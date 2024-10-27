@@ -1,6 +1,5 @@
 export interface RegionalAmbassador {
-  parkrunId: string;
   name: string;
-  homeEvent: string;
+  state: string;
   supportsEAs: string[];
 }

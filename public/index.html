@@ -4,6 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Ambassador Map</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
     <link rel="stylesheet" href="style.css" />
   </head>
   <body>
@@ -12,19 +13,21 @@
     <input type="file" id="csvFileInput" accept=".csv" />
     <button id="uploadButton">Upload</button>
     <br><br>
-    <canvas id="mapCanvas" width="800" height="600"></canvas>
+    <div id="map" style="width: 800px; height: 600px;"></div>
     <div id="eventDetails"></div>
-    <div id="mapExtents"></div>
-    <button id="zoomInButton">+</button>
-    <button id="zoomOutButton">-</button>
+    <br><br>
+    <div id="mapInfo">
+      <div id="mapExtents"></div>
+      <div id="zoomLevel"></div>
+      <div id="centerCoordinates"></div>
+    </div>
     <br><br>
     <h2>Event Teams</h2>
     <table id="eventTeamsTable" border="1">
       <thead>
         <tr>
           <th>Event Name</th>
-          <th>Event Director</th>
-          <th>Co-Event Director</th>
+          <th>Event Director(s)</th>
           <th>Associated Event Long Name</th>
           <th>Associated Event Location</th>
           <th>Coordinates</th>
@@ -34,7 +37,7 @@
         <!-- Event team rows will be populated here -->
       </tbody>
     </table>
-    <br><br>
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
     <script src="/dist/bundle.js"></script>
   </body>
 </html>
