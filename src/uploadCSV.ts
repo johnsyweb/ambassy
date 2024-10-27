@@ -10,45 +10,43 @@ export function handleFileUpload(event: Event): void {
     return;
   }
 
-  Array.from(input.files).forEach(file => {
-    Papa.parse(file, {
-      header: true,
-      complete: (results) => {
-        const data = results.data as any[];
-        eventTeams = data.map(row => ({
-          eventShortName: row['Event Short Name'],
-          eventDirector: row['Event Director'],
-          coEventDirector: row['Co-Event Director'] || undefined
-        }));
-        console.log('Parsed Event Teams:', eventTeams);
-        populateEventTeamsTable(eventTeams);
-      },
-      error: (error) => {
-        console.error('Error parsing CSV file:', error);
-      }
-    });
+  const file = input.files[0];
+  if (!file) {
+    console.error('No file found');
+    return;
+  }
+
+  Papa.parse(file, {
+    header: true,
+    complete: (results) => {
+      const data = results.data as any[];
+      eventTeams = data.map(row => ({
+        eventShortName: row['Event Short Name'],
+        eventDirector: row['Event Director'],
+        coEventDirector: row['Co-Event Director'] || undefined
+      }));
+      console.debug('Parsed Event Teams:', eventTeams);
+      populateEventTeamsTable(eventTeams);
+    },
+    error: (error) => {
+      console.error('Error parsing CSV file:', error);
+    }
   });
 }
 
 function populateEventTeamsTable(eventTeams: EventTeam[]): void {
-  const tableBody = document.getElementById('eventTeamsTable')?.getElementsByTagName('tbody')[0];
+  const tableBody = document.querySelector('#eventTeamsTable tbody') as HTMLTableSectionElement;
   if (!tableBody) {
     console.error('Table body not found');
     return;
   }
 
-  // Clear existing rows
-  tableBody.innerHTML = '';
+  tableBody.innerHTML = ''; // Clear existing rows
 
-  // Populate table with event team data
-  eventTeams.forEach(team => {
+  eventTeams.forEach(({ eventShortName, eventDirector, coEventDirector }) => {
     const row = tableBody.insertRow();
-    const eventNameCell = row.insertCell(0);
-    const eventDirectorCell = row.insertCell(1);
-    const coEventDirectorCell = row.insertCell(2);
-
-    eventNameCell.textContent = team.eventShortName;
-    eventDirectorCell.textContent = team.eventDirector;
-    coEventDirectorCell.textContent = team.coEventDirector || 'N/A';
+    row.insertCell(0).textContent = eventShortName;
+    row.insertCell(1).textContent = eventDirector;
+    row.insertCell(2).textContent = coEventDirector || 'N/A';
   });
 }
