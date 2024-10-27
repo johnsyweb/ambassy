@@ -31,7 +31,7 @@ function getCachedEvents(): any | null {
   return null;
 }
 
-async function getEvents(): Promise<any> {
+export async function getEvents(): Promise<any> {
   const cachedEvents = getCachedEvents();
 
   if (cachedEvents) {
@@ -42,8 +42,3 @@ async function getEvents(): Promise<any> {
     return getCachedEvents();
   }
 }
-
-// Example usage
-getEvents().then(events => {
-  console.log('Events:', events);
-});
