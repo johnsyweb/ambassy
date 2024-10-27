@@ -2,6 +2,8 @@ import Papa from 'papaparse';
 import { EventTeam } from './models/EventTeam';
 import { ParkRunEvent } from './models/parkrunEvent';
 import { getEvents } from './fetchEvents';
+import { populateEventTeamsTable } from './index';
+
 
 let eventTeams: EventTeam[] = [];
 let events: ParkRunEvent[] = [];
@@ -48,39 +50,6 @@ function associateEventTeamsWithEvents(eventTeams: EventTeam[], events: ParkRunE
       team['associatedEvent'] = associatedEvent;
     } else {
       console.warn(`No matching event found for team: ${team.eventShortName}`);
-    }
-  });
-}
-
-function populateEventTeamsTable(eventTeams: EventTeam[]): void {
-  const tableBody = document.getElementById('eventTeamsTable')?.getElementsByTagName('tbody')[0];
-  if (!tableBody) {
-    console.error('Table body not found');
-    return;
-  }
-
-  // Clear existing rows
-  tableBody.innerHTML = '';
-
-  // Populate table with event team data
-  eventTeams.forEach(team => {
-    const row = tableBody.insertRow();
-    const eventNameCell = row.insertCell(0);
-    const eventDirectorCell = row.insertCell(1);
-    const coEventDirectorCell = row.insertCell(2);
-    const associatedEventLongNameCell = row.insertCell(3);
-    const associatedEventLocationCell = row.insertCell(4);
-
-    eventNameCell.textContent = team.eventShortName;
-    eventDirectorCell.textContent = team.eventDirector;
-    coEventDirectorCell.textContent = team.coEventDirector || 'N/A';
-
-    if (team['associatedEvent']) {
-      associatedEventLongNameCell.textContent = team['associatedEvent'].properties.EventLongName;
-      associatedEventLocationCell.textContent = team['associatedEvent'].properties.EventLocation;
-    } else {
-      associatedEventLongNameCell.textContent = 'N/A';
-      associatedEventLocationCell.textContent = 'N/A';
     }
   });
 }
