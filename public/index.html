@@ -6,12 +6,10 @@
     <title>Ambassador Map</title>
   </head>
   <body>
-    <textarea id="debug" title="debug" cols="80" rows="25">
-      Debug info will appear here!
-    </textarea>
-
+    <h1>Upload CSV Files</h1>
+    <input type="file" title="Your files here" id="csvFileInput" accept=".csv" multiple />
+    <button title="Upload" id="uploadButton">Upload</button>
     <canvas id="mapCanvas" width="800" height="600"></canvas>
-
     <script src="/dist/bundle.js"></script>
   </body>
 </html>

@@ -6,10 +6,10 @@ This is a project written by a parkrun Regional Ambassador (RA) to save some tim
 
 parkrun has many _events_ around the world, which are listed at <http://images.parkrun.com/events.json>. Event Ambassadors may also support "prospects". A prospect is an event that has not yet started and is not yet listed by parkrun.
 
-We'll keep a table of these and their allocated Event Ambassadors in a Google Sheet.
-We'll keep a table of Event Ambassador event allocations in a separate Google Sheet.
-A third Google Sheet will keep a table of Regional Ambassadors and the Event Ambassadors they support.
-These Google Sheets will remain private and will need authentication to access.
+We'll keep a table of these and their allocated Event Ambassadors in a CSV file.
+We'll keep a table of Event Ambassador event allocations in a separate CSV file.
+A third CSV file will keep a table of Regional Ambassadors and the Event Ambassadors they support.
+These CSV files will remain private and will be uploaded via the /upload page.
 
 We are not concerned with all parkrun events globally, just those within the care of the Regional Ambassadors listed.
 
@@ -26,15 +26,15 @@ graph TD
     ET -->|comprised of| RD[Run Director]
     EA -->|supports| P[Prospect]
 
-    subgraph Google Sheets
-        GS1[Table of Prospects and their allocated Event Ambassadors]
-        GS2[List of Event Ambassador event allocations]
-        GS3[Table of Regional Ambassadors and the Event Ambassadors they support]
+    subgraph CSV Files
+        CSV1[Table of Prospects and their allocated Event Ambassadors]
+        CSV2[Table of Event Ambassador event allocations]
+        CSV3[Table of Regional Ambassadors and the Event Ambassadors they support]
     end
 
-    RA -->|listed in| GS3
-    EA -->|listed in| GS1
-    EA -->|listed in| GS2
+    RA -->|listed in| CSV3
+    EA -->|listed in| CSV1
+    EA -->|listed in| CSV2
 
     subgraph parkrun Volunteers
         PV1[Home parkrun Event]
@@ -45,7 +45,7 @@ graph TD
     PV2 -->|e.g.| A1001388
     ED -->|can also be| EA
     ED -->|cannot support| ET
-  ```
+```
 
 ## What this project will do
 
