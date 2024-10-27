@@ -1,4 +1,4 @@
-export interface parkrunEvent {
+export interface ParkRunEvent {
   id: string;
   type: string;
   geometry: {
