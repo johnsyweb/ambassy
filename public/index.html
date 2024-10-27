@@ -4,24 +4,39 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Ambassador Map</title>
+    <style>
+      #eventDetails {
+        display: none;
+        position: absolute;
+        background-color: white;
+        border: 1px solid black;
+        padding: 10px;
+        z-index: 1000;
+      }
+    </style>
   </head>
   <body>
-    <h1>Upload CSV Files</h1>
-    <input type="file" id="csvFileInput" accept=".csv" multiple />
+    <h1>Ambassador Map</h1>
+    <h2>Upload Event Teams CSV</h2>
+    <input type="file" id="csvFileInput" accept=".csv" />
     <button id="uploadButton">Upload</button>
     <br><br>
-    <input type="text" id="searchInput" placeholder="Search events..." />
-    <button id="searchButton">Search</button>
-    <br><br>
-    <label for="categorySelect">Highlight Category:</label>
-    <select id="categorySelect">
-      <option value="">Select a category</option>
-      <option value="EventDirector">Event Director</option>
-      <option value="CoEventDirector">Co-Event Director</option>
-      <!-- Add more categories as needed -->
-    </select>
-    <button id="highlightButton">Highlight</button>
     <canvas id="mapCanvas" width="800" height="600"></canvas>
+    <div id="eventDetails"></div>
+    <br><br>
+    <h2>Event Teams</h2>
+    <table id="eventTeamsTable" border="1">
+      <thead>
+        <tr>
+          <th>Event Name</th>
+          <th>Event Director</th>
+          <th>Co-Event Director</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- Event team rows will be populated here -->
+      </tbody>
+    </table>
     <script src="/dist/bundle.js"></script>
   </body>
 </html>

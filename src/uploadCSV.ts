@@ -1,9 +1,7 @@
 import Papa from 'papaparse';
-import { RegionalAmbassador } from './models/regionalAmbassador';
-import { EventAmbassador } from './models/eventAmbassador';
-import { EventTeam } from './models/eventTeam';
+import { EventTeam } from './models/EventTeam';
 
-export let regionalAmbassadors: RegionalAmbassador[] = [];
+let eventTeams: EventTeam[] = [];
 
 export function handleFileUpload(event: Event): void {
   const input = event.target as HTMLInputElement;
@@ -13,46 +11,17 @@ export function handleFileUpload(event: Event): void {
   }
 
   Array.from(input.files).forEach(file => {
-    const fileType = getFileType(file.name); // Determine the type of CSV file
-
     Papa.parse(file, {
       header: true,
       complete: (results) => {
         const data = results.data as any[];
-
-        if (fileType === 'RegionalAmbassador') {
-          regionalAmbassadors = data.map(row => ({
-            parkrunId: row['parkrun ID'],
-            name: row['Name'],
-            homeEvent: row['Home parkrun event'],
-            supportsEAs: Object.keys(row)
-              .filter(key => key.startsWith('Supports EA') && row[key])
-              .map(key => row[key])
-          }));
-          console.log('Parsed Regional Ambassadors:', regionalAmbassadors);
-          // Process the parsed data as needed
-        } else if (fileType === 'EventAmbassador') {
-          const eventAmbassadors: EventAmbassador[] = data.map(row => ({
-            parkrunId: row['parkrun ID'],
-            name: row['Name'],
-            homeEvent: row['Home parkrun event'],
-            supportsEvents: Object.keys(row)
-              .filter(key => key.startsWith('Supports Event') && row[key])
-              .map(key => row[key])
-          }));
-          console.log('Parsed Event Ambassadors:', eventAmbassadors);
-          // Process the parsed data as needed
-        } else if (fileType === 'EventTeam') {
-          const eventTeams: EventTeam[] = data.map(row => ({
-            eventShortName: row['Event Short Name'],
-            eventDirector: row['Event Director'],
-            coEventDirector: row['Co-Event Director'] || undefined
-          }));
-          console.log('Parsed Event Teams:', eventTeams);
-          // Process the parsed data as needed
-        } else {
-          console.error('Unknown file type:', fileType);
-        }
+        eventTeams = data.map(row => ({
+          eventShortName: row['Event Short Name'],
+          eventDirector: row['Event Director'],
+          coEventDirector: row['Co-Event Director'] || undefined
+        }));
+        console.log('Parsed Event Teams:', eventTeams);
+        populateEventTeamsTable(eventTeams);
       },
       error: (error) => {
         console.error('Error parsing CSV file:', error);
@@ -61,14 +30,25 @@ export function handleFileUpload(event: Event): void {
   });
 }
 
-function getFileType(fileName: string): string {
-  if (fileName.includes('Regional Ambassador')) {
-    return 'RegionalAmbassador';
-  } else if (fileName.includes('Event Ambassador')) {
-    return 'EventAmbassador';
-  } else if (fileName.includes('Event Team')) {
-    return 'EventTeam';
-  } else {
-    return 'Unknown';
+function populateEventTeamsTable(eventTeams: EventTeam[]): void {
+  const tableBody = document.getElementById('eventTeamsTable')?.getElementsByTagName('tbody')[0];
+  if (!tableBody) {
+    console.error('Table body not found');
+    return;
   }
+
+  // Clear existing rows
+  tableBody.innerHTML = '';
+
+  // Populate table with event team data
+  eventTeams.forEach(team => {
+    const row = tableBody.insertRow();
+    const eventNameCell = row.insertCell(0);
+    const eventDirectorCell = row.insertCell(1);
+    const coEventDirectorCell = row.insertCell(2);
+
+    eventNameCell.textContent = team.eventShortName;
+    eventDirectorCell.textContent = team.eventDirector;
+    coEventDirectorCell.textContent = team.coEventDirector || 'N/A';
+  });
 }

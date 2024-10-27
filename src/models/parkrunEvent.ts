@@ -1,5 +1,5 @@
 export interface parkrunEvent {
-  id: number;
+  id: string;
   type: string;
   geometry: {
     type: string;

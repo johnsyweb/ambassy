@@ -49,7 +49,7 @@ graph TD
 
 ## What this project will do
 
-- Render a map, using OpenStreetMap, showing the locations of each of the parkrun volunteers identified and their allocations
+- Render a map, showing the locations of each of the parkrun volunteers identified and their allocations
 - Make recommendations as to which EAs are best-placed to support local events and prospects
 - Make recommendations as to which RAs are best-placed to support local EAs
 
