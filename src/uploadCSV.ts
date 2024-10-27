@@ -3,6 +3,8 @@ import { RegionalAmbassador } from './models/regionalAmbassador';
 import { EventAmbassador } from './models/eventAmbassador';
 import { EventTeam } from './models/eventTeam';
 
+export let regionalAmbassadors: RegionalAmbassador[] = [];
+
 export function handleFileUpload(event: Event): void {
   const input = event.target as HTMLInputElement;
   if (!input.files) {
@@ -19,7 +21,7 @@ export function handleFileUpload(event: Event): void {
         const data = results.data as any[];
 
         if (fileType === 'RegionalAmbassador') {
-          const regionalAmbassadors: RegionalAmbassador[] = data.map(row => ({
+          regionalAmbassadors = data.map(row => ({
             parkrunId: row['parkrun ID'],
             name: row['Name'],
             homeEvent: row['Home parkrun event'],
@@ -49,7 +51,7 @@ export function handleFileUpload(event: Event): void {
           console.log('Parsed Event Teams:', eventTeams);
           // Process the parsed data as needed
         } else {
-          console.error('Unknown file type:', fileType, 'for file:', file.name);
+          console.error('Unknown file type:', fileType);
         }
       },
       error: (error) => {

@@ -7,8 +7,20 @@
   </head>
   <body>
     <h1>Upload CSV Files</h1>
-    <input type="file" title="Your files here" id="csvFileInput" accept=".csv" multiple />
-    <button title="Upload" id="uploadButton">Upload</button>
+    <input type="file" id="csvFileInput" accept=".csv" multiple />
+    <button id="uploadButton">Upload</button>
+    <br><br>
+    <input type="text" id="searchInput" placeholder="Search events..." />
+    <button id="searchButton">Search</button>
+    <br><br>
+    <label for="categorySelect">Highlight Category:</label>
+    <select id="categorySelect">
+      <option value="">Select a category</option>
+      <option value="EventDirector">Event Director</option>
+      <option value="CoEventDirector">Co-Event Director</option>
+      <!-- Add more categories as needed -->
+    </select>
+    <button id="highlightButton">Highlight</button>
     <canvas id="mapCanvas" width="800" height="600"></canvas>
     <script src="/dist/bundle.js"></script>
   </body>
