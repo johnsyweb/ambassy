@@ -6,7 +6,7 @@ interface EventPoint {
   y: number;
 }
 
-let zoomLevel = 1;
+let zoomLevel = 2.2;
 const zoomFactor = 1.2;
 
 export function renderMap(eventTeams: EventTeam[]): void {
@@ -40,17 +40,17 @@ export function renderMap(eventTeams: EventTeam[]): void {
       const x = (longitude + 180) * zoomLevel; // Convert longitude to x coordinate
       const y = (90 - latitude) * zoomLevel; // Convert latitude to y coordinate
 
-      const color = 'blue';
+      const color = 'purple';
 
       context.fillStyle = color;
       context.beginPath();
-      context.arc(x, y, 5 * zoomLevel, 0, 2 * Math.PI);
+      context.arc(x, y, 5, 0, 2 * Math.PI);
       context.fill();
       // Draw the event short name below the circle
       context.fillStyle = 'black';
-      context.font = `${12 * zoomLevel}px Arial`;
+      context.font = '12px Arial';
       context.textAlign = 'center';
-      context.fillText(team.eventShortName, x, y + 15 * zoomLevel);
+      context.fillText(team.eventShortName, x, y + 15);
       // Store the event point
       eventPoints.push({ team, x, y });
     }
