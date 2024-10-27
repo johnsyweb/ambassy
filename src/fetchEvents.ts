@@ -4,7 +4,7 @@ import path from 'path';
 
 const CACHE_FILE = path.resolve(__dirname, '../cache/events.json');
 const CACHE_DURATION = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
-const PARKRUN_EVENTS_URL = 'https://images.parkrun.com/events.json';
+const PARKRUN_EVENTS_URL = 'https://images.parkrun.com/events.json'; 
 
 async function fetchEvents(): Promise<void> {
   try {
