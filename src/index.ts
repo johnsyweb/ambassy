@@ -1,4 +1,4 @@
 import { renderMap } from './mapRenderer';
 
-console.log('Parkrun Project Initialized');
+console.log('Ambassy Initialized');
 renderMap();
