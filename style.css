@@ -57,5 +57,6 @@ h1, h2 {
 
 #mapContainer {
   height: 800px;
+  width: 95%;
   display: none;
 }

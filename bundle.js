@@ -14725,12 +14725,9 @@ function populateEventTeamsTable(regionalAmbassadors) {
     // Populate table with event team data
     regionalAmbassadors.forEach(ra => {
         var _a;
-        console.log(ra.name);
         (_a = ra.eventAmbassadors) === null || _a === void 0 ? void 0 : _a.forEach(ea => {
             var _a;
-            console.log(ea.name, ea.events);
             (_a = ea.supportedEventTeams) === null || _a === void 0 ? void 0 : _a.forEach(team => {
-                console.log(team.eventShortName);
                 const row = tableBody.insertRow();
                 const raNameCell = row.insertCell(0);
                 const eaNameCell = row.insertCell(1);
@@ -14965,7 +14962,7 @@ function checkAllDataLoaded() {
                 const ea = associatedTeam === null || associatedTeam === void 0 ? void 0 : associatedTeam.associatedEA;
                 const ra = ea === null || ea === void 0 ? void 0 : ea.regionalAmbassador;
                 const [lng, lat] = event.geometry.coordinates;
-                const raColor = (ra ? raColorMap.get(ra.name) : 'green');
+                const raColor = (ra ? raColorMap.get(ra.name) : 'white');
                 const eaColor = (ea ? eaColorMap.get(ea.name) : 'purple');
                 const tooltip = `
         <strong>Event:</strong> ${event.properties.EventShortName}<br>
