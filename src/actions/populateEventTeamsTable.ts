@@ -1,4 +1,4 @@
-import { RegionalAmbassador } from '../models/regionalAmbassador';
+import { RegionalAmbassador } from '../models/RegionalAmbassador';
 
 export function populateEventTeamsTable(regionalAmbassadors: RegionalAmbassador[]): void {
   const tableBody = document.getElementById('eventTeamsTable')?.getElementsByTagName('tbody')[0];

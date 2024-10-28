@@ -1,4 +1,4 @@
-import { RegionalAmbassador } from '../models/regionalAmbassador';
+import { RegionalAmbassador } from '../models/RegionalAmbassador';
 import { EventAmbassador } from '../models/EventAmbassador';
 
 export function associateRegionalAmbassadorsWithEventAmbassadors(regionalAmbassadors: RegionalAmbassador[], eventAmbassadors: EventAmbassador[]): RegionalAmbassador[] {

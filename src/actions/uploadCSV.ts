@@ -1,7 +1,7 @@
 import Papa from 'papaparse';
-import { parseEventTeams } from './parsers/parseEventTeams';
-import { parseEventAmbassadors } from './parsers/parseEventAmbassadors';
-import { parseRegionalAmbassadors } from './parsers/parseRegionalAmbassadors';
+import { parseEventTeams } from '../parsers/parseEventTeams';
+import { parseEventAmbassadors } from '../parsers/parseEventAmbassadors';
+import { parseRegionalAmbassadors } from '../parsers/parseRegionalAmbassadors';
 
 export function handleFileUpload(file: File, callback: (type: string) => void): void {
   Papa.parse(file, {

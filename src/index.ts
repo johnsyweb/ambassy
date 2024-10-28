@@ -1,13 +1,15 @@
-import { handleFileUpload } from './uploadCSV';
-import { EventTeam } from './models/EventTeam';
+import { associateEventAmbassadorsWithEventTeams } from './actions/associateEventAmbassadorsWithEventTeams';
+import { associateEventTeamsWithParkRunEvents } from './actions/associateEventTeamsWithParkRunEvents';
+import { associateRegionalAmbassadorsWithEventAmbassadors } from './actions/associateRegionalAmbassadorsWithEventAmbassadors';
+import { getEvents } from './actions/fetchEvents';
+import { handleFileUpload } from './actions/uploadCSV';
+import { populateEventTeamsTable } from './actions/populateEventTeamsTable';
+
 import { EventAmbassador } from './models/EventAmbassador';
-import { RegionalAmbassador } from './models/regionalAmbassador';
-import { getEvents } from './fetchEvents';
-import { ParkRunEvent } from './models/parkrunEvent';
-import { associateEventTeamsWithParkRunEvents } from './utils/associateEventTeamsWithParkRunEvents';
-import { populateEventTeamsTable } from './utils/populateEventTeamsTable';
-import { associateEventAmbassadorsWithEventTeams } from './utils/associateEventAmbassadorsWithEventTeams';
-import { associateRegionalAmbassadorsWithEventAmbassadors } from './utils/associateRegionalAmbassadorsWithEventAmbassadors';
+import { EventDetails } from './models/EventDetails';
+import { EventTeam } from './models/EventTeam';
+import { RegionalAmbassador } from './models/RegionalAmbassador';
+
 import L from 'leaflet';
 import * as d3 from 'd3';
 import * as d3GeoVoronoi from 'd3-geo-voronoi';
@@ -20,26 +22,20 @@ enum UploadState {
 }
 
 let uploadState = UploadState.EventAmbassadors;
-let map: L.Map
+let map: L.Map;
 
+// Define a color palette
 const colorPalette = [
   '#FF5733', '#33FF57', '#3357FF', '#FF33A1', '#A133FF', '#33FFF5', '#FF8C33', '#33FF8C', '#8C33FF', '#FF338C'
 ];
 
+// Assign colors to RAs
 function assignColorsToRAs(regionalAmbassadors: RegionalAmbassador[]): Map<string, string> {
   const raColorMap = new Map<string, string>();
   regionalAmbassadors.forEach((ra, index) => {
     raColorMap.set(ra.name, colorPalette[index % colorPalette.length]);
   });
   return raColorMap;
-}
-
-function assignColorsToEAs(eas: EventAmbassador[]): Map<string, string> {
-  const eaColorMap = new Map<string, string>();
-  eas.forEach((ea, index) => {
-    eaColorMap.set(ea.name, colorPalette[index % colorPalette.length]);
-  });
-  return eaColorMap;
 }
 
 function updatePrompt() {
@@ -68,17 +64,21 @@ async function checkAllDataLoaded() {
   const csvFileInput = document.getElementById('csvFileInput');
   const uploadButton = document.getElementById('uploadButton');
   const mapContainer = document.getElementById('mapContainer');
-
   const eventTeamsTableContainer = document.getElementById('eventTeamsTableContainer');
 
-  if (!h1Element || !uploadPrompt || !csvFileInput || !uploadButton || !eventTeamsTableContainer || !mapContainer) {
+  if (!h1Element || !uploadPrompt || !csvFileInput || !uploadButton || !mapContainer || !eventTeamsTableContainer) {
     console.error('Required elements not found');
     return;
   }
 
+  if (!eventTeams || !regionalAmbassadors || !eventAmbassadors) {
+     console.log('Missing files');
+    return
+  };
+
   if (isEventTeamsLoaded && isRegionalAmbassadorsLoaded && isEventAmbassadorsLoaded) {
     const storedParkRunEvents = sessionStorage.getItem('parkRunEvents');
-    let parkRunEvents: ParkRunEvent[] = [];
+    let parkRunEvents: EventDetails[] = [];
 
     if (storedParkRunEvents) {
       parkRunEvents = JSON.parse(storedParkRunEvents);
@@ -95,8 +95,8 @@ async function checkAllDataLoaded() {
     regionalAmbassadors = associateRegionalAmbassadorsWithEventAmbassadors(regionalAmbassadors, eventAmbassadors);
     console.log('Associated Regional Ambassadors with Event Ambassadors:', regionalAmbassadors);
 
+    // Assign colors to RAs
     const raColorMap = assignColorsToRAs(regionalAmbassadors);
-    const eaColorMap = assignColorsToEAs(eventAmbassadors);
 
     // Update the UI
     h1Element.textContent = 'Ambassy';
@@ -117,20 +117,18 @@ async function checkAllDataLoaded() {
 
     // Add dots for each event team
     regionalAmbassadors.forEach(ra => {
-      ra?.eventAmbassadors?.forEach(ea => {
-        const raColor = raColorMap.get(ra.name) || '#000000'; 
-     
-        ea?.supportedEventTeams?.forEach(team => {
+      const raColor = raColorMap.get(ra.name) || '#000000'; // Default to black if no color assigned
+      ra.eventAmbassadors?.forEach(ea => {
+        ea.supportedEventTeams?.forEach(team => {
           if (team.associatedEvent) {
-            const eaColor = eaColorMap.get(ea.name) || '#000000'; 
-     
+            const eaColor = raColorMap.get(ea.name) || '#000000'; // Default to black if no color assigned
             const [lng, lat] = team.associatedEvent.geometry.coordinates;
             const tooltip = `
               <strong>Event:</strong> ${team.eventShortName}<br>
               <strong>Event Director(s):</strong> ${team.eventDirectors.join(', ')}<br>
               <strong>Event Ambassador:</strong> ${ea.name}<br>
               <strong>Regional Ambassador:</strong> ${ra.name}
-            `
+            `;
             points.push([lng, lat, JSON.stringify({ raColor, tooltip })]);
             const marker = L.circleMarker([lat, lng], { radius: 5, color: eaColor }).addTo(map);
             marker.bindTooltip(tooltip);
@@ -139,20 +137,18 @@ async function checkAllDataLoaded() {
       });
     });
 
-        // Generate Voronoi diagram
-        const voronoi = d3GeoVoronoi.geoVoronoi(points.map(p => [p[0], p[1]]));
-        const polygons = voronoi.polygons();
-    
-        // Add Voronoi cells to the map
-        polygons.features.forEach((feature, index) => {
+    // Generate Voronoi diagram
+    const voronoi = d3GeoVoronoi.geoVoronoi(points.map(p => [p[0], p[1]]));
+    const polygons = voronoi.polygons();
 
-          const { raColor, tooltip } = JSON.parse(points[index][2]);     
-          const coordinates = (feature.geometry.coordinates[0] as [number, number][]).map((coord) => [coord[1], coord[0]] as L.LatLngTuple);
-          const poly = L.polygon(coordinates, { color: raColor, fillOpacity: 0.2 }).addTo(map);
-          poly.bindTooltip(tooltip); 
-        });
-    
-        
+    // Add Voronoi cells to the map
+    polygons.features.forEach((feature, index) => {
+      const { raColor, tooltip } = JSON.parse(points[index][2]);
+      const coordinates = (feature.geometry.coordinates[0] as [number, number][]).map((coord) => [coord[1], coord[0]] as L.LatLngTuple);
+      const poly = L.polygon(coordinates, { color: raColor, fillOpacity: 0.2 }).addTo(map);
+      poly.bindTooltip(tooltip);
+    });
+
     // Populate the event teams table
     populateEventTeamsTable(regionalAmbassadors);
   } else {

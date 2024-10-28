@@ -1,4 +1,4 @@
-import { RegionalAmbassador } from '../models/regionalAmbassador';
+import { RegionalAmbassador } from '../models/RegionalAmbassador';
 
 export function parseRegionalAmbassadors(data: any[]): RegionalAmbassador[] {
   const regionalAmbassadors: RegionalAmbassador[] = [];
