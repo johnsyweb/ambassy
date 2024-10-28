@@ -137,7 +137,7 @@ async function checkAllDataLoaded() {
       const ea = associatedTeam?.associatedEA;
       const ra = ea?.regionalAmbassador
       const [lng, lat] = event.geometry.coordinates;
-      const raColor = (ra ? raColorMap.get(ra.name) : 'green');
+      const raColor = (ra ? raColorMap.get(ra.name) : 'white');
       const eaColor = (ea ? eaColorMap.get(ea.name) : 'purple')
       const tooltip = `
         <strong>Event:</strong> ${event.properties.EventShortName}<br>
