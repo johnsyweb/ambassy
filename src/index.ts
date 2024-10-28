@@ -152,7 +152,7 @@ async function checkAllDataLoaded() {
           poly.bindTooltip(tooltip); 
         });
     
-
+        
     // Populate the event teams table
     populateEventTeamsTable(regionalAmbassadors);
   } else {
