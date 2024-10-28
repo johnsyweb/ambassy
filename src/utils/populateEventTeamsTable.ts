@@ -1,6 +1,6 @@
-import { EventTeam } from '../models/EventTeam';
+import { RegionalAmbassador } from '../models/regionalAmbassador';
 
-export function populateEventTeamsTable(eventTeams: EventTeam[]): void {
+export function populateEventTeamsTable(regionalAmbassadors: RegionalAmbassador[]): void {
   const tableBody = document.getElementById('eventTeamsTable')?.getElementsByTagName('tbody')[0];
   if (!tableBody) {
     console.error('Table body not found');
@@ -11,14 +11,24 @@ export function populateEventTeamsTable(eventTeams: EventTeam[]): void {
   tableBody.innerHTML = '';
 
   // Populate table with event team data
-  eventTeams.forEach(team => {
-    const row = tableBody.insertRow();
-    const eventNameCell = row.insertCell(0);
-    const eventAmbassadorCell = row.insertCell(1);
-    const eventDirectorsCell = row.insertCell(2);
+  regionalAmbassadors.forEach(ra => {
+    ra?.eventAmbassadors?.forEach(ea => {
+      ea?.supportedEventTeams?.forEach(team => {
+        const row = tableBody.insertRow();
+        const raNameCell = row.insertCell(0);
+        const eaNameCell = row.insertCell(1);
+        const eventNameCell = row.insertCell(2);
+        const eventDirectorsCell = row.insertCell(3);
+        const eventCoordinatesCell = row.insertCell(4);
 
-    eventNameCell.textContent = team.eventShortName;
-    eventAmbassadorCell.textContent = team.eventAmbassador;
-    eventDirectorsCell.textContent = team.eventDirectors.join(', ');
+        raNameCell.textContent = ra.name;
+        eaNameCell.textContent = ea.name;
+        eventNameCell.textContent = team.eventShortName;
+        eventDirectorsCell.textContent = team.eventDirectors.join(', ');
+        eventCoordinatesCell.textContent = team.associatedEvent
+          ? `${team.associatedEvent.geometry.coordinates[1]}, ${team.associatedEvent.geometry.coordinates[0]}`
+          : 'N/A';
+      });
+    });
   });
 }

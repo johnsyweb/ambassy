@@ -8,20 +8,28 @@
 </head>
 <body>
   <h1>Upload CSV Files</h1>
-  <h2>Please upload CSV files with the following headers:</h2>
-  <h3>Event Teams:</h3>
-  <ul>
-    <li>Event</li>
-    <li>Event Ambassador</li>
-    <li>Event Director/s</li>
-  </ul>
-  <h3>Event Ambassadors:</h3>
-  <ul>
-    <li>Event Ambassador</li>
-    <li>Events</li>
-  </ul>
+  <h2 id="uploadPrompt">Please upload the Event Ambassadors CSV file.</h2>
   <input type="file" id="csvFileInput" accept=".csv">
   <button id="uploadButton">Upload</button>
+  
+  <div id="eventTeamsTableContainer" style="display: none;">
+    <h2>Event Teams</h2>
+    <table id="eventTeamsTable" border="1">
+      <thead>
+        <tr>
+          <th>Regional Ambassador (RA)</th>
+          <th>Event Ambassador (EA)</th>
+          <th>Event Name</th>
+          <th>Event Director(s)</th>
+          <th>Coordinates</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- Event team rows will be populated here -->
+      </tbody>
+    </table>
+  </div>
+
   <script src="/dist/bundle.js"></script>
 </body>
 </html>
