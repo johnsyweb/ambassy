@@ -23,6 +23,11 @@ h1, h2 {
   text-align: center;
 }
 
+#mapContainer,
+#eventTeamsTableContainer {
+  display: none;
+}
+
 /* Event teams table styles */
 #eventTeamsTable {
   width: 80%;

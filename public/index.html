@@ -1,43 +1,21 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Ambassador Map</title>
-    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
-    <link rel="stylesheet" href="style.css" />
-  </head>
-  <body>
-    <h1>Ambassador Map</h1>
-    <h2>Upload Event Teams CSV</h2>
-    <input type="file" id="csvFileInput" accept=".csv" />
-    <button id="uploadButton">Upload</button>
-    <br><br>
-    <div id="map" style="width: 800px; height: 600px;"></div>
-    <div id="eventDetails"></div>
-    <br><br>
-    <div id="mapInfo">
-      <div id="mapExtents"></div>
-      <div id="zoomLevel"></div>
-      <div id="centerCoordinates"></div>
-    </div>
-    <br><br>
-    <h2>Event Teams</h2>
-    <table id="eventTeamsTable" border="1">
-      <thead>
-        <tr>
-          <th>Event Name</th>
-          <th>Event Director(s)</th>
-          <th>Associated Event Long Name</th>
-          <th>Associated Event Location</th>
-          <th>Coordinates</th>
-        </tr>
-      </thead>
-      <tbody>
-        <!-- Event team rows will be populated here -->
-      </tbody>
-    </table>
-    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
-    <script src="/dist/bundle.js"></script>
-  </body>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Upload Event Teams CSV</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <h1>Upload Event Teams CSV</h1>
+  <h2>Please upload a CSV file with the following headers:</h2>
+  <ul>
+    <li>Event</li>
+    <li>Event Ambassador</li>
+    <li>Event Director/s</li>
+  </ul>
+  <input type="file" id="csvFileInput" accept=".csv">
+  <button id="uploadButton">Upload</button>
+  <script src="/dist/bundle.js"></script>
+</body>
 </html>
