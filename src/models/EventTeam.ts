@@ -1,3 +1,4 @@
+import { EventAmbassador } from "./EventAmbassador";
 import { EventDetails } from "./EventDetails";
 
 export interface EventTeam {
@@ -5,4 +6,5 @@ export interface EventTeam {
   eventAmbassador: string;
   eventDirectors: string[];
   associatedEvent?: EventDetails;
+  associatedEA?: EventAmbassador;
 }

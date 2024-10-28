@@ -1,5 +1,5 @@
 import { associateEventAmbassadorsWithEventTeams } from './actions/associateEventAmbassadorsWithEventTeams';
-import { associateEventTeamsWithParkRunEvents } from './actions/associateEventTeamsWithParkRunEvents';
+import { associateEventTeamsWithEventDetails } from './actions/associateEventTeamsWithEventDetails';
 import { associateRegionalAmbassadorsWithEventAmbassadors } from './actions/associateRegionalAmbassadorsWithEventAmbassadors';
 import { getEvents } from './actions/fetchEvents';
 import { handleFileUpload } from './actions/uploadCSV';
@@ -36,6 +36,14 @@ function assignColorsToRAs(regionalAmbassadors: RegionalAmbassador[]): Map<strin
     raColorMap.set(ra.name, colorPalette[index % colorPalette.length]);
   });
   return raColorMap;
+}
+
+function assignColorsToEAs(eas: EventAmbassador[]): Map<string, string> {
+  const eaColorMap = new Map<string, string>();
+  regionalAmbassadors.forEach((ra, index) => {
+    eaColorMap.set(ra.name, colorPalette[index % colorPalette.length]);
+  });
+  return eaColorMap;
 }
 
 function updatePrompt() {
@@ -77,17 +85,14 @@ async function checkAllDataLoaded() {
   };
 
   if (isEventTeamsLoaded && isRegionalAmbassadorsLoaded && isEventAmbassadorsLoaded) {
-    const storedParkRunEvents = sessionStorage.getItem('parkRunEvents');
-    let parkRunEvents: EventDetails[] = [];
+    const storedEventDetails = sessionStorage.getItem('eventDetails');
+    let eventDetails: EventDetails[] = [];
 
-    if (storedParkRunEvents) {
-      parkRunEvents = JSON.parse(storedParkRunEvents);
+    if (storedEventDetails) {
+      eventDetails = JSON.parse(storedEventDetails);
     } else {
-      parkRunEvents = await getEvents();
+      eventDetails = await getEvents();
     }
-
-    eventTeams = associateEventTeamsWithParkRunEvents(eventTeams, parkRunEvents);
-    console.log('Associated Event Teams with ParkRun Events:', eventTeams);
 
     eventAmbassadors = associateEventAmbassadorsWithEventTeams(eventAmbassadors, eventTeams);
     console.log('Associated Event Ambassadors with Event Teams:', eventAmbassadors);
@@ -95,8 +100,17 @@ async function checkAllDataLoaded() {
     regionalAmbassadors = associateRegionalAmbassadorsWithEventAmbassadors(regionalAmbassadors, eventAmbassadors);
     console.log('Associated Regional Ambassadors with Event Ambassadors:', regionalAmbassadors);
 
-    // Assign colors to RAs
+
+    eventAmbassadors = associateEventAmbassadorsWithEventTeams(eventAmbassadors, eventTeams);
+    console.log('Associated Event Ambassadors with Event Teams:', eventAmbassadors);
+
+    eventTeams = associateEventTeamsWithEventDetails(eventTeams, eventDetails);
+    console.log('Associated Event Teams with Event Details:', eventTeams);
+
+
+
     const raColorMap = assignColorsToRAs(regionalAmbassadors);
+    const eaColorMap = assignColorsToEAs(eventAmbassadors)
 
     // Update the UI
     h1Element.textContent = 'Ambassy';
@@ -115,26 +129,25 @@ async function checkAllDataLoaded() {
     // Collect points for Voronoi diagram
     const points: [number, number, string][] = [];
 
-    // Add dots for each event team
-    regionalAmbassadors.forEach(ra => {
-      const raColor = raColorMap.get(ra.name) || '#000000'; // Default to black if no color assigned
-      ra.eventAmbassadors?.forEach(ea => {
-        ea.supportedEventTeams?.forEach(team => {
-          if (team.associatedEvent) {
-            const eaColor = raColorMap.get(ea.name) || '#000000'; // Default to black if no color assigned
-            const [lng, lat] = team.associatedEvent.geometry.coordinates;
-            const tooltip = `
-              <strong>Event:</strong> ${team.eventShortName}<br>
-              <strong>Event Director(s):</strong> ${team.eventDirectors.join(', ')}<br>
-              <strong>Event Ambassador:</strong> ${ea.name}<br>
-              <strong>Regional Ambassador:</strong> ${ra.name}
-            `;
-            points.push([lng, lat, JSON.stringify({ raColor, tooltip })]);
-            const marker = L.circleMarker([lat, lng], { radius: 5, color: eaColor }).addTo(map);
-            marker.bindTooltip(tooltip);
-          }
-        });
-      });
+    // Add dots for each parkrun event
+    eventDetails
+    .filter(event => event.properties.countrycode === 3 && event.properties.seriesid === 1) // Australian, open, 5km events only
+    .forEach(event => {
+      const associatedTeam = event.associatedTeam;
+      const ea = associatedTeam?.associatedEA;
+      const ra = ea?.regionalAmbassador
+      const [lng, lat] = event.geometry.coordinates;
+      const raColor = (ra ? raColorMap.get(ra.name) : 'green');
+      const eaColor = (ea ? eaColorMap.get(ea.name) : 'purple')
+      const tooltip = `
+        <strong>Event:</strong> ${event.properties.EventShortName}<br>
+        <strong>Event Director(s):</strong> ${associatedTeam?.eventDirectors?.join(', ')}<br>
+        <strong>Event Ambassador(s):</strong> ${ea?.name}<br>
+        <strong>Regional Ambassador(s):</strong> ${ra?.name}<br>
+      `;
+      points.push([lng, lat, JSON.stringify({ raColor, tooltip })]);
+      const marker = L.circleMarker([lat, lng], { radius: 5, color: eaColor }).addTo(map);
+      marker.bindTooltip(tooltip);
     });
 
     // Generate Voronoi diagram
@@ -151,6 +164,7 @@ async function checkAllDataLoaded() {
 
     // Populate the event teams table
     populateEventTeamsTable(regionalAmbassadors);
+
   } else {
     let missingFilesMessage = 'Please upload the following missing files: ';
     const missingFiles = [];
