@@ -5,14 +5,17 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Upload CSV Files</title>
   <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
 </head>
 <body>
   <h1>Upload CSV Files</h1>
   <h2 id="uploadPrompt">Please upload the Event Ambassadors CSV file.</h2>
-  <input type="file" id="csvFileInput" accept=".csv">
+  <input type="file" id="csvFileInput" title="csvFileInput" accept=".csv">
   <button id="uploadButton">Upload</button>
   
-  <div id="eventTeamsTableContainer" style="display: none;">
+  <div id="mapContainer"></div>
+  
+  <div id="eventTeamsTableContainer">
     <h2>Event Teams</h2>
     <table id="eventTeamsTable" border="1">
       <thead>
@@ -30,6 +33,7 @@
     </table>
   </div>
 
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
   <script src="/dist/bundle.js"></script>
 </body>
 </html>

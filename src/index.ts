@@ -8,6 +8,7 @@ import { associateEventTeamsWithParkRunEvents } from './utils/associateEventTeam
 import { populateEventTeamsTable } from './utils/populateEventTeamsTable';
 import { associateEventAmbassadorsWithEventTeams } from './utils/associateEventAmbassadorsWithEventTeams';
 import { associateRegionalAmbassadorsWithEventAmbassadors } from './utils/associateRegionalAmbassadorsWithEventAmbassadors';
+import L from 'leaflet';
 
 enum UploadState {
   EventAmbassadors,
@@ -17,6 +18,20 @@ enum UploadState {
 }
 
 let uploadState = UploadState.EventAmbassadors;
+let map: L.Map
+
+const colorPalette = [
+  '#FF5733', '#33FF57', '#3357FF', '#FF33A1', '#A133FF', '#33FFF5', '#FF8C33', '#33FF8C', '#8C33FF', '#FF338C'
+];
+
+// Assign colors to RAs
+function assignColorsToRAs(regionalAmbassadors: RegionalAmbassador[]): Map<string, string> {
+  const raColorMap = new Map<string, string>();
+  regionalAmbassadors.forEach((ra, index) => {
+    raColorMap.set(ra.name, colorPalette[index % colorPalette.length]);
+  });
+  return raColorMap;
+}
 
 function updatePrompt() {
   const uploadPrompt = document.getElementById('uploadPrompt');
@@ -43,6 +58,8 @@ async function checkAllDataLoaded() {
   const uploadPrompt = document.getElementById('uploadPrompt');
   const csvFileInput = document.getElementById('csvFileInput');
   const uploadButton = document.getElementById('uploadButton');
+  const mapContainer = document.getElementById('mapContainer');
+
   const eventTeamsTableContainer = document.getElementById('eventTeamsTableContainer');
 
   if (!h1Element || !uploadPrompt || !csvFileInput || !uploadButton || !eventTeamsTableContainer) {
@@ -69,13 +86,43 @@ async function checkAllDataLoaded() {
     regionalAmbassadors = associateRegionalAmbassadorsWithEventAmbassadors(regionalAmbassadors, eventAmbassadors);
     console.log('Associated Regional Ambassadors with Event Ambassadors:', regionalAmbassadors);
 
+    const raColorMap = assignColorsToRAs(regionalAmbassadors);
 
     // Update the UI
     h1Element.textContent = 'Ambassy';
     uploadPrompt.style.display = 'none';
     csvFileInput.style.display = 'none';
     uploadButton.style.display = 'none';
+    if (mapContainer) {
+      mapContainer.style.display = 'block';
+    }
     eventTeamsTableContainer.style.display = 'block';
+
+    // Initialize the map
+    map = L.map('mapContainer').setView([0, 0], 2);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(map);
+
+    // Add dots for each event team
+    regionalAmbassadors.forEach(ra => {
+      ra?.eventAmbassadors?.forEach(ea => {
+        const raColor = raColorMap.get(ra.name) || '#000000'; // Default to black if no color assigned
+     
+        ea?.supportedEventTeams?.forEach(team => {
+          if (team.associatedEvent) {
+            const [lng, lat] = team.associatedEvent.geometry.coordinates;
+            const marker = L.circleMarker([lat, lng], { radius: 5, color: raColor }).addTo(map);
+            marker.bindTooltip(`
+              <strong>Event:</strong> ${team.eventShortName}<br>
+              <strong>Event Director(s):</strong> ${team.eventDirectors.join(', ')}<br>
+              <strong>Event Ambassador:</strong> ${ea.name}<br>
+              <strong>Regional Ambassador:</strong> ${ra.name}
+            `);
+          }
+        });
+      });
+    });
 
     // Populate the event teams table
     populateEventTeamsTable(regionalAmbassadors);

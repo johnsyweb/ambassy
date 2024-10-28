@@ -55,11 +55,7 @@ h1, h2 {
   cursor: pointer;
 }
 
-/* Zoom buttons styles */
-#zoomInButton, #zoomOutButton {
-  display: block;
-  margin: 10px auto;
-  padding: 10px 20px;
-  font-size: 16px;
-  cursor: pointer;
+#mapContainer {
+  height: 800px;
+  display: none;
 }
