@@ -13,11 +13,8 @@ export function populateEventTeamsTable(regionalAmbassadors: RegionalAmbassador[
 
   // Populate table with event team data
   regionalAmbassadors.forEach(ra => {
-    console.log(ra.name);
     ra.eventAmbassadors?.forEach(ea => {
-      console.log(ea.name, ea.events);
       ea.supportedEventTeams?.forEach(team => {
-        console.log(team.eventShortName);
         const row = tableBody.insertRow();
         const raNameCell = row.insertCell(0);
         const eaNameCell = row.insertCell(1);
