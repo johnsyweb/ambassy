@@ -1,6 +1,6 @@
 import { RegionalAmbassador } from '../models/RegionalAmbassador';
 
-interface RegionalAmbassadorRow {
+export interface RegionalAmbassadorRow {
   'RA Name': string;
   'RA State': string;
   'EA Name': string;

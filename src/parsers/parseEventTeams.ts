@@ -1,6 +1,6 @@
 import { EventTeam } from '../models/EventTeam';
 
-interface EventTeamRow {
+export interface EventTeamRow {
   'Event': string;
   'Event Ambassador': string;
   'Event Director/s': string;

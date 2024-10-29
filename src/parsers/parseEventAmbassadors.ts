@@ -1,6 +1,11 @@
 import { EventAmbassador } from '../models/EventAmbassador';
 
-export function parseEventAmbassadors(data): EventAmbassador[] {
+export interface EventAmbassadorRow {
+  'Event Ambassador': string;
+  'Events': string;
+};
+
+export function parseEventAmbassadors(data: EventAmbassadorRow[]): EventAmbassador[] {
   const eventAmbassadors: EventAmbassador[] = [];
   let currentEA: EventAmbassador | null = null;
 
