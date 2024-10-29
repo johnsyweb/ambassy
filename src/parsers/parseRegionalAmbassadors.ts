@@ -1,6 +1,12 @@
 import { RegionalAmbassador } from '../models/RegionalAmbassador';
 
-export function parseRegionalAmbassadors(data: any[]): RegionalAmbassador[] {
+interface RegionalAmbassadorRow {
+  'RA Name': string;
+  'RA State': string;
+  'EA Name': string;
+};
+
+export function parseRegionalAmbassadors(data: RegionalAmbassadorRow[]): RegionalAmbassador[] {
   const regionalAmbassadors: RegionalAmbassador[] = [];
   let currentRA: RegionalAmbassador | null = null;
 

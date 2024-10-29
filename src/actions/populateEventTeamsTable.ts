@@ -1,4 +1,3 @@
-import { json } from 'd3';
 import { RegionalAmbassador } from '../models/RegionalAmbassador';
 
 export function populateEventTeamsTable(regionalAmbassadors: RegionalAmbassador[]): void {

@@ -39,7 +39,7 @@ function assignColorsToRAs(regionalAmbassadors: RegionalAmbassador[]): Map<strin
 
 function assignColorsToEAs(eas: EventAmbassador[]): Map<string, string> {
   const eaColorMap = new Map<string, string>();
-  regionalAmbassadors.forEach((ra, index) => {
+  eas.forEach((ra, index) => {
     eaColorMap.set(ra.name, colorPalette[index % colorPalette.length]);
   });
   return eaColorMap;

@@ -1,6 +1,12 @@
 import { EventTeam } from '../models/EventTeam';
 
-export function parseEventTeams(data: any[]): EventTeam[] {
+interface EventTeamRow {
+  'Event': string;
+  'Event Ambassador': string;
+  'Event Director/s': string;
+};
+
+export function parseEventTeams(data: EventTeamRow[]): EventTeam[] {
   const eventTeams: EventTeam[] = [];
   let currentEventTeam: EventTeam | null = null;
 

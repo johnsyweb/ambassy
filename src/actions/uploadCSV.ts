@@ -8,7 +8,7 @@ export function handleFileUpload(file: File, callback: (type: string) => void): 
     header: true,
     skipEmptyLines: true,
     complete: (results) => {
-      const data = results.data as any[];
+      const data = results.data;
       if (file.name.includes('Event Ambassadors')) {
         const eventAmbassadors = parseEventAmbassadors(data);
         console.log('Parsed Event Ambassadors:', eventAmbassadors);

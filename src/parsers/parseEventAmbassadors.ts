@@ -1,6 +1,6 @@
 import { EventAmbassador } from '../models/EventAmbassador';
 
-export function parseEventAmbassadors(data: any[]): EventAmbassador[] {
+export function parseEventAmbassadors(data): EventAmbassador[] {
   const eventAmbassadors: EventAmbassador[] = [];
   let currentEA: EventAmbassador | null = null;
 

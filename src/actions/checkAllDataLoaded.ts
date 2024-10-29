@@ -1,10 +1,12 @@
+import { EventTeam } from '../models/EventTeam';
+
 export function checkAllDataLoaded(
   isEventTeamsLoaded: boolean,
   isRegionalAmbassadorsLoaded: boolean,
   isEventAmbassadorsLoaded: boolean,
-  eventTeams: any[],
-  renderMap: (eventTeams: any[]) => void,
-  populateEventTeamsTable: (eventTeams: any[]) => void
+  eventTeams: EventTeam[],
+  renderMap: (eventTeams: EventTeam[]) => void,
+  populateEventTeamsTable: (eventTeams: EventTeam[]) => void
 ): void {
   if (isEventTeamsLoaded && isRegionalAmbassadorsLoaded && isEventAmbassadorsLoaded) {
     document.getElementById('map')!.style.display = 'block';
