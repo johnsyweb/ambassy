@@ -71,12 +71,7 @@ async function checkAllDataLoaded() {
   }
 
   const eventDetails: EventDetails[] = await getEvents();
-
-  if (
-    isEventTeamsLoaded &&
-    isRegionalAmbassadorsLoaded &&
-    isEventAmbassadorsLoaded
-  ) {
+  if (eventTeams.length && eventAmbassadors.length && regionalAmbassadors.length) {
     eventAmbassadors = associateEventAmbassadorsWithEventTeams(
       eventAmbassadors,
       eventTeams
@@ -176,13 +171,11 @@ async function checkAllDataLoaded() {
     // Populate the event teams table
     populateEventTeamsTable(regionalAmbassadors);
   } else {
-    let missingFilesMessage = "Please upload the following missing files: ";
     const missingFiles = [];
-    if (!isEventTeamsLoaded) missingFiles.push("Event Teams CSV");
-    if (!isRegionalAmbassadorsLoaded)
-      missingFiles.push("Regional Ambassadors CSV");
-    if (!isEventAmbassadorsLoaded) missingFiles.push("Event Ambassadors CSV");
-    missingFilesMessage += missingFiles.join(", ");
+    if (!eventTeams?.length) missingFiles.push("Event Teams CSV");
+    if (!regionalAmbassadors?.length) missingFiles.push("Regional Ambassadors CSV");
+    if (!eventAmbassadors?.length) missingFiles.push("Event Ambassadors CSV");
+    const missingFilesMessage = `Please upload the following missing files: ${missingFiles.join(', ')}`;
     uploadPrompt.textContent = missingFilesMessage;
   }
 }
@@ -217,22 +210,12 @@ if (storedRegionalAmbassadors) {
   );
 }
 
-let isEventTeamsLoaded = !!storedEventTeams;
-let isRegionalAmbassadorsLoaded = !!storedRegionalAmbassadors;
-let isEventAmbassadorsLoaded = !!storedEventAmbassadors;
-
 document.getElementById("uploadButton")?.addEventListener("click", () => {
   const input = document.getElementById("csvFileInput") as HTMLInputElement;
-  if (input && input.files && input.files.length > 0) {
+  if (input.files && input.files.length > 0) {
     const file = input.files[0];
     handleFileUpload(file, (type) => {
-      if (type === "Event Ambassadors") {
-        isEventAmbassadorsLoaded = true;
-      } else if (type === "Event Teams") {
-        isEventTeamsLoaded = true;
-      } else if (type === "Regional Ambassadors") {
-        isRegionalAmbassadorsLoaded = true;
-      }
+      console.log(`Uploaded ${type} CSV file.`);
       checkAllDataLoaded();
     });
   } else {
