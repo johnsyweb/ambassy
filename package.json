@@ -19,6 +19,7 @@
   "devDependencies": {
     "@types/connect": "^3.4.38",
     "@types/d3": "^7.4.3",
+    "@types/geojson": "^7946.0.14",
     "@types/jest": "^29.5.14",
     "@types/leaflet": "^1.9.14",
     "@types/papaparse": "^5.3.15",
@@ -41,5 +42,6 @@
     "papaparse": "^5.4.1",
     "path-browserify": "^1.0.1",
     "ts-node": "^10.9.2"
-  }
+  },
+  "packageManager": "pnpm@9.12.2+sha512.22721b3a11f81661ae1ec68ce1a7b879425a1ca5b991c975b074ac220b187ce56c708fe5db69f4c962c989452eee76c82877f4ee80f474cebd61ee13461b6228"
 }
