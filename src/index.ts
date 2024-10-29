@@ -13,14 +13,6 @@ import { RegionalAmbassador } from './models/RegionalAmbassador';
 import L from 'leaflet';
 import * as d3GeoVoronoi from 'd3-geo-voronoi';
 
-enum UploadState {
-  EventAmbassadors,
-  EventTeams,
-  RegionalAmbassadors,
-  Complete
-}
-
-let uploadState = UploadState.EventAmbassadors;
 let map: L.Map;
 
 // Define a color palette
@@ -45,26 +37,6 @@ function assignColorsToEAs(eas: EventAmbassador[]): Map<string, string> {
   return eaColorMap;
 }
 
-function updatePrompt() {
-  const uploadPrompt = document.getElementById('uploadPrompt');
-  if (!uploadPrompt) return;
-
-  switch (uploadState) {
-    case UploadState.EventAmbassadors:
-      uploadPrompt.textContent = 'Please upload the Event Ambassadors CSV file.';
-      break;
-    case UploadState.EventTeams:
-      uploadPrompt.textContent = 'Please upload the Event Teams CSV file.';
-      break;
-    case UploadState.RegionalAmbassadors:
-      uploadPrompt.textContent = 'Please upload the Regional Ambassadors CSV file.';
-      break;
-    case UploadState.Complete:
-      uploadPrompt.textContent = 'All files uploaded successfully!';
-      break;
-  }
-}
-
 async function checkAllDataLoaded() {
   const h1Element = document.querySelector('h1');
   const uploadPrompt = document.getElementById('uploadPrompt');
@@ -84,14 +56,7 @@ async function checkAllDataLoaded() {
   };
 
   if (isEventTeamsLoaded && isRegionalAmbassadorsLoaded && isEventAmbassadorsLoaded) {
-    const storedEventDetails = sessionStorage.getItem('eventDetails');
-    let eventDetails: EventDetails[] = [];
-
-    if (storedEventDetails) {
-      eventDetails = JSON.parse(storedEventDetails);
-    } else {
-      eventDetails = await getEvents();
-    }
+    const eventDetails: EventDetails[] =  await getEvents();
 
     eventAmbassadors = associateEventAmbassadorsWithEventTeams(eventAmbassadors, eventTeams);
     console.log('Associated Event Ambassadors with Event Teams:', eventAmbassadors);
@@ -210,23 +175,17 @@ document.getElementById('uploadButton')?.addEventListener('click', () => {
     handleFileUpload(file, (type) => {
       if (type === 'Event Ambassadors') {
         isEventAmbassadorsLoaded = true;
-        uploadState = UploadState.EventTeams;
       } else if (type === 'Event Teams') {
         isEventTeamsLoaded = true;
-        uploadState = UploadState.RegionalAmbassadors;
       } else if (type === 'Regional Ambassadors') {
         isRegionalAmbassadorsLoaded = true;
-        uploadState = UploadState.Complete;
       }
-      updatePrompt();
       checkAllDataLoaded();
     });
   } else {
     alert('Please select a CSV file to upload.');
   }
 });
-
-updatePrompt();
 
 // Fetch events when the page loads
 getEvents();
