@@ -11,7 +11,6 @@ import { EventTeam } from './models/EventTeam';
 import { RegionalAmbassador } from './models/RegionalAmbassador';
 
 import L from 'leaflet';
-import * as d3 from 'd3';
 import * as d3GeoVoronoi from 'd3-geo-voronoi';
 
 enum UploadState {
