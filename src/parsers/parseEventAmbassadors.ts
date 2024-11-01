@@ -1,12 +1,13 @@
 import { EventAmbassador } from '../models/EventAmbassador';
+import { EventAmbassadorMap } from '../models/EventAmbassadorMap';
 
 export interface EventAmbassadorRow {
   'Event Ambassador': string;
   'Events': string;
 };
 
-export function parseEventAmbassadors(data: EventAmbassadorRow[]): EventAmbassador[] {
-  const eventAmbassadors: EventAmbassador[] = [];
+export function parseEventAmbassadors(data: EventAmbassadorRow[]): EventAmbassadorMap {
+  const eventAmbassadorsMap: EventAmbassadorMap = new Map<string, EventAmbassador>();
   let currentEA: EventAmbassador | null = null;
 
   data.forEach(row => {
@@ -15,11 +16,11 @@ export function parseEventAmbassadors(data: EventAmbassadorRow[]): EventAmbassad
 
     if (eaName) {
       if (currentEA) {
-        eventAmbassadors.push(currentEA);
+        eventAmbassadorsMap.set(currentEA.name , currentEA);
       }
       currentEA = {
         name: eaName,
-        events: []
+        events: [],
       };
     }
 
@@ -29,8 +30,8 @@ export function parseEventAmbassadors(data: EventAmbassadorRow[]): EventAmbassad
   });
 
   if (currentEA) {
-    eventAmbassadors.push(currentEA);
+    eventAmbassadorsMap.set(currentEA['name'], currentEA);
   }
 
-  return eventAmbassadors;
+  return eventAmbassadorsMap;
 }

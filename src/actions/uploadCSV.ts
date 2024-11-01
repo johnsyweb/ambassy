@@ -13,7 +13,7 @@ export function handleFileUpload(file: File, callback: FileUploadCallback): void
       if (file.name.includes('Event Ambassadors')) {
         const eventAmbassadors = parseEventAmbassadors(data as EventAmbassadorRow[]);
         console.log('Parsed Event Ambassadors:', eventAmbassadors);
-        sessionStorage.setItem('eventAmbassadors', JSON.stringify(eventAmbassadors));
+        sessionStorage.setItem('Event Ambassadors', JSON.stringify(Array.from(eventAmbassadors.entries())));
         callback('Event Ambassadors');
       } else if (file.name.includes('Event Teams')) {
         const eventTeams = parseEventTeams(data as EventTeamRow[]);

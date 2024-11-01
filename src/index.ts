@@ -1,4 +1,3 @@
-import { associateEventAmbassadorsWithEventTeams } from "./actions/associateEventAmbassadorsWithEventTeams";
 import { associateEventTeamsWithEventDetails } from "./actions/associateEventTeamsWithEventDetails";
 import { getEvents } from "./actions/fetchEvents";
 import { handleFileUpload } from "./actions/uploadCSV";
@@ -10,6 +9,7 @@ import { EventDetails } from "./models/EventDetails";
 import { EventTeam } from "./models/EventTeam";
 import { RegionalAmbassadorMap } from "./models/RegionalAmbassadorMap";
 import { RegionalAmbassador } from "./models/RegionalAmbassador";
+import { EventAmbassadorMap } from "./models/EventAmbassadorMap";
 
 async function ambassy() {
   const h1Element = document.querySelector("h1");
@@ -33,29 +33,18 @@ async function ambassy() {
     return;
   }
 
+  const regionalAmbassadors = getRegionalAmbassadorsFromSession();
+  const eventAmbassadors = getEventAmbassadorsFromSession();
+
   const eventDetails: EventDetails[] = await getEvents();
   if (
     eventTeams.length &&
-    eventAmbassadors.length &&
+    eventAmbassadors.size &&
     regionalAmbassadors.size
   ) {
-    eventAmbassadors = associateEventAmbassadorsWithEventTeams(
-      eventAmbassadors,
-      eventTeams
-    );
-    console.log(
-      "Associated Event Ambassadors with Event Teams:",
-      eventAmbassadors
-    );
-
-    eventAmbassadors = associateEventAmbassadorsWithEventTeams(
-      eventAmbassadors,
-      eventTeams
-    );
-    console.log(
-      "Associated Event Ambassadors with Event Teams:",
-      eventAmbassadors
-    );
+    
+    const eaIsSupportedBy = buildRALookup(regionalAmbassadors);
+    const teamIsSupportedBy = buildEALookup(eventAmbassadors);
 
     eventTeams = associateEventTeamsWithEventDetails(eventTeams, eventDetails);
     console.log("Associated Event Teams with Event Details:", eventTeams);
@@ -72,17 +61,17 @@ async function ambassy() {
     const names = [
       ...new Set([
         ...regionalAmbassadors.keys(),
-        ...eventAmbassadors.map((a) => a.name),
+        ...eventAmbassadors.keys(),
       ]),
     ];
-    initializeMap(eventDetails, names);
-    populateEventTeamsTable(regionalAmbassadors);
+    initializeMap(regionalAmbassadors, eventDetails, names);
+    populateEventTeamsTable(regionalAmbassadors, eventAmbassadors);
   } else {
     const missingFiles = [];
     if (!eventTeams?.length) missingFiles.push("Event Teams CSV");
     if (regionalAmbassadors.size === 0){
       missingFiles.push("Regional Ambassadors CSV");
-}    if (!eventAmbassadors?.length) missingFiles.push("Event Ambassadors CSV");
+}    if (eventAmbassadors.size === 0) missingFiles.push("Event Ambassadors CSV");
     const missingFilesMessage = `Please upload the following missing files: ${missingFiles.join(
       ", "
     )}`;
@@ -98,15 +87,13 @@ if (storedEventTeams) {
   console.log("Retrieved Event Teams from session storage:", eventTeams);
 }
 
-// Retrieve stored event ambassadors from session storage
-let eventAmbassadors: EventAmbassador[] = [];
-const storedEventAmbassadors = sessionStorage.getItem("eventAmbassadors");
-if (storedEventAmbassadors) {
-  eventAmbassadors = JSON.parse(storedEventAmbassadors);
-  console.log(
-    "Retrieved Event Ambassadors from session storage:",
-    eventAmbassadors
-  );
+function getEventAmbassadorsFromSession(): EventAmbassadorMap {
+  const storedEventAmbassadors = sessionStorage.getItem('Event Ambassadors');
+  if (storedEventAmbassadors) {
+    const parsedData = JSON.parse(storedEventAmbassadors);
+    return new Map<string, EventAmbassador>(parsedData);
+  }
+  return new Map<string, EventAmbassador>();
 }
 
 function getRegionalAmbassadorsFromSession(): RegionalAmbassadorMap {
@@ -118,7 +105,9 @@ function getRegionalAmbassadorsFromSession(): RegionalAmbassadorMap {
   return new Map<string, RegionalAmbassador>();
 }
 
-function buildReverseLookup(regionalAmbassadors: RegionalAmbassadorMap): Map<string, string> {
+type NameLookup = Map<string, string>;
+
+function buildRALookup(regionalAmbassadors: RegionalAmbassadorMap): NameLookup {
   const reverseLookupMap = new Map<string, string>();
 
   regionalAmbassadors.forEach((ra, raName) => {
@@ -129,8 +118,24 @@ function buildReverseLookup(regionalAmbassadors: RegionalAmbassadorMap): Map<str
 
   return reverseLookupMap;
 }
-const regionalAmbassadors = getRegionalAmbassadorsFromSession();
-const eaIsSupprteaIsSupportedBy = buildReverseLookup(regionalAmbassadors);
+
+function buildEALookup(eventAmbassadors: EventAmbassadorMap): Map<string, string[]> {
+  const reverseLookupMap = new Map<string, string[]>();
+
+  eventAmbassadors.forEach((ea, eaName) => {
+    ea.events.forEach(eventName => {
+      if (!reverseLookupMap.has(eventName)) {
+        reverseLookupMap.set(eventName, []);
+      }
+      const supportedEAs = reverseLookupMap.get(eventName);
+      if (supportedEAs) {
+        supportedEAs.push(eaName);
+      }
+    });
+  });
+
+  return reverseLookupMap;
+}
 
 document.getElementById("uploadButton")?.addEventListener("click", () => {
   const input = document.getElementById("csvFileInput") as HTMLInputElement;

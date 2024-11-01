@@ -2,8 +2,10 @@
 import L from "leaflet";
 import * as d3GeoVoronoi from "d3-geo-voronoi";
 import { EventDetails } from "./models/EventDetails";
+import { RegionalAmbassadorMap } from "./models/RegionalAmbassadorMap";
 
 export function initializeMap(
+  eaIsSupportedBy: RegionalAmbassadorMap,
   eventDetails: EventDetails[],
   names: string[]) {
   const colorMap = assignColorsToNames(names);
@@ -24,7 +26,7 @@ export function initializeMap(
     .forEach((event) => {
       const associatedTeam = event.associatedTeam;
       const ea = associatedTeam?.associatedEA;
-      const ra = ea?.regionalAmbassador;
+      const ra = ea ? eaIsSupportedBy.get(ea.name) : ''
       const [lng, lat] = event.geometry.coordinates;
       const raColor = ra ? colorMap.get(ra.name) : "white";
       const eaColor = ea ? colorMap.get(ea.name) : "purple";
@@ -34,7 +36,7 @@ export function initializeMap(
           ", "
         )}<br>
         <strong>Event Ambassador(s):</strong> ${ea?.name}<br>
-        <strong>Regional Ambassador(s):</strong> ${ra?.name}<br>
+        <strong>Regional Ambassador(s):</strong> ${ra}<br>
       `;
       points.push([lng, lat, JSON.stringify({ raColor, tooltip })]);
       const marker = L.circleMarker([lat, lng], {
