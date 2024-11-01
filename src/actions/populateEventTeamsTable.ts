@@ -28,10 +28,12 @@ export function populateEventTeamsTable(
         const eventNameCell = row.insertCell(2);
         const eventDirectorsCell = row.insertCell(3);
         const eventCoordinatesCell = row.insertCell(4);
+        const eventSeriesCell = row.insertCell(5);
+        const eventCountryCell = row.insertCell(6);
 
         const eventTeam = eventTeams.get(eventName);
 
-        if ([raNameCell, eaNameCell, eventNameCell, eventDirectorsCell, eventCoordinatesCell].some(cell => !cell)) {
+        if ([raNameCell, eaNameCell, eventNameCell, eventDirectorsCell, eventCoordinatesCell, eventSeriesCell, eventCountryCell].some(cell => !cell)) {
           console.error("Failed to insert row");
           return;
         }
@@ -41,7 +43,8 @@ export function populateEventTeamsTable(
         eventNameCell.textContent = eventName;
         eventDirectorsCell.textContent = eventTeam?.eventDirectors.join(", ") ?? "N/A";
         eventCoordinatesCell.textContent = (eventDetails.get(eventName)?.geometry?.coordinates?.join(", ") ?? "N/A");
-
+        eventSeriesCell.textContent = eventDetails.get(eventName)?.properties.seriesid.toLocaleString() ?? "N/A";
+        eventCountryCell.textContent = eventDetails.get(eventName)?.properties.countrycode.toLocaleString() ?? "N/A";
       });
     });
   });

@@ -1,17 +1,16 @@
+import { EventAmbassador } from "./models/EventAmbassador";
+import { EventAmbassadorMap } from "./models/EventAmbassadorMap";
+import { EventDetailsMap } from "./models/EventDetailsMap";
+import { EventTeam } from "./models/EventTeam";
+import { EventTeamMap } from "./models/EventTeamMap";
+import { RegionalAmbassador } from "./models/RegionalAmbassador";
+import { RegionalAmbassadorMap } from "./models/RegionalAmbassadorMap";
+
 import { getEvents } from "./actions/fetchEvents";
 import { handleFileUpload } from "./actions/uploadCSV";
+import { populateMap } from "./actions/populateMap";
 import { populateEventTeamsTable } from "./actions/populateEventTeamsTable";
-import { initializeMap } from "./mapView";
 
-import { EventAmbassador } from "./models/EventAmbassador";
-import { EventDetails } from "./models/EventDetails";
-import { EventTeam } from "./models/EventTeam";
-import { RegionalAmbassadorMap } from "./models/RegionalAmbassadorMap";
-import { RegionalAmbassador } from "./models/RegionalAmbassador";
-import { EventAmbassadorMap } from "./models/EventAmbassadorMap";
-import { EventTeamMap } from "./models/EventTeamMap";
-import { EventDetailsMap } from "./models/EventDetailsMap";
-import e from "express";
 
 async function ambassy() {
   const h1Element = document.querySelector("h1");
@@ -55,7 +54,7 @@ async function ambassy() {
     const names = [
       ...new Set([...regionalAmbassadors.keys(), ...eventAmbassadors.keys()]),
     ];
-    initializeMap(regionalAmbassadors, eventDetails, names);
+    populateMap(regionalAmbassadors, eventDetails, names);
     populateEventTeamsTable(regionalAmbassadors, eventAmbassadors, eventTeams, eventDetails);
   } else {
     const missingFiles = [];
@@ -104,40 +103,6 @@ function getRegionalAmbassadorsFromSession(): RegionalAmbassadorMap {
     return new Map<string, RegionalAmbassador>(parsedData);
   }
   return new Map<string, RegionalAmbassador>();
-}
-
-type NameLookup = Map<string, string>;
-
-function buildRALookup(regionalAmbassadors: RegionalAmbassadorMap): NameLookup {
-  const reverseLookupMap = new Map<string, string>();
-
-  regionalAmbassadors.forEach((ra, raName) => {
-    ra.supportsEAs.forEach((eaName) => {
-      reverseLookupMap.set(eaName, raName);
-    });
-  });
-
-  return reverseLookupMap;
-}
-
-function buildEALookup(
-  eventAmbassadors: EventAmbassadorMap
-): Map<string, string[]> {
-  const reverseLookupMap = new Map<string, string[]>();
-
-  eventAmbassadors.forEach((ea, eaName) => {
-    ea.events.forEach((eventName) => {
-      if (!reverseLookupMap.has(eventName)) {
-        reverseLookupMap.set(eventName, []);
-      }
-      const supportedEAs = reverseLookupMap.get(eventName);
-      if (supportedEAs) {
-        supportedEAs.push(eaName);
-      }
-    });
-  });
-
-  return reverseLookupMap;
 }
 
 document.getElementById("uploadButton")?.addEventListener("click", () => {

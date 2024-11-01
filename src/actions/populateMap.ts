@@ -1,10 +1,11 @@
 
-import L from "leaflet";
-import * as d3GeoVoronoi from "d3-geo-voronoi";
-import { RegionalAmbassadorMap } from "./models/RegionalAmbassadorMap";
-import { EventDetailsMap } from "./models/EventDetailsMap";
+import { EventDetailsMap } from "../models/EventDetailsMap";
+import { RegionalAmbassadorMap } from "../models/RegionalAmbassadorMap";
 
-export function initializeMap(
+import * as d3GeoVoronoi from "d3-geo-voronoi";
+import L from "leaflet";
+
+export function populateMap(
   eaIsSupportedBy: RegionalAmbassadorMap,
   eventDetails: EventDetailsMap,
   names: string[]) {
