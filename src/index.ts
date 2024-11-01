@@ -1,4 +1,3 @@
-import { associateEventTeamsWithEventDetails } from "./actions/associateEventTeamsWithEventDetails";
 import { getEvents } from "./actions/fetchEvents";
 import { handleFileUpload } from "./actions/uploadCSV";
 import { populateEventTeamsTable } from "./actions/populateEventTeamsTable";
@@ -10,6 +9,7 @@ import { EventTeam } from "./models/EventTeam";
 import { RegionalAmbassadorMap } from "./models/RegionalAmbassadorMap";
 import { RegionalAmbassador } from "./models/RegionalAmbassador";
 import { EventAmbassadorMap } from "./models/EventAmbassadorMap";
+import { EventTeamMap } from "./models/EventTeamMap";
 
 async function ambassy() {
   const h1Element = document.querySelector("h1");
@@ -35,21 +35,10 @@ async function ambassy() {
 
   const regionalAmbassadors = getRegionalAmbassadorsFromSession();
   const eventAmbassadors = getEventAmbassadorsFromSession();
+  const eventTeams = getEventTeamsFromSession();
 
   const eventDetails: EventDetails[] = await getEvents();
-  if (
-    eventTeams.length &&
-    eventAmbassadors.size &&
-    regionalAmbassadors.size
-  ) {
-    
-    const eaIsSupportedBy = buildRALookup(regionalAmbassadors);
-    const teamIsSupportedBy = buildEALookup(eventAmbassadors);
-
-    eventTeams = associateEventTeamsWithEventDetails(eventTeams, eventDetails);
-    console.log("Associated Event Teams with Event Details:", eventTeams);
-
-    
+  if (eventTeams.size && eventAmbassadors.size && regionalAmbassadors.size) {
     // Update the UI
     h1Element.textContent = "Ambassy";
     uploadPrompt.style.display = "none";
@@ -59,19 +48,21 @@ async function ambassy() {
     eventTeamsTableContainer.style.display = "block";
 
     const names = [
-      ...new Set([
-        ...regionalAmbassadors.keys(),
-        ...eventAmbassadors.keys(),
-      ]),
+      ...new Set([...regionalAmbassadors.keys(), ...eventAmbassadors.keys()]),
     ];
     initializeMap(regionalAmbassadors, eventDetails, names);
-    populateEventTeamsTable(regionalAmbassadors, eventAmbassadors);
+    populateEventTeamsTable(regionalAmbassadors, eventAmbassadors, eventTeams);
   } else {
     const missingFiles = [];
-    if (!eventTeams?.length) missingFiles.push("Event Teams CSV");
-    if (regionalAmbassadors.size === 0){
+    if (eventTeams.size === 0) {
+      missingFiles.push("Event Teams CSV");
+    }
+    if (regionalAmbassadors.size === 0) {
       missingFiles.push("Regional Ambassadors CSV");
-}    if (eventAmbassadors.size === 0) missingFiles.push("Event Ambassadors CSV");
+    }
+    if (eventAmbassadors.size === 0) {
+      missingFiles.push("Event Ambassadors CSV");
+    }
     const missingFilesMessage = `Please upload the following missing files: ${missingFiles.join(
       ", "
     )}`;
@@ -79,16 +70,19 @@ async function ambassy() {
   }
 }
 
-// Retrieve stored event teams from session storage
-let eventTeams: EventTeam[] = [];
-const storedEventTeams = sessionStorage.getItem("eventTeams");
-if (storedEventTeams) {
-  eventTeams = JSON.parse(storedEventTeams);
-  console.log("Retrieved Event Teams from session storage:", eventTeams);
+function getEventTeamsFromSession(): EventTeamMap {
+  const storedEventTeams = sessionStorage.getItem("Event Teams");
+  if (storedEventTeams) {
+    const parsedData = JSON.parse(storedEventTeams);
+    if (parsedData) {
+      return new Map<string, EventTeam>(parsedData);
+    }
+  }
+  return new Map<string, EventTeam>();
 }
 
 function getEventAmbassadorsFromSession(): EventAmbassadorMap {
-  const storedEventAmbassadors = sessionStorage.getItem('Event Ambassadors');
+  const storedEventAmbassadors = sessionStorage.getItem("Event Ambassadors");
   if (storedEventAmbassadors) {
     const parsedData = JSON.parse(storedEventAmbassadors);
     return new Map<string, EventAmbassador>(parsedData);
@@ -97,7 +91,9 @@ function getEventAmbassadorsFromSession(): EventAmbassadorMap {
 }
 
 function getRegionalAmbassadorsFromSession(): RegionalAmbassadorMap {
-  const storedRegionalAmbassadors = sessionStorage.getItem('Regional Ambassadors');
+  const storedRegionalAmbassadors = sessionStorage.getItem(
+    "Regional Ambassadors"
+  );
   if (storedRegionalAmbassadors) {
     const parsedData = JSON.parse(storedRegionalAmbassadors);
     return new Map<string, RegionalAmbassador>(parsedData);
@@ -111,7 +107,7 @@ function buildRALookup(regionalAmbassadors: RegionalAmbassadorMap): NameLookup {
   const reverseLookupMap = new Map<string, string>();
 
   regionalAmbassadors.forEach((ra, raName) => {
-    ra.supportsEAs.forEach(eaName => {
+    ra.supportsEAs.forEach((eaName) => {
       reverseLookupMap.set(eaName, raName);
     });
   });
@@ -119,11 +115,13 @@ function buildRALookup(regionalAmbassadors: RegionalAmbassadorMap): NameLookup {
   return reverseLookupMap;
 }
 
-function buildEALookup(eventAmbassadors: EventAmbassadorMap): Map<string, string[]> {
+function buildEALookup(
+  eventAmbassadors: EventAmbassadorMap
+): Map<string, string[]> {
   const reverseLookupMap = new Map<string, string[]>();
 
   eventAmbassadors.forEach((ea, eaName) => {
-    ea.events.forEach(eventName => {
+    ea.events.forEach((eventName) => {
       if (!reverseLookupMap.has(eventName)) {
         reverseLookupMap.set(eventName, []);
       }

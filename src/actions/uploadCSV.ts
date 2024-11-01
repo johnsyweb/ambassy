@@ -12,17 +12,14 @@ export function handleFileUpload(file: File, callback: FileUploadCallback): void
       const data = results.data;
       if (file.name.includes('Event Ambassadors')) {
         const eventAmbassadors = parseEventAmbassadors(data as EventAmbassadorRow[]);
-        console.log('Parsed Event Ambassadors:', eventAmbassadors);
         sessionStorage.setItem('Event Ambassadors', JSON.stringify(Array.from(eventAmbassadors.entries())));
         callback('Event Ambassadors');
       } else if (file.name.includes('Event Teams')) {
         const eventTeams = parseEventTeams(data as EventTeamRow[]);
-        console.log('Parsed Event Teams:', eventTeams);
-        sessionStorage.setItem('eventTeams', JSON.stringify(eventTeams));
+        sessionStorage.setItem('Event Teams', JSON.stringify(Array.from(eventTeams)));
         callback('Event Teams');
       } else if (file.name.includes('Regional Ambassadors')) {
         const regionalAmbassadors = parseRegionalAmbassadors(data as RegionalAmbassadorRow[]);
-        console.log('Parsed Regional Ambassadors:', regionalAmbassadors);
         sessionStorage.setItem('Regional Ambassadors', JSON.stringify(Array.from(regionalAmbassadors.entries())));
         callback('Regional Ambassadors');
       }

@@ -1,4 +1,5 @@
 import { EventTeam } from '../models/EventTeam';
+import { EventTeamMap } from '../models/EventTeamMap';
 
 export interface EventTeamRow {
   'Event': string;
@@ -6,8 +7,8 @@ export interface EventTeamRow {
   'Event Director/s': string;
 };
 
-export function parseEventTeams(data: EventTeamRow[]): EventTeam[] {
-  const eventTeams: EventTeam[] = [];
+export function parseEventTeams(data: EventTeamRow[]): EventTeamMap {
+  const eventTeamMap: EventTeamMap = new Map<string, EventTeam>();
   let currentEventTeam: EventTeam | null = null;
 
   data.forEach(row => {
@@ -17,7 +18,7 @@ export function parseEventTeams(data: EventTeamRow[]): EventTeam[] {
 
     if (eventShortName) {
       if (currentEventTeam) {
-        eventTeams.push(currentEventTeam);
+        eventTeamMap.set(eventShortName, currentEventTeam);
       }
       currentEventTeam = {
         eventShortName,
@@ -30,8 +31,8 @@ export function parseEventTeams(data: EventTeamRow[]): EventTeam[] {
   });
 
   if (currentEventTeam) {
-    eventTeams.push(currentEventTeam);
+    eventTeamMap.set(currentEventTeam['eventShortName'], currentEventTeam);
   }
 
-  return eventTeams;
+  return eventTeamMap;
 }
