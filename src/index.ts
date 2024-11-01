@@ -117,7 +117,20 @@ function getRegionalAmbassadorsFromSession(): RegionalAmbassadorMap {
   }
   return new Map<string, RegionalAmbassador>();
 }
+
+function buildReverseLookup(regionalAmbassadors: RegionalAmbassadorMap): Map<string, string> {
+  const reverseLookupMap = new Map<string, string>();
+
+  regionalAmbassadors.forEach((ra, raName) => {
+    ra.supportsEAs.forEach(eaName => {
+      reverseLookupMap.set(eaName, raName);
+    });
+  });
+
+  return reverseLookupMap;
+}
 const regionalAmbassadors = getRegionalAmbassadorsFromSession();
+const eaIsSupprteaIsSupportedBy = buildReverseLookup(regionalAmbassadors);
 
 document.getElementById("uploadButton")?.addEventListener("click", () => {
   const input = document.getElementById("csvFileInput") as HTMLInputElement;
