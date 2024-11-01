@@ -10,6 +10,8 @@ import { RegionalAmbassadorMap } from "./models/RegionalAmbassadorMap";
 import { RegionalAmbassador } from "./models/RegionalAmbassador";
 import { EventAmbassadorMap } from "./models/EventAmbassadorMap";
 import { EventTeamMap } from "./models/EventTeamMap";
+import { EventDetailsMap } from "./models/EventDetailsMap";
+import e from "express";
 
 async function ambassy() {
   const h1Element = document.querySelector("h1");
@@ -37,7 +39,10 @@ async function ambassy() {
   const eventAmbassadors = getEventAmbassadorsFromSession();
   const eventTeams = getEventTeamsFromSession();
 
-  const eventDetails: EventDetails[] = await getEvents();
+  const eventDetails: EventDetailsMap = await getEvents();
+
+  console.log("Loaded: ", eventDetails.size, "events... ", Array.from(eventDetails.entries()));
+
   if (eventTeams.size && eventAmbassadors.size && regionalAmbassadors.size) {
     // Update the UI
     h1Element.textContent = "Ambassy";
@@ -51,7 +56,7 @@ async function ambassy() {
       ...new Set([...regionalAmbassadors.keys(), ...eventAmbassadors.keys()]),
     ];
     initializeMap(regionalAmbassadors, eventDetails, names);
-    populateEventTeamsTable(regionalAmbassadors, eventAmbassadors, eventTeams);
+    populateEventTeamsTable(regionalAmbassadors, eventAmbassadors, eventTeams, eventDetails);
   } else {
     const missingFiles = [];
     if (eventTeams.size === 0) {

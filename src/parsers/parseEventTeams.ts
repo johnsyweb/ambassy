@@ -1,14 +1,15 @@
 import { EventTeam } from '../models/EventTeam';
-import { EventTeamMap } from '../models/EventTeamMap';
 
 export interface EventTeamRow {
   'Event': string;
   'Event Ambassador': string;
   'Event Director/s': string;
-};
+}
+
+export type EventTeamMap = Map<string, EventTeam>;
 
 export function parseEventTeams(data: EventTeamRow[]): EventTeamMap {
-  const eventTeamMap: EventTeamMap = new Map<string, EventTeam>();
+  const eventTeamsMap = new Map<string, EventTeam>();
   let currentEventTeam: EventTeam | null = null;
 
   data.forEach(row => {
@@ -18,7 +19,7 @@ export function parseEventTeams(data: EventTeamRow[]): EventTeamMap {
 
     if (eventShortName) {
       if (currentEventTeam) {
-        eventTeamMap.set(eventShortName, currentEventTeam);
+        eventTeamsMap.set(currentEventTeam.eventShortName, currentEventTeam);
       }
       currentEventTeam = {
         eventShortName,
@@ -27,12 +28,14 @@ export function parseEventTeams(data: EventTeamRow[]): EventTeamMap {
       };
     } else if (currentEventTeam && eventDirector) {
       currentEventTeam.eventDirectors.push(eventDirector);
+    } else {
+      throw new Error('Invalid event team row' + row);
     }
   });
 
   if (currentEventTeam) {
-    eventTeamMap.set(currentEventTeam['eventShortName'], currentEventTeam);
+    eventTeamsMap.set(currentEventTeam['eventShortName'], currentEventTeam);
   }
 
-  return eventTeamMap;
+  return eventTeamsMap;
 }

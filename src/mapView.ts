@@ -1,12 +1,12 @@
 
 import L from "leaflet";
 import * as d3GeoVoronoi from "d3-geo-voronoi";
-import { EventDetails } from "./models/EventDetails";
 import { RegionalAmbassadorMap } from "./models/RegionalAmbassadorMap";
+import { EventDetailsMap } from "./models/EventDetailsMap";
 
 export function initializeMap(
   eaIsSupportedBy: RegionalAmbassadorMap,
-  eventDetails: EventDetails[],
+  eventDetails: EventDetailsMap,
   names: string[]) {
   const colorMap = assignColorsToNames(names);
   const map = L.map("mapContainer").setView([0, 0], 2);
@@ -18,7 +18,7 @@ export function initializeMap(
   const points: [number, number, string][] = [];
 
   // Add dots for each parkrun event
-  eventDetails
+  Array.from(eventDetails.values())
     .filter(
       (event) =>
         event.properties.countrycode === 3 && event.properties.seriesid === 1
