@@ -10,6 +10,7 @@ import { getEvents } from "./actions/fetchEvents";
 import { handleFileUpload } from "./actions/uploadCSV";
 import { populateMap } from "./actions/populateMap";
 import { populateEventTeamsTable } from "./actions/populateEventTeamsTable";
+import { extractEventTeamsTableData } from "./models/EventTeamsTable";
 
 
 async function ambassy() {
@@ -37,11 +38,8 @@ async function ambassy() {
   const regionalAmbassadors = getRegionalAmbassadorsFromSession();
   const eventAmbassadors = getEventAmbassadorsFromSession();
   const eventTeams = getEventTeamsFromSession();
-
   const eventDetails: EventDetailsMap = await getEvents();
-
-  console.log("Loaded: ", eventDetails.size, "events... ", Array.from(eventDetails.entries()));
-
+  
   if (eventTeams.size && eventAmbassadors.size && regionalAmbassadors.size) {
     // Update the UI
     h1Element.textContent = "Ambassy";
@@ -51,12 +49,16 @@ async function ambassy() {
     mapContainer.style.display = "block";
     eventTeamsTableContainer.style.display = "block";
 
+    const eventTeamsTableData = extractEventTeamsTableData(regionalAmbassadors, eventAmbassadors, eventTeams, eventDetails);
+    populateEventTeamsTable(eventTeamsTableData);
+
     const names = [
       ...new Set([...regionalAmbassadors.keys(), ...eventAmbassadors.keys()]),
     ];
+
+
     populateMap(regionalAmbassadors, eventDetails, names);
-    populateEventTeamsTable(regionalAmbassadors, eventAmbassadors, eventTeams, eventDetails);
-  } else {
+    } else {
     const missingFiles = [];
     if (eventTeams.size === 0) {
       missingFiles.push("Event Teams CSV");

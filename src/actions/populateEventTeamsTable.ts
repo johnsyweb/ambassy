@@ -1,17 +1,12 @@
-import { EventAmbassadorMap } from "../models/EventAmbassadorMap";
-import { RegionalAmbassadorMap } from "../models/RegionalAmbassadorMap";
-import { EventTeamMap } from "../models/EventTeamMap";
-import { EventDetailsMap } from "../models/EventDetailsMap";
+import { EventTeamsTableDataMap } from "../models/EventTeamsTable";
 
 export function populateEventTeamsTable(
-  regionalAmbassadors: RegionalAmbassadorMap,
-  eventAmbassadors: EventAmbassadorMap,
-  eventTeams: EventTeamMap,
-  eventDetails: EventDetailsMap
+  eventTeamsTableData: EventTeamsTableDataMap
 ): void {
   const tableBody = document
     .getElementById("eventTeamsTable")
     ?.getElementsByTagName("tbody")[0];
+    
   if (!tableBody) {
     console.error("Table body not found");
     return;
@@ -19,33 +14,37 @@ export function populateEventTeamsTable(
 
   tableBody.innerHTML = "";
 
-  regionalAmbassadors.forEach((ra, raName) => {
-    ra.supportsEAs.forEach((ea) => {
-      eventAmbassadors.get(ea)?.events.forEach((eventName) => {
-        const row = tableBody.insertRow();
-        const raNameCell = row.insertCell(0);
-        const eaNameCell = row.insertCell(1);
-        const eventNameCell = row.insertCell(2);
-        const eventDirectorsCell = row.insertCell(3);
-        const eventCoordinatesCell = row.insertCell(4);
-        const eventSeriesCell = row.insertCell(5);
-        const eventCountryCell = row.insertCell(6);
+  eventTeamsTableData.forEach((data, eventName) => {
+    const row = tableBody.insertRow();
+    const raNameCell = row.insertCell(0);
+    const eaNameCell = row.insertCell(1);
+    const eventNameCell = row.insertCell(2);
+    const eventDirectorsCell = row.insertCell(3);
+    const eventCoordinatesCell = row.insertCell(4);
+    const eventSeriesCell = row.insertCell(5);
+    const eventCountryCell = row.insertCell(6);
 
-        const eventTeam = eventTeams.get(eventName);
+    if (
+      [
+        raNameCell,
+        eaNameCell,
+        eventNameCell,
+        eventDirectorsCell,
+        eventCoordinatesCell,
+        eventSeriesCell,
+        eventCountryCell,
+      ].some((cell) => !cell)
+    ) {
+      console.error("Failed to insert row");
+      return;
+    }
 
-        if ([raNameCell, eaNameCell, eventNameCell, eventDirectorsCell, eventCoordinatesCell, eventSeriesCell, eventCountryCell].some(cell => !cell)) {
-          console.error("Failed to insert row");
-          return;
-        }
-      
-        raNameCell.textContent = raName;
-        eaNameCell.textContent = ea;
-        eventNameCell.textContent = eventName;
-        eventDirectorsCell.textContent = eventTeam?.eventDirectors.join(", ") ?? "N/A";
-        eventCoordinatesCell.textContent = (eventDetails.get(eventName)?.geometry?.coordinates?.join(", ") ?? "N/A");
-        eventSeriesCell.textContent = eventDetails.get(eventName)?.properties.seriesid.toLocaleString() ?? "N/A";
-        eventCountryCell.textContent = eventDetails.get(eventName)?.properties.countrycode.toLocaleString() ?? "N/A";
-      });
-    });
+    raNameCell.textContent = data.regionalAmbassador;
+    eaNameCell.textContent = data.eventAmbassador;
+    eventNameCell.textContent = eventName;
+    eventDirectorsCell.textContent = data.eventDirectors;
+    eventCoordinatesCell.textContent = data.eventCoordinates;
+    eventSeriesCell.textContent = data.eventSeries.toLocaleString();
+    eventCountryCell.textContent = data.eventCountry.toLocaleString();
   });
 }
