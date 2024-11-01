@@ -57,7 +57,7 @@ async function ambassy() {
     ];
 
 
-    populateMap(regionalAmbassadors, eventDetails, names);
+    populateMap(eventTeamsTableData, eventDetails, names);
     } else {
     const missingFiles = [];
     if (eventTeams.size === 0) {

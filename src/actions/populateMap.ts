@@ -1,12 +1,12 @@
 
 import { EventDetailsMap } from "../models/EventDetailsMap";
-import { RegionalAmbassadorMap } from "../models/RegionalAmbassadorMap";
+import { EventTeamsTableDataMap } from "../models/EventTeamsTable";
 
 import * as d3GeoVoronoi from "d3-geo-voronoi";
 import L from "leaflet";
 
 export function populateMap(
-  eaIsSupportedBy: RegionalAmbassadorMap,
+  eventTeamsTableData: EventTeamsTableDataMap,
   eventDetails: EventDetailsMap,
   names: string[]) {
   const colorMap = assignColorsToNames(names);
@@ -19,32 +19,38 @@ export function populateMap(
   const points: [number, number, string][] = [];
 
   // Add dots for each parkrun event
-  Array.from(eventDetails.values())
-    .filter(
-      (event) =>
-        event.properties.countrycode === 3 && event.properties.seriesid === 1
-    ) // Australian, open, 5km events only
-    .forEach((event) => {
-      const associatedTeam = event.associatedTeam;
-      const ea = associatedTeam?.associatedEA;
-      const ra = ea ? eaIsSupportedBy.get(ea.name) : ''
-      const [lng, lat] = event.geometry.coordinates;
-      const raColor = ra ? colorMap.get(ra.name) : "white";
-      const eaColor = ea ? colorMap.get(ea.name) : "purple";
+  eventDetails.forEach((event, eventName) => {
+    const latitiude = event.geometry.coordinates[1];
+    const longitude = event.geometry.coordinates[0];
+    const data = eventTeamsTableData.get(eventName);
+    if (data) {
+      const raColor = colorMap.get(data.regionalAmbassador) ?? "white";
+      const eaColor = colorMap.get(data.eventAmbassador) ?? "purple";
       const tooltip = `
-        <strong>Event:</strong> ${event.properties.EventShortName}<br>
-        <strong>Event Director(s):</strong> ${associatedTeam?.eventDirectors?.join(
-          ", "
-        )}<br>
-        <strong>Event Ambassador(s):</strong> ${ea?.name}<br>
-        <strong>Regional Ambassador(s):</strong> ${ra}<br>
+        <strong>Event:</strong> ${eventName}<br>
+        <strong>Event Director(s):</strong> ${data.eventDirectors}<br>
+        <strong>Event Ambassador(s):</strong> ${data.eventAmbassador}<br>
+        <strong>Regional Ambassador(s):</strong> ${data.regionalAmbassador}<br>
       `;
-      points.push([lng, lat, JSON.stringify({ raColor, tooltip })]);
-      const marker = L.circleMarker([lat, lng], {
+     
+      const marker = L.circleMarker([latitiude, longitude], {
         radius: 5,
         color: eaColor,
       }).addTo(map);
       marker.bindTooltip(tooltip);
+
+      points.push([longitude, latitiude, JSON.stringify({ raColor, tooltip })]);
+    } else {
+      const marker = L.circleMarker([latitiude,longitude], {
+        radius: 2,
+        color: 'goldenrod',
+      }).addTo(map);
+      marker.bindTooltip(eventName);
+      if (event.properties.countrycode === 3) {
+        points.push([event.geometry.coordinates[0], event.geometry.coordinates[1], JSON.stringify({ raColor: 'lightgrey', tooltip: eventName })]);
+      }
+    
+    }
     });
 
   // Generate Voronoi diagram
