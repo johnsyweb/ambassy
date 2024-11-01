@@ -1,13 +1,14 @@
 import { RegionalAmbassador } from '../models/RegionalAmbassador';
+import { RegionalAmbassadorMap } from '../models/RegionalAmbassadorMap';
 
 export interface RegionalAmbassadorRow {
   'RA Name': string;
   'RA State': string;
   'EA Name': string;
-};
+}
 
-export function parseRegionalAmbassadors(data: RegionalAmbassadorRow[]): RegionalAmbassador[] {
-  const regionalAmbassadors: RegionalAmbassador[] = [];
+export function parseRegionalAmbassadors(data: RegionalAmbassadorRow[]): RegionalAmbassadorMap {
+  const regionalAmbassadorsMap: RegionalAmbassadorMap = new Map<string, RegionalAmbassador>();
   let currentRA: RegionalAmbassador | null = null;
 
   data.forEach(row => {
@@ -17,7 +18,7 @@ export function parseRegionalAmbassadors(data: RegionalAmbassadorRow[]): Regiona
 
     if (raName) {
       if (currentRA) {
-        regionalAmbassadors.push(currentRA);
+        regionalAmbassadorsMap.set(currentRA.name, currentRA);
       }
       currentRA = {
         name: raName,
@@ -32,8 +33,8 @@ export function parseRegionalAmbassadors(data: RegionalAmbassadorRow[]): Regiona
   });
 
   if (currentRA) {
-    regionalAmbassadors.push(currentRA);
+    regionalAmbassadorsMap.set(currentRA['name'], currentRA);
   }
 
-  return regionalAmbassadors;
+  return regionalAmbassadorsMap;
 }

@@ -1,6 +1,5 @@
 import { associateEventAmbassadorsWithEventTeams } from "./actions/associateEventAmbassadorsWithEventTeams";
 import { associateEventTeamsWithEventDetails } from "./actions/associateEventTeamsWithEventDetails";
-import { associateRegionalAmbassadorsWithEventAmbassadors } from "./actions/associateRegionalAmbassadorsWithEventAmbassadors";
 import { getEvents } from "./actions/fetchEvents";
 import { handleFileUpload } from "./actions/uploadCSV";
 import { populateEventTeamsTable } from "./actions/populateEventTeamsTable";
@@ -9,6 +8,7 @@ import { initializeMap } from "./mapView";
 import { EventAmbassador } from "./models/EventAmbassador";
 import { EventDetails } from "./models/EventDetails";
 import { EventTeam } from "./models/EventTeam";
+import { RegionalAmbassadorMap } from "./models/RegionalAmbassadorMap";
 import { RegionalAmbassador } from "./models/RegionalAmbassador";
 
 async function ambassy() {
@@ -37,7 +37,7 @@ async function ambassy() {
   if (
     eventTeams.length &&
     eventAmbassadors.length &&
-    regionalAmbassadors.length
+    regionalAmbassadors.size
   ) {
     eventAmbassadors = associateEventAmbassadorsWithEventTeams(
       eventAmbassadors,
@@ -46,15 +46,6 @@ async function ambassy() {
     console.log(
       "Associated Event Ambassadors with Event Teams:",
       eventAmbassadors
-    );
-
-    regionalAmbassadors = associateRegionalAmbassadorsWithEventAmbassadors(
-      regionalAmbassadors,
-      eventAmbassadors
-    );
-    console.log(
-      "Associated Regional Ambassadors with Event Ambassadors:",
-      regionalAmbassadors
     );
 
     eventAmbassadors = associateEventAmbassadorsWithEventTeams(
@@ -80,7 +71,7 @@ async function ambassy() {
 
     const names = [
       ...new Set([
-        ...regionalAmbassadors.map((a) => a.name),
+        ...regionalAmbassadors.keys(),
         ...eventAmbassadors.map((a) => a.name),
       ]),
     ];
@@ -89,9 +80,9 @@ async function ambassy() {
   } else {
     const missingFiles = [];
     if (!eventTeams?.length) missingFiles.push("Event Teams CSV");
-    if (!regionalAmbassadors?.length)
+    if (regionalAmbassadors.size === 0){
       missingFiles.push("Regional Ambassadors CSV");
-    if (!eventAmbassadors?.length) missingFiles.push("Event Ambassadors CSV");
+}    if (!eventAmbassadors?.length) missingFiles.push("Event Ambassadors CSV");
     const missingFilesMessage = `Please upload the following missing files: ${missingFiles.join(
       ", "
     )}`;
@@ -118,16 +109,15 @@ if (storedEventAmbassadors) {
   );
 }
 
-// Retrieve stored regional ambassadors from session storage
-let regionalAmbassadors: RegionalAmbassador[] = [];
-const storedRegionalAmbassadors = sessionStorage.getItem("regionalAmbassadors");
-if (storedRegionalAmbassadors) {
-  regionalAmbassadors = JSON.parse(storedRegionalAmbassadors);
-  console.log(
-    "Retrieved Regional Ambassadors from session storage:",
-    regionalAmbassadors
-  );
+function getRegionalAmbassadorsFromSession(): RegionalAmbassadorMap {
+  const storedRegionalAmbassadors = sessionStorage.getItem('Regional Ambassadors');
+  if (storedRegionalAmbassadors) {
+    const parsedData = JSON.parse(storedRegionalAmbassadors);
+    return new Map<string, RegionalAmbassador>(parsedData);
+  }
+  return new Map<string, RegionalAmbassador>();
 }
+const regionalAmbassadors = getRegionalAmbassadorsFromSession();
 
 document.getElementById("uploadButton")?.addEventListener("click", () => {
   const input = document.getElementById("csvFileInput") as HTMLInputElement;

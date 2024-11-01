@@ -2,10 +2,9 @@ import Papa from 'papaparse';
 import { parseEventTeams, EventTeamRow } from '../parsers/parseEventTeams';
 import { parseEventAmbassadors, EventAmbassadorRow } from '../parsers/parseEventAmbassadors';
 import { parseRegionalAmbassadors, RegionalAmbassadorRow } from '../parsers/parseRegionalAmbassadors';
+import { FileUploadCallback } from '../types/FileUploadCallback';
 
-export type FileUploadType = 'Event Ambassadors' | 'Event Teams' | 'Regional Ambassadors';
-
-export function handleFileUpload(file: File, callback: (type: FileUploadType) => void): void {
+export function handleFileUpload(file: File, callback: FileUploadCallback): void {
   Papa.parse(file, {
     header: true,
     skipEmptyLines: true,
@@ -24,7 +23,7 @@ export function handleFileUpload(file: File, callback: (type: FileUploadType) =>
       } else if (file.name.includes('Regional Ambassadors')) {
         const regionalAmbassadors = parseRegionalAmbassadors(data as RegionalAmbassadorRow[]);
         console.log('Parsed Regional Ambassadors:', regionalAmbassadors);
-        sessionStorage.setItem('regionalAmbassadors', JSON.stringify(regionalAmbassadors));
+        sessionStorage.setItem('Regional Ambassadors', JSON.stringify(Array.from(regionalAmbassadors.entries())));
         callback('Regional Ambassadors');
       }
     },
