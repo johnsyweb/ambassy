@@ -1,3 +1,4 @@
+import { countries } from "./country";
 import { EventAmbassadorMap } from "./EventAmbassadorMap";
 import { EventDetailsMap } from "./EventDetailsMap";
 import { EventTeamMap } from "./EventTeamMap";
@@ -10,7 +11,8 @@ export interface EventTeamsTableData {
   regionalAmbassador: string;
   eventCoordinates: string;
   eventSeries: number;
-  eventCountry: number;
+  eventCountryCode: number;
+  eventCountry: string;
 }
 
 export type EventTeamsTableDataMap = Map<string, EventTeamsTableData>;
@@ -27,6 +29,8 @@ export function extractEventTeamsTableData(
     ra.supportsEAs.forEach((ea) => {
       eventAmbassadors.get(ea)?.events.forEach((eventName) => {
         const eventTeam = eventTeams.get(eventName);
+        const countryCode =
+          eventDetails.get(eventName)?.properties.countrycode ?? 0;
         data.set(eventName, {
           eventShortName: eventName,
           eventDirectors: eventTeam?.eventDirectors.join(", ") ?? "N/A",
@@ -36,8 +40,8 @@ export function extractEventTeamsTableData(
             eventDetails.get(eventName)?.geometry?.coordinates?.join(", ") ??
             "N/A",
           eventSeries: eventDetails.get(eventName)?.properties.seriesid ?? 0,
-          eventCountry:
-            eventDetails.get(eventName)?.properties.countrycode ?? 0,
+          eventCountryCode: countryCode,
+          eventCountry: countries[countryCode]?.url?.split('.').slice(-1)[0] ?? "N/A",
         });
       });
     });

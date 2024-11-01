@@ -45,6 +45,7 @@ export function populateEventTeamsTable(
     eventDirectorsCell.textContent = data.eventDirectors;
     eventCoordinatesCell.textContent = data.eventCoordinates;
     eventSeriesCell.textContent = data.eventSeries.toLocaleString();
-    eventCountryCell.textContent = data.eventCountry.toLocaleString();
+    eventCountryCell.title = data.eventCountryCode.toLocaleString();
+    eventCountryCell.textContent = data.eventCountry;
   });
 }
