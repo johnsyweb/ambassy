@@ -14541,100 +14541,6 @@ License: MIT
 
 /***/ }),
 
-/***/ "./src/actions/associateEventAmbassadorsWithEventTeams.ts":
-/*!****************************************************************!*\
-  !*** ./src/actions/associateEventAmbassadorsWithEventTeams.ts ***!
-  \****************************************************************/
-/***/ ((__unused_webpack_module, exports) => {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.associateEventAmbassadorsWithEventTeams = associateEventAmbassadorsWithEventTeams;
-function associateEventAmbassadorsWithEventTeams(eventAmbassadors, eventTeams) {
-    // Create a map to store the association
-    const eventTeamMap = new Map();
-    // Populate the map with event teams
-    eventTeams.forEach(team => {
-        eventTeamMap.set(team.eventShortName, team);
-    });
-    // Associate event ambassadors with event teams
-    const updatedEventAmbassadors = eventAmbassadors.map(ambassador => {
-        const supportedEventTeams = eventTeams.filter(team => ambassador.events.includes(team.eventShortName));
-        supportedEventTeams.forEach(team => {
-            team.associatedEA = ambassador;
-        });
-        return Object.assign(Object.assign({}, ambassador), { supportedEventTeams });
-    });
-    return updatedEventAmbassadors;
-}
-
-
-/***/ }),
-
-/***/ "./src/actions/associateEventTeamsWithEventDetails.ts":
-/*!************************************************************!*\
-  !*** ./src/actions/associateEventTeamsWithEventDetails.ts ***!
-  \************************************************************/
-/***/ ((__unused_webpack_module, exports) => {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.associateEventTeamsWithEventDetails = associateEventTeamsWithEventDetails;
-function associateEventTeamsWithEventDetails(eventTeams, eventDetails) {
-    // Create a map to store the association
-    const eventDetailsMap = new Map();
-    // Populate the map with event details
-    eventDetails.forEach(event => {
-        eventDetailsMap.set(event.properties.EventShortName, event);
-    });
-    // Associate event teams with event details
-    const updatedEventTeams = eventTeams.map(team => {
-        const associatedEvent = eventDetailsMap.get(team.eventShortName);
-        if (associatedEvent) {
-            team.associatedEvent = associatedEvent;
-            associatedEvent.associatedTeam = team;
-        }
-        return team;
-    });
-    return updatedEventTeams;
-}
-
-
-/***/ }),
-
-/***/ "./src/actions/associateRegionalAmbassadorsWithEventAmbassadors.ts":
-/*!*************************************************************************!*\
-  !*** ./src/actions/associateRegionalAmbassadorsWithEventAmbassadors.ts ***!
-  \*************************************************************************/
-/***/ ((__unused_webpack_module, exports) => {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.associateRegionalAmbassadorsWithEventAmbassadors = associateRegionalAmbassadorsWithEventAmbassadors;
-function associateRegionalAmbassadorsWithEventAmbassadors(regionalAmbassadors, eventAmbassadors) {
-    // Create a map to store the association
-    const eventAmbassadorMap = new Map();
-    // Populate the map with event ambassadors
-    eventAmbassadors.forEach(ea => {
-        eventAmbassadorMap.set(ea.name, ea);
-    });
-    // Associate regional ambassadors with event ambassadors
-    const updatedRegionalAmbassadors = regionalAmbassadors.map(ra => {
-        const supportedEventAmbassadors = eventAmbassadors.filter(ea => ra.supportsEAs.includes(ea.name));
-        supportedEventAmbassadors.forEach(ea => {
-            ea.regionalAmbassador = ra;
-        });
-        return Object.assign(Object.assign({}, ra), { eventAmbassadors: supportedEventAmbassadors });
-    });
-    return updatedRegionalAmbassadors;
-}
-
-
-/***/ }),
-
 /***/ "./src/actions/fetchEvents.ts":
 /*!************************************!*\
   !*** ./src/actions/fetchEvents.ts ***!
@@ -14658,7 +14564,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.getEvents = getEvents;
 const axios_1 = __importDefault(__webpack_require__(/*! axios */ "./node_modules/.pnpm/axios@1.7.7/node_modules/axios/dist/browser/axios.cjs"));
-const CACHE_KEY = 'parkrun_events_cache';
+const CACHE_KEY = 'parkrun events';
 const CACHE_DURATION = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
 const PARKRUN_EVENTS_URL = 'https://images.parkrun.com/events.json';
 function fetchEvents() {
@@ -14666,8 +14572,15 @@ function fetchEvents() {
         try {
             const response = yield axios_1.default.get(PARKRUN_EVENTS_URL);
             const events = response.data.events.features;
+            const eventDetailsMap = new Map();
+            events.forEach(event => {
+                eventDetailsMap.set(event.properties.EventShortName, event);
+            });
             // Save the events to localStorage
-            localStorage.setItem(CACHE_KEY, JSON.stringify({ timestamp: Date.now(), events }));
+            localStorage.setItem(CACHE_KEY, JSON.stringify({
+                timestamp: Date.now(),
+                eventDetailsMap: Array.from(eventDetailsMap.entries())
+            }));
             console.log('Events fetched and cached successfully.');
         }
         catch (error) {
@@ -14681,7 +14594,7 @@ function getCachedEvents() {
         const parsedCache = JSON.parse(cache);
         const age = Date.now() - parsedCache.timestamp;
         if (age < CACHE_DURATION) {
-            return parsedCache.events;
+            return new Map(parsedCache.eventDetailsMap);
         }
     }
     return null;
@@ -14695,7 +14608,7 @@ function getEvents() {
         }
         else {
             yield fetchEvents();
-            return getCachedEvents() || [];
+            return getCachedEvents() || new Map();
         }
     });
 }
@@ -14713,37 +14626,161 @@ function getEvents() {
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.populateEventTeamsTable = populateEventTeamsTable;
-function populateEventTeamsTable(regionalAmbassadors) {
+function populateEventTeamsTable(eventTeamsTableData) {
     var _a;
-    const tableBody = (_a = document.getElementById('eventTeamsTable')) === null || _a === void 0 ? void 0 : _a.getElementsByTagName('tbody')[0];
+    const tableBody = (_a = document
+        .getElementById("eventTeamsTable")) === null || _a === void 0 ? void 0 : _a.getElementsByTagName("tbody")[0];
     if (!tableBody) {
-        console.error('Table body not found');
+        console.error("Table body not found");
         return;
     }
-    // Clear existing rows
-    tableBody.innerHTML = '';
-    // Populate table with event team data
-    regionalAmbassadors.forEach(ra => {
-        var _a;
-        (_a = ra.eventAmbassadors) === null || _a === void 0 ? void 0 : _a.forEach(ea => {
-            var _a;
-            (_a = ea.supportedEventTeams) === null || _a === void 0 ? void 0 : _a.forEach(team => {
-                const row = tableBody.insertRow();
-                const raNameCell = row.insertCell(0);
-                const eaNameCell = row.insertCell(1);
-                const eventNameCell = row.insertCell(2);
-                const eventDirectorsCell = row.insertCell(3);
-                const eventCoordinatesCell = row.insertCell(4);
-                raNameCell.textContent = ra.name;
-                eaNameCell.textContent = ea.name;
-                eventNameCell.textContent = team.eventShortName;
-                eventDirectorsCell.textContent = team.eventDirectors.join(', ');
-                eventCoordinatesCell.textContent = team.associatedEvent
-                    ? `${team.associatedEvent.geometry.coordinates[1]}, ${team.associatedEvent.geometry.coordinates[0]}`
-                    : 'N/A';
-            });
-        });
+    tableBody.innerHTML = "";
+    eventTeamsTableData.forEach((data, eventName) => {
+        const row = tableBody.insertRow();
+        const raNameCell = row.insertCell(0);
+        const eaNameCell = row.insertCell(1);
+        const eventNameCell = row.insertCell(2);
+        const eventDirectorsCell = row.insertCell(3);
+        const eventCoordinatesCell = row.insertCell(4);
+        const eventSeriesCell = row.insertCell(5);
+        const eventCountryCell = row.insertCell(6);
+        if ([
+            raNameCell,
+            eaNameCell,
+            eventNameCell,
+            eventDirectorsCell,
+            eventCoordinatesCell,
+            eventSeriesCell,
+            eventCountryCell,
+        ].some((cell) => !cell)) {
+            console.error("Failed to insert row");
+            return;
+        }
+        raNameCell.textContent = data.regionalAmbassador;
+        eaNameCell.textContent = data.eventAmbassador;
+        eventNameCell.textContent = eventName;
+        eventDirectorsCell.textContent = data.eventDirectors;
+        eventCoordinatesCell.textContent = data.eventCoordinates;
+        eventSeriesCell.textContent = data.eventSeries.toLocaleString();
+        eventCountryCell.title = data.eventCountryCode.toLocaleString();
+        eventCountryCell.textContent = data.eventCountry;
     });
+}
+
+
+/***/ }),
+
+/***/ "./src/actions/populateMap.ts":
+/*!************************************!*\
+  !*** ./src/actions/populateMap.ts ***!
+  \************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+"use strict";
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.populateMap = populateMap;
+const d3GeoVoronoi = __importStar(__webpack_require__(/*! d3-geo-voronoi */ "./node_modules/.pnpm/d3-geo-voronoi@2.1.0/node_modules/d3-geo-voronoi/src/index.js"));
+const leaflet_1 = __importDefault(__webpack_require__(/*! leaflet */ "./node_modules/.pnpm/leaflet@1.9.4/node_modules/leaflet/dist/leaflet-src.js"));
+function populateMap(eventTeamsTableData, eventDetails, names) {
+    const colorMap = assignColorsToNames(names);
+    const map = leaflet_1.default.map("mapContainer").setView([0, 0], 2);
+    leaflet_1.default.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        attribution: "&copy; OpenStreetMap contributors",
+    }).addTo(map);
+    // Collect points for Voronoi diagram
+    const points = [];
+    // Add dots for each parkrun event
+    eventDetails.forEach((event, eventName) => {
+        var _a, _b;
+        const latitiude = event.geometry.coordinates[1];
+        const longitude = event.geometry.coordinates[0];
+        const data = eventTeamsTableData.get(eventName);
+        if (data) {
+            const raColor = (_a = colorMap.get(data.regionalAmbassador)) !== null && _a !== void 0 ? _a : "white";
+            const eaColor = (_b = colorMap.get(data.eventAmbassador)) !== null && _b !== void 0 ? _b : "purple";
+            const tooltip = `
+        <strong>Event:</strong> ${eventName}<br>
+        <strong>Event Director(s):</strong> ${data.eventDirectors}<br>
+        <strong>Event Ambassador(s):</strong> ${data.eventAmbassador}<br>
+        <strong>Regional Ambassador(s):</strong> ${data.regionalAmbassador}<br>
+      `;
+            const marker = leaflet_1.default.circleMarker([latitiude, longitude], {
+                radius: 5,
+                color: eaColor,
+            }).addTo(map);
+            marker.bindTooltip(tooltip);
+            points.push([longitude, latitiude, JSON.stringify({ raColor, tooltip })]);
+        }
+        else {
+            const marker = leaflet_1.default.circleMarker([latitiude, longitude], {
+                radius: 2,
+                color: 'goldenrod',
+            }).addTo(map);
+            marker.bindTooltip(eventName);
+            if (event.properties.countrycode === 3) {
+                points.push([event.geometry.coordinates[0], event.geometry.coordinates[1], JSON.stringify({ raColor: 'lightgrey', tooltip: eventName })]);
+            }
+        }
+    });
+    // Generate Voronoi diagram
+    const voronoi = d3GeoVoronoi.geoVoronoi(points.map((p) => [p[0], p[1]]));
+    const polygons = voronoi.polygons();
+    // Add Voronoi cells to the map
+    polygons.features.forEach((feature, index) => {
+        const { raColor, tooltip } = JSON.parse(points[index][2]);
+        const coordinates = feature.geometry.coordinates[0].map((coord) => [coord[1], coord[0]]);
+        const poly = leaflet_1.default.polygon(coordinates, {
+            color: raColor,
+            fillOpacity: 0.2,
+        }).addTo(map);
+        poly.bindTooltip(tooltip);
+    });
+}
+const colorPalette = [
+    "#FF5733",
+    "#33FF57",
+    "#3357FF",
+    "#FF33A1",
+    "#A133FF",
+    "#33FFF5",
+    "#FF8C33",
+    "#33FF8C",
+    "#8C33FF",
+    "#FF338C",
+];
+function assignColorsToNames(names) {
+    const nameColorMap = new Map();
+    names.forEach((name, index) => {
+        nameColorMap.set(name, colorPalette[index % colorPalette.length]);
+    });
+    return nameColorMap;
 }
 
 
@@ -14774,23 +14811,17 @@ function handleFileUpload(file, callback) {
             const data = results.data;
             if (file.name.includes('Event Ambassadors')) {
                 const eventAmbassadors = (0, parseEventAmbassadors_1.parseEventAmbassadors)(data);
-                console.log('Parsed Event Ambassadors:', eventAmbassadors);
-                // Store event ambassadors in session storage
-                sessionStorage.setItem('eventAmbassadors', JSON.stringify(eventAmbassadors));
+                sessionStorage.setItem('Event Ambassadors', JSON.stringify(Array.from(eventAmbassadors.entries())));
                 callback('Event Ambassadors');
             }
             else if (file.name.includes('Event Teams')) {
                 const eventTeams = (0, parseEventTeams_1.parseEventTeams)(data);
-                console.log('Parsed Event Teams:', eventTeams);
-                // Store event teams in session storage
-                sessionStorage.setItem('eventTeams', JSON.stringify(eventTeams));
+                sessionStorage.setItem('Event Teams', JSON.stringify(Array.from(eventTeams)));
                 callback('Event Teams');
             }
             else if (file.name.includes('Regional Ambassadors')) {
                 const regionalAmbassadors = (0, parseRegionalAmbassadors_1.parseRegionalAmbassadors)(data);
-                console.log('Parsed Regional Ambassadors:', regionalAmbassadors);
-                // Store regional ambassadors in session storage
-                sessionStorage.setItem('regionalAmbassadors', JSON.stringify(regionalAmbassadors));
+                sessionStorage.setItem('Regional Ambassadors', JSON.stringify(Array.from(regionalAmbassadors.entries())));
                 callback('Regional Ambassadors');
             }
         },
@@ -14811,29 +14842,6 @@ function handleFileUpload(file, callback) {
 
 "use strict";
 
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -14843,217 +14851,182 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 var _a;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-const associateEventAmbassadorsWithEventTeams_1 = __webpack_require__(/*! ./actions/associateEventAmbassadorsWithEventTeams */ "./src/actions/associateEventAmbassadorsWithEventTeams.ts");
-const associateEventTeamsWithEventDetails_1 = __webpack_require__(/*! ./actions/associateEventTeamsWithEventDetails */ "./src/actions/associateEventTeamsWithEventDetails.ts");
-const associateRegionalAmbassadorsWithEventAmbassadors_1 = __webpack_require__(/*! ./actions/associateRegionalAmbassadorsWithEventAmbassadors */ "./src/actions/associateRegionalAmbassadorsWithEventAmbassadors.ts");
 const fetchEvents_1 = __webpack_require__(/*! ./actions/fetchEvents */ "./src/actions/fetchEvents.ts");
 const uploadCSV_1 = __webpack_require__(/*! ./actions/uploadCSV */ "./src/actions/uploadCSV.ts");
+const populateMap_1 = __webpack_require__(/*! ./actions/populateMap */ "./src/actions/populateMap.ts");
 const populateEventTeamsTable_1 = __webpack_require__(/*! ./actions/populateEventTeamsTable */ "./src/actions/populateEventTeamsTable.ts");
-const leaflet_1 = __importDefault(__webpack_require__(/*! leaflet */ "./node_modules/.pnpm/leaflet@1.9.4/node_modules/leaflet/dist/leaflet-src.js"));
-const d3GeoVoronoi = __importStar(__webpack_require__(/*! d3-geo-voronoi */ "./node_modules/.pnpm/d3-geo-voronoi@2.1.0/node_modules/d3-geo-voronoi/src/index.js"));
-var UploadState;
-(function (UploadState) {
-    UploadState[UploadState["EventAmbassadors"] = 0] = "EventAmbassadors";
-    UploadState[UploadState["EventTeams"] = 1] = "EventTeams";
-    UploadState[UploadState["RegionalAmbassadors"] = 2] = "RegionalAmbassadors";
-    UploadState[UploadState["Complete"] = 3] = "Complete";
-})(UploadState || (UploadState = {}));
-let uploadState = UploadState.EventAmbassadors;
-let map;
-// Define a color palette
-const colorPalette = [
-    '#FF5733', '#33FF57', '#3357FF', '#FF33A1', '#A133FF', '#33FFF5', '#FF8C33', '#33FF8C', '#8C33FF', '#FF338C'
-];
-// Assign colors to RAs
-function assignColorsToRAs(regionalAmbassadors) {
-    const raColorMap = new Map();
-    regionalAmbassadors.forEach((ra, index) => {
-        raColorMap.set(ra.name, colorPalette[index % colorPalette.length]);
-    });
-    return raColorMap;
-}
-function assignColorsToEAs(eas) {
-    const eaColorMap = new Map();
-    eas.forEach((ra, index) => {
-        eaColorMap.set(ra.name, colorPalette[index % colorPalette.length]);
-    });
-    return eaColorMap;
-}
-function updatePrompt() {
-    const uploadPrompt = document.getElementById('uploadPrompt');
-    if (!uploadPrompt)
-        return;
-    switch (uploadState) {
-        case UploadState.EventAmbassadors:
-            uploadPrompt.textContent = 'Please upload the Event Ambassadors CSV file.';
-            break;
-        case UploadState.EventTeams:
-            uploadPrompt.textContent = 'Please upload the Event Teams CSV file.';
-            break;
-        case UploadState.RegionalAmbassadors:
-            uploadPrompt.textContent = 'Please upload the Regional Ambassadors CSV file.';
-            break;
-        case UploadState.Complete:
-            uploadPrompt.textContent = 'All files uploaded successfully!';
-            break;
-    }
-}
-function checkAllDataLoaded() {
+const EventTeamsTable_1 = __webpack_require__(/*! ./models/EventTeamsTable */ "./src/models/EventTeamsTable.ts");
+function ambassy() {
     return __awaiter(this, void 0, void 0, function* () {
-        const h1Element = document.querySelector('h1');
-        const uploadPrompt = document.getElementById('uploadPrompt');
-        const csvFileInput = document.getElementById('csvFileInput');
-        const uploadButton = document.getElementById('uploadButton');
-        const mapContainer = document.getElementById('mapContainer');
-        const eventTeamsTableContainer = document.getElementById('eventTeamsTableContainer');
-        if (!h1Element || !uploadPrompt || !csvFileInput || !uploadButton || !mapContainer || !eventTeamsTableContainer) {
-            console.error('Required elements not found');
+        const h1Element = document.querySelector("h1");
+        const uploadPrompt = document.getElementById("uploadPrompt");
+        const csvFileInput = document.getElementById("csvFileInput");
+        const uploadButton = document.getElementById("uploadButton");
+        const mapContainer = document.getElementById("mapContainer");
+        const eventTeamsTableContainer = document.getElementById("eventTeamsTableContainer");
+        if (!h1Element ||
+            !uploadPrompt ||
+            !csvFileInput ||
+            !uploadButton ||
+            !mapContainer ||
+            !eventTeamsTableContainer) {
+            console.error("Required elements not found");
             return;
         }
-        if (!eventTeams || !regionalAmbassadors || !eventAmbassadors) {
-            console.log('Missing files');
-            return;
-        }
-        ;
-        if (isEventTeamsLoaded && isRegionalAmbassadorsLoaded && isEventAmbassadorsLoaded) {
-            const storedEventDetails = sessionStorage.getItem('eventDetails');
-            let eventDetails = [];
-            if (storedEventDetails) {
-                eventDetails = JSON.parse(storedEventDetails);
-            }
-            else {
-                eventDetails = yield (0, fetchEvents_1.getEvents)();
-            }
-            eventAmbassadors = (0, associateEventAmbassadorsWithEventTeams_1.associateEventAmbassadorsWithEventTeams)(eventAmbassadors, eventTeams);
-            console.log('Associated Event Ambassadors with Event Teams:', eventAmbassadors);
-            regionalAmbassadors = (0, associateRegionalAmbassadorsWithEventAmbassadors_1.associateRegionalAmbassadorsWithEventAmbassadors)(regionalAmbassadors, eventAmbassadors);
-            console.log('Associated Regional Ambassadors with Event Ambassadors:', regionalAmbassadors);
-            eventAmbassadors = (0, associateEventAmbassadorsWithEventTeams_1.associateEventAmbassadorsWithEventTeams)(eventAmbassadors, eventTeams);
-            console.log('Associated Event Ambassadors with Event Teams:', eventAmbassadors);
-            eventTeams = (0, associateEventTeamsWithEventDetails_1.associateEventTeamsWithEventDetails)(eventTeams, eventDetails);
-            console.log('Associated Event Teams with Event Details:', eventTeams);
-            const raColorMap = assignColorsToRAs(regionalAmbassadors);
-            const eaColorMap = assignColorsToEAs(eventAmbassadors);
+        const regionalAmbassadors = getRegionalAmbassadorsFromSession();
+        const eventAmbassadors = getEventAmbassadorsFromSession();
+        const eventTeams = getEventTeamsFromSession();
+        const eventDetails = yield (0, fetchEvents_1.getEvents)();
+        if (eventTeams.size && eventAmbassadors.size && regionalAmbassadors.size) {
             // Update the UI
-            h1Element.textContent = 'Ambassy';
-            uploadPrompt.style.display = 'none';
-            csvFileInput.style.display = 'none';
-            uploadButton.style.display = 'none';
-            mapContainer.style.display = 'block';
-            eventTeamsTableContainer.style.display = 'block';
-            // Initialize the map
-            map = leaflet_1.default.map('mapContainer').setView([0, 0], 2);
-            leaflet_1.default.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                attribution: '&copy; OpenStreetMap contributors'
-            }).addTo(map);
-            // Collect points for Voronoi diagram
-            const points = [];
-            // Add dots for each parkrun event
-            eventDetails
-                .filter(event => event.properties.countrycode === 3 && event.properties.seriesid === 1) // Australian, open, 5km events only
-                .forEach(event => {
-                var _a;
-                const associatedTeam = event.associatedTeam;
-                const ea = associatedTeam === null || associatedTeam === void 0 ? void 0 : associatedTeam.associatedEA;
-                const ra = ea === null || ea === void 0 ? void 0 : ea.regionalAmbassador;
-                const [lng, lat] = event.geometry.coordinates;
-                const raColor = (ra ? raColorMap.get(ra.name) : 'white');
-                const eaColor = (ea ? eaColorMap.get(ea.name) : 'purple');
-                const tooltip = `
-        <strong>Event:</strong> ${event.properties.EventShortName}<br>
-        <strong>Event Director(s):</strong> ${(_a = associatedTeam === null || associatedTeam === void 0 ? void 0 : associatedTeam.eventDirectors) === null || _a === void 0 ? void 0 : _a.join(', ')}<br>
-        <strong>Event Ambassador(s):</strong> ${ea === null || ea === void 0 ? void 0 : ea.name}<br>
-        <strong>Regional Ambassador(s):</strong> ${ra === null || ra === void 0 ? void 0 : ra.name}<br>
-      `;
-                points.push([lng, lat, JSON.stringify({ raColor, tooltip })]);
-                const marker = leaflet_1.default.circleMarker([lat, lng], { radius: 5, color: eaColor }).addTo(map);
-                marker.bindTooltip(tooltip);
-            });
-            // Generate Voronoi diagram
-            const voronoi = d3GeoVoronoi.geoVoronoi(points.map(p => [p[0], p[1]]));
-            const polygons = voronoi.polygons();
-            // Add Voronoi cells to the map
-            polygons.features.forEach((feature, index) => {
-                const { raColor, tooltip } = JSON.parse(points[index][2]);
-                const coordinates = feature.geometry.coordinates[0].map((coord) => [coord[1], coord[0]]);
-                const poly = leaflet_1.default.polygon(coordinates, { color: raColor, fillOpacity: 0.2 }).addTo(map);
-                poly.bindTooltip(tooltip);
-            });
-            // Populate the event teams table
-            (0, populateEventTeamsTable_1.populateEventTeamsTable)(regionalAmbassadors);
+            h1Element.textContent = "Ambassy";
+            uploadPrompt.style.display = "none";
+            csvFileInput.style.display = "none";
+            uploadButton.style.display = "none";
+            mapContainer.style.display = "block";
+            eventTeamsTableContainer.style.display = "block";
+            const eventTeamsTableData = (0, EventTeamsTable_1.extractEventTeamsTableData)(regionalAmbassadors, eventAmbassadors, eventTeams, eventDetails);
+            (0, populateEventTeamsTable_1.populateEventTeamsTable)(eventTeamsTableData);
+            const names = [
+                ...new Set([...regionalAmbassadors.keys(), ...eventAmbassadors.keys()]),
+            ];
+            (0, populateMap_1.populateMap)(eventTeamsTableData, eventDetails, names);
         }
         else {
-            let missingFilesMessage = 'Please upload the following missing files: ';
             const missingFiles = [];
-            if (!isEventTeamsLoaded)
-                missingFiles.push('Event Teams CSV');
-            if (!isRegionalAmbassadorsLoaded)
-                missingFiles.push('Regional Ambassadors CSV');
-            if (!isEventAmbassadorsLoaded)
-                missingFiles.push('Event Ambassadors CSV');
-            missingFilesMessage += missingFiles.join(', ');
+            if (eventTeams.size === 0) {
+                missingFiles.push("Event Teams CSV");
+            }
+            if (regionalAmbassadors.size === 0) {
+                missingFiles.push("Regional Ambassadors CSV");
+            }
+            if (eventAmbassadors.size === 0) {
+                missingFiles.push("Event Ambassadors CSV");
+            }
+            const missingFilesMessage = `Please upload the following missing files: ${missingFiles.join(", ")}`;
             uploadPrompt.textContent = missingFilesMessage;
         }
     });
 }
-// Retrieve stored event teams from session storage
-let eventTeams = [];
-const storedEventTeams = sessionStorage.getItem('eventTeams');
-if (storedEventTeams) {
-    eventTeams = JSON.parse(storedEventTeams);
-    console.log('Retrieved Event Teams from session storage:', eventTeams);
+function getEventTeamsFromSession() {
+    const storedEventTeams = sessionStorage.getItem("Event Teams");
+    if (storedEventTeams) {
+        const parsedData = JSON.parse(storedEventTeams);
+        if (parsedData) {
+            return new Map(parsedData);
+        }
+    }
+    return new Map();
 }
-// Retrieve stored event ambassadors from session storage
-let eventAmbassadors = [];
-const storedEventAmbassadors = sessionStorage.getItem('eventAmbassadors');
-if (storedEventAmbassadors) {
-    eventAmbassadors = JSON.parse(storedEventAmbassadors);
-    console.log('Retrieved Event Ambassadors from session storage:', eventAmbassadors);
+function getEventAmbassadorsFromSession() {
+    const storedEventAmbassadors = sessionStorage.getItem("Event Ambassadors");
+    if (storedEventAmbassadors) {
+        const parsedData = JSON.parse(storedEventAmbassadors);
+        return new Map(parsedData);
+    }
+    return new Map();
 }
-// Retrieve stored regional ambassadors from session storage
-let regionalAmbassadors = [];
-const storedRegionalAmbassadors = sessionStorage.getItem('regionalAmbassadors');
-if (storedRegionalAmbassadors) {
-    regionalAmbassadors = JSON.parse(storedRegionalAmbassadors);
-    console.log('Retrieved Regional Ambassadors from session storage:', regionalAmbassadors);
+function getRegionalAmbassadorsFromSession() {
+    const storedRegionalAmbassadors = sessionStorage.getItem("Regional Ambassadors");
+    if (storedRegionalAmbassadors) {
+        const parsedData = JSON.parse(storedRegionalAmbassadors);
+        return new Map(parsedData);
+    }
+    return new Map();
 }
-let isEventTeamsLoaded = !!storedEventTeams;
-let isRegionalAmbassadorsLoaded = !!storedRegionalAmbassadors;
-let isEventAmbassadorsLoaded = !!storedEventAmbassadors;
-(_a = document.getElementById('uploadButton')) === null || _a === void 0 ? void 0 : _a.addEventListener('click', () => {
-    const input = document.getElementById('csvFileInput');
-    if (input && input.files && input.files.length > 0) {
+(_a = document.getElementById("uploadButton")) === null || _a === void 0 ? void 0 : _a.addEventListener("click", () => {
+    const input = document.getElementById("csvFileInput");
+    if (input.files && input.files.length > 0) {
         const file = input.files[0];
         (0, uploadCSV_1.handleFileUpload)(file, (type) => {
-            if (type === 'Event Ambassadors') {
-                isEventAmbassadorsLoaded = true;
-                uploadState = UploadState.EventTeams;
-            }
-            else if (type === 'Event Teams') {
-                isEventTeamsLoaded = true;
-                uploadState = UploadState.RegionalAmbassadors;
-            }
-            else if (type === 'Regional Ambassadors') {
-                isRegionalAmbassadorsLoaded = true;
-                uploadState = UploadState.Complete;
-            }
-            updatePrompt();
-            checkAllDataLoaded();
+            console.log(`Uploaded ${type} CSV file.`);
+            ambassy();
         });
     }
     else {
-        alert('Please select a CSV file to upload.');
+        alert("Please select a CSV file to upload.");
     }
 });
-updatePrompt();
-// Fetch events when the page loads
-(0, fetchEvents_1.getEvents)();
-checkAllDataLoaded();
+ambassy();
+
+
+/***/ }),
+
+/***/ "./src/models/EventTeamsTable.ts":
+/*!***************************************!*\
+  !*** ./src/models/EventTeamsTable.ts ***!
+  \***************************************/
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.extractEventTeamsTableData = extractEventTeamsTableData;
+const country_1 = __webpack_require__(/*! ./country */ "./src/models/country.ts");
+function extractEventTeamsTableData(regionalAmbassadors, eventAmbassadors, eventTeams, eventDetails) {
+    const data = new Map();
+    regionalAmbassadors.forEach((ra, raName) => {
+        ra.supportsEAs.forEach((ea) => {
+            var _a;
+            (_a = eventAmbassadors.get(ea)) === null || _a === void 0 ? void 0 : _a.events.forEach((eventName) => {
+                var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m;
+                const eventTeam = eventTeams.get(eventName);
+                const countryCode = (_b = (_a = eventDetails.get(eventName)) === null || _a === void 0 ? void 0 : _a.properties.countrycode) !== null && _b !== void 0 ? _b : 0;
+                data.set(eventName, {
+                    eventShortName: eventName,
+                    eventDirectors: (_c = eventTeam === null || eventTeam === void 0 ? void 0 : eventTeam.eventDirectors.join(", ")) !== null && _c !== void 0 ? _c : "N/A",
+                    eventAmbassador: ea,
+                    regionalAmbassador: raName,
+                    eventCoordinates: (_g = (_f = (_e = (_d = eventDetails.get(eventName)) === null || _d === void 0 ? void 0 : _d.geometry) === null || _e === void 0 ? void 0 : _e.coordinates) === null || _f === void 0 ? void 0 : _f.join(", ")) !== null && _g !== void 0 ? _g : "N/A",
+                    eventSeries: (_j = (_h = eventDetails.get(eventName)) === null || _h === void 0 ? void 0 : _h.properties.seriesid) !== null && _j !== void 0 ? _j : 0,
+                    eventCountryCode: countryCode,
+                    eventCountry: (_m = (_l = (_k = country_1.countries[countryCode]) === null || _k === void 0 ? void 0 : _k.url) === null || _l === void 0 ? void 0 : _l.split('.').slice(-1)[0]) !== null && _m !== void 0 ? _m : "N/A",
+                });
+            });
+        });
+    });
+    return data;
+}
+
+
+/***/ }),
+
+/***/ "./src/models/country.ts":
+/*!*******************************!*\
+  !*** ./src/models/country.ts ***!
+  \*******************************/
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.countries = void 0;
+exports.countries = {
+    "0": { url: null, bounds: [-141.002, -47.29, 153.639, 83.1132] },
+    "3": { url: "www.parkrun.com.au", bounds: [112.921, -43.6432, 153.639, -10.0591] },
+    "4": { url: "www.parkrun.co.at", bounds: [9.53095, 46.3727, 17.1621, 49.0212] },
+    "14": { url: "www.parkrun.ca", bounds: [-141.002, 41.6766, -52.6191, 83.1132] },
+    "23": { url: "www.parkrun.dk", bounds: [8.07251, 54.5591, 15.157, 57.3282] },
+    "30": { url: "www.parkrun.fi", bounds: [20.5486, 59.8078, 31.5867, 70.0923] },
+    "31": { url: "www.parkrun.fr", bounds: [-5.14128, 41.3646, 9.56009, 51.089] },
+    "32": { url: "www.parkrun.com.de", bounds: [5.86632, 47.2701, 15.0418, 55.0584] },
+    "42": { url: "www.parkrun.ie", bounds: [-10.48, 51.4475, -5.99805, 55.3829] },
+    "44": { url: "www.parkrun.it", bounds: [6.62662, 36.6441, 18.5204, 47.0918] },
+    "46": { url: "www.parkrun.jp", bounds: [122.934, 24.2552, 145.817, 45.523] },
+    "54": { url: "www.parkrun.lt", bounds: [20.9415, 53.8968, 26.8355, 56.4504] },
+    "57": { url: "www.parkrun.my", bounds: [99.6407, 0.855001, 119.27, 7.36334] },
+    "64": { url: "www.parkrun.co.nl", bounds: [3.35838, 50.7504, 7.2275, 53.5157] },
+    "65": { url: "www.parkrun.co.nz", bounds: [166.724, -47.29, -180, -34.3928] },
+    "67": { url: "www.parkrun.no", bounds: [4.64182, 57.9799, 31.0637, 71.1855] },
+    "74": { url: "www.parkrun.pl", bounds: [14.1229, 49.002, 24.1458, 54.8358] },
+    "82": { url: "www.parkrun.sg", bounds: [103.606, 1.21065, 104.044, 1.47077] },
+    "85": { url: "www.parkrun.co.za", bounds: [16.4519, -34.8342, 32.945, -22.125] },
+    "88": { url: "www.parkrun.se", bounds: [11.1095, 55.3374, 24.1552, 69.06] },
+    "97": { url: "www.parkrun.org.uk", bounds: [-8.61772, 49.9029, 1.76891, 59.3608] },
+    "98": { url: "www.parkrun.us", bounds: [-124.733, 24.5439, -66.9492, 49.3845] }
+};
 
 
 /***/ }),
@@ -15070,18 +15043,18 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.parseEventAmbassadors = parseEventAmbassadors;
 ;
 function parseEventAmbassadors(data) {
-    const eventAmbassadors = [];
+    const eventAmbassadorsMap = new Map();
     let currentEA = null;
     data.forEach(row => {
         const eaName = row['Event Ambassador'];
         const eventName = row['Events'];
         if (eaName) {
             if (currentEA) {
-                eventAmbassadors.push(currentEA);
+                eventAmbassadorsMap.set(currentEA.name, currentEA);
             }
             currentEA = {
                 name: eaName,
-                events: []
+                events: [],
             };
         }
         if (currentEA && eventName) {
@@ -15089,9 +15062,9 @@ function parseEventAmbassadors(data) {
         }
     });
     if (currentEA) {
-        eventAmbassadors.push(currentEA);
+        eventAmbassadorsMap.set(currentEA['name'], currentEA);
     }
-    return eventAmbassadors;
+    return eventAmbassadorsMap;
 }
 
 
@@ -15107,9 +15080,8 @@ function parseEventAmbassadors(data) {
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.parseEventTeams = parseEventTeams;
-;
 function parseEventTeams(data) {
-    const eventTeams = [];
+    const eventTeamsMap = new Map();
     let currentEventTeam = null;
     data.forEach(row => {
         const eventShortName = row['Event'];
@@ -15117,7 +15089,7 @@ function parseEventTeams(data) {
         const eventDirector = row['Event Director/s'];
         if (eventShortName) {
             if (currentEventTeam) {
-                eventTeams.push(currentEventTeam);
+                eventTeamsMap.set(currentEventTeam.eventShortName, currentEventTeam);
             }
             currentEventTeam = {
                 eventShortName,
@@ -15128,11 +15100,14 @@ function parseEventTeams(data) {
         else if (currentEventTeam && eventDirector) {
             currentEventTeam.eventDirectors.push(eventDirector);
         }
+        else {
+            throw new Error('Invalid event team row' + row);
+        }
     });
     if (currentEventTeam) {
-        eventTeams.push(currentEventTeam);
+        eventTeamsMap.set(currentEventTeam['eventShortName'], currentEventTeam);
     }
-    return eventTeams;
+    return eventTeamsMap;
 }
 
 
@@ -15148,9 +15123,8 @@ function parseEventTeams(data) {
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.parseRegionalAmbassadors = parseRegionalAmbassadors;
-;
 function parseRegionalAmbassadors(data) {
-    const regionalAmbassadors = [];
+    const regionalAmbassadorsMap = new Map();
     let currentRA = null;
     data.forEach(row => {
         const raName = row['RA Name'];
@@ -15158,7 +15132,7 @@ function parseRegionalAmbassadors(data) {
         const eaName = row['EA Name'];
         if (raName) {
             if (currentRA) {
-                regionalAmbassadors.push(currentRA);
+                regionalAmbassadorsMap.set(currentRA.name, currentRA);
             }
             currentRA = {
                 name: raName,
@@ -15171,9 +15145,9 @@ function parseRegionalAmbassadors(data) {
         }
     });
     if (currentRA) {
-        regionalAmbassadors.push(currentRA);
+        regionalAmbassadorsMap.set(currentRA['name'], currentRA);
     }
-    return regionalAmbassadors;
+    return regionalAmbassadorsMap;
 }
 
 
