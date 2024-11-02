@@ -17,7 +17,7 @@ async function ambassy() {
   const h1Element = document.querySelector("h1");
   const uploadPrompt = document.getElementById("uploadPrompt");
   const csvFileInput = document.getElementById("csvFileInput");
-  const uploadButton = document.getElementById("uploadButton");  const mapContainer = document.getElementById("mapContainer");
+  const mapContainer = document.getElementById("mapContainer");
   const eventTeamsTableContainer = document.getElementById(
     "eventTeamsTableContainer"
   );
