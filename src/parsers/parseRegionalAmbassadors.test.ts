@@ -1,5 +1,5 @@
 import { parseRegionalAmbassadors, RegionalAmbassadorRow } from './parseRegionalAmbassadors';
-import { RegionalAmbassadorMap } from '../models/RegionalAmbassadorMap';
+import { RegionalAmbassadorMap } from '@models/RegionalAmbassadorMap';
 
 describe('parseRegionalAmbassadors', () => {
   it('should parse regional ambassadors correctly', () => {

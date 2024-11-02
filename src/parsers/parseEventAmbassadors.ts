@@ -1,5 +1,5 @@
-import { EventAmbassador } from '../models/EventAmbassador';
-import { EventAmbassadorMap } from '../models/EventAmbassadorMap';
+import { EventAmbassador } from '@models/EventAmbassador';
+import { EventAmbassadorMap } from '@models/EventAmbassadorMap';
 
 export interface EventAmbassadorRow {
   'Event Ambassador': string;

@@ -1,6 +1,6 @@
 
-import { EventDetailsMap } from "../models/EventDetailsMap";
-import { EventTeamsTableDataMap } from "../models/EventTeamsTable";
+import { EventDetailsMap } from "@models/EventDetailsMap";
+import { EventTeamsTableDataMap } from "@models/EventTeamsTable";
 
 import * as d3GeoVoronoi from "d3-geo-voronoi";
 import L from "leaflet";

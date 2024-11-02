@@ -9,9 +9,12 @@ module.exports = {
     path: path.resolve(__dirname, 'dist'),
   },
   resolve: {
-    extensions: ['.ts', '.js'],
+    extensions: ['.ts', '.tsx', '.js'],
     fallback: {
       "path": require.resolve("path-browserify")
+    },
+    alias: {
+      '@models': path.resolve(__dirname, 'src/models/')
     }
   },
   module: {

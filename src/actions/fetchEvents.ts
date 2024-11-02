@@ -1,6 +1,6 @@
 import axios from 'axios';
-import { EventDetails } from '../models/EventDetails';
-import { EventDetailsMap } from '../models/EventDetailsMap';
+import { EventDetails } from '@models/EventDetails';
+import { EventDetailsMap } from '@models/EventDetailsMap';
 
 const CACHE_KEY = 'parkrun events';
 const CACHE_DURATION = 24 * 60 * 60 * 1000; // 24 hours in milliseconds

@@ -1,4 +1,4 @@
-import { EventTeam } from '../models/EventTeam';
+import { EventTeam } from '@models/EventTeam';
 
 export interface EventTeamRow {
   'Event': string;

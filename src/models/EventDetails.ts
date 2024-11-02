@@ -1,5 +1,3 @@
-import { EventTeam } from "./EventTeam";
-
 export interface EventDetails {
   id: string;
   type: string;
@@ -16,5 +14,4 @@ export interface EventDetails {
     seriesid: number;
     EventLocation: string;
   };
-  associatedTeam?: EventTeam;
 }

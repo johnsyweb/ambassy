@@ -1,5 +1,5 @@
 import { parseEventTeams, EventTeamRow } from "./parseEventTeams";
-import { EventTeamMap } from "../models/EventTeamMap";
+import { EventTeamMap } from "@models/EventTeamMap";
 
 describe("parseEventTeams", () => {
   it("should handle empty data", () => {

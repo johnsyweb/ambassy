@@ -13,7 +13,10 @@ module.exports = {
     publicPath: '/'
   },
   resolve: {
-    extensions: ['.ts', '.tsx', '.js']
+    extensions: ['.ts', '.tsx', '.js'],
+    alias: {
+      '@models': path.resolve(__dirname, 'src/models/')
+    }
   },
   module: {
     rules: [

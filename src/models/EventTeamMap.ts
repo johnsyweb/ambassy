@@ -1,4 +1,3 @@
-import { EventTeam } from "../models/EventTeam";
-
+import { EventTeam } from "@models/EventTeam";
 
 export type EventTeamMap = Map<string, EventTeam>;
