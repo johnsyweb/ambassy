@@ -10,7 +10,11 @@
     "typeRoots": ["./node_modules/@types", "./types"],
     "baseUrl": "./",
     "paths": {
-      "@models/*": ["src/models/*"]
+      "@actions/*": ["src/actions/*"],
+      "@models/*": ["src/models/*"],
+      "@localtypes/*": ["src/types/*"],
+      "@parsers/*": ["src/parsers/*"],
+      "@utils/*": ["src/utils/*"]
     }
   },
   "include": ["src"],

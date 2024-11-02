@@ -1,4 +1,4 @@
-import { RegionalAmbassador } from './RegionalAmbassador';
+import { RegionalAmbassador } from '@models/RegionalAmbassador';
 
 export type RegionalAmbassadorMap = Map<string, RegionalAmbassador>;
 

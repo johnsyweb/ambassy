@@ -1,8 +1,8 @@
-import { countries } from "./country";
-import { EventAmbassadorMap } from "./EventAmbassadorMap";
-import { EventDetailsMap } from "./EventDetailsMap";
-import { EventTeamMap } from "./EventTeamMap";
-import { RegionalAmbassadorMap } from "./RegionalAmbassadorMap";
+import { countries } from "@models/country";
+import { EventAmbassadorMap } from "@models/EventAmbassadorMap";
+import { EventDetailsMap } from "@models/EventDetailsMap";
+import { EventTeamMap } from "@models/EventTeamMap";
+import { RegionalAmbassadorMap } from "@models/RegionalAmbassadorMap";
 
 export interface EventTeamsTableData {
   eventShortName: string;

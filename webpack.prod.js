@@ -15,7 +15,11 @@ module.exports = {
   resolve: {
     extensions: ['.ts', '.tsx', '.js'],
     alias: {
-      '@models': path.resolve(__dirname, 'src/models/')
+      '@actions': path.resolve(__dirname, 'src/actions/'),
+      '@models': path.resolve(__dirname, 'src/models/'),
+      '@localtypes': path.resolve(__dirname, 'src/types/'),
+      '@parsers': path.resolve(__dirname, 'src/parsers/'),
+      '@utils': path.resolve(__dirname, 'src/utils/'),
     }
   },
   module: {
