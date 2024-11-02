@@ -17,8 +17,7 @@ async function ambassy() {
   const h1Element = document.querySelector("h1");
   const uploadPrompt = document.getElementById("uploadPrompt");
   const csvFileInput = document.getElementById("csvFileInput");
-  const uploadButton = document.getElementById("uploadButton");
-  const mapContainer = document.getElementById("mapContainer");
+  const uploadButton = document.getElementById("uploadButton");  const mapContainer = document.getElementById("mapContainer");
   const eventTeamsTableContainer = document.getElementById(
     "eventTeamsTableContainer"
   );
@@ -27,7 +26,6 @@ async function ambassy() {
     !h1Element ||
     !uploadPrompt ||
     !csvFileInput ||
-    !uploadButton ||
     !mapContainer ||
     !eventTeamsTableContainer
   ) {
@@ -45,7 +43,6 @@ async function ambassy() {
     h1Element.textContent = "Ambassy";
     uploadPrompt.style.display = "none";
     csvFileInput.style.display = "none";
-    uploadButton.style.display = "none";
     mapContainer.style.display = "block";
     eventTeamsTableContainer.style.display = "block";
 
@@ -107,16 +104,15 @@ function getRegionalAmbassadorsFromSession(): RegionalAmbassadorMap {
   return new Map<string, RegionalAmbassador>();
 }
 
-document.getElementById("uploadButton")?.addEventListener("click", () => {
-  const input = document.getElementById("csvFileInput") as HTMLInputElement;
+document.getElementById("csvFileInput")?.addEventListener("change", (event) => {
+  const input = event.target as HTMLInputElement;
   if (input.files && input.files.length > 0) {
-    const file = input.files[0];
+    Array.from(input.files).forEach((file) => {
     handleFileUpload(file, (type) => {
       console.log(`Uploaded ${type} CSV file.`);
       ambassy();
     });
-  } else {
-    alert("Please select a CSV file to upload.");
+  });
   }
 });
 
