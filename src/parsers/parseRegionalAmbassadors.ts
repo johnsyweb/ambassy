@@ -1,5 +1,5 @@
-import { RegionalAmbassador } from '@models/RegionalAmbassador';
-import { RegionalAmbassadorMap } from '@models/RegionalAmbassadorMap';
+import { RegionalAmbassador } from "@models/RegionalAmbassador";
+import { RegionalAmbassadorMap } from "@models/RegionalAmbassadorMap";
 
 export interface RegionalAmbassadorRow {
   'RA Name': string;

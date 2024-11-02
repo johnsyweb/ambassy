@@ -1,3 +1,4 @@
+---
 name: Deploy
 
 on:
@@ -24,7 +25,10 @@ jobs:
       - name: '🔗 Install dependencies'
         run: pnpm install
 
-      - name: '🧪 Testing'
+      - name: '🔍 Resolve'
+        run: pnpm run resolve
+
+      - name: '🧪 Test'
         run: pnpm test
 
       - name: '👷🏻 Build the project'

@@ -5,12 +5,13 @@
   "main": "index.js",
   "scripts": {
     "build": "webpack --config webpack.prod.js",
-    "test": "jest",
-    "start": "webpack serve --open",
-    "predeploy": "pnpm run build",
     "deploy": "gh-pages -d dist",
+    "lint:fix": "eslint 'src/**/*.{ts,tsx}' --fix",
     "lint": "eslint 'src/**/*.{ts,tsx}'",
-    "lint:fix": "eslint 'src/**/*.{ts,tsx}' --fix"
+    "predeploy": "pnpm run build",
+    "resolve": "tsc --traceResolution",
+    "start": "webpack serve --open",
+    "test": "jest"
   },
   "keywords": [
     "parkrun",
