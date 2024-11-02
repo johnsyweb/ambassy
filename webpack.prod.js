@@ -8,7 +8,7 @@ module.exports = {
   mode: 'production',
   entry: './src/index.ts',
   output: {
-    filename: 'bundle.[contenthash].js',
+    filename: 'bundle.js',
     path: path.resolve(__dirname, 'dist'),
     publicPath: '/'
   },
@@ -36,7 +36,7 @@ module.exports = {
     new CleanWebpackPlugin(),
     new CopyWebpackPlugin({
       patterns: [
-        { from: 'public', to: 'public' }
+        { from: 'public', to: '' }
       ]
     }),
     new MiniCssExtractPlugin({

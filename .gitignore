@@ -26,3 +26,5 @@ jest-config/
 
 # Environment variables
 .env
+
+/target
