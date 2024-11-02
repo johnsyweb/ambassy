@@ -1,13 +1,10 @@
 ---
-name: Deploy
+name: CI
 
-on:
-  push:
-    branches:
-      - main
+on: push
 
 jobs:
-  deploy:
+  CI:
     runs-on: ubuntu-latest
 
     steps:
@@ -36,7 +33,3 @@ jobs:
 
       - name: '👷🏻 Build the project'
         run: pnpm run build
-
-      - name: '🚀 Deploy the project'
-        run: pnpm run deploy
-  
