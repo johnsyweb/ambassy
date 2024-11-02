@@ -25,6 +25,9 @@ jobs:
       - name: '🔗 Install dependencies'
         run: pnpm install
 
+      - name: '👮🏻 Lint'
+        run: pnpm install
+
       - name: '🔍 Resolve'
         run: pnpm run resolve
 
