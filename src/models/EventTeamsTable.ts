@@ -3,19 +3,7 @@ import { EventAmbassadorMap } from "@models/EventAmbassadorMap";
 import { EventDetailsMap } from "@models/EventDetailsMap";
 import { EventTeamMap } from "@models/EventTeamMap";
 import { RegionalAmbassadorMap } from "@models/RegionalAmbassadorMap";
-
-export interface EventTeamsTableData {
-  eventShortName: string;
-  eventDirectors: string;
-  eventAmbassador: string;
-  regionalAmbassador: string;
-  eventCoordinates: string;
-  eventSeries: number;
-  eventCountryCode: number;
-  eventCountry: string;
-}
-
-export type EventTeamsTableDataMap = Map<string, EventTeamsTableData>;
+import { EventTeamsTableData, EventTeamsTableDataMap } from "./EventTeamsTableData";
 
 export function extractEventTeamsTableData(
   regionalAmbassadors: RegionalAmbassadorMap,

@@ -1,4 +1,4 @@
-import { EventTeamsTableDataMap } from "@models/EventTeamsTable";
+import { EventTeamsTableDataMap } from "@models/EventTeamsTableData";
 
 export function populateEventTeamsTable(eventTeamsTableData: EventTeamsTableDataMap) {
   const tableBody = document.querySelector('#eventTeamsTable tbody');
