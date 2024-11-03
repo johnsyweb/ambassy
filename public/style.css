@@ -6,29 +6,17 @@
   display: none;
 }
 
-
 #mapCanvas {
-  display: block;
   margin: 0 auto;
-  border: 1px solid black;
+  border: 1px solid;
 }
 
 #eventDetails {
-  display: none;
-  position: absolute;
   background-color: white;
-  border: 1px solid black;
+  border: 1px solid;
   padding: 10px;
-  z-index: 1000;
-  text-align: center;
 }
 
-/* #mapContainer,
-#eventTeamsTableContainer {
-  display: none;
-} */
-
-/* Event teams table styles */
 #eventTeamsTable {
   width: 80%;
   margin: 20px auto;
@@ -57,5 +45,6 @@
 
 #mapContainer {
   height: 800px;
-  /* display: none; */
+  width: 95%;
+  margin: auto;
 }

@@ -114,4 +114,9 @@ document.getElementById("csvFileInput")?.addEventListener("change", (event) => {
   }
 });
 
+document.getElementById("purgeButton")?.addEventListener("click", () => {
+  sessionStorage.clear();
+  location.reload();
+});
+
 ambassy();
