@@ -10,6 +10,9 @@ import { populateMap } from "./actions/populateMap";
 import { populateEventTeamsTable } from "./actions/populateEventTeamsTable";
 import { extractEventTeamsTableData } from "./models/EventTeamsTable";
 import { getEventTeamsFromSession } from "@parsers/parseEventTeams";
+import { LogEntry } from "@models/LogEntry";
+import { updateEventAmbassador } from "@actions/updateEventAmbassador";
+import { EventTeamsTableData } from "@models/EventTeamsTableData";
 
 function getRegionalAmbassadorsFromSession(): RegionalAmbassadorMap {
   const storedRegionalAmbassadors = sessionStorage.getItem("Regional Ambassadors");
@@ -27,6 +30,20 @@ function getEventAmbassadorsFromSession(): EventAmbassadorMap {
     return new Map<string, EventAmbassador>(parsedData);
   }
   return new Map<string, EventAmbassador>();
+}
+
+const log: LogEntry[] = [];
+let eventTeamsTableData: Map<string, EventTeamsTableData> | null = null;
+let eventDetails: EventDetailsMap | null = null;
+  
+function updateEventAmbassadorUI(eventShortName: string, newEventAmbassador: string) {
+  if (!eventTeamsTableData) {
+    console.error("Event Teams Table Data not available");  
+    return;
+  }
+  updateEventAmbassador(eventTeamsTableData, eventShortName, newEventAmbassador, log);
+  updateUIWithEventDetails();
+  console.log(log);
 }
 
 document.getElementById("csvFileInput")?.addEventListener("change", (event) => {
@@ -53,7 +70,7 @@ async function ambassy() {
   const csvFileInput = document.getElementById("csvFileInput");
   const mapContainer = document.getElementById("mapContainer");
   const eventTeamsTableContainer = document.getElementById("eventTeamsTableContainer");
-
+  eventDetails = await getEvents();
   if (!introduction || !ambassy || !uploadPrompt || !csvFileInput || !mapContainer || !eventTeamsTableContainer) {
     console.error("Required elements not found");
     return;
@@ -62,21 +79,15 @@ async function ambassy() {
   const regionalAmbassadors = getRegionalAmbassadorsFromSession();
   const eventAmbassadors = getEventAmbassadorsFromSession();
   const eventTeams = getEventTeamsFromSession();
-  const eventDetails: EventDetailsMap = await getEvents();
   
   if (eventTeams.size && eventAmbassadors.size && regionalAmbassadors.size) {
     // Update the UI
     introduction.style.display = "none";
     ambassy.style.display = "block";
 
-    const eventTeamsTableData = extractEventTeamsTableData(regionalAmbassadors, eventAmbassadors, eventTeams, eventDetails);
-    populateEventTeamsTable(eventTeamsTableData);
-
-    const names = [
-      ...new Set([...regionalAmbassadors.keys(), ...eventAmbassadors.keys()]),
-    ];
-
-    populateMap(eventTeamsTableData, eventDetails, names);
+    eventTeamsTableData = extractEventTeamsTableData(regionalAmbassadors, eventAmbassadors, eventTeams, eventDetails);
+    
+    updateUIWithEventDetails();
   } else {
     const missingFiles = [];
     if (eventTeams.size === 0) {
@@ -95,3 +106,12 @@ async function ambassy() {
 document.addEventListener("DOMContentLoaded", () => {
   ambassy();
 });
+
+function updateUIWithEventDetails() {
+  if (!eventDetails || !eventTeamsTableData) {
+    console.error("Event details are not available");
+    return
+  }
+  populateEventTeamsTable(eventTeamsTableData, updateEventAmbassadorUI);
+  populateMap(eventTeamsTableData, eventDetails);
+}

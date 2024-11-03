@@ -1,12 +1,15 @@
 import { EventTeamsTableDataMap } from "@models/EventTeamsTableData";
 
-export function populateEventTeamsTable(eventTeamsTableData: EventTeamsTableDataMap) {
+export function populateEventTeamsTable(eventTeamsTableData: EventTeamsTableDataMap,
+   updateEAfn: (eventShortName: string, newEventAmbassador: string) => void) {
   const tableBody = document.querySelector('#eventTeamsTable tbody');
   
   if (!tableBody) {
     console.error("Table body not found");
     return;
   }
+
+  const eventAmbassadors = new Set(Array.from(eventTeamsTableData.values()).map(data => data.eventAmbassador).sort());
 
   tableBody.innerHTML = '';
 
@@ -19,6 +22,21 @@ export function populateEventTeamsTable(eventTeamsTableData: EventTeamsTableData
 
     const eventAmbassadorCell = document.createElement('td');
     eventAmbassadorCell.textContent = data.eventAmbassador;
+    eventAmbassadorCell.addEventListener('click', () => {
+      const dropdown = document.createElement('select');
+      eventAmbassadors.forEach((eaName) => {
+        const option = document.createElement('option');
+        option.value = eaName;
+        option.textContent = eaName;
+        dropdown.appendChild(option);
+      });
+      dropdown.addEventListener('change', (event) => {
+        const newEventAmbassador = (event.target as HTMLSelectElement).value;
+        updateEAfn(data.eventShortName, newEventAmbassador);
+      });
+      eventAmbassadorCell.innerHTML = '';
+      eventAmbassadorCell.appendChild(dropdown);
+    });
     row.appendChild(eventAmbassadorCell);
 
     const eventShortNameCell = document.createElement('td');
