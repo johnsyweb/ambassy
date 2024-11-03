@@ -9,7 +9,7 @@ export function populateEventTeamsTable(eventTeamsTableData: EventTeamsTableData
     return;
   }
 
-  const eventAmbassadors = new Set(Array.from(eventTeamsTableData.values()).map(data => data.eventAmbassador).sort());
+  const eventAmbassadors = new Set([...['n/a'], ...Array.from(eventTeamsTableData.values()).map(data => data.eventAmbassador).sort()]);
 
   tableBody.innerHTML = '';
 
