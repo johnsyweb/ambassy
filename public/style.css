@@ -12,33 +12,37 @@
 }
 
 #eventDetails {
+  position: absolute;
   background-color: white;
   border: 1px solid;
   padding: 10px;
 }
 
-#eventTeamsTable {
+table {
   width: 80%;
   margin: 20px auto;
   border-collapse: collapse;
 }
 
-#eventTeamsTable th, #eventTeamsTable td {
+#changesTable th,
+#eventTeamsTable th,
+td {
   border: 1px solid #ddd;
   padding: 8px;
   text-align: center;
 }
 
+#changesTable th,
 #eventTeamsTable th {
   background-color: #f2f2f2;
   font-weight: bold;
 }
 
-#eventTeamsTable tr:nth-child(even) {
+tr:nth-child(even) {
   background-color: #f9f9f9;
 }
 
-#eventTeamsTable tr:hover {
+tr:hover {
   background-color: #ddd;
   cursor: pointer;
 }

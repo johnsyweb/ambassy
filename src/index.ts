@@ -13,6 +13,7 @@ import { getEventTeamsFromSession } from "@parsers/parseEventTeams";
 import { LogEntry } from "@models/LogEntry";
 import { updateEventAmbassador } from "@actions/updateEventAmbassador";
 import { EventTeamsTableData } from "@models/EventTeamsTableData";
+import { populateChangesLogTable } from "@actions/populateChangesLogTable";
 
 function getRegionalAmbassadorsFromSession(): RegionalAmbassadorMap {
   const storedRegionalAmbassadors = sessionStorage.getItem("Regional Ambassadors");
@@ -32,7 +33,16 @@ function getEventAmbassadorsFromSession(): EventAmbassadorMap {
   return new Map<string, EventAmbassador>();
 }
 
-const log: LogEntry[] = [];
+function getLogFromSession(): LogEntry[] {
+  const storedLog = sessionStorage.getItem("log");
+  if (storedLog) {
+    return JSON.parse(storedLog);
+  }
+  return [];
+}
+
+const log: LogEntry[] = getLogFromSession();
+
 let eventTeamsTableData: Map<string, EventTeamsTableData> | null = null;
 let eventDetails: EventDetailsMap | null = null;
   
@@ -42,8 +52,8 @@ function updateEventAmbassadorUI(eventShortName: string, newEventAmbassador: str
     return;
   }
   updateEventAmbassador(eventTeamsTableData, eventShortName, newEventAmbassador, log);
+  sessionStorage.setItem("log", JSON.stringify(log));
   updateUIWithEventDetails();
-  console.log(log);
 }
 
 document.getElementById("csvFileInput")?.addEventListener("change", (event) => {
@@ -114,4 +124,5 @@ function updateUIWithEventDetails() {
   }
   populateEventTeamsTable(eventTeamsTableData, updateEventAmbassadorUI);
   populateMap(eventTeamsTableData, eventDetails);
+  populateChangesLogTable(log);
 }
