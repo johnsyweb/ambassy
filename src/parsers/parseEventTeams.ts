@@ -39,3 +39,12 @@ export function parseEventTeams(data: EventTeamRow[]): EventTeamMap {
 
   return eventTeamsMap;
 }
+
+export function getEventTeamsFromSession(): EventTeamMap {
+  const storedEventTeams = sessionStorage.getItem("Event Teams");
+  if (storedEventTeams) {
+    const parsedData = JSON.parse(storedEventTeams);
+    return new Map<string, EventTeam>(parsedData);
+  }
+  return new Map<string, EventTeam>();
+}

@@ -1,8 +1,6 @@
 import { EventAmbassador } from "./models/EventAmbassador";
 import { EventAmbassadorMap } from "./models/EventAmbassadorMap";
 import { EventDetailsMap } from "./models/EventDetailsMap";
-import { EventTeam } from "./models/EventTeam";
-import { EventTeamMap } from "./models/EventTeamMap";
 import { RegionalAmbassador } from "./models/RegionalAmbassador";
 import { RegionalAmbassadorMap } from "./models/RegionalAmbassadorMap";
 
@@ -11,7 +9,42 @@ import { handleFileUpload } from "./actions/uploadCSV";
 import { populateMap } from "./actions/populateMap";
 import { populateEventTeamsTable } from "./actions/populateEventTeamsTable";
 import { extractEventTeamsTableData } from "./models/EventTeamsTable";
+import { getEventTeamsFromSession } from "@parsers/parseEventTeams";
 
+function getRegionalAmbassadorsFromSession(): RegionalAmbassadorMap {
+  const storedRegionalAmbassadors = sessionStorage.getItem("Regional Ambassadors");
+  if (storedRegionalAmbassadors) {
+    const parsedData = JSON.parse(storedRegionalAmbassadors);
+    return new Map<string, RegionalAmbassador>(parsedData);
+  }
+  return new Map<string, RegionalAmbassador>();
+}
+
+function getEventAmbassadorsFromSession(): EventAmbassadorMap {
+  const storedEventAmbassadors = sessionStorage.getItem("Event Ambassadors");
+  if (storedEventAmbassadors) {
+    const parsedData = JSON.parse(storedEventAmbassadors);
+    return new Map<string, EventAmbassador>(parsedData);
+  }
+  return new Map<string, EventAmbassador>();
+}
+
+document.getElementById("csvFileInput")?.addEventListener("change", (event) => {
+  const input = event.target as HTMLInputElement;
+  if (input.files && input.files.length > 0) {
+    Array.from(input.files).forEach((file) => {
+      handleFileUpload(file, (type) => {
+        console.log(`Uploaded ${type} CSV file.`);
+        ambassy();
+      });
+    });
+  }
+});
+
+document.getElementById("purgeButton")?.addEventListener("click", () => {
+  sessionStorage.clear();
+  location.reload();
+});
 
 async function ambassy() {
   const introduction = document.getElementById("introduction");
@@ -19,18 +52,9 @@ async function ambassy() {
   const uploadPrompt = document.getElementById("uploadPrompt");
   const csvFileInput = document.getElementById("csvFileInput");
   const mapContainer = document.getElementById("mapContainer");
-  const eventTeamsTableContainer = document.getElementById(
-    "eventTeamsTableContainer"
-  );
+  const eventTeamsTableContainer = document.getElementById("eventTeamsTableContainer");
 
-  if (
-    !introduction ||
-    !ambassy ||
-    !uploadPrompt ||
-    !csvFileInput ||
-    !mapContainer ||
-    !eventTeamsTableContainer
-  ) {
+  if (!introduction || !ambassy || !uploadPrompt || !csvFileInput || !mapContainer || !eventTeamsTableContainer) {
     console.error("Required elements not found");
     return;
   }
@@ -53,7 +77,7 @@ async function ambassy() {
     ];
 
     populateMap(eventTeamsTableData, eventDetails, names);
-    } else {
+  } else {
     const missingFiles = [];
     if (eventTeams.size === 0) {
       missingFiles.push("Event Teams CSV");
@@ -64,59 +88,10 @@ async function ambassy() {
     if (eventAmbassadors.size === 0) {
       missingFiles.push("Event Ambassadors CSV");
     }
-    const missingFilesMessage = `Please upload the following missing files: ${missingFiles.join(
-      ", "
-    )}`;
-    uploadPrompt.textContent = missingFilesMessage;
+    uploadPrompt.textContent = `Please upload the following files: ${missingFiles.join(", ")}`;
   }
 }
 
-function getEventTeamsFromSession(): EventTeamMap {
-  const storedEventTeams = sessionStorage.getItem("Event Teams");
-  if (storedEventTeams) {
-    const parsedData = JSON.parse(storedEventTeams);
-    if (parsedData) {
-      return new Map<string, EventTeam>(parsedData);
-    }
-  }
-  return new Map<string, EventTeam>();
-}
-
-function getEventAmbassadorsFromSession(): EventAmbassadorMap {
-  const storedEventAmbassadors = sessionStorage.getItem("Event Ambassadors");
-  if (storedEventAmbassadors) {
-    const parsedData = JSON.parse(storedEventAmbassadors);
-    return new Map<string, EventAmbassador>(parsedData);
-  }
-  return new Map<string, EventAmbassador>();
-}
-
-function getRegionalAmbassadorsFromSession(): RegionalAmbassadorMap {
-  const storedRegionalAmbassadors = sessionStorage.getItem(
-    "Regional Ambassadors"
-  );
-  if (storedRegionalAmbassadors) {
-    const parsedData = JSON.parse(storedRegionalAmbassadors);
-    return new Map<string, RegionalAmbassador>(parsedData);
-  }
-  return new Map<string, RegionalAmbassador>();
-}
-
-document.getElementById("csvFileInput")?.addEventListener("change", (event) => {
-  const input = event.target as HTMLInputElement;
-  if (input.files && input.files.length > 0) {
-    Array.from(input.files).forEach((file) => {
-    handleFileUpload(file, (type) => {
-      console.log(`Uploaded ${type} CSV file.`);
-      ambassy();
-    });
-  });
-  }
+document.addEventListener("DOMContentLoaded", () => {
+  ambassy();
 });
-
-document.getElementById("purgeButton")?.addEventListener("click", () => {
-  sessionStorage.clear();
-  location.reload();
-});
-
-ambassy();

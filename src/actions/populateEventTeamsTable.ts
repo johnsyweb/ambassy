@@ -1,51 +1,46 @@
 import { EventTeamsTableDataMap } from "@models/EventTeamsTable";
 
-export function populateEventTeamsTable(
-  eventTeamsTableData: EventTeamsTableDataMap
-): void {
-  const tableBody = document
-    .getElementById("eventTeamsTable")
-    ?.getElementsByTagName("tbody")[0];
-    
+export function populateEventTeamsTable(eventTeamsTableData: EventTeamsTableDataMap) {
+  const tableBody = document.querySelector('#eventTeamsTable tbody');
+  
   if (!tableBody) {
     console.error("Table body not found");
     return;
   }
 
-  tableBody.innerHTML = "";
+  tableBody.innerHTML = '';
 
-  eventTeamsTableData.forEach((data, eventName) => {
-    const row = tableBody.insertRow();
-    const raNameCell = row.insertCell(0);
-    const eaNameCell = row.insertCell(1);
-    const eventNameCell = row.insertCell(2);
-    const eventDirectorsCell = row.insertCell(3);
-    const eventCoordinatesCell = row.insertCell(4);
-    const eventSeriesCell = row.insertCell(5);
-    const eventCountryCell = row.insertCell(6);
+  eventTeamsTableData.forEach(data => {
+    const row = document.createElement('tr');
 
-    if (
-      [
-        raNameCell,
-        eaNameCell,
-        eventNameCell,
-        eventDirectorsCell,
-        eventCoordinatesCell,
-        eventSeriesCell,
-        eventCountryCell,
-      ].some((cell) => !cell)
-    ) {
-      console.error("Failed to insert row");
-      return;
-    }
+    const regionalAmbassadorCell = document.createElement('td');
+    regionalAmbassadorCell.textContent = data.regionalAmbassador;
+    row.appendChild(regionalAmbassadorCell);
 
-    raNameCell.textContent = data.regionalAmbassador;
-    eaNameCell.textContent = data.eventAmbassador;
-    eventNameCell.textContent = eventName;
+    const eventAmbassadorCell = document.createElement('td');
+    eventAmbassadorCell.textContent = data.eventAmbassador;
+    row.appendChild(eventAmbassadorCell);
+
+    const eventShortNameCell = document.createElement('td');
+    eventShortNameCell.textContent = data.eventShortName;
+    row.appendChild(eventShortNameCell);
+
+    const eventDirectorsCell = document.createElement('td');
     eventDirectorsCell.textContent = data.eventDirectors;
+    row.appendChild(eventDirectorsCell);
+
+    const eventCoordinatesCell = document.createElement('td');
     eventCoordinatesCell.textContent = data.eventCoordinates;
+    row.appendChild(eventCoordinatesCell);
+
+    const eventSeriesCell = document.createElement('td');
     eventSeriesCell.textContent = data.eventSeries.toLocaleString();
-    eventCountryCell.title = data.eventCountryCode.toLocaleString();
+    row.appendChild(eventSeriesCell);
+
+    const eventCountryCell = document.createElement('td');
     eventCountryCell.textContent = data.eventCountry;
+    row.appendChild(eventCountryCell);
+    
+    tableBody.appendChild(row);
   });
 }
