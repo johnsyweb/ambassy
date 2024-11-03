@@ -1,74 +1,206 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta http-equiv="Window-Target" content="_top">
-  <meta http-equiv="X-Clacks-Overhead" content="GNU Terry Pratchett" />
-  <meta name="application-name" content="Ambassy"/>
-  <meta name="description" content="a tool for parkrun ambassadors">
-  <meta name="keywords" content="parkrun">
-  <meta name="msapplication-square150x150logo" content="https://johnsy.com/icons/mstile-150x150.png" />
-  <meta name="msapplication-square310x310logo" content="https://johnsy.com/icons/mstile-310x310.png" />
-  <meta name="msapplication-square70x70logo" content="https://johnsy.com/icons/mstile-70x70.png" />
-  <meta name="msapplication-TileColor" content="#FFFFFF" />
-  <meta name="msapplication-TileImage" content="https://johnsy.com/icons/mstile-144x144.png" />
-  <meta name="msapplication-wide310x150logo" content="https://johnsy.com/icons/mstile-310x150.png" />
-  <meta name="MSSmartTagsPreventParsing" content="TRUE">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta property="og:description" content="a tool for parkrun ambassadors" />
-  <meta property="og:image" content="https://johnsy.com/icons/favicon-196x196.png" />
-  <meta property="og:title" content="Ambassy" />
-  <meta property="og:url" content="https://johnsy.com/ambassy/" />
-  <link href="https://unpkg.com/leaflet/dist/leaflet.css" rel="stylesheet" />
-  <link href="style.css" rel="stylesheet">
-  <link href="https://johnsy.com/assets/css/colors-dark.css" rel="alternate stylesheet" title="Dark" />
-  <link href="https://johnsy.com/assets/css/colors-light.css" rel="stylesheet" title="Light" />
-  <link href="https://johnsy.com/assets/css/style-20150308.css" rel="stylesheet" />
-  <link rel="apple-touch-icon" sizes="114x114" href="https://johnsy.com/icons/apple-touch-icon-114x114.png" />
-  <link rel="apple-touch-icon" sizes="120x120" href="https://johnsy.com/icons/apple-touch-icon-120x120.png" />
-  <link rel="apple-touch-icon" sizes="144x144" href="https://johnsy.com/icons/apple-touch-icon-144x144.png" />
-  <link rel="apple-touch-icon" sizes="152x152" href="https://johnsy.com/icons/apple-touch-icon-152x152.png" />
-  <link rel="apple-touch-icon" sizes="57x57" href="https://johnsy.com/icons/apple-touch-icon-57x57.png" />
-  <link rel="apple-touch-icon" sizes="60x60" href="https://johnsy.com/icons/apple-touch-icon-60x60.png" />
-  <link rel="apple-touch-icon" sizes="72x72" href="https://johnsy.com/icons/apple-touch-icon-72x72.png" />
-  <link rel="apple-touch-icon" sizes="76x76" href="https://johnsy.com/icons/apple-touch-icon-76x76.png" />
-  <link rel="Help" href="https://johnsy.com/about/" title="What is the point of this website?" />
-  <link rel="icon" type="image/png" href="https://johnsy.com/icons/favicon-128.png" sizes="128x128" />
-  <link rel="icon" type="image/png" href="https://johnsy.com/icons/favicon-16x16.png" sizes="16x16" />
-  <link rel="icon" type="image/png" href="https://johnsy.com/icons/favicon-196x196.png" sizes="196x196" />
-  <link rel="icon" type="image/png" href="https://johnsy.com/icons/favicon-32x32.png" sizes="32x32" />
-  <link rel="icon" type="image/png" href="https://johnsy.com/icons/favicon-96x96.png" sizes="96x96" />
-  <link rel="shortcut icon" title="pajIcon" href="https://johnsy.com/favicon.ico">
-  <link rel="Start" href="https://johnsy.com/" title="Back to the start" />
-  <title>johnsy.com/ambassy/ --A tool for parkrun ambassadors</title>
-</head>
-<body>
-  <h1>Upload CSV Files</h1>
-  <h2 id="uploadPrompt">Please upload the Event Ambassadors CSV file.</h2>
-  <input type="file" title="upload data" id="csvFileInput" accept=".csv" multiple>
-  
-  <div id="mapContainer"></div>
-  
-  <div id="eventTeamsTableContainer">
-    <h2>Event Teams</h2>
-    <table id="eventTeamsTable" border="1">
-      <thead>
-        <tr>
-          <th>Regional Ambassador (RA)</th>
-          <th>Event Ambassador (EA)</th>
-          <th>Event Name</th>
-          <th>Event Director(s)</th>
-          <th>Coordinates</th>
-          <th title="E.g. 1 is 5km, open">Event Series</th>
-          <th>Country</th>
-        </tr>
-      </thead>
-      <tbody>
-        <!-- Event team rows will be populated here -->
-      </tbody>
-    </table>
-  </div>
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="Window-Target" content="_top" />
+    <meta http-equiv="X-Clacks-Overhead" content="GNU Terry Pratchett" />
+    <meta name="application-name" content="Ambassy" />
+    <meta name="description" content="a tool for parkrun ambassadors" />
+    <meta name="keywords" content="parkrun" />
+    <meta
+      name="msapplication-square150x150logo"
+      content="https://johnsy.com/icons/mstile-150x150.png"
+    />
+    <meta
+      name="msapplication-square310x310logo"
+      content="https://johnsy.com/icons/mstile-310x310.png"
+    />
+    <meta
+      name="msapplication-square70x70logo"
+      content="https://johnsy.com/icons/mstile-70x70.png"
+    />
+    <meta name="msapplication-TileColor" content="#FFFFFF" />
+    <meta
+      name="msapplication-TileImage"
+      content="https://johnsy.com/icons/mstile-144x144.png"
+    />
+    <meta
+      name="msapplication-wide310x150logo"
+      content="https://johnsy.com/icons/mstile-310x150.png"
+    />
+    <meta name="MSSmartTagsPreventParsing" content="TRUE" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta property="og:description" content="a tool for parkrun ambassadors" />
+    <meta
+      property="og:image"
+      content="https://johnsy.com/icons/favicon-196x196.png"
+    />
+    <meta property="og:title" content="Ambassy" />
+    <meta property="og:url" content="https://johnsy.com/ambassy/" />
+    <link href="https://unpkg.com/leaflet/dist/leaflet.css" rel="stylesheet" />
+    <link href="style.css" rel="stylesheet" />
+    <link
+      href="https://johnsy.com/assets/css/colors-dark.css"
+      rel="alternate stylesheet"
+      title="Dark"
+    />
+    <link
+      href="https://johnsy.com/assets/css/colors-light.css"
+      rel="stylesheet"
+      title="Light"
+    />
+    <link
+      href="https://johnsy.com/assets/css/style-20150308.css"
+      rel="stylesheet"
+    />
+    <link
+      rel="apple-touch-icon"
+      sizes="114x114"
+      href="https://johnsy.com/icons/apple-touch-icon-114x114.png"
+    />
+    <link
+      rel="apple-touch-icon"
+      sizes="120x120"
+      href="https://johnsy.com/icons/apple-touch-icon-120x120.png"
+    />
+    <link
+      rel="apple-touch-icon"
+      sizes="144x144"
+      href="https://johnsy.com/icons/apple-touch-icon-144x144.png"
+    />
+    <link
+      rel="apple-touch-icon"
+      sizes="152x152"
+      href="https://johnsy.com/icons/apple-touch-icon-152x152.png"
+    />
+    <link
+      rel="apple-touch-icon"
+      sizes="57x57"
+      href="https://johnsy.com/icons/apple-touch-icon-57x57.png"
+    />
+    <link
+      rel="apple-touch-icon"
+      sizes="60x60"
+      href="https://johnsy.com/icons/apple-touch-icon-60x60.png"
+    />
+    <link
+      rel="apple-touch-icon"
+      sizes="72x72"
+      href="https://johnsy.com/icons/apple-touch-icon-72x72.png"
+    />
+    <link
+      rel="apple-touch-icon"
+      sizes="76x76"
+      href="https://johnsy.com/icons/apple-touch-icon-76x76.png"
+    />
+    <link
+      rel="Help"
+      href="https://johnsy.com/about/"
+      title="What is the point of this website?"
+    />
+    <link
+      rel="icon"
+      type="image/png"
+      href="https://johnsy.com/icons/favicon-128.png"
+      sizes="128x128"
+    />
+    <link
+      rel="icon"
+      type="image/png"
+      href="https://johnsy.com/icons/favicon-16x16.png"
+      sizes="16x16"
+    />
+    <link
+      rel="icon"
+      type="image/png"
+      href="https://johnsy.com/icons/favicon-196x196.png"
+      sizes="196x196"
+    />
+    <link
+      rel="icon"
+      type="image/png"
+      href="https://johnsy.com/icons/favicon-32x32.png"
+      sizes="32x32"
+    />
+    <link
+      rel="icon"
+      type="image/png"
+      href="https://johnsy.com/icons/favicon-96x96.png"
+      sizes="96x96"
+    />
+    <link
+      rel="shortcut icon"
+      title="pajIcon"
+      href="https://johnsy.com/favicon.ico"
+    />
+    <link rel="Start" href="https://johnsy.com/" title="Back to the start" />
+    <title>johnsy.com/ambassy/ --A tool for parkrun ambassadors</title>
+  </head>
+  <body>
+    <div id="content">
+      <h1>Ambassy</h1>
+      <div id="introduction">
+        <p>
+          Ambassy is designed to help parkrun Regional Ambassadors (RAs) to
+          allocate events.
+        </p>
+        <p>
+          The tool allows you to upload a CSV file containing the names of the
+          Event Ambassadors you support and the events they support. These files
+          are processed in your browser and no data is sent to any servers. The
+          soure code is available on
+          <a href="https://github.com/johnsyweb/ambassy">GitHub</a>
+          for inspection (and improvements are welcome).
+        </p>
+        <p>
+          The tool will then display the events on a map and in a table. Each
+          parkrun event is represented by a marker on the map. The markers are
+          coloured according to the Event Ambassador allocated to the event.
+          There is a Voronoi layer representing Regional Ambassadors. The table
+          should be self-explanatory.
+        </p>
+        <p>
+          I found this useful (and a fun programming challenge) as an RA and I
+          publish it in the hope you do too.
+        </p>
 
-  <script src="bundle.js"></script>
-</body>
+        <div id="upload">
+          <h2>Upload CSV Files</h2>
+          <h3 id="uploadPrompt">Please upload your files here.</h3>
+          <input
+            type="file"
+            title="upload data"
+            id="csvFileInput"
+            accept=".csv"
+            multiple
+          />
+        </div>
+      </div>
+    </div>
+
+    <div id="ambassy">
+      <div id="mapContainer"></div>
+      <div id="eventTeamsTableContainer">
+        <h2>Event Teams</h2>
+        <table id="eventTeamsTable" border="1">
+          <thead>
+            <tr>
+              <th>Regional Ambassador (RA)</th>
+              <th>Event Ambassador (EA)</th>
+              <th>Event Name</th>
+              <th>Event Director(s)</th>
+              <th>Coordinates</th>
+              <th title="E.g. 1 is 5km, open">Event Series</th>
+              <th>Country</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- Event team rows will be populated here -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <script src="bundle.js"></script>
+  </body>
 </html>

@@ -14,7 +14,8 @@ import { extractEventTeamsTableData } from "./models/EventTeamsTable";
 
 
 async function ambassy() {
-  const h1Element = document.querySelector("h1");
+  const introduction = document.getElementById("introduction");
+  const ambassy = document.getElementById("ambassy");
   const uploadPrompt = document.getElementById("uploadPrompt");
   const csvFileInput = document.getElementById("csvFileInput");
   const mapContainer = document.getElementById("mapContainer");
@@ -23,7 +24,8 @@ async function ambassy() {
   );
 
   if (
-    !h1Element ||
+    !introduction ||
+    !ambassy ||
     !uploadPrompt ||
     !csvFileInput ||
     !mapContainer ||
@@ -40,11 +42,8 @@ async function ambassy() {
   
   if (eventTeams.size && eventAmbassadors.size && regionalAmbassadors.size) {
     // Update the UI
-    h1Element.textContent = "Ambassy";
-    uploadPrompt.style.display = "none";
-    csvFileInput.style.display = "none";
-    mapContainer.style.display = "block";
-    eventTeamsTableContainer.style.display = "block";
+    introduction.style.display = "none";
+    ambassy.style.display = "block";
 
     const eventTeamsTableData = extractEventTeamsTableData(regionalAmbassadors, eventAmbassadors, eventTeams, eventDetails);
     populateEventTeamsTable(eventTeamsTableData);
@@ -52,7 +51,6 @@ async function ambassy() {
     const names = [
       ...new Set([...regionalAmbassadors.keys(), ...eventAmbassadors.keys()]),
     ];
-
 
     populateMap(eventTeamsTableData, eventDetails, names);
     } else {
