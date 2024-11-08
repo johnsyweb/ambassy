@@ -10,9 +10,8 @@ import * as d3GeoVoronoi from "d3-geo-voronoi";
 import L from "leaflet";
 import { colorPalette } from "./colorPalette";
 
-let map: L.Map | null = null;
-let markersLayer: L.LayerGroup;
-let polygonsLayer: L.LayerGroup;
+const DEFAULT_EVENT_COLOUR = "rebeccapurple";
+const DEFAULT_POLYGON_COLOUR = "lightgrey";
 
 export function populateMap(
   eventTeamsTableData: EventTeamsTableDataMap,
@@ -20,46 +19,24 @@ export function populateMap(
 ) {
   const raNames = regionalAmbassadorsFrom(eventTeamsTableData);
   const eaNames = eventAmbassadorsFrom(eventTeamsTableData);
-
   const raColorMap = assignColorsToNames(raNames);
   const eaColorMap = assignColorsToNames(eaNames);
+  const countryCode = country(eventTeamsTableData);
 
-  if (!map) {
-    map = L.map("mapContainer").setView([0, 0], 2);
-    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-      attribution: "&copy; OpenStreetMap contributors",
-    }).addTo(map);
-  }
+  const {map, markersLayer, polygonsLayer} = setupMapView(countryCode);
 
-  if (!map) {
-    return;
-  }
-  setMapCenterToCountry(eventTeamsTableData);
+  markersLayer.clearLayers();
+  polygonsLayer.clearLayers();
+  
+  const voronoiPoints: [number, number, string][] = [];
 
-  // Clear existing layers
-  if (markersLayer) {
-    markersLayer.clearLayers();
-  } else {
-    markersLayer = L.layerGroup();
-  }
-
-  if (polygonsLayer) {
-    polygonsLayer.clearLayers();
-  } else {
-    polygonsLayer = L.layerGroup();
-  }
-
-  // Collect points for Voronoi diagram
-  const points: [number, number, string][] = [];
-
-  // Add dots for each parkrun event
   eventDetails.forEach((event, eventName) => {
     const latitiude = event.geometry.coordinates[1];
     const longitude = event.geometry.coordinates[0];
     const data = eventTeamsTableData.get(eventName);
     if (data) {
-      const raColor = raColorMap.get(data.regionalAmbassador) ?? "white";
-      const eaColor = eaColorMap.get(data.eventAmbassador) ?? "purple";
+      const raColor = raColorMap.get(data.regionalAmbassador) ?? DEFAULT_POLYGON_COLOUR;
+      const eaColor = eaColorMap.get(data.eventAmbassador) ?? DEFAULT_EVENT_COLOUR;
       const tooltip = `
         <strong>Event:</strong> ${eventName}<br>
         <strong>Event Director(s):</strong> ${data.eventDirectors}<br>
@@ -74,20 +51,20 @@ export function populateMap(
       marker.bindTooltip(tooltip);
       markersLayer.addLayer(marker);
 
-      points.push([longitude, latitiude, JSON.stringify({ raColor, tooltip })]);
+      voronoiPoints.push([longitude, latitiude, JSON.stringify({ raColor, tooltip })]);
     } else {
       const marker = L.circleMarker([latitiude, longitude], {
-        radius: 2,
-        color: "goldenrod",
+        radius: 1,
+        color: DEFAULT_EVENT_COLOUR,
       });
       marker.bindTooltip(eventName);
       markersLayer.addLayer(marker);
-      const countries = new Set(Array.from(eventTeamsTableData.values()).map((data) => data.eventCountryCode ));
-      if (countries.has(event.properties.countrycode)) {
-        points.push([
+      
+      if (countryCode === event.properties.countrycode) {
+        voronoiPoints.push([
           event.geometry.coordinates[0],
           event.geometry.coordinates[1],
-          JSON.stringify({ raColor: "lightgrey", tooltip: eventName }),
+          JSON.stringify({ raColor: DEFAULT_POLYGON_COLOUR, tooltip: eventName }),
         ]);
       }
     }
@@ -96,11 +73,11 @@ export function populateMap(
   // Add markersLayer to map
   markersLayer.addTo(map!);
 
-  const voronoi = d3GeoVoronoi.geoVoronoi(points.map((p) => [p[0], p[1]]));
+  const voronoi = d3GeoVoronoi.geoVoronoi(voronoiPoints.map((p) => [p[0], p[1]]));
   const polygons = voronoi.polygons();
 
   polygons.features.forEach((feature, index) => {
-    const { raColor, tooltip } = JSON.parse(points[index][2]);
+    const { raColor, tooltip } = JSON.parse(voronoiPoints[index][2]);
     const coordinates = (
       feature.geometry.coordinates[0] as [number, number][]
     ).map((coord) => [coord[1], coord[0]] as L.LatLngTuple);
@@ -123,11 +100,23 @@ export function populateMap(
   L.control.layers(undefined, overlayMaps).addTo(map!);
 }
 
-function setMapCenterToCountry(eventTeamsTableData: EventTeamsTableDataMap) {
-  const Country = [...eventTeamsTableData.values()]
-    .map((data) => data.eventCountryCode)
-    .filter(Boolean)[0];
-  const bounds = countries[Country].bounds;
+function setupMapView(countryCode: number) {
+  if (!_map) {
+    _map = L.map("mapContainer").setView([0, 0], 2);
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+      attribution: "&copy; OpenStreetMap contributors",
+    }).addTo(_map);
+    setMapCenterToCountry(_map, countryCode);
+    _markersLayer = L.layerGroup()
+    _polygonsLayer = L.layerGroup()
+  }
+  return {map: _map, markersLayer: _markersLayer, polygonsLayer: _polygonsLayer};
+}
+
+
+
+function setMapCenterToCountry(map: L.Map, countryCode: number) {
+  const bounds = countries[countryCode].bounds;
   map?.fitBounds([
     [bounds[1], bounds[0]],
     [bounds[3], bounds[2]],
@@ -141,3 +130,14 @@ function assignColorsToNames(names: string[]): Map<string, string> {
   });
   return nameColorMap;
 }
+
+function country(eventTeamsTableData: EventTeamsTableDataMap): number {
+return Math.max(...Array.from(eventTeamsTableData.values())
+  .map((data) => data.eventCountryCode)
+) ?? 1;
+}
+
+// Global variables
+let _map: L.Map | null = null;
+let _markersLayer: L.LayerGroup;
+let _polygonsLayer: L.LayerGroup;
