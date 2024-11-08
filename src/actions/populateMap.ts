@@ -1,23 +1,29 @@
 import { countries } from "@models/country";
 import { EventDetailsMap } from "@models/EventDetailsMap";
 import {
-  ambassadorNamesFrom,
+  regionalAmbassadorsFrom,
+  eventAmbassadorsFrom,
   EventTeamsTableDataMap,
 } from "@models/EventTeamsTableData";
 
 import * as d3GeoVoronoi from "d3-geo-voronoi";
 import L from "leaflet";
+import { colorPalette } from "./colorPalette";
 
 let map: L.Map | null = null;
-let markersLayer: L.LayerGroup | null = null;
+let markersLayer: L.LayerGroup;
+let polygonsLayer: L.LayerGroup;
 
 export function populateMap(
   eventTeamsTableData: EventTeamsTableDataMap,
   eventDetails: EventDetailsMap
 ) {
-  const names = ambassadorNamesFrom(eventTeamsTableData);
+  const raNames = regionalAmbassadorsFrom(eventTeamsTableData);
+  const eaNames = eventAmbassadorsFrom(eventTeamsTableData);
 
-  const colorMap = assignColorsToNames(names);
+  const raColorMap = assignColorsToNames(raNames);
+  const eaColorMap = assignColorsToNames(eaNames);
+
   if (!map) {
     map = L.map("mapContainer").setView([0, 0], 2);
     L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
@@ -30,10 +36,18 @@ export function populateMap(
   }
   setMapCenterToCountry(eventTeamsTableData);
 
+  // Clear existing layers
   if (markersLayer) {
-    map.removeLayer(markersLayer);
+    markersLayer.clearLayers();
+  } else {
+    markersLayer = L.layerGroup();
   }
-  markersLayer = L.layerGroup().addTo(map);
+
+  if (polygonsLayer) {
+    polygonsLayer.clearLayers();
+  } else {
+    polygonsLayer = L.layerGroup();
+  }
 
   // Collect points for Voronoi diagram
   const points: [number, number, string][] = [];
@@ -44,8 +58,8 @@ export function populateMap(
     const longitude = event.geometry.coordinates[0];
     const data = eventTeamsTableData.get(eventName);
     if (data) {
-      const raColor = colorMap.get(data.regionalAmbassador) ?? "white";
-      const eaColor = colorMap.get(data.eventAmbassador) ?? "purple";
+      const raColor = raColorMap.get(data.regionalAmbassador) ?? "white";
+      const eaColor = eaColorMap.get(data.eventAmbassador) ?? "purple";
       const tooltip = `
         <strong>Event:</strong> ${eventName}<br>
         <strong>Event Director(s):</strong> ${data.eventDirectors}<br>
@@ -56,17 +70,20 @@ export function populateMap(
       const marker = L.circleMarker([latitiude, longitude], {
         radius: 5,
         color: eaColor,
-      }).addTo(map!);
+      });
       marker.bindTooltip(tooltip);
+      markersLayer.addLayer(marker);
 
       points.push([longitude, latitiude, JSON.stringify({ raColor, tooltip })]);
     } else {
       const marker = L.circleMarker([latitiude, longitude], {
         radius: 2,
         color: "goldenrod",
-      }).addTo(map!);
+      });
       marker.bindTooltip(eventName);
-      if (event.properties.countrycode === 3) {
+      markersLayer.addLayer(marker);
+      const countries = new Set(Array.from(eventTeamsTableData.values()).map((data) => data.eventCountryCode ));
+      if (countries.has(event.properties.countrycode)) {
         points.push([
           event.geometry.coordinates[0],
           event.geometry.coordinates[1],
@@ -75,6 +92,9 @@ export function populateMap(
       }
     }
   });
+
+  // Add markersLayer to map
+  markersLayer.addTo(map!);
 
   const voronoi = d3GeoVoronoi.geoVoronoi(points.map((p) => [p[0], p[1]]));
   const polygons = voronoi.polygons();
@@ -87,43 +107,21 @@ export function populateMap(
     const poly = L.polygon(coordinates, {
       color: raColor,
       fillOpacity: 0.1,
-    }).addTo(map!);
+    });
     poly.bindTooltip(tooltip);
+    polygonsLayer.addLayer(poly);
   });
-}
 
-const colorPalette = [
-  "#FF5733",
-  "#33FF57",
-  "#3357FF",
-  "#FF33A1",
-  "#A133FF",
-  "#33FFF5",
-  "#FF8C33",
-  "#33FF8C",
-  "#8C33FF",
-  "#FF338C",
-  "#FF5733",
-  "#33FF57",
-  "#3357FF",
-  "#FF33A1",
-  "#A133FF",
-  "#33FFF5",
-  "#FF8C33",
-  "#33FF8C",
-  "#8C33FF",
-  "#FF338C",
-  "#FF5733",
-  "#33FF57",
-  "#3357FF",
-  "#FF33A1",
-  "#A133FF",
-  "#33FFF5",
-  "#FF8C33",
-  "#33FF8C",
-  "#8C33FF",
-  "#FF338C",
-];
+  // Add polygonsLayer to map
+  polygonsLayer.addTo(map!);
+
+  // Add layer control
+  const overlayMaps = {
+    "Event Markers": markersLayer,
+    "Ambassador Polygons": polygonsLayer,
+  };
+  L.control.layers(undefined, overlayMaps).addTo(map!);
+}
 
 function setMapCenterToCountry(eventTeamsTableData: EventTeamsTableDataMap) {
   const Country = [...eventTeamsTableData.values()]
