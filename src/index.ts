@@ -6,14 +6,11 @@ import { RegionalAmbassadorMap } from "./models/RegionalAmbassadorMap";
 
 import { getEvents } from "./actions/fetchEvents";
 import { handleFileUpload } from "./actions/uploadCSV";
-import { populateMap } from "./actions/populateMap";
-import { populateEventTeamsTable } from "./actions/populateEventTeamsTable";
 import { extractEventTeamsTableData } from "./models/EventTeamsTable";
 import { getEventTeamsFromSession } from "@parsers/parseEventTeams";
 import { LogEntry } from "@models/LogEntry";
-import { updateEventAmbassador } from "@actions/updateEventAmbassador";
 import { EventTeamsTableData } from "@models/EventTeamsTableData";
-import { populateChangesLogTable } from "@actions/populateChangesLogTable";
+import { refreshUI } from "./actions/refreshUI";
 
 function getRegionalAmbassadorsFromSession(): RegionalAmbassadorMap {
   const storedRegionalAmbassadors = sessionStorage.getItem("Regional Ambassadors");
@@ -46,16 +43,6 @@ const log: LogEntry[] = getLogFromSession();
 let eventTeamsTableData: Map<string, EventTeamsTableData> | null = null;
 let eventDetails: EventDetailsMap | null = null;
   
-function updateEventAmbassadorUI(eventShortName: string, newEventAmbassador: string) {
-  if (!eventTeamsTableData) {
-    console.error("Event Teams Table Data not available");  
-    return;
-  }
-  updateEventAmbassador(eventTeamsTableData, eventShortName, newEventAmbassador, log);
-  sessionStorage.setItem("log", JSON.stringify(log));
-  updateUIWithEventDetails();
-}
-
 document.getElementById("csvFileInput")?.addEventListener("change", (event) => {
   const input = event.target as HTMLInputElement;
   if (input.files && input.files.length > 0) {
@@ -97,7 +84,7 @@ async function ambassy() {
 
     eventTeamsTableData = extractEventTeamsTableData(regionalAmbassadors, eventAmbassadors, eventTeams, eventDetails);
     
-    updateUIWithEventDetails();
+    refreshUI(eventDetails, eventTeamsTableData, log);
   } else {
     const missingFiles = [];
     if (eventTeams.size === 0) {
@@ -117,12 +104,4 @@ document.addEventListener("DOMContentLoaded", () => {
   ambassy();
 });
 
-function updateUIWithEventDetails() {
-  if (!eventDetails || !eventTeamsTableData) {
-    console.error("Event details are not available");
-    return
-  }
-  populateEventTeamsTable(eventTeamsTableData, updateEventAmbassadorUI);
-  populateMap(eventTeamsTableData, eventDetails);
-  populateChangesLogTable(log);
-}
+
