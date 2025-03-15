@@ -53,7 +53,6 @@
     "d3": "^7.9.0",
     "d3-geo-voronoi": "^2.1.0",
     "fs": "^0.0.2",
-    "googleapis": "^144.0.0",
     "leaflet": "^1.9.4",
     "papaparse": "^5.5.2",
     "path-browserify": "^1.0.1",
