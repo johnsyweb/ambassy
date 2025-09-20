@@ -11,22 +11,21 @@ jobs:
       - name: '🧑🏻‍💻 Checkout repository'
         uses: actions/checkout@v4
 
+      - name: '📦 Install pnpm'
+        uses: pnpm/action-setup@v4
+        with:
+          run_install: false
+
       - name: '🌐 Set up Node.js'
         uses: actions/setup-node@v4
         with:
-          node-version: '23'
-
-      - name: '📦 Install pnpm'
-        run: npm install -g pnpm
+          cache: 'pnpm'
 
       - name: '🔗 Install dependencies'
         run: pnpm install
 
       - name: '👮🏻 Lint'
-        run: pnpm install
-
-      - name: '🔍 Resolve'
-        run: pnpm run resolve
+        run: pnpm lint
 
       - name: '🧪 Test'
         run: pnpm test
