@@ -11,7 +11,8 @@
     "predeploy": "pnpm run build",
     "resolve": "tsc --traceResolution",
     "start": "webpack serve --open",
-    "test": "jest"
+    "test": "jest",
+    "screenshots": "ts-node script/generate-screenshots.ts"
   },
   "keywords": [
     "parkrun",
@@ -39,6 +40,7 @@
     "html-webpack-plugin": "^5.6.4",
     "jest": "^30.2.0",
     "mini-css-extract-plugin": "^2.9.4",
+    "puppeteer": "^23.11.1",
     "terser-webpack-plugin": "^5.3.14",
     "ts-jest": "^29.4.5",
     "ts-loader": "^9.5.4",

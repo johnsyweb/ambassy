@@ -5,8 +5,11 @@
     <meta http-equiv="Window-Target" content="_top" />
     <meta http-equiv="X-Clacks-Overhead" content="GNU Terry Pratchett" />
     <meta name="application-name" content="Ambassy" />
-    <meta name="description" content="a tool for parkrun ambassadors" />
-    <meta name="keywords" content="parkrun" />
+    <meta name="description" content="A tool for parkrun Regional Event Ambassadors (REAs) to visualise and manage event allocations. Upload CSV files to display events on a map with Voronoi territories showing Regional Event Ambassador support areas." />
+    <meta name="keywords" content="parkrun, ambassadors, regional event ambassadors, event ambassadors, parkrun volunteers, event allocation, parkrun management, running community" />
+    <meta name="robots" content="index, follow" />
+    <meta name="author" content="Pete Johns" />
+    <meta name="theme-color" content="#2b233d" />
     <meta
       name="msapplication-square150x150logo"
       content="https://johnsy.com/icons/mstile-150x150.png"
@@ -30,13 +33,39 @@
     />
     <meta name="MSSmartTagsPreventParsing" content="TRUE" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta property="og:description" content="a tool for parkrun ambassadors" />
-    <meta
-      property="og:image"
-      content="https://johnsy.com/icons/favicon-196x196.png"
-    />
-    <meta property="og:title" content="Ambassy" />
+    
+    <!-- OpenGraph / Facebook -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Ambassy" />
+    <meta property="og:title" content="Ambassy - A tool for parkrun ambassadors" />
+    <meta property="og:description" content="A tool for parkrun Regional Event Ambassadors (REAs) to visualise and manage event allocations. Upload CSV files to display events on a map with Voronoi territories showing Regional Event Ambassador support areas." />
     <meta property="og:url" content="https://johnsy.com/ambassy/" />
+    <meta property="og:image" content="https://johnsy.com/ambassy/ambassy-social-preview.png" />
+    <meta property="og:image:alt" content="Ambassy showing parkrun event allocations on a map with Regional Event Ambassador (REA) territories" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:type" content="image/png" />
+    <meta property="og:image:secure_url" content="https://johnsy.com/ambassy/ambassy-social-preview.png" />
+    
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:site" content="@johnsyweb" />
+    <meta name="twitter:title" content="Ambassy - A tool for parkrun ambassadors" />
+    <meta name="twitter:description" content="A tool for parkrun Regional Event Ambassadors (REAs) to visualise and manage event allocations." />
+    <meta name="twitter:image" content="https://johnsy.com/ambassy/ambassy-social-preview.png" />
+    <meta name="twitter:image:alt" content="Ambassy showing parkrun event allocations on a map with Regional Event Ambassador (REA) territories" />
+    
+    <!-- Bluesky -->
+    <meta name="bluesky:card" content="summary_large_image" />
+    <meta name="bluesky:title" content="Ambassy - A tool for parkrun ambassadors" />
+    <meta name="bluesky:description" content="A tool for parkrun Regional Event Ambassadors (REAs) to visualise and manage event allocations." />
+    <meta name="bluesky:image" content="https://johnsy.com/ambassy/ambassy-social-preview.png" />
+    
+    <!-- Messaging Platform Optimizations -->
+    <meta name="format-detection" content="telephone=no" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <link href="https://unpkg.com/leaflet/dist/leaflet.css" rel="stylesheet" />
     <link href="style.css" rel="stylesheet" />
     <link
@@ -134,14 +163,41 @@
       href="https://johnsy.com/favicon.ico"
     />
     <link rel="Start" href="https://johnsy.com/" title="Back to the start" />
-    <title>johnsy.com/ambassy/ --A tool for parkrun ambassadors</title>
+    <title>Ambassy - A tool for parkrun ambassadors</title>
+    
+    <!-- Structured Data -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "Ambassy",
+      "description": "A tool for parkrun Regional Event Ambassadors (REAs) to visualise and manage event allocations. Upload CSV files to display events on a map with Voronoi territories showing Regional Event Ambassador support areas.",
+      "url": "https://johnsy.com/ambassy/",
+      "applicationCategory": "UtilityApplication",
+      "operatingSystem": ["Windows", "macOS", "Linux", "Android", "iOS"],
+      "browserRequirements": "Requires JavaScript. Works with modern browsers including Chrome, Firefox, Safari, and Edge.",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD"
+      },
+      "author": {
+        "@type": "Person",
+        "name": "Pete Johns",
+        "url": "https://johnsy.com"
+      },
+      "screenshot": "https://johnsy.com/ambassy/ambassy-social-preview.png",
+      "datePublished": "2024-01-01",
+      "dateModified": "2025-01-20"
+    }
+    </script>
   </head>
   <body>
     <div id="content">
       <h1>Ambassy</h1>
       <div id="introduction">
         <p>
-          Ambassy is designed to help parkrun Regional Ambassadors (RAs) to
+          Ambassy is designed to help parkrun Regional Event Ambassadors (REAs) to
           allocate events.
         </p>
         <p>
@@ -156,7 +212,7 @@
           The tool will then display the events on a map and in a table. Each
           parkrun event is represented by a marker on the map. The markers are
           coloured according to the Event Ambassador allocated to the event.
-          There is a Voronoi layer representing Regional Ambassadors. The table
+          There is a Voronoi layer representing Regional Event Ambassadors. The table
           should be self-explanatory.
         </p>
         <img
@@ -165,10 +221,10 @@
           title="Screenshot of Ambassy"
           width="500" height="273"
            />
-        <p>
-          I found this useful (and a fun programming challenge) as an RA and I
-          publish it in the hope you do too.
-        </p>
+          <p>
+            I found this useful (and a fun programming challenge) as an REA and I
+            publish it in the hope you do too.
+          </p>
 
         <div id="upload">
           <h2>Upload CSV Files</h2>
@@ -176,7 +232,7 @@
           <p>
             Sample CSV files are provided for you to download, inspect and populate:
             <ul>
-              <li><a download="Ambassadors - Regional Ambassadors.csv" href="./Ambassadors - Regional Ambassadors.csv">Regional Ambassador (RA)</a></li>
+              <li><a download="Ambassadors - Regional Ambassadors.csv" href="./Ambassadors - Regional Ambassadors.csv">Regional Event Ambassador (REA)</a></li>
               <li><a download="Ambassadors - Event Ambassadors.csv" href="./Ambassadors - Event Ambassadors.csv"> Event Ambassador (EA)</a></li>
               <li><a download="Ambassadors - Event Teams.csv" href="./Ambassadors - Event Teams.csv"> Event Teams</a></li>
             </ul>
@@ -201,7 +257,7 @@
         <table id="eventTeamsTable" border="1">
           <thead>
             <tr>
-              <th>Regional Ambassador (RA)</th>
+              <th>Regional Event Ambassador (REA)</th>
               <th>Event Ambassador (EA)</th>
               <th>Event Name</th>
               <th>Event Director(s)</th>

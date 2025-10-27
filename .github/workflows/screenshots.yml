@@ -1,0 +1,69 @@
+name: Screenshots
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: 'screenshots'
+  cancel-in-progress: false
+
+jobs:
+  generate-screenshots:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8
+
+      - name: Setup Node.js
+        uses: actions/setup-node@2028fbc5c25fe9cf00d9f06a71cc4710d4507903
+        with:
+          node-version-file: '.tool-versions'
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@41ff72655975bd51cab0327fa583b6e92b6d3061
+        with:
+          run_install: true
+
+      - name: Build project
+        run: pnpm build
+
+      - name: Install Chrome dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y wget gnupg
+          wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | sudo apt-key add -
+          echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" | sudo tee /etc/apt/sources.list.d/google-chrome.list
+          sudo apt-get update
+          sudo apt-get install -y google-chrome-stable
+
+      - name: Generate screenshots
+        run: |
+          # Set display for headless browser
+          export DISPLAY=:99
+          # Use system-installed Chrome
+          export PUPPETEER_EXECUTABLE_PATH=/usr/bin/google-chrome
+          # Start virtual display
+          Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
+          # Wait for display to start
+          sleep 2
+          # Generate screenshots
+          pnpm screenshots
+
+      - name: Commit updated screenshots
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add public/screenshot.png public/ambassy-social-preview.png
+          if git diff --staged --quiet; then
+            echo "No screenshot changes to commit"
+          else
+            git pull --rebase origin main
+            git commit -m "chore: update screenshots [skip ci]"
+            git push
+          fi
