@@ -1,0 +1,53 @@
+---
+name: Deploy to GitHub Pages
+
+on:
+  workflow_run:
+    workflows: ["Screenshots"]
+    types:
+      - completed
+    branches:
+      - main
+
+permissions:
+  contents: write
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    # Only deploy if CI workflow succeeded and Screenshots workflow completed
+    if: |
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.event == 'push' &&
+      github.ref == 'refs/heads/main'
+
+    steps:
+      - name: "🧑🏻‍💻 Checkout repository"
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8
+        with:
+          ref: ${{ github.event.workflow_run.head_branch || github.ref }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: "📦 Install pnpm"
+        uses: pnpm/action-setup@41ff72655975bd51cab0327fa583b6e92b6d3061
+        with:
+          run_install: false
+
+      - name: "🌐 Set up Node.js"
+        uses: actions/setup-node@2028fbc5c25fe9cf00d9f06a71cc4710d4507903
+        with:
+          cache: "pnpm"
+          node-version-file: ".tool-versions"
+
+      - name: "🔗 Install dependencies"
+        run: pnpm install
+
+      - name: "👷🏻 Build the project"
+        run: pnpm run build
+
+      - name: "🚀 Deploy to GitHub Pages"
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./dist
+          cname: false

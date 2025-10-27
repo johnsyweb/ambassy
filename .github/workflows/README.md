@@ -1,13 +1,36 @@
-# GitHub Actions Screenshot Generation Setup
+# GitHub Actions Workflows
 
-This document describes the GitHub Actions workflow for generating screenshots automatically.
+This document describes the GitHub Actions workflows for CI, screenshot generation, and deployment.
 
-## Files Created
+## Workflow Chain
 
-### 1. `.github/workflows/screenshots.yml`
-Automatically generates screenshots when changes are pushed to main or when manually triggered.
+The workflows are chained together to avoid duplication:
+
+1. **CI** - Runs tests, linting, and build on every push and pull request
+2. **Screenshots** - Only runs after CI succeeds on main branch pushes
+3. **Deploy** - Only runs after Screenshots completes successfully
+
+## Files
+
+### 1. `.github/workflows/CI.yml`
+
+CI workflow that runs on every push and pull request to main.
 
 **Steps:**
+
+1. Checks out the code
+2. Sets up Node.js and pnpm
+3. Installs dependencies
+4. Runs tests
+5. Runs linting
+6. Builds the project
+
+### 2. `.github/workflows/screenshots.yml`
+
+Automatically generates screenshots after CI succeeds on main branch pushes.
+
+**Steps:**
+
 1. Checks out the code
 2. Sets up Node.js using the version from `.tool-versions`
 3. Installs pnpm and dependencies
@@ -17,24 +40,36 @@ Automatically generates screenshots when changes are pushed to main or when manu
 7. Commits and pushes updated screenshots back to the repository
 
 **Requirements:**
-- Requires `contents: write` permission to commit screenshots back to the repo
 
-### 2. `.github/workflows/node.js.yml`
-CI workflow that runs on every push and pull request.
+- Requires `contents: write` permission to commit screenshots back to the repo
+- Only runs after CI workflow succeeds
+- Can also be triggered manually via workflow_dispatch
+
+### 3. `.github/workflows/deploy.yml`
+
+Deploys the built project to GitHub Pages after Screenshots completes.
 
 **Steps:**
+
 1. Checks out the code
 2. Sets up Node.js and pnpm
 3. Installs dependencies
-4. Runs tests
-5. Runs linting
-6. Builds the project
+4. Builds the project
+5. Deploys to GitHub Pages
 
-### 3. `.tool-versions`
+**Requirements:**
+
+- Only runs after Screenshots workflow completes successfully
+- Requires `contents: write` permission to deploy to GitHub Pages
+
+### 4. `.tool-versions`
+
 Specifies Node.js version 20 for GitHub Actions to use.
 
-### 4. `script/generate-screenshots.ts`
+### 5. `script/generate-screenshots.ts`
+
 Screenshot generation script that:
+
 - Starts a local dev server
 - Launches a headless browser using Puppeteer
 - Captures screenshots at different viewport sizes
@@ -42,12 +77,14 @@ Screenshot generation script that:
 - Detects CI environment and adjusts browser settings accordingly
 
 **Screenshots Generated:**
+
 - `public/screenshot.png` (1200x800)
 - `public/ambassy-social-preview.png` (1200x630)
 
 ## Prerequisites
 
 All dependencies are already in place:
+
 - ✅ `puppeteer` installed in `devDependencies`
 - ✅ `ts-node` installed in `dependencies`
 - ✅ Screenshot script created in `script/generate-screenshots.ts`
@@ -57,12 +94,15 @@ All dependencies are already in place:
 ## Usage
 
 ### Local Screenshot Generation
+
 ```bash
 pnpm screenshots
 ```
 
 ### CI Screenshot Generation
+
 The GitHub Actions workflow will automatically:
+
 1. Run on every push to the `main` branch
 2. Build the project
 3. Start a dev server

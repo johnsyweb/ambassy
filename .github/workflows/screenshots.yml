@@ -1,7 +1,10 @@
 name: Screenshots
 
 on:
-  push:
+  workflow_run:
+    workflows: ["CI"]
+    types:
+      - completed
     branches:
       - main
   workflow_dispatch:
@@ -10,20 +13,28 @@ permissions:
   contents: write
 
 concurrency:
-  group: 'screenshots'
+  group: "screenshots"
   cancel-in-progress: false
 
 jobs:
   generate-screenshots:
     runs-on: ubuntu-latest
+    # If triggered by workflow_run, ensure CI succeeded. If manual dispatch, always run.
+    if: |
+      github.event_name == 'workflow_dispatch' ||
+      (github.event.workflow_run.conclusion == 'success' &&
+       github.event.workflow_run.event == 'push')
     steps:
       - name: Checkout
         uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8
+        with:
+          ref: ${{ github.event.workflow_run.head_branch || github.ref }}
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Setup Node.js
         uses: actions/setup-node@2028fbc5c25fe9cf00d9f06a71cc4710d4507903
         with:
-          node-version-file: '.tool-versions'
+          node-version-file: ".tool-versions"
 
       - name: Install pnpm
         uses: pnpm/action-setup@41ff72655975bd51cab0327fa583b6e92b6d3061
