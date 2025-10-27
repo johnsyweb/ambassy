@@ -11,10 +11,15 @@ on:
 
 permissions:
   contents: write
+  pages: write
+  id-token: write
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
     # Only deploy if CI workflow succeeded and Screenshots workflow completed
     if: |
       github.event.workflow_run.conclusion == 'success' &&
@@ -45,9 +50,14 @@ jobs:
       - name: "👷🏻 Build the project"
         run: pnpm run build
 
-      - name: "🚀 Deploy to GitHub Pages"
-        uses: peaceiris/actions-gh-pages@v3
+      - name: "⚙️ Setup Pages"
+        uses: actions/configure-pages@v5
+
+      - name: "📤 Upload artifact"
+        uses: actions/upload-pages-artifact@v3
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./dist
-          cname: false
+          path: ./dist
+
+      - name: "🚀 Deploy to GitHub Pages"
+        uses: actions/deploy-pages@v4
+        id: deployment
