@@ -8,6 +8,7 @@ on:
       - completed
     branches:
       - main
+  workflow_dispatch:
 
 permissions:
   contents: write
@@ -20,17 +21,17 @@ jobs:
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
-    # Only deploy if CI workflow succeeded and Screenshots workflow completed
+    # Always run on manual dispatch, otherwise only if Screenshots workflow succeeded
     if: |
-      github.event.workflow_run.conclusion == 'success' &&
-      github.event.workflow_run.event == 'push' &&
-      github.ref == 'refs/heads/main'
+      github.event_name == 'workflow_dispatch' ||
+      (github.event.workflow_run.conclusion == 'success' &&
+       github.event.workflow_run.event == 'push')
 
     steps:
       - name: "🧑🏻‍💻 Checkout repository"
         uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8
         with:
-          ref: ${{ github.event.workflow_run.head_branch || github.ref }}
+          ref: ${{ github.event_name == 'workflow_run' && (github.event.workflow_run.head_branch || github.ref) || github.ref }}
           token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: "📦 Install pnpm"
