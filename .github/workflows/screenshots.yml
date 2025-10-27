@@ -59,11 +59,17 @@ jobs:
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
+          # Check if there are any changes to screenshot files
           git add public/screenshot.png public/ambassy-social-preview.png
           if git diff --staged --quiet; then
             echo "No screenshot changes to commit"
           else
+            # Unstage the changes temporarily
+            git reset HEAD public/screenshot.png public/ambassy-social-preview.png
+            # Pull with rebase to get latest changes
             git pull --rebase origin main
+            # Re-add and commit the changes
+            git add public/screenshot.png public/ambassy-social-preview.png
             git commit -m "chore: update screenshots [skip ci]"
             git push
           fi
