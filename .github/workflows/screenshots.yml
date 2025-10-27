@@ -66,8 +66,12 @@ jobs:
           else
             # Unstage the changes temporarily
             git reset HEAD public/screenshot.png public/ambassy-social-preview.png
+            # Stash the changes
+            git stash push -m "temp: screenshot changes"
             # Pull with rebase to get latest changes
             git pull --rebase origin main
+            # Pop the stashed changes
+            git stash pop
             # Re-add and commit the changes
             git add public/screenshot.png public/ambassy-social-preview.png
             git commit -m "chore: update screenshots [skip ci]"
