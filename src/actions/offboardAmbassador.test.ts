@@ -85,14 +85,15 @@ describe("offboardAmbassador", () => {
       expect(persistEventAmbassadors).toHaveBeenCalled();
     });
 
-    it("should log offboarding action", () => {
+    it("should log each reassignment separately", () => {
       const eventAmbassadors: EventAmbassadorMap = new Map([
-        ["EA1", { name: "EA1", events: ["Event1"] }],
+        ["EA1", { name: "EA1", events: ["Event1", "Event2"] }],
         ["EA2", { name: "EA2", events: [] }],
       ]);
       const regionalAmbassadors: RegionalAmbassadorMap = new Map();
       const eventTeams: EventTeamMap = new Map([
         ["Event1", { eventShortName: "Event1", eventAmbassador: "EA1", eventDirectors: [] }],
+        ["Event2", { eventShortName: "Event2", eventAmbassador: "EA1", eventDirectors: [] }],
       ]);
       const log: Array<{ type: string; event: string; oldValue: string; newValue: string; timestamp: number }> = [];
 
@@ -109,8 +110,18 @@ describe("offboardAmbassador", () => {
         log
       );
 
-      expect(log.length).toBeGreaterThan(0);
-      expect(log.some((entry) => entry.type === "offboard event ambassador")).toBe(true);
+      const assignmentLogs = log.filter((entry) => entry.type === "assign event to ambassador");
+      const offboardLog = log.find((entry) => entry.type === "offboard event ambassador");
+
+      expect(assignmentLogs.length).toBe(2);
+      expect(assignmentLogs[0].event).toBe("Event1");
+      expect(assignmentLogs[0].oldValue).toBe("EA1");
+      expect(assignmentLogs[0].newValue).toBe("EA2");
+      expect(assignmentLogs[1].event).toBe("Event2");
+      expect(assignmentLogs[1].oldValue).toBe("EA1");
+      expect(assignmentLogs[1].newValue).toBe("EA2");
+      expect(offboardLog).toBeDefined();
+      expect(offboardLog?.event).toBe("EA1");
       expect(persistChangesLog).toHaveBeenCalled();
     });
 

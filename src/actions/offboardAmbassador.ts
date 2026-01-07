@@ -60,6 +60,7 @@ export function offboardEventAmbassador(
         throw new Error(`Recipient Event Ambassador "${recipientName}" not found`);
       }
 
+      // assignEventToAmbassador logs each reassignment separately
       assignEventToAmbassador(
         eventName,
         ambassadorName,
@@ -76,12 +77,21 @@ export function offboardEventAmbassador(
         eventTeams.set(eventName, eventTeam);
       }
     } else {
-      // No recipient specified - unassign event
+      // No recipient specified - unassign event and log separately
       const eventTeam = eventTeams.get(eventName);
       if (eventTeam) {
         eventTeam.eventAmbassador = "";
         eventTeams.set(eventName, eventTeam);
       }
+
+      // Log unassignment separately
+      log.push({
+        type: "assign event to ambassador",
+        event: eventName,
+        oldValue: ambassadorName,
+        newValue: "",
+        timestamp: Date.now(),
+      });
     }
   }
 
@@ -89,15 +99,12 @@ export function offboardEventAmbassador(
   eventAmbassadors.delete(ambassadorName);
   persistEventAmbassadors(eventAmbassadors);
 
-  // Log the offboarding
-  const recipientsList = Array.from(eventRecipients.values())
-    .filter(r => r && r.trim() !== "")
-    .join(", ") || "unassigned";
+  // Log the offboarding (each reassignment already logged separately by assignEventToAmbassador)
   log.push({
     type: "offboard event ambassador",
     event: ambassadorName,
     oldValue: ambassadorName,
-    newValue: recipientsList,
+    newValue: "",
     timestamp: Date.now(),
   });
 
@@ -145,9 +152,33 @@ export function offboardRegionalAmbassador(
       if (!recipient.supportsEAs.includes(eaName)) {
         recipient.supportsEAs.push(eaName);
       }
+
+      // Log each EA reassignment separately
+      log.push({
+        type: "assign event ambassador to regional ambassador",
+        event: eaName,
+        oldValue: ambassadorName,
+        newValue: recipientName,
+        timestamp: Date.now(),
+      });
     }
 
     regionalAmbassadors.set(recipientName, recipient);
+  }
+
+  // Handle unassigned EAs (no recipient specified)
+  for (const eaName of easToReallocate) {
+    const recipientName = eaRecipients.get(eaName) || "";
+    if (!recipientName || recipientName.trim() === "") {
+      // Log unassignment
+      log.push({
+        type: "assign event ambassador to regional ambassador",
+        event: eaName,
+        oldValue: ambassadorName,
+        newValue: "",
+        timestamp: Date.now(),
+      });
+    }
   }
 
   // Remove the ambassador
@@ -155,13 +186,11 @@ export function offboardRegionalAmbassador(
   persistRegionalAmbassadors(regionalAmbassadors);
 
   // Log the offboarding
-  const recipientsList = Array.from(new Set(Array.from(eaRecipients.values()).filter(r => r && r.trim() !== "")))
-    .join(", ") || "unassigned";
   log.push({
     type: "offboard regional ambassador",
     event: ambassadorName,
     oldValue: ambassadorName,
-    newValue: recipientsList,
+    newValue: "",
     timestamp: Date.now(),
   });
 
