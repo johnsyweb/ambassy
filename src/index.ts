@@ -220,9 +220,8 @@ async function ambassy() {
   const uploadPrompt = document.getElementById("uploadPrompt");
   const csvFileInput = document.getElementById("csvFileInput");
   const mapContainer = document.getElementById("mapContainer");
-  const eventTeamsTableContainer = document.getElementById("eventTeamsTableContainer");
   eventDetails = await getEvents();
-  if (!introduction || !ambassy || !uploadPrompt || !csvFileInput || !mapContainer || !eventTeamsTableContainer) {
+  if (!introduction || !ambassy || !uploadPrompt || !csvFileInput || !mapContainer) {
     console.error("Required elements not found");
     return;
   }
