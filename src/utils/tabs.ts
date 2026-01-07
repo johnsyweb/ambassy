@@ -4,7 +4,6 @@
 
 export function initializeTabs(): void {
   const tabButtons = document.querySelectorAll<HTMLButtonElement>(".tab-button");
-  const tabContents = document.querySelectorAll<HTMLElement>(".tab-content");
 
   tabButtons.forEach((button, index) => {
     button.addEventListener("click", () => {

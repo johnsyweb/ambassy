@@ -57,19 +57,15 @@ describe("storage", () => {
       const originalSetItem = localStorage.setItem;
       const originalSessionSetItem = sessionStorage.setItem;
       
-      // Track calls to localStorage.setItem
-      let localStorageCallCount = 0;
       const sessionStorageSetItemSpy = jest.fn();
       
-      localStorage.setItem = jest.fn((key: string, value: string) => {
-        // Allow isStorageAvailable() check to succeed (test key)
+      localStorage.setItem = jest.fn((key: string) => {
         if (key === "ambassy:test") {
           return;
         }
-        // Throw QuotaExceededError on actual save attempt
         const error = new DOMException("QuotaExceededError", "QuotaExceededError");
-        (error as any).code = 22;
-        (error as any).name = "QuotaExceededError";
+        Object.defineProperty(error, "code", { value: 22 });
+        Object.defineProperty(error, "name", { value: "QuotaExceededError" });
         throw error;
       });
       // Mock sessionStorage.setItem

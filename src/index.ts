@@ -528,7 +528,7 @@ async function ambassy() {
   updateButtonVisibility(hasData, isMapViewDisplayed());
 }
 
-let isRefreshing = false;
+const isRefreshing = false;
 
 let lastStorageEventTime = 0;
 window.addEventListener("storage", () => {
