@@ -36,13 +36,14 @@
 
 - [x] T004 [P] Create CapacityStatus enum in src/models/CapacityStatus.ts with values WITHIN, UNDER, OVER
 - [x] T005 [P] Create CapacityLimits interface in src/models/CapacityLimits.ts with eventAmbassadorMin, eventAmbassadorMax, regionalAmbassadorMin, regionalAmbassadorMax fields
-- [x] T006 [P] Create Region enum/type in src/models/Region.ts with REGION_1, REGION_2, REGION_3, UNKNOWN values
+- [x] T006 [P] ~~Create Region enum/type~~ REMOVED: Region is determined dynamically from supportsEAs relationship, not stored
 - [x] T007 [P] Create ReallocationSuggestion interface in src/models/ReallocationSuggestion.ts with fromAmbassador, toAmbassador, items, score, reasons, warnings fields
 - [x] T008 [P] Create calculateDistance function using Haversine formula in src/utils/geography.ts
 - [x] T009 [P] Create calculateAverageDistance function in src/utils/geography.ts for proximity scoring
-- [x] T010 [P] Create assignRegion function in src/utils/regions.ts for region assignment
-- [x] T011 [P] Create getRegionForEvent function in src/utils/regions.ts to get event region
+- [x] T010 [P] ~~Create assignRegion function~~ REMOVED: Region is determined dynamically, no assignment needed
+- [x] T011 [P] ~~Create getRegionForEvent function~~ REMOVED: Region is determined dynamically from supportsEAs
 - [x] T012 [P] Create defaultCapacityLimits constant in src/models/CapacityLimits.ts (EA: 2-9, REA: 3-10)
+- [ ] T012a [P] Create helper function to determine Event Ambassador's region dynamically (find which REA supports them via supportsEAs) in src/utils/regions.ts
 
 **Checkpoint**: Foundation ready - user story implementation can now begin in parallel
 
@@ -134,7 +135,7 @@
 - [ ] T050 [P] [US3] Write unit test for calculateAverageDistance function in src/utils/geography.test.ts
 - [ ] T051 [P] [US3] Write unit test for calculateGeographicProximityScore function in src/actions/suggestReallocation.test.ts
 - [ ] T052 [P] [US3] Write unit test for calculateReallocationScore function (capacity factor) in src/actions/suggestReallocation.test.ts
-- [ ] T053 [P] [US3] Write unit test for calculateReallocationScore function (region factor) in src/actions/suggestReallocation.test.ts
+- [ ] T053 [P] [US3] Write unit test for calculateReallocationScore function (region factor - determined dynamically from supportsEAs) in src/actions/suggestReallocation.test.ts
 - [ ] T054 [P] [US3] Write unit test for calculateReallocationScore function (proximity factor) in src/actions/suggestReallocation.test.ts
 - [ ] T055 [P] [US3] Write unit test for calculateReallocationScore function (conflict avoidance) in src/actions/suggestReallocation.test.ts
 - [ ] T056 [P] [US3] Write unit test for suggestEventReallocation function in src/actions/suggestReallocation.test.ts
@@ -149,22 +150,22 @@
 - [ ] T062 [US3] Implement calculateDistance function using Haversine formula in src/utils/geography.ts
 - [ ] T063 [US3] Implement calculateAverageDistance function in src/utils/geography.ts
 - [ ] T064 [US3] Implement calculateGeographicProximityScore function in src/actions/suggestReallocation.ts
-- [ ] T065 [US3] Implement calculateReallocationScore function in src/actions/suggestReallocation.ts with multi-factor scoring (capacity, region, proximity, conflicts)
-- [ ] T066 [US3] Implement suggestEventReallocation function in src/actions/suggestReallocation.ts
+- [ ] T065 [US3] Implement calculateReallocationScore function in src/actions/suggestReallocation.ts with multi-factor scoring (capacity, region determined dynamically from supportsEAs, proximity, conflicts)
+- [ ] T066 [US3] Implement suggestEventReallocation function in src/actions/suggestReallocation.ts (determine region dynamically from supportsEAs)
 - [ ] T067 [US3] Implement suggestEventAmbassadorReallocation function in src/actions/suggestReallocation.ts
 - [ ] T068 [US3] Implement checkReallocationCapacityWarning function in src/actions/offboardAmbassador.ts
 - [ ] T069 [US3] Implement offboardEventAmbassador function in src/actions/offboardAmbassador.ts
 - [ ] T070 [US3] Implement offboardRegionalAmbassador function in src/actions/offboardAmbassador.ts
 - [ ] T071 [US3] Add logging for offboarding and reallocation actions in src/actions/offboardAmbassador.ts
-- [ ] T072 [US3] Extend EventAmbassador interface in src/models/EventAmbassador.ts to include optional region and conflicts fields
-- [ ] T073 [US3] Extend RegionalAmbassador interface in src/models/RegionalAmbassador.ts to include optional region and conflicts fields
+- [ ] T072 [US3] Extend EventAmbassador interface in src/models/EventAmbassador.ts to include optional conflicts field (region is determined dynamically, not stored)
+- [ ] T073 [US3] Extend RegionalAmbassador interface in src/models/RegionalAmbassador.ts to include optional conflicts field (region is determined dynamically, not stored)
 - [ ] T074 [US3] Add "Offboard Ambassador" button and confirmation dialog to public/index.html
 - [ ] T075 [US3] Wire up offboarding button in src/index.ts to show reallocation suggestions dialog
 - [ ] T076 [US3] Implement reallocation suggestion display UI in public/index.html (show suggestions with scores, reasons, warnings)
 - [ ] T077 [US3] Wire up reallocation selection in src/index.ts to call offboard functions with selected recipient
 - [ ] T078 [US3] Ensure UI refreshes after offboarding and reallocation in src/index.ts
-- [ ] T079 [US3] Add region assignment UI to public/index.html (for events and ambassadors)
-- [ ] T080 [US3] Wire up region assignment in src/index.ts to call assignRegion function
+- [ ] T079 [US3] ~~Add region assignment UI~~ REMOVED: Region is determined dynamically from supportsEAs, no UI needed
+- [ ] T080 [US3] ~~Wire up region assignment~~ REMOVED: Region is determined dynamically, no assignment needed
 - [ ] T081 [US3] Add conflict of interest flagging UI to public/index.html
 - [ ] T082 [US3] Wire up conflict flagging in src/index.ts to update ambassador conflicts field
 
@@ -211,7 +212,7 @@
 
 - [ ] T098 [P] Ensure all onboarding/offboarding actions are logged in changes log
 - [ ] T099 [P] Verify capacity status updates correctly when events are assigned/reassigned
-- [ ] T100 [P] Verify region assignment persists across sessions
+- [ ] T100 [P] ~~Verify region assignment persists~~ REMOVED: Region is determined dynamically, no persistence needed
 - [ ] T101 [P] Verify conflict flagging persists across sessions
 - [ ] T102 [P] Ensure geographic calculations handle missing coordinates gracefully
 - [ ] T103 [P] Verify reallocation suggestions handle edge cases (no recipients, all at capacity, etc.)
@@ -305,7 +306,8 @@ With multiple developers:
 - Stop at any checkpoint to validate story independently
 - Avoid: vague tasks, same file conflicts, cross-story dependencies that break independence
 - Capacity status is calculated, not stored (recalculated when needed)
-- Region and conflicts are optional fields that can be added incrementally
+- Region is determined dynamically from supportsEAs relationship (which REA supports each EA), not stored as a field
+- Conflicts are optional fields that can be added incrementally
 - Geographic calculations use Haversine formula for accuracy
-- Reallocation scoring balances multiple factors pragmatically
+- Reallocation scoring balances multiple factors pragmatically (capacity, region from supportsEAs, proximity, conflicts)
 
