@@ -23,6 +23,11 @@
 
 - Q: What does "the same region" mean in the context of reallocation suggestions? → A: By "the same region", we mean "supported by the same Regional Ambassador". Two Event Ambassadors are in the same region if they are both supported by the same Regional Ambassador (i.e., both appear in the same Regional Ambassador's supportsEAs list). Region is determined dynamically from the supportsEAs relationship, not stored as a separate field.
 
+### Session 2026-01-10
+
+- Q: How should reassignments be logged in the changelog - grouped or separate entries? → A: Each reassignment must be logged as a separate row in the changelog (one log entry per event/EA moved). This provides clear auditability, easier filtering/searching, and maintains consistency with individual assignment logging patterns.
+- Q: What UI method should be used to make selecting new assignments as easy as possible? → A: Use clickable suggestion buttons (showing top 3-5 suggestions with scores and reasons) with a dropdown fallback option for "Other" or manual selection. This reduces typing errors, makes reasoning visible, supports keyboard navigation, and provides a clear visual hierarchy of recommendations.
+
 ## User Scenarios & Testing *(mandatory)*
 
 ### User Story 1 - Onboard New Ambassadors (Priority: P1)
@@ -70,13 +75,13 @@ As a Regional Event Ambassador, I want to remove an ambassador from the system a
 
 **Acceptance Scenarios**:
 
-1. **Given** an Event Ambassador supports 3 events and there are other Event Ambassadors with capacity, **When** the user offboards the ambassador, **Then** the system suggests reallocating the 3 events to ambassadors with available capacity, prioritising those supported by the same Regional Ambassador (same region), with nearby events, and avoiding conflicts of interest
+1. **Given** an Event Ambassador supports 3 events and there are other Event Ambassadors with capacity, **When** the user offboards the ambassador, **Then** the system displays clickable suggestion buttons (top 3-5 suggestions with scores and reasons) for each event, with a dropdown fallback for "Other" or manual selection, prioritising ambassadors with available capacity, those supported by the same Regional Ambassador (same region), with nearby events, and avoiding conflicts of interest
 2. **Given** events are geographically close, **When** the system suggests reallocation, **Then** those events are prioritised for allocation to Event Ambassadors already supporting nearby events
 4. **Given** a Regional Ambassador supports 5 Event Ambassadors and there are other Regional Ambassadors with capacity, **When** the user offboards the Regional Ambassador, **Then** the system suggests reallocating the 5 Event Ambassadors to Regional Ambassadors with available capacity (regional alignment not applicable for REA-to-REA reallocation)
 5. **Given** an ambassador is offboarded and events are reallocated, **When** the user confirms the reallocation, **Then** the events are moved to the new ambassador, the old ambassador is removed from all UI views (except changelog), and all references are cleaned up (removed from REA's supportsEAs list, Event Teams table updated, map view updated)
 6. **Given** there are no ambassadors with available capacity for reallocation, **When** the user attempts to offboard an ambassador, **Then** the system blocks offboarding until all allocations can be reallocated (validation occurs before offboarding starts)
 7. **Given** reallocation suggestions cannot perfectly satisfy all principles (e.g., capacity vs proximity), **When** the system presents suggestions, **Then** the system prioritises pragmatically and allows users to override suggestions
-8. **Given** an ambassador is offboarded, **When** the reallocation is complete, **Then** the changes are logged in the changes log
+8. **Given** an ambassador is offboarded, **When** the reallocation is complete, **Then** each reassignment (each event/EA moved) is logged as a separate row in the changes log with clear old and new values
 9. **Given** Event Ambassadors are supported by Regional Ambassadors, **When** events are displayed or reallocated, **Then** it is clear which Regional Ambassador supports each Event Ambassador (determining the region)
 10. **Given** the map shows event locations, **When** reallocation suggestions are made, **Then** the map informs but does not dictate allocations (geographic proximity is a factor but not the only factor)
 
@@ -150,6 +155,8 @@ As a Regional Event Ambassador, I want to configure the preferred capacity range
 - **FR-019**: System MUST persist configured capacity limits across application sessions
 - **FR-020**: System MUST validate capacity limit configuration (minimum must be less than or equal to maximum, both must be positive integers)
 - **FR-021**: System MUST log all onboarding and offboarding actions in the changes log
+- **FR-036**: System MUST log each reassignment (each event/EA moved) as a separate row in the changes log with clear old and new values (not grouped into a single entry)
+- **FR-037**: System MUST display clickable suggestion buttons (top 3-5 suggestions with scores and reasons) for selecting new assignments during offboarding, with a dropdown fallback option for "Other" or manual selection
 - **FR-022**: System MUST support reallocating events to multiple Event Ambassadors (distributing events across several ambassadors)
 
 ### Key Entities *(include if feature involves data)*
@@ -182,6 +189,8 @@ As a Regional Event Ambassador, I want to configure the preferred capacity range
 - **SC-009**: Configured capacity limits persist across application sessions 100% of the time
 - **SC-010**: System prevents invalid capacity limit configurations (minimum > maximum, negative values) 100% of the time
 - **SC-011**: All onboarding and offboarding actions are logged in the changes log within 5 seconds of completion
+- **SC-017**: Each reassignment (each event/EA moved) appears as a separate row in the changes log 100% of the time, with clear old and new values
+- **SC-018**: Users can select a new assignment for each event/EA using clickable suggestion buttons (showing top 3-5 suggestions) or dropdown fallback in under 10 seconds per selection
 
 ## Assumptions
 
