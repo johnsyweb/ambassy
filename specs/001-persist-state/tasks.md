@@ -94,19 +94,19 @@
 
 > **NOTE: Write these tests FIRST, ensure they FAIL before implementation**
 
-- [ ] T031 [P] [US2] Write unit test for exportApplicationState function in src/actions/exportState.test.ts
-- [ ] T032 [P] [US2] Write unit test for downloadStateFile function in src/actions/exportState.test.ts
-- [ ] T033 [P] [US2] Write integration test for export button click triggering file download in src/index.test.ts
+- [x] T031 [P] [US2] Write unit test for exportApplicationState function in src/actions/exportState.test.ts
+- [x] T032 [P] [US2] Write unit test for downloadStateFile function in src/actions/exportState.test.ts
+- [x] T033 [P] [US2] Write integration test for export button click triggering file download in src/index.test.ts
 
 ### Implementation for User Story 2
 
-- [ ] T034 [US2] Create exportApplicationState function in src/actions/exportState.ts that collects all state from localStorage and creates ApplicationState object
-- [ ] T035 [US2] Implement JSON serialization in exportApplicationState function in src/actions/exportState.ts with version "1.0.0" and exportedAt timestamp
-- [ ] T036 [US2] Create downloadStateFile function in src/actions/exportState.ts that creates Blob from JSON and triggers browser download
-- [ ] T037 [US2] Add export button element to upload section in public/index.html with id "exportButton" and accessible label
-- [ ] T038 [US2] Add click event listener for export button in src/index.ts that calls exportApplicationState and downloadStateFile
-- [ ] T039 [US2] Generate filename with timestamp format "ambassy-state-YYYY-MM-DD.json" in downloadStateFile function in src/actions/exportState.ts
-- [ ] T040 [US2] Add error handling in exportApplicationState function in src/actions/exportState.ts to show user notification if state incomplete
+- [x] T034 [US2] Create exportApplicationState function in src/actions/exportState.ts that collects all state from localStorage and creates ApplicationState object
+- [x] T035 [US2] Implement JSON serialization in exportApplicationState function in src/actions/exportState.ts with version "1.0.0" and exportedAt timestamp
+- [x] T036 [US2] Create downloadStateFile function in src/actions/exportState.ts that creates Blob from JSON and triggers browser download
+- [x] T037 [US2] Add export button element to upload section in public/index.html with id "exportButton" and accessible label
+- [x] T038 [US2] Add click event listener for export button in src/index.ts that calls exportApplicationState and downloadStateFile
+- [x] T039 [US2] Generate filename with timestamp format "ambassy-state-YYYY-MM-DD.json" in downloadStateFile function in src/actions/exportState.ts
+- [x] T040 [US2] Add error handling in exportApplicationState function in src/actions/exportState.ts to show user notification if state incomplete
 
 **Checkpoint**: At this point, User Stories 1 AND 2 should both work independently. Users can persist data and export it as a shareable file.
 
@@ -122,28 +122,28 @@
 
 > **NOTE: Write these tests FIRST, ensure they FAIL before implementation**
 
-- [ ] T041 [P] [US3] Write unit test for validateStateFile function with valid JSON file in src/actions/importState.test.ts
-- [ ] T042 [P] [US3] Write unit test for validateStateFile function with invalid JSON file in src/actions/importState.test.ts
-- [ ] T043 [P] [US3] Write unit test for validateStateFile function with missing fields in src/actions/importState.test.ts
-- [ ] T044 [P] [US3] Write unit test for validateStateFile function with version mismatch in src/actions/importState.test.ts
-- [ ] T045 [P] [US3] Write unit test for importApplicationState function in src/actions/importState.test.ts
-- [ ] T046 [P] [US3] Write integration test for import button triggering file selection and import in src/index.test.ts
+- [x] T041 [P] [US3] Write unit test for validateStateFile function with valid JSON file in src/actions/importState.test.ts
+- [x] T042 [P] [US3] Write unit test for validateStateFile function with invalid JSON file in src/actions/importState.test.ts
+- [x] T043 [P] [US3] Write unit test for validateStateFile function with missing fields in src/actions/importState.test.ts
+- [x] T044 [P] [US3] Write unit test for validateStateFile function with version mismatch in src/actions/importState.test.ts
+- [x] T045 [P] [US3] Write unit test for importApplicationState function in src/actions/importState.test.ts
+- [x] T046 [P] [US3] Write integration test for import button triggering file selection and import in src/index.test.ts
 
 ### Implementation for User Story 3
 
-- [ ] T047 [US3] Create validateStateFile function in src/actions/importState.ts that reads File, parses JSON, and validates structure
-- [ ] T048 [US3] Implement version validation in validateStateFile function in src/actions/importState.ts to check version matches "1.0.0"
-- [ ] T049 [US3] Implement structure validation in validateStateFile function in src/actions/importState.ts to check required fields (version, exportedAt, data)
-- [ ] T050 [US3] Implement data completeness validation in validateStateFile function in src/actions/importState.ts to check all data arrays present
-- [ ] T051 [US3] Create custom error classes InvalidFileFormatError, MissingFieldError, VersionMismatchError, InvalidDataError in src/actions/importState.ts
-- [ ] T052 [US3] Create importApplicationState function in src/actions/importState.ts that persists validated state to localStorage and updates UI
-- [ ] T053 [US3] Add hidden file input element for import in public/index.html with id "importFileInput" and accept=".json"
-- [ ] T054 [US3] Add import button element to upload section in public/index.html with id "importButton" and accessible label
-- [ ] T055 [US3] Add click event listener for import button in src/index.ts that triggers file input click
-- [ ] T056 [US3] Add change event listener for import file input in src/index.ts that calls validateStateFile and importApplicationState
-- [ ] T057 [US3] Implement confirmation dialog in src/index.ts before importApplicationState if existing data present in localStorage
-- [ ] T058 [US3] Add error handling in import flow in src/index.ts to show clear error messages for InvalidFileFormatError, MissingFieldError, VersionMismatchError, InvalidDataError
-- [ ] T059 [US3] Add success notification in importApplicationState function in src/actions/importState.ts after successful import
+- [x] T047 [US3] Create validateStateFile function in src/actions/importState.ts that reads File, parses JSON, and validates structure
+- [x] T048 [US3] Implement version validation in validateStateFile function in src/actions/importState.ts to check version matches "1.0.0"
+- [x] T049 [US3] Implement structure validation in validateStateFile function in src/actions/importState.ts to check required fields (version, exportedAt, data)
+- [x] T050 [US3] Implement data completeness validation in validateStateFile function in src/actions/importState.ts to check all data arrays present
+- [x] T051 [US3] Create custom error classes InvalidFileFormatError, MissingFieldError, VersionMismatchError, InvalidDataError in src/actions/importState.ts
+- [x] T052 [US3] Create importApplicationState function in src/actions/importState.ts that persists validated state to localStorage and updates UI
+- [x] T053 [US3] Add hidden file input element for import in public/index.html with id "importFileInput" and accept=".json"
+- [x] T054 [US3] Add import button element to upload section in public/index.html with id "importButton" and accessible label
+- [x] T055 [US3] Add click event listener for import button in src/index.ts that triggers file input click
+- [x] T056 [US3] Add change event listener for import file input in src/index.ts that calls validateStateFile and importApplicationState
+- [x] T057 [US3] Implement confirmation dialog in src/index.ts before importApplicationState if existing data present in localStorage
+- [x] T058 [US3] Add error handling in import flow in src/index.ts to show clear error messages for InvalidFileFormatError, MissingFieldError, VersionMismatchError, InvalidDataError
+- [x] T059 [US3] Add success notification in importApplicationState function in src/actions/importState.ts after successful import
 
 **Checkpoint**: At this point, all user stories should be independently functional. Users can persist data, export it, and import shared state files.
 
@@ -153,15 +153,15 @@
 
 **Purpose**: Improvements that affect multiple user stories
 
-- [ ] T060 [P] Update README.md with instructions for using export and import functionality
-- [ ] T061 [P] Add user notification for storage unavailability (private browsing mode) in src/utils/storage.ts
-- [ ] T062 [P] Add user notification when localStorage quota exceeded in src/utils/storage.ts
-- [ ] T063 [P] Ensure all error messages use Australian English in src/actions/importState.ts and src/actions/exportState.ts
-- [ ] T064 [P] Verify all UI elements are keyboard accessible (export button, import button, file input) in public/index.html
-- [ ] T065 [P] Add visual feedback for export/import operations (loading states, success indicators) in src/index.ts
-- [ ] T066 [P] Run quickstart.md validation checklist from specs/001-persist-state/quickstart.md
-- [ ] T067 [P] Remove disused sessionStorage code from src/index.ts and src/parsers/parseEventTeams.ts after migration complete
-- [ ] T068 [P] Update purgeButton functionality to clear localStorage and show confirmation dialog in src/index.ts
+- [x] T060 [P] Update README.md with instructions for using export and import functionality
+- [x] T061 [P] Add user notification for storage unavailability (private browsing mode) in src/utils/storage.ts
+- [x] T062 [P] Add user notification when localStorage quota exceeded in src/utils/storage.ts
+- [x] T063 [P] Ensure all error messages use Australian English in src/actions/importState.ts and src/actions/exportState.ts
+- [x] T064 [P] Verify all UI elements are keyboard accessible (export button, import button, file input) in public/index.html
+- [x] T065 [P] Add visual feedback for export/import operations (loading states, success indicators) in src/index.ts
+- [x] T066 [P] Run quickstart.md validation checklist from specs/001-persist-state/quickstart.md
+- [x] T067 [P] Remove disused sessionStorage code from src/index.ts and src/parsers/parseEventTeams.ts after migration complete
+- [x] T068 [P] Update purgeButton functionality to clear localStorage and show confirmation dialog in src/index.ts
 
 ---
 

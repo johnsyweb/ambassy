@@ -57,6 +57,23 @@ graph TD
 
 This project is written in TypeScript, has unit tests, and the map will be displayed in any modern web browser.
 
+## State Persistence and Sharing
+
+Ambassy automatically persists your uploaded CSV data to browser local storage, so you don't need to re-upload files every time you visit the application. Your data persists across browser sessions.
+
+### Exporting State
+
+Click the "Export State" button to download your current application state as a JSON file. This file contains all your uploaded data (Event Ambassadors, Event Teams, Regional Ambassadors, and changes log) and can be shared with other ambassadors or parkrun staff.
+
+### Importing State
+
+Click the "Import State" button to load a previously exported state file. This allows you to:
+- Share your data with other users
+- Restore your data on a different device or browser
+- Load data shared by other ambassadors
+
+**Note**: Importing will replace your current data. You'll be asked to confirm before importing if you have existing data.
+
 ## Development with Speckit
 
 This project uses [Speckit](https://speckit.org/) (Spec Kit) for specification-driven development. Speckit helps ensure that features are well-specified before implementation, reducing errors and improving code quality.

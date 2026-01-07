@@ -237,6 +237,7 @@
         <div id="upload">
           <h2>Upload CSV Files</h2>
           <h3 id="uploadPrompt">Please upload your files here.</h3>
+          <div id="storageWarning" style="display: none; color: #d32f2f; margin-top: 1em; padding: 0.5em; background-color: #ffebee; border-radius: 4px;"></div>
           <p>
             Sample CSV files are provided for you to download, inspect and populate:
             <ul>
@@ -250,6 +251,15 @@
             id="csvFileInput"
             accept=".csv"
             multiple
+          />
+          <button type="button" id="exportButton" title="Export state">Export State</button>
+          <button type="button" id="importButton" title="Import state">Import State</button>
+          <input
+            type="file"
+            title="import state"
+            id="importFileInput"
+            accept=".json"
+            style="display: none;"
           />
         </div>
       </div>

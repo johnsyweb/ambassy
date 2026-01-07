@@ -11,6 +11,20 @@ export function isStorageAvailable(): boolean {
   }
 }
 
+let storageWarningShown = false;
+
+function showStorageWarning(): void {
+  if (!storageWarningShown) {
+    const warningElement = document.getElementById("storageWarning");
+    if (warningElement) {
+      warningElement.textContent =
+        "Persistence unavailable. Data will be lost when browser closes.";
+      warningElement.style.display = "block";
+      storageWarningShown = true;
+    }
+  }
+}
+
 export function saveToStorage(key: string, value: unknown): boolean {
   const prefixedKey = `${STORAGE_PREFIX}${key}`;
   try {
@@ -19,6 +33,7 @@ export function saveToStorage(key: string, value: unknown): boolean {
       return true;
     } else {
       sessionStorage.setItem(prefixedKey, JSON.stringify(value));
+      showStorageWarning();
       return false;
     }
   } catch (error) {
@@ -26,6 +41,7 @@ export function saveToStorage(key: string, value: unknown): boolean {
       console.warn("Storage quota exceeded. Falling back to sessionStorage.");
       try {
         sessionStorage.setItem(prefixedKey, JSON.stringify(value));
+        showStorageWarning();
         return false;
       } catch {
         console.error("Failed to save to sessionStorage:", error);
