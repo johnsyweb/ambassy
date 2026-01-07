@@ -18,6 +18,7 @@ import { exportApplicationState, downloadStateFile } from "./actions/exportState
 import { validateStateFile, importApplicationState, InvalidFileFormatError, MissingFieldError, VersionMismatchError, InvalidDataError } from "./actions/importState";
 import { onboardEventAmbassador, onboardRegionalAmbassador } from "./actions/onboardAmbassador";
 import { persistChangesLog } from "./actions/persistState";
+import { initializeTabs } from "./utils/tabs";
 
 function getRegionalAmbassadorsFromSession(): RegionalAmbassadorMap {
   const storedRegionalAmbassadors = loadFromStorage<Array<[string, RegionalAmbassador]>>("regionalAmbassadors");
@@ -272,6 +273,7 @@ window.addEventListener("storage", () => {
 });
 
 document.addEventListener("DOMContentLoaded", () => {
+  initializeTabs();
   ambassy();
 });
 

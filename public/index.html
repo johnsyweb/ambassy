@@ -275,71 +275,82 @@
         <button type="button" id="purgeButton">Purge Data</button>
       </div>
 
-      <div id="eventTeamsTableContainer">
-        <h2>Event Teams</h2>
-        <table id="eventTeamsTable" border="1">
-          <thead>
-            <tr>
-              <th>Regional Event Ambassador (REA)</th>
-              <th>Event Ambassador (EA)</th>
-              <th>Event Name</th>
-              <th>Event Director(s)</th>
-              <th>Coordinates</th>
-              <th title="E.g. 1 is 5km, open">Event Series</th>
-              <th>Country</th>
-            </tr>
-          </thead>
-          <tbody>
-            <!-- Event team rows will be populated here -->
-          </tbody>
-        </table>
-      </div>
+      <div id="tabsContainer">
+        <div class="tabs" role="tablist">
+          <button class="tab-button active" role="tab" aria-selected="true" aria-controls="eventTeamsTab" id="eventTeamsTabButton" tabindex="0">Event Teams</button>
+          <button class="tab-button" role="tab" aria-selected="false" aria-controls="eventAmbassadorsTab" id="eventAmbassadorsTabButton" tabindex="-1">Event Ambassadors</button>
+          <button class="tab-button" role="tab" aria-selected="false" aria-controls="regionalAmbassadorsTab" id="regionalAmbassadorsTabButton" tabindex="-1">Regional Ambassadors</button>
+          <button class="tab-button" role="tab" aria-selected="false" aria-controls="changesLogTab" id="changesLogTabButton" tabindex="-1">Changes Log</button>
+        </div>
 
-      <div id="ambassadorsTableContainer">
-        <h2>Ambassadors</h2>
-        <h3>Event Ambassadors</h3>
-        <table id="eventAmbassadorsTable" border="1">
-          <thead>
-            <tr>
-              <th>Name</th>
-              <th>Events Assigned</th>
-            </tr>
-          </thead>
-          <tbody>
-            <!-- Event Ambassador rows will be populated here -->
-          </tbody>
-        </table>
-        <h3>Regional Ambassadors</h3>
-        <table id="regionalAmbassadorsTable" border="1">
-          <thead>
-            <tr>
-              <th>Name</th>
-              <th>State</th>
-              <th>Event Ambassadors Supported</th>
-            </tr>
-          </thead>
-          <tbody>
-            <!-- Regional Ambassador rows will be populated here -->
-          </tbody>
-        </table>
-      </div>
+        <div id="eventTeamsTab" class="tab-content active" role="tabpanel" aria-labelledby="eventTeamsTabButton">
+          <h2>Event Teams</h2>
+          <table id="eventTeamsTable" border="1">
+            <thead>
+              <tr>
+                <th>Regional Event Ambassador (REA)</th>
+                <th>Event Ambassador (EA)</th>
+                <th>Event Name</th>
+                <th>Event Director(s)</th>
+                <th>Coordinates</th>
+                <th title="E.g. 1 is 5km, open">Event Series</th>
+                <th>Country</th>
+              </tr>
+            </thead>
+            <tbody>
+              <!-- Event team rows will be populated here -->
+            </tbody>
+          </table>
+        </div>
 
-      <div id="changesTableContainer">
-        <h2>Changes Log</h2>
-        <table id="changesTable" border="1">
-          <thead>
-            <tr>
-              <th>Change Type</th>
-              <th>Event Name</th>
-              <th>Original Value</th>
-              <th>New Value</th>
-              <th>Timestamp</th>
-            </tr>
-          </thead>
-          <tbody>
-            <!-- Changes log rows will be populated here -->
-          </tbody>
-        </table>
+        <div id="eventAmbassadorsTab" class="tab-content" role="tabpanel" aria-labelledby="eventAmbassadorsTabButton" hidden>
+          <h2>Event Ambassadors</h2>
+          <table id="eventAmbassadorsTable" border="1">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Events Assigned</th>
+              </tr>
+            </thead>
+            <tbody>
+              <!-- Event Ambassador rows will be populated here -->
+            </tbody>
+          </table>
+        </div>
+
+        <div id="regionalAmbassadorsTab" class="tab-content" role="tabpanel" aria-labelledby="regionalAmbassadorsTabButton" hidden>
+          <h2>Regional Ambassadors</h2>
+          <table id="regionalAmbassadorsTable" border="1">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>State</th>
+                <th>Event Ambassadors Supported</th>
+              </tr>
+            </thead>
+            <tbody>
+              <!-- Regional Ambassador rows will be populated here -->
+            </tbody>
+          </table>
+        </div>
+
+        <div id="changesLogTab" class="tab-content" role="tabpanel" aria-labelledby="changesLogTabButton" hidden>
+          <h2>Changes Log</h2>
+          <table id="changesTable" border="1">
+            <thead>
+              <tr>
+                <th>Change Type</th>
+                <th>Event Name</th>
+                <th>Original Value</th>
+                <th>New Value</th>
+                <th>Timestamp</th>
+              </tr>
+            </thead>
+            <tbody>
+              <!-- Changes log rows will be populated here -->
+            </tbody>
+          </table>
+        </div>
       </div>
 
     </div>

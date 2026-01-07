@@ -57,6 +57,57 @@ tr:hover {
   margin: auto;
 }
 
-#changesTableContainer {
+/* Tabs */
+.tabs {
+  display: flex;
+  border-bottom: 2px solid #ddd;
+  margin: 20px auto;
+  width: 80%;
+}
+
+.tab-button {
+  background-color: #f2f2f2;
+  border: none;
+  border-bottom: 2px solid transparent;
+  padding: 12px 24px;
+  cursor: pointer;
+  font-size: 16px;
+  font-family: "Atkinson Hyperlegible", Verdana, serif;
+  transition: background-color 0.2s;
+  margin-right: 4px;
+}
+
+.tab-button:hover {
+  background-color: #e0e0e0;
+}
+
+.tab-button:focus {
+  outline: 2px solid #4a90e2;
+  outline-offset: -2px;
+}
+
+.tab-button.active {
+  background-color: #fff;
+  border-bottom-color: #4a90e2;
+  font-weight: bold;
+}
+
+.tab-content {
   display: none;
+  width: 80%;
+  margin: 20px auto;
+}
+
+.tab-content.active {
+  display: block;
+}
+
+.tab-content h2 {
+  margin-top: 0;
+}
+
+#eventAmbassadorsTable th,
+#regionalAmbassadorsTable th {
+  background-color: #f2f2f2;
+  font-weight: bold;
 }
