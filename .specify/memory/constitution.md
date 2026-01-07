@@ -1,8 +1,11 @@
 <!--
 Sync Impact Report:
-Version change: N/A → 1.0.0 (initial constitution)
-Modified principles: N/A (new file)
-Added sections: Core Principles, Quality Gates, Development Workflow, Governance
+Version change: 1.0.0 → 1.1.0 (added new principles: test skipping policy, production/test parity, 12-factor apps)
+Modified principles: 
+  - II. Test-Driven Development - Added explicit prohibition on skipping tests without confirmation
+Added sections: 
+  - VIII. Production/Test Parity (new principle)
+  - IX. Twelve-Factor App Principles (new principle)
 Removed sections: N/A
 Templates requiring updates:
   ✅ plan-template.md - Constitution Check section exists and aligns
@@ -28,9 +31,9 @@ All code MUST pass quality gates before commit:
 
 ### II. Test-Driven Development
 
-Tests MUST be written for production code. Tests MUST NOT check whether code is running in a test environment - tests MUST test production code directly. Functions MUST have low cyclomatic complexity and high test coverage. Tests MUST NOT pollute the console.
+Tests MUST be written for production code. Tests MUST NOT check whether code is running in a test environment - tests MUST test production code directly. Functions MUST have low cyclomatic complexity and high test coverage. Tests MUST NOT pollute the console. Tests MUST NOT be skipped without explicit confirmation from the project maintainer.
 
-**Rationale**: Ensures reliable, maintainable code with confidence in changes. Testing production code directly prevents test-specific code paths that diverge from production behaviour.
+**Rationale**: Ensures reliable, maintainable code with confidence in changes. Testing production code directly prevents test-specific code paths that diverge from production behaviour. Skipping tests without approval risks introducing regressions and technical debt.
 
 ### III. Atomic Commits with Semantic Messages
 
@@ -61,6 +64,24 @@ Favour free and open source libraries over implementing logic that requires cust
 The README MUST remain up-to-date at all times. Documentation MUST reflect the current state of the project, including setup instructions, dependencies, and usage examples.
 
 **Rationale**: Accurate documentation reduces onboarding time and prevents confusion. Outdated documentation is worse than no documentation.
+
+### VIII. Production/Test Parity
+
+Code MUST behave identically in production and test environments. Environment-specific behaviour MUST be achieved through configuration, not code branches. Tests MUST exercise the same code paths that run in production.
+
+**Rationale**: Eliminates "works on my machine" problems and ensures tests accurately reflect production behaviour. Configuration-based differences are explicit and testable, while code branches create hidden divergence.
+
+### IX. Twelve-Factor App Principles
+
+The application MUST follow the Twelve-Factor App methodology (<https://12factor.net/>) where applicable:
+- Configuration via environment variables
+- Stateless processes
+- Disposability (fast startup and graceful shutdown)
+- Development/production parity
+- Logs as event streams
+- Admin processes as one-off processes
+
+**Rationale**: Twelve-Factor principles ensure applications are portable, scalable, and maintainable. They promote best practices for modern application development and deployment.
 
 ## Technology Standards
 
@@ -101,6 +122,8 @@ All changes MUST:
 - Include appropriate tests
 - Maintain or improve test coverage
 - Not introduce console pollution in tests
+- Not skip tests without explicit approval
+- Behave identically in production and test environments
 - Be keyboard accessible (for UI changes)
 - Use Australian English (for user-facing text)
 
@@ -133,4 +156,4 @@ This constitution supersedes all other development practices. All code changes M
 
 **Runtime Guidance**: See `README.md` for project setup, development workflow, and usage instructions.
 
-**Version**: 1.0.0 | **Ratified**: 2026-01-07 | **Last Amended**: 2026-01-07
+**Version**: 1.1.0 | **Ratified**: 2026-01-07 | **Last Amended**: 2026-01-08
