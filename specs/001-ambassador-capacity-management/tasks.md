@@ -74,10 +74,10 @@
 - [x] T023 [US1] Integrate onboardEventAmbassador with persistEventAmbassadors in src/actions/onboardAmbassador.ts to save to localStorage
 - [x] T024 [US1] Integrate onboardRegionalAmbassador with persistRegionalAmbassadors in src/actions/onboardAmbassador.ts to save to localStorage
 - [x] T025 [US1] Add logging for onboarding actions in src/actions/onboardAmbassador.ts using existing LogEntry infrastructure
-- [ ] T026 [US1] Add "Add Event Ambassador" button and input dialog to public/index.html
-- [ ] T027 [US1] Add "Add Regional Ambassador" button and input dialog to public/index.html
-- [ ] T028 [US1] Wire up onboarding buttons in src/index.ts to call onboardEventAmbassador and onboardRegionalAmbassador
-- [ ] T029 [US1] Ensure new ambassadors appear in UI after onboarding (refresh display in src/index.ts)
+- [x] T026 [US1] Add "Add Event Ambassador" button and input dialog to public/index.html
+- [x] T027 [US1] Add "Add Regional Ambassador" button and input dialog to public/index.html
+- [x] T028 [US1] Wire up onboarding buttons in src/index.ts to call onboardEventAmbassador and onboardRegionalAmbassador
+- [x] T029 [US1] Ensure new ambassadors appear in UI after onboarding (refresh display in src/index.ts)
 
 **Checkpoint**: At this point, User Story 1 should be fully functional and testable independently. Users can onboard new ambassadors.
 

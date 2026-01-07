@@ -16,6 +16,8 @@ import { restoreApplicationState } from "./actions/persistState";
 import { loadFromStorage } from "@utils/storage";
 import { exportApplicationState, downloadStateFile } from "./actions/exportState";
 import { validateStateFile, importApplicationState, InvalidFileFormatError, MissingFieldError, VersionMismatchError, InvalidDataError } from "./actions/importState";
+import { onboardEventAmbassador, onboardRegionalAmbassador } from "./actions/onboardAmbassador";
+import { persistChangesLog } from "./actions/persistState";
 
 function getRegionalAmbassadorsFromSession(): RegionalAmbassadorMap {
   const storedRegionalAmbassadors = loadFromStorage<Array<[string, RegionalAmbassador]>>("regionalAmbassadors");
@@ -123,6 +125,54 @@ function setupImportButton(buttonId: string): void {
 setupExportButton("exportButtonMap");
 setupImportButton("importButton");
 setupImportButton("importButtonMap");
+
+function setupOnboardingButtons(): void {
+  const addEventAmbassadorButton = document.getElementById("addEventAmbassadorButton");
+  const addRegionalAmbassadorButton = document.getElementById("addRegionalAmbassadorButton");
+
+  addEventAmbassadorButton?.addEventListener("click", () => {
+    const name = prompt("Enter Event Ambassador name:");
+    if (name === null || name.trim() === "") {
+      return;
+    }
+
+    try {
+      const eventAmbassadors = getEventAmbassadorsFromSession();
+      const regionalAmbassadors = getRegionalAmbassadorsFromSession();
+      onboardEventAmbassador(name, eventAmbassadors, regionalAmbassadors, log);
+      persistChangesLog(log);
+      ambassy();
+      alert(`Event Ambassador "${name.trim()}" added successfully.`);
+    } catch (error) {
+      alert(`Failed to add Event Ambassador: ${error instanceof Error ? error.message : "Unknown error"}`);
+    }
+  });
+
+  addRegionalAmbassadorButton?.addEventListener("click", () => {
+    const name = prompt("Enter Regional Ambassador name:");
+    if (name === null || name.trim() === "") {
+      return;
+    }
+
+    const state = prompt("Enter state (e.g., VIC, NSW):");
+    if (state === null || state.trim() === "") {
+      return;
+    }
+
+    try {
+      const eventAmbassadors = getEventAmbassadorsFromSession();
+      const regionalAmbassadors = getRegionalAmbassadorsFromSession();
+      onboardRegionalAmbassador(name, state, eventAmbassadors, regionalAmbassadors, log);
+      persistChangesLog(log);
+      ambassy();
+      alert(`Regional Ambassador "${name.trim()}" added successfully.`);
+    } catch (error) {
+      alert(`Failed to add Regional Ambassador: ${error instanceof Error ? error.message : "Unknown error"}`);
+    }
+  });
+}
+
+setupOnboardingButtons();
 
 document.getElementById("importFileInput")?.addEventListener("change", async (event) => {
   const input = event.target as HTMLInputElement;
