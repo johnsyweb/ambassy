@@ -164,10 +164,10 @@
 - [x] T074 [US3] Add "Offboard Ambassador" button and confirmation dialog to public/index.html
 - [x] T075 [US3] Wire up offboarding button in src/index.ts to show reallocation suggestions dialog
 - [x] T076 [US3] Implement reallocation suggestion display UI in public/index.html (show suggestions with scores, reasons, warnings)
-- [ ] T076a [US3] Replace prompt() dialogs with modal dialogs containing clickable suggestion buttons (top 3-5) in src/index.ts and public/index.html
-- [ ] T076b [US3] Add dropdown fallback option for "Other" or manual selection in reallocation modal dialogs in src/index.ts and public/index.html
-- [ ] T076c [US3] Ensure clickable suggestion buttons display ambassador name, score, and reasons clearly in public/index.html
-- [ ] T076d [US3] Implement keyboard navigation support (Tab, Enter, Arrow keys) for suggestion buttons and dropdown in src/index.ts
+- [x] T076a [US3] Replace prompt() dialogs with modal dialogs containing clickable suggestion buttons (top 3-5) in src/index.ts and public/index.html
+- [x] T076b [US3] Add dropdown fallback option for "Other" or manual selection in reallocation modal dialogs in src/index.ts and public/index.html
+- [x] T076c [US3] Ensure clickable suggestion buttons display ambassador name, score, and reasons clearly in public/index.html
+- [x] T076d [US3] Implement keyboard navigation support (Tab, Enter, Arrow keys) for suggestion buttons and dropdown in src/index.ts
 - [x] T077 [US3] Wire up reallocation selection in src/index.ts to call offboard functions with selected recipient
 - [x] T078 [US3] Ensure UI refreshes after offboarding and reallocation in src/index.ts
 - [ ] T079 [US3] ~~Add region assignment UI~~ REMOVED: Region is determined dynamically from supportsEAs, no UI needed
