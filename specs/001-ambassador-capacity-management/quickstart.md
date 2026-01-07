@@ -40,7 +40,7 @@ Multi-factor scoring system for reallocation suggestions:
 - `suggestEventAmbassadorReallocation()`: Generate suggestions for EAs
 - `calculateReallocationScore()`: Score potential recipients
 - `calculateGeographicProximityScore()`: Calculate proximity score
-- Considers: capacity, region, landowner, proximity, conflicts
+- Considers: capacity, region, proximity, conflicts
 
 ### Offboarding (`src/actions/offboardAmbassador.ts`)
 
@@ -61,7 +61,6 @@ Geographic calculations:
 Region assignment and management:
 - `assignRegion()`: Assign region to event or ambassador
 - `getRegionForEvent()`: Get region for event
-- `extractLandowner()`: Extract landowner from EventLocation
 
 ## Usage Flow
 

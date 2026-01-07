@@ -120,21 +120,18 @@ Existing entity extended with capacity-related fields.
 
 ### EventDetails (Extended)
 
-Existing entity extended with region and landowner information.
+Existing entity extended with region information.
 
 **Existing Fields**: (from EventDetails interface)
 - `id`, `type`, `geometry`, `properties` (unchanged)
 
 **New Fields** (stored separately or in metadata):
 - `region` (Region, optional): Region assignment for this event
-- `landowner` (string, optional): Landowner entity name (extracted from EventLocation or manually assigned)
 
 **Relationships**: Unchanged from existing model
 
 **Validation Rules**:
 - `region` may be UNKNOWN if not assigned
-- `landowner` may be empty if not identified
-- `landowner` may be extracted from `properties.EventLocation` field
 
 ## State Transitions
 

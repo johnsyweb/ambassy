@@ -50,24 +50,21 @@
 
 ### 3. Landowner Information Extraction
 
-**Decision**: Extract landowner information from EventLocation field when available, support manual assignment
+**Decision**: Landowner extraction removed from requirements. Landowner grouping is no longer part of allocation principles.
 
 **Rationale**:
-- EventLocation field may contain landowner information but format may vary
-- Some events may not have landowner information in EventLocation
-- Manual assignment provides flexibility for missing or unclear data
-- Pattern matching can identify common landowners (e.g., "City of X", "Parks Victoria")
+- Pattern matching from EventLocation field is not feasible due to inconsistent data format
+- Landowner grouping removed from allocation principles per clarification
+- System will focus on capacity, region, geographic proximity, and conflict avoidance
 
 **Alternatives Considered**:
-- Separate landowner field in EventDetails: Requires data model changes, may not be available
-- External landowner database: Overkill, adds complexity and maintenance burden
-- Purely manual assignment: Accurate but time-consuming
+- Pattern matching from EventLocation: Not feasible due to data inconsistency
+- Manual landowner assignment: Not required as landowner grouping removed from principles
+- External landowner database: Not needed
 
 **Implementation Notes**:
-- Parse EventLocation field for common patterns (City of, Parks, Council, etc.)
-- Store extracted/assigned landowner in event metadata
-- Provide UI for manual landowner assignment/editing
-- Group events by landowner for reallocation suggestions
+- No landowner extraction or grouping functionality required
+- Focus allocation principles on: capacity, region, proximity, conflicts
 
 ### 4. Conflict of Interest Tracking
 
@@ -109,10 +106,9 @@
 - Score each potential recipient ambassador based on:
   - Capacity availability (higher score for more available capacity)
   - Regional alignment (higher score for same region)
-  - Landowner grouping (higher score for matching landowner)
   - Geographic proximity (higher score for closer events)
   - Conflict avoidance (exclude or heavily penalize conflicts)
-- Weight factors based on importance (capacity > region > landowner > proximity)
+- Weight factors based on importance (capacity > region > proximity)
 - Present top N suggestions (e.g., top 3) with scores/justifications
 - Allow user to override and manually select recipients
 

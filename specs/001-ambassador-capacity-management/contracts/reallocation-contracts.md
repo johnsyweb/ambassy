@@ -105,7 +105,6 @@ Calculates a score indicating how suitable a recipient is for reallocation.
 - Returns score based on:
   - Capacity availability (higher score for more available capacity)
   - Regional alignment (higher score for same region)
-  - Landowner grouping (higher score for matching landowner)
   - Geographic proximity (higher score for closer events)
   - Conflict avoidance (exclude or heavily penalize conflicts)
 - Returns 0 if recipient has conflicts (unless override specified)
@@ -141,26 +140,4 @@ Calculates geographic proximity score based on average distance between recipien
 
 ---
 
-## Extract Landowner from Event Location
-
-### `extractLandowner(eventLocation: string): string | null`
-
-Extracts landowner information from EventLocation field.
-
-**Parameters**:
-- `eventLocation` (string): EventLocation field from EventDetails
-
-**Returns**: `string | null` - Extracted landowner name or null if not found
-
-**Throws**: Never throws
-
-**Side Effects**: None
-
-**Preconditions**:
-- `eventLocation` must be string (may be empty)
-
-**Postconditions**:
-- Returns extracted landowner if pattern matches (e.g., "City of X", "Parks Victoria")
-- Returns null if no pattern matches or eventLocation is empty
-- Pattern matching is case-insensitive
 
