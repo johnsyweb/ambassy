@@ -118,7 +118,8 @@ function handleEventAmbassadorCellClick(
         oldEventAmbassador,
         newEventAmbassador,
         allEventAmbassadors,
-        changelog
+        changelog,
+        regionalAmbassadorsMap
       );
     } catch (error) {
       alert(`Failed to assign event: ${error instanceof Error ? error.message : "Unknown error"}`);

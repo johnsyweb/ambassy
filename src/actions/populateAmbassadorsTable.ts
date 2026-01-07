@@ -1,5 +1,6 @@
 import { EventAmbassadorMap } from "@models/EventAmbassadorMap";
 import { RegionalAmbassadorMap } from "@models/RegionalAmbassadorMap";
+import { CapacityStatus } from "@models/CapacityStatus";
 
 export function populateAmbassadorsTable(
   eventAmbassadors: EventAmbassadorMap,
@@ -25,7 +26,32 @@ function populateEventAmbassadorsTable(eventAmbassadors: EventAmbassadorMap): vo
     const row = document.createElement("tr");
 
     const nameCell = document.createElement("td");
-    nameCell.textContent = name;
+    const nameSpan = document.createElement("span");
+    nameSpan.textContent = name;
+    nameCell.appendChild(nameSpan);
+    
+    // Add capacity status badge
+    if (ambassador.capacityStatus) {
+      const badge = document.createElement("span");
+      badge.textContent = ` [${ambassador.capacityStatus}]`;
+      badge.style.marginLeft = "8px";
+      badge.style.padding = "2px 6px";
+      badge.style.borderRadius = "3px";
+      badge.style.fontSize = "0.85em";
+      
+      if (ambassador.capacityStatus === CapacityStatus.WITHIN) {
+        badge.style.backgroundColor = "#d4edda";
+        badge.style.color = "#155724";
+      } else if (ambassador.capacityStatus === CapacityStatus.UNDER) {
+        badge.style.backgroundColor = "#fff3cd";
+        badge.style.color = "#856404";
+      } else if (ambassador.capacityStatus === CapacityStatus.OVER) {
+        badge.style.backgroundColor = "#f8d7da";
+        badge.style.color = "#721c24";
+      }
+      
+      nameCell.appendChild(badge);
+    }
     row.appendChild(nameCell);
 
     const eventsCell = document.createElement("td");
@@ -58,7 +84,32 @@ function populateRegionalAmbassadorsTable(regionalAmbassadors: RegionalAmbassado
     const row = document.createElement("tr");
 
     const nameCell = document.createElement("td");
-    nameCell.textContent = name;
+    const nameSpan = document.createElement("span");
+    nameSpan.textContent = name;
+    nameCell.appendChild(nameSpan);
+    
+    // Add capacity status badge
+    if (ambassador.capacityStatus) {
+      const badge = document.createElement("span");
+      badge.textContent = ` [${ambassador.capacityStatus}]`;
+      badge.style.marginLeft = "8px";
+      badge.style.padding = "2px 6px";
+      badge.style.borderRadius = "3px";
+      badge.style.fontSize = "0.85em";
+      
+      if (ambassador.capacityStatus === CapacityStatus.WITHIN) {
+        badge.style.backgroundColor = "#d4edda";
+        badge.style.color = "#155724";
+      } else if (ambassador.capacityStatus === CapacityStatus.UNDER) {
+        badge.style.backgroundColor = "#fff3cd";
+        badge.style.color = "#856404";
+      } else if (ambassador.capacityStatus === CapacityStatus.OVER) {
+        badge.style.backgroundColor = "#f8d7da";
+        badge.style.color = "#721c24";
+      }
+      
+      nameCell.appendChild(badge);
+    }
     row.appendChild(nameCell);
 
     const stateCell = document.createElement("td");

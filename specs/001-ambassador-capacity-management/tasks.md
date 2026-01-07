@@ -93,28 +93,28 @@
 
 > **NOTE: Write these tests FIRST, ensure they FAIL before implementation**
 
-- [ ] T030 [P] [US2] Write unit test for checkEventAmbassadorCapacity function (within capacity) in src/actions/checkCapacity.test.ts
-- [ ] T031 [P] [US2] Write unit test for checkEventAmbassadorCapacity function (under capacity) in src/actions/checkCapacity.test.ts
-- [ ] T032 [P] [US2] Write unit test for checkEventAmbassadorCapacity function (over capacity) in src/actions/checkCapacity.test.ts
-- [ ] T033 [P] [US2] Write unit test for checkRegionalAmbassadorCapacity function (within capacity) in src/actions/checkCapacity.test.ts
-- [ ] T034 [P] [US2] Write unit test for checkRegionalAmbassadorCapacity function (under capacity) in src/actions/checkCapacity.test.ts
-- [ ] T035 [P] [US2] Write unit test for checkRegionalAmbassadorCapacity function (over capacity) in src/actions/checkCapacity.test.ts
-- [ ] T036 [P] [US2] Write unit test for loadCapacityLimits function (returns defaults when not stored) in src/actions/checkCapacity.test.ts
-- [ ] T037 [P] [US2] Write unit test for loadCapacityLimits function (returns stored limits) in src/actions/checkCapacity.test.ts
-- [ ] T038 [P] [US2] Write unit test for calculateAllCapacityStatuses function in src/actions/checkCapacity.test.ts
+- [x] T030 [P] [US2] Write unit test for checkEventAmbassadorCapacity function (within capacity) in src/actions/checkCapacity.test.ts
+- [x] T031 [P] [US2] Write unit test for checkEventAmbassadorCapacity function (under capacity) in src/actions/checkCapacity.test.ts
+- [x] T032 [P] [US2] Write unit test for checkEventAmbassadorCapacity function (over capacity) in src/actions/checkCapacity.test.ts
+- [x] T033 [P] [US2] Write unit test for checkRegionalAmbassadorCapacity function (within capacity) in src/actions/checkCapacity.test.ts
+- [x] T034 [P] [US2] Write unit test for checkRegionalAmbassadorCapacity function (under capacity) in src/actions/checkCapacity.test.ts
+- [x] T035 [P] [US2] Write unit test for checkRegionalAmbassadorCapacity function (over capacity) in src/actions/checkCapacity.test.ts
+- [x] T036 [P] [US2] Write unit test for loadCapacityLimits function (returns defaults when not stored) in src/actions/checkCapacity.test.ts
+- [x] T037 [P] [US2] Write unit test for loadCapacityLimits function (returns stored limits) in src/actions/checkCapacity.test.ts
+- [x] T038 [P] [US2] Write unit test for calculateAllCapacityStatuses function in src/actions/checkCapacity.test.ts
 - [ ] T039 [P] [US2] Write integration test for capacity status display in UI in src/index.test.ts
 
 ### Implementation for User Story 2
 
-- [ ] T040 [US2] Create checkEventAmbassadorCapacity function in src/actions/checkCapacity.ts to calculate capacity status
-- [ ] T041 [US2] Create checkRegionalAmbassadorCapacity function in src/actions/checkCapacity.ts to calculate capacity status
-- [ ] T042 [US2] Create loadCapacityLimits function in src/actions/checkCapacity.ts to load from localStorage or return defaults
-- [ ] T043 [US2] Create calculateAllCapacityStatuses function in src/actions/checkCapacity.ts to update all ambassadors
-- [ ] T044 [US2] Extend EventAmbassador interface in src/models/EventAmbassador.ts to include optional capacityStatus field
-- [ ] T045 [US2] Extend RegionalAmbassador interface in src/models/RegionalAmbassador.ts to include optional capacityStatus field
-- [ ] T046 [US2] Call calculateAllCapacityStatuses in ambassy function in src/index.ts when data is loaded
-- [ ] T047 [US2] Add capacity status display to ambassador tables/lists in public/index.html (colour coding, badges, etc.)
-- [ ] T048 [US2] Ensure capacity status updates when allocations change (call calculateAllCapacityStatuses after updates)
+- [x] T040 [US2] Create checkEventAmbassadorCapacity function in src/actions/checkCapacity.ts to calculate capacity status
+- [x] T041 [US2] Create checkRegionalAmbassadorCapacity function in src/actions/checkCapacity.ts to calculate capacity status
+- [x] T042 [US2] Create loadCapacityLimits function in src/actions/checkCapacity.ts to load from localStorage or return defaults
+- [x] T043 [US2] Create calculateAllCapacityStatuses function in src/actions/checkCapacity.ts to update all ambassadors
+- [x] T044 [US2] Extend EventAmbassador interface in src/models/EventAmbassador.ts to include optional capacityStatus field
+- [x] T045 [US2] Extend RegionalAmbassador interface in src/models/RegionalAmbassador.ts to include optional capacityStatus field
+- [x] T046 [US2] Call calculateAllCapacityStatuses in ambassy function in src/index.ts when data is loaded
+- [x] T047 [US2] Add capacity status display to ambassador tables/lists in public/index.html (colour coding, badges, etc.)
+- [x] T048 [US2] Ensure capacity status updates when allocations change (call calculateAllCapacityStatuses after updates)
 
 **Checkpoint**: At this point, User Stories 1 AND 2 should both work independently. Capacity status is visible for all ambassadors.
 

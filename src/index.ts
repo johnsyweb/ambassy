@@ -19,6 +19,7 @@ import { validateStateFile, importApplicationState, InvalidFileFormatError, Miss
 import { onboardEventAmbassador, onboardRegionalAmbassador } from "./actions/onboardAmbassador";
 import { persistChangesLog } from "./actions/persistState";
 import { initializeTabs } from "./utils/tabs";
+import { calculateAllCapacityStatuses, loadCapacityLimits } from "./actions/checkCapacity";
 
 function getRegionalAmbassadorsFromSession(): RegionalAmbassadorMap {
   const storedRegionalAmbassadors = loadFromStorage<Array<[string, RegionalAmbassador]>>("regionalAmbassadors");
@@ -244,6 +245,10 @@ async function ambassy() {
     introduction.style.display = "none";
     ambassy.style.display = "block";
 
+    // Calculate capacity statuses for all ambassadors
+    const capacityLimits = loadCapacityLimits();
+    calculateAllCapacityStatuses(eventAmbassadors, regionalAmbassadors, capacityLimits);
+    
     eventTeamsTableData = extractEventTeamsTableData(regionalAmbassadors, eventAmbassadors, eventTeams, eventDetails);
     
     refreshUI(eventDetails, eventTeamsTableData, log, eventAmbassadors, regionalAmbassadors);
