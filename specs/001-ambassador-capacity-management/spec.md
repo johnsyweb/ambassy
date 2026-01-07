@@ -5,6 +5,12 @@
 **Status**: Draft  
 **Input**: User description: "Ambassadors are volunteers with lives outside of parkrun. Ambassadors will come and go. We need to be able to easily onboard and offboard both regional and event ambassadors. When an ambassdor leaves or changes roles, we'd prefer to allocate their events to existing ambassadors with capacity. By capacity, I mean that we prefer for Event ambassadors to support between 2 and 9 events. Any more than this should be flagged. We prefer Regional event ambassadors to support between three and 10 event ambassadors. More than this should be flagged. These limits should be configurable settings."
 
+## Clarifications
+
+### Session 2026-01-07
+
+- Q: Landowner extraction: Pattern matching from EventLocation field is probably not possible. Let's remove this as a requirement for now. → A: Landowner extraction requirement removed. Landowner grouping is no longer part of allocation principles. System will focus on capacity, region, geographic proximity, and conflict avoidance.
+
 ## User Scenarios & Testing *(mandatory)*
 
 ### User Story 1 - Onboard New Ambassadors (Priority: P1)
