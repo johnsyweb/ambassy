@@ -37,7 +37,7 @@ export function saveToStorage(key: string, value: unknown): boolean {
       return false;
     }
   } catch (error) {
-    if (error instanceof DOMException && error.code === 22) {
+    if (error instanceof DOMException && (error.code === 22 || error.name === "QuotaExceededError")) {
       console.warn("Storage quota exceeded. Falling back to sessionStorage.");
       try {
         sessionStorage.setItem(prefixedKey, JSON.stringify(value));
