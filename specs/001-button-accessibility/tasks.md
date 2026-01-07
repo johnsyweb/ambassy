@@ -52,24 +52,24 @@
 
 > **NOTE: Write these tests FIRST, ensure they FAIL before implementation**
 
-- [ ] T007 [P] [US1] Write unit test for hasApplicationData function in src/index.test.ts (returns false when no data)
-- [ ] T008 [P] [US1] Write unit test for hasApplicationData function in src/index.test.ts (returns true when all data present)
-- [ ] T009 [P] [US1] Write unit test for isMapViewDisplayed function in src/index.test.ts (returns false when upload section visible)
-- [ ] T010 [P] [US1] Write unit test for isMapViewDisplayed function in src/index.test.ts (returns true when map view visible)
-- [ ] T011 [P] [US1] Write unit test for updateButtonVisibility function in src/index.test.ts (hides export button when no data)
-- [ ] T012 [P] [US1] Write unit test for updateButtonVisibility function in src/index.test.ts (shows export button when data loaded)
-- [ ] T013 [P] [US1] Write integration test for export button visibility in upload section (not visible when no data) in src/index.test.ts
-- [ ] T014 [P] [US1] Write integration test for export button visibility in map view (visible when data loaded) in src/index.test.ts
+- [x] T007 [P] [US1] Write unit test for hasApplicationData function in src/index.test.ts (returns false when no data)
+- [x] T008 [P] [US1] Write unit test for hasApplicationData function in src/index.test.ts (returns true when all data present)
+- [x] T009 [P] [US1] Write unit test for isMapViewDisplayed function in src/index.test.ts (returns false when upload section visible)
+- [x] T010 [P] [US1] Write unit test for isMapViewDisplayed function in src/index.test.ts (returns true when map view visible)
+- [x] T011 [P] [US1] Write unit test for updateButtonVisibility function in src/index.test.ts (hides export button when no data)
+- [x] T012 [P] [US1] Write unit test for updateButtonVisibility function in src/index.test.ts (shows export button when data loaded)
+- [x] T013 [P] [US1] Write integration test for export button visibility in upload section (not visible when no data) in src/index.test.ts
+- [x] T014 [P] [US1] Write integration test for export button visibility in map view (visible when data loaded) in src/index.test.ts
 
 ### Implementation for User Story 1
 
-- [ ] T015 [US1] Remove export button element from upload section in public/index.html (remove button with id="exportButton")
-- [ ] T016 [US1] Remove setupExportButton("exportButton") call from src/index.ts (line 84)
-- [ ] T017 [US1] Implement hasApplicationData function in src/index.ts to check if eventTeams, eventAmbassadors, and regionalAmbassadors all have data
-- [ ] T018 [US1] Implement isMapViewDisplayed function in src/index.ts to check if map view section display style is not "none"
-- [ ] T019 [US1] Implement updateButtonVisibility function in src/index.ts that calls hasApplicationData and isMapViewDisplayed, then updates export button visibility in map view
-- [ ] T020 [US1] Call updateButtonVisibility in ambassy function in src/index.ts when data state changes
-- [ ] T021 [US1] Ensure export button in map view (id="exportButtonMap") remains functional after visibility changes
+- [x] T015 [US1] Remove export button element from upload section in public/index.html (remove button with id="exportButton")
+- [x] T016 [US1] Remove setupExportButton("exportButton") call from src/index.ts (line 84)
+- [x] T017 [US1] Implement hasApplicationData function in src/index.ts to check if eventTeams, eventAmbassadors, and regionalAmbassadors all have data
+- [x] T018 [US1] Implement isMapViewDisplayed function in src/index.ts to check if map view section display style is not "none"
+- [x] T019 [US1] Implement updateButtonVisibility function in src/index.ts that calls hasApplicationData and isMapViewDisplayed, then updates export button visibility in map view
+- [x] T020 [US1] Call updateButtonVisibility in ambassy function in src/index.ts when data state changes
+- [x] T021 [US1] Ensure export button in map view (id="exportButtonMap") remains functional after visibility changes
 
 **Checkpoint**: At this point, User Story 1 should be fully functional and testable independently. Export button should only appear in map view when data is loaded.
 
@@ -85,22 +85,22 @@
 
 > **NOTE: Write these tests FIRST, ensure they FAIL before implementation**
 
-- [ ] T022 [P] [US2] Write unit test for updateButtonVisibility function ensuring import button always visible in upload section in src/index.test.ts
-- [ ] T023 [P] [US2] Write unit test for updateButtonVisibility function ensuring import button always visible in map view in src/index.test.ts
-- [ ] T024 [P] [US2] Write integration test for import button visibility in upload section (always visible) in src/index.test.ts
-- [ ] T025 [P] [US2] Write integration test for import button visibility in map view (always visible) in src/index.test.ts
-- [ ] T026 [P] [US2] Write integration test for import button functionality from upload section in src/index.test.ts
-- [ ] T027 [P] [US2] Write integration test for import button functionality from map view in src/index.test.ts
+- [x] T022 [P] [US2] Write unit test for updateButtonVisibility function ensuring import button always visible in upload section in src/index.test.ts
+- [x] T023 [P] [US2] Write unit test for updateButtonVisibility function ensuring import button always visible in map view in src/index.test.ts
+- [x] T024 [P] [US2] Write integration test for import button visibility in upload section (always visible) in src/index.test.ts
+- [x] T025 [P] [US2] Write integration test for import button visibility in map view (always visible) in src/index.test.ts
+- [x] T026 [P] [US2] Write integration test for import button functionality from upload section in src/index.test.ts
+- [x] T027 [P] [US2] Write integration test for import button functionality from map view in src/index.test.ts
 
 ### Implementation for User Story 2
 
-- [ ] T028 [US2] Verify import button exists in upload section (id="importButton") in public/index.html
-- [ ] T029 [US2] Verify import button exists in map view section (id="importButtonMap") in public/index.html
-- [ ] T030 [US2] Update updateButtonVisibility function in src/index.ts to ensure import buttons are always visible (both locations)
-- [ ] T031 [US2] Ensure setupImportButton calls remain for both button IDs in src/index.ts (lines 86-87)
-- [ ] T032 [US2] Verify import functionality works correctly when triggered from upload section
-- [ ] T033 [US2] Verify import functionality works correctly when triggered from map view section
-- [ ] T034 [US2] Ensure import button remains keyboard accessible in both locations
+- [x] T028 [US2] Verify import button exists in upload section (id="importButton") in public/index.html
+- [x] T029 [US2] Verify import button exists in map view section (id="importButtonMap") in public/index.html
+- [x] T030 [US2] Update updateButtonVisibility function in src/index.ts to ensure import buttons are always visible (both locations)
+- [x] T031 [US2] Ensure setupImportButton calls remain for both button IDs in src/index.ts (lines 86-87)
+- [x] T032 [US2] Verify import functionality works correctly when triggered from upload section
+- [x] T033 [US2] Verify import functionality works correctly when triggered from map view section
+- [x] T034 [US2] Ensure import button remains keyboard accessible in both locations
 
 **Checkpoint**: At this point, User Stories 1 AND 2 should both work independently. Import button should be accessible from both locations at all times.
 
@@ -110,17 +110,17 @@
 
 **Purpose**: Improvements that affect multiple user stories
 
-- [ ] T035 [P] Verify keyboard accessibility for all buttons (Tab navigation, Enter/Space activation) in both sections
-- [ ] T036 [P] Ensure no layout shifts occur when buttons appear/disappear (use display: none, not visibility: hidden)
-- [ ] T037 [P] Verify button visibility updates correctly when transitioning from upload section to map view
-- [ ] T038 [P] Verify button visibility updates correctly when data is cleared (purge button clicked)
-- [ ] T039 [P] Test button visibility when importing data while viewing map (should refresh visibility)
-- [ ] T040 [P] Ensure all tests pass and maintain high code coverage
-- [ ] T041 [P] Review code for adherence to Single Responsibility Principle
-- [ ] T042 [P] Verify Australian English is used for all user-facing text (if any added)
-- [ ] T043 [P] Perform final lint:fix and lint check
-- [ ] T044 [P] Run TypeScript type checking (tsc --noEmit)
-- [ ] T045 [P] Run all tests (pnpm test)
+- [x] T035 [P] Verify keyboard accessibility for all buttons (Tab navigation, Enter/Space activation) in both sections
+- [x] T036 [P] Ensure no layout shifts occur when buttons appear/disappear (use display: none, not visibility: hidden)
+- [x] T037 [P] Verify button visibility updates correctly when transitioning from upload section to map view
+- [x] T038 [P] Verify button visibility updates correctly when data is cleared (purge button clicked)
+- [x] T039 [P] Test button visibility when importing data while viewing map (should refresh visibility)
+- [x] T040 [P] Ensure all tests pass and maintain high code coverage
+- [x] T041 [P] Review code for adherence to Single Responsibility Principle
+- [x] T042 [P] Verify Australian English is used for all user-facing text (if any added)
+- [x] T043 [P] Perform final lint:fix and lint check
+- [x] T044 [P] Run TypeScript type checking (tsc --noEmit)
+- [x] T045 [P] Run all tests (pnpm test)
 
 ---
 
