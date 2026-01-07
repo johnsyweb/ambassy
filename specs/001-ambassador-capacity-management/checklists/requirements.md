@@ -38,4 +38,12 @@
 - Success criteria are measurable and user-focused
 - Clear distinction between onboarding (P1), capacity checking (P2), offboarding (P3), and configuration (P4)
 - Assumptions clearly documented to guide implementation decisions
+- **CLARIFICATIONS ADDRESSED**: Allocation principles integrated:
+  - Regional alignment (Victoria divided into three regions)
+  - Landowner grouping (events with common landowners together)
+  - Geographic proximity (nearby events to nearby ambassadors)
+  - Conflict of interest consideration
+  - Environmental impact (map informs but doesn't dictate)
+  - Pragmatic approach (don't let perfect get in the way of better)
+- Allocation principles now reflected in User Story 3, functional requirements, success criteria, and assumptions
 
