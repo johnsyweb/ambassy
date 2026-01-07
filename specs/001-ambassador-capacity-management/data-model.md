@@ -48,7 +48,7 @@ A recommendation to move events or Event Ambassadors from one ambassador to anot
 - `toAmbassador` (string, required): Name of suggested recipient ambassador
 - `items` (string[], required): Array of event names or Event Ambassador names to reallocate
 - `score` (number, required): Calculated score indicating how well this suggestion matches allocation principles (higher is better)
-- `reasons` (string[], optional): Array of reasons explaining why this suggestion was made (e.g., "Same region", "Common landowner", "Geographic proximity")
+- `reasons` (string[], optional): Array of reasons explaining why this suggestion was made (e.g., "Same region" (determined from supportsEAs), "Geographic proximity")
 - `warnings` (string[], optional): Array of warnings about this suggestion (e.g., "Would exceed capacity limit", "Potential conflict of interest")
 
 **Relationships**: Generated for offboarding operations
@@ -60,22 +60,22 @@ A recommendation to move events or Event Ambassadors from one ambassador to anot
 - `score` must be >= 0
 - Multiple suggestions may be generated for a single offboarding operation
 
-### Region
+### Region (Determined Dynamically)
 
-One of three regions that Victoria is divided into.
+**Note**: Region is NOT stored as a separate entity or field. Region is determined dynamically from the `supportsEAs` relationship.
 
-**Values**:
-- `REGION_1`: First Victoria region (name/configurable)
-- `REGION_2`: Second Victoria region (name/configurable)
-- `REGION_3`: Third Victoria region (name/configurable)
-- `UNKNOWN`: Region not assigned or cannot be determined
+**Definition**: Two Event Ambassadors are in the "same region" if they are both supported by the same Regional Ambassador (i.e., both appear in the same Regional Ambassador's `supportsEAs` list).
 
-**Relationships**: Assigned to events and ambassadors
+**Determination Logic**:
+- To find an Event Ambassador's region: Find which Regional Ambassador has this EA in their `supportsEAs` list
+- To check if two Event Ambassadors are in the same region: Check if they are both supported by the same Regional Ambassador
+- If an Event Ambassador is not supported by any Regional Ambassador, regional alignment cannot be determined
+
+**Relationships**: Derived from RegionalAmbassador.supportsEAs relationship
 
 **Validation Rules**:
-- Events may be assigned to regions manually or automatically
-- Region assignment may be ambiguous or span multiple regions
-- Default to UNKNOWN if assignment cannot be determined
+- Region is always determined dynamically, never stored
+- If an Event Ambassador is not in any Regional Ambassador's `supportsEAs` list, regional alignment cannot be determined for reallocation suggestions
 
 ### EventAmbassador (Extended)
 
@@ -87,15 +87,14 @@ Existing entity extended with capacity-related fields.
 
 **New Fields**:
 - `capacityStatus` (CapacityStatus, calculated): Current capacity status
-- `region` (Region, optional): Region assignment
 - `conflicts` (string[], optional): Array of ambassador names or event names that represent conflicts of interest
 
-**Relationships**: Unchanged from existing model
+**Relationships**: Unchanged from existing model. Region is determined dynamically by finding which Regional Ambassador has this EA in their `supportsEAs` list.
 
 **Validation Rules**:
 - `capacityStatus` is calculated based on `events.length` and CapacityLimits
 - `conflicts` array may be empty
-- `region` may be UNKNOWN
+- Region is NOT stored - determined dynamically from supportsEAs relationship
 
 ### RegionalAmbassador (Extended)
 
@@ -108,30 +107,23 @@ Existing entity extended with capacity-related fields.
 
 **New Fields**:
 - `capacityStatus` (CapacityStatus, calculated): Current capacity status
-- `region` (Region, optional): Region assignment
 - `conflicts` (string[], optional): Array of Event Ambassador names that represent conflicts of interest
 
-**Relationships**: Unchanged from existing model
+**Relationships**: Unchanged from existing model. Regional Ambassadors define regions through their `supportsEAs` list - Event Ambassadors in the same REA's `supportsEAs` list are in the same region.
 
 **Validation Rules**:
 - `capacityStatus` is calculated based on `supportsEAs.length` and CapacityLimits
 - `conflicts` array may be empty
-- `region` may be UNKNOWN
+- Region is NOT stored - Event Ambassadors' regions are determined by which Regional Ambassador supports them
 
 ### EventDetails (Extended)
 
-Existing entity extended with region information.
+Existing entity - no changes required for region.
 
 **Existing Fields**: (from EventDetails interface)
 - `id`, `type`, `geometry`, `properties` (unchanged)
 
-**New Fields** (stored separately or in metadata):
-- `region` (Region, optional): Region assignment for this event
-
-**Relationships**: Unchanged from existing model
-
-**Validation Rules**:
-- `region` may be UNKNOWN if not assigned
+**Note**: Event region is determined dynamically from the Event Ambassador's region (which is determined from which Regional Ambassador supports that EA). No region field needed on EventDetails.
 
 ## State Transitions
 
@@ -197,8 +189,9 @@ Existing entity extended with region information.
 
 ### Region Validation
 
-1. **Valid Region**: Region must be one of the defined values or UNKNOWN
-2. **Consistency**: Events in same region should be grouped where possible
+1. **Dynamic Determination**: Region is determined dynamically from supportsEAs relationship - no validation needed
+2. **Consistency**: Events supported by Event Ambassadors in the same Regional Ambassador's `supportsEAs` list are in the same region
+3. **Missing Support**: If an Event Ambassador is not supported by any Regional Ambassador, regional alignment cannot be determined for reallocation suggestions
 
 ## Error States
 

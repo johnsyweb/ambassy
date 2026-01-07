@@ -1,98 +1,78 @@
 # Implementation Plan: Ambassador Capacity Management and Lifecycle
 
-**Branch**: `001-ambassador-capacity-management` | **Date**: 2026-01-07 | **Spec**: [spec.md](./spec.md)
+**Branch**: `001-ambassador-capacity-management` | **Date**: 2026-01-09 | **Spec**: [spec.md](./spec.md)
 **Input**: Feature specification from `/specs/001-ambassador-capacity-management/spec.md`
-
-**Note**: This template is filled in by the `/speckit.plan` command. See `.specify/templates/commands/plan.md` for the execution workflow.
 
 ## Summary
 
-This feature adds comprehensive ambassador lifecycle management to the Ambassy application, enabling onboarding and offboarding of Event Ambassadors and Regional Ambassadors with intelligent capacity checking and reallocation suggestions. The system will calculate capacity based on configurable limits, flag ambassadors who are under or over capacity, and provide reallocation suggestions that consider multiple allocation principles: capacity availability, regional alignment, geographic proximity, and conflict avoidance. Capacity limits are configurable and persist across sessions. 
+This feature enables onboarding and offboarding of Event Ambassadors and Regional Ambassadors, with capacity checking and intelligent reallocation suggestions. The system tracks ambassador capacity against configurable limits, flags ambassadors who are under or over capacity, and provides reallocation suggestions during offboarding that consider capacity availability, regional alignment (determined dynamically from supportsEAs relationship), geographic proximity, and conflict avoidance.
 
-**Critical Offboarding Requirements**: The offboarding process must ensure complete data integrity by validating that all allocations can be reallocated BEFORE allowing offboarding to start. Once offboarding completes, the system must automatically clean up all references: remove Event Ambassadors from Regional Ambassadors' supportsEAs lists, update Event Teams table references, remove visual representations from the map view, and ensure offboarded ambassadors only appear in the changes log. The implementation leverages existing data structures and geographic data while adding new models for capacity configuration and reallocation suggestions.
+**Technical Approach**: Extend existing TypeScript web application with new models (CapacityStatus, CapacityLimits, ReallocationSuggestion), utility functions for geographic calculations and capacity checking, and UI components for onboarding/offboarding workflows. Region determination is dynamic based on which Regional Ambassador supports each Event Ambassador (via supportsEAs relationship), not stored as a separate field.
 
 ## Technical Context
 
-**Language/Version**: TypeScript 5.9.3 (strict mode enabled, ES6 target)
+**Language/Version**: TypeScript 5.9.3 (strict mode enabled)
 
 **Primary Dependencies**: 
-- No new external dependencies required
-- Uses existing leaflet (map visualization)
-- Uses existing d3-geo-voronoi (geographic calculations)
-- Uses existing localStorage API (persistence)
-- May use haversine formula or similar for distance calculations (can implement directly or use lightweight library)
+- Existing: Leaflet (map visualization), d3-geo-voronoi (regional polygons), PapaParse (CSV parsing)
+- New: None required - using native JavaScript/TypeScript for geographic calculations (Haversine formula)
 
-**Storage**: 
-- Browser localStorage API (for capacity limit configuration)
-- Existing application state persistence (for ambassador data)
-- No database required (client-side only)
+**Storage**: localStorage (browser-based persistence, already implemented)
 
-**Testing**: Jest 30.2.0 with ts-jest 29.4.5, jsdom environment
+**Testing**: Jest 30.2.0 with jest-environment-jsdom for browser API simulation
 
-**Target Platform**: Modern web browsers (ES6+), client-side only application
+**Target Platform**: Modern web browsers (ES6+)
 
 **Project Type**: Single-page web application
 
 **Performance Goals**: 
-- Capacity checking completes in under 100ms for all ambassadors
-- Reallocation suggestion generation completes in under 2 seconds for typical scenarios (up to 50 events, 20 ambassadors)
-- Onboarding/offboarding operations complete in under 1 second
-- UI updates reflect capacity status within 1 second of data changes
+- Capacity status calculation: < 100ms for 100 ambassadors
+- Reallocation suggestions: < 500ms for 50 potential recipients
+- UI updates: < 1 second for full refresh
 
 **Constraints**: 
-- Must maintain existing data structures (EventAmbassador, RegionalAmbassador interfaces)
-- Must work with existing geographic data (EventDetails with coordinates)
-- Must integrate with existing changes log functionality
-- Must preserve backward compatibility with existing CSV upload functionality
-- Geographic calculations must handle missing or invalid coordinate data gracefully
-- Region assignment may need manual input or derivation from existing data
-- **Offboarding validation**: Must validate that all allocations can be reallocated before allowing offboarding to start
-- **Complete cleanup**: Must automatically remove all references to offboarded ambassadors (REA's supportsEAs, Event Teams table, map view) except changes log
-- **Data integrity**: Must prevent partial offboarding - all allocations must be reallocated before ambassador removal
+- Must work offline (localStorage-based)
+- Must maintain backward compatibility with existing data structures
+- All user inputs must be keyboard accessible
+- Australian English for all user-facing text
 
 **Scale/Scope**: 
-- Typical usage: 20-50 Event Ambassadors, 5-10 Regional Ambassadors, 100-200 events
-- Capacity limits: Configurable per ambassador type (defaults: EA 2-9 events, REA 3-10 EAs)
-- Reallocation suggestions: Must handle up to 20 events being reallocated simultaneously
-- Geographic calculations: Must handle Victoria region (approximately 227,000 km²)
+- Typical usage: 50-200 Event Ambassadors, 5-15 Regional Ambassadors, 100-300 events
+- Capacity limits: Configurable per ambassador type (Event/Regional)
+- Reallocation suggestions: Up to 10 suggestions per offboarding action
 
 ## Constitution Check
 
 *GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
 
-### Quality Gates (NON-NEGOTIABLE)
-- ✅ Code MUST be formatted with Prettier - Will use existing Prettier configuration
-- ✅ Code MUST pass ESLint linting - Will use existing ESLint configuration
-- ✅ Code MUST pass TypeScript type checking - Will use strict TypeScript mode
-- ✅ All tests MUST pass - Will write comprehensive tests for all new functionality
-- ✅ Disused code MUST be removed - Will remove any temporary code after implementation
+### Quality Gates (I)
+✅ **PASS**: All code will be formatted with Prettier, linted with ESLint, type-checked with TypeScript, and tested with Jest before commit.
 
-### Test-Driven Development
-- ✅ Tests MUST be written for production code - Will write tests first following TDD
-- ✅ Tests MUST NOT check for test environment - Tests will test production code directly
-- ✅ Functions MUST have low cyclomatic complexity - Will break complex reallocation logic into smaller functions
-- ✅ Tests MUST NOT pollute console - Will ensure test output is clean
+### Test-Driven Development (II)
+✅ **PASS**: Tests will be written first (TDD), test production code directly, maintain high coverage, and not pollute console. Tests will not be skipped without explicit confirmation.
 
-### Atomic Commits with Semantic Messages
-- ✅ Each change MUST be committed atomically - Will commit feature incrementally by user story
-- ✅ Commit messages MUST follow Conventional Commits - Will use "feat:", "fix:", "refactor:" prefixes
+### Atomic Commits (III)
+✅ **PASS**: Each change will be committed atomically with semantic commit messages following Conventional Commits.
 
-### Single Responsibility & Clean Architecture
-- ✅ Each component MUST have single responsibility - Will create focused functions for capacity checking, reallocation, onboarding, offboarding
-- ✅ Code layout MUST follow current structure - Will add new files to `src/actions/`, `src/models/`, `src/utils/` as appropriate
+### Single Responsibility & Clean Architecture (IV)
+✅ **PASS**: Code follows existing structure (models, actions, parsers, utils). Self-documenting code preferred over comments.
 
-### Accessibility & User Experience
-- ✅ Every user input MUST be controllable from keyboard - All new UI elements will be keyboard accessible
-- ✅ UI MUST be clean, consistent, accessible - Will follow existing UI patterns
-- ✅ Use Australian English - Will use Australian English for all user-facing text
+### Accessibility & UX (V)
+✅ **PASS**: All UI elements will be keyboard accessible. Australian English for user-facing text.
 
-### Open Source Preference
-- ✅ Favour open source libraries - Will use existing libraries, implement distance calculations directly if needed (haversine formula is simple)
+### Open Source Preference (VI)
+✅ **PASS**: Using existing open source libraries (Leaflet, d3-geo-voronoi). Geographic calculations implemented natively (no new dependencies).
 
-### Documentation Currency
-- ✅ README MUST remain up-to-date - Will update README with new features and usage instructions
+### Documentation Currency (VII)
+✅ **PASS**: README will be updated with new features. Documentation reflects current state.
 
-**Gate Status**: ✅ ALL GATES PASS - No violations identified. Implementation aligns with all constitution principles.
+### Production/Test Parity (VIII)
+✅ **PASS**: Code behaves identically in production and test. No environment-specific branches.
+
+### Twelve-Factor App Principles (IX)
+✅ **PASS**: Configuration via localStorage (client-side equivalent of environment variables), stateless processes, disposability, development/production parity.
+
+**GATE STATUS**: ✅ **ALL GATES PASS**
 
 ## Project Structure
 
@@ -105,6 +85,10 @@ specs/001-ambassador-capacity-management/
 ├── data-model.md        # Phase 1 output (/speckit.plan command)
 ├── quickstart.md        # Phase 1 output (/speckit.plan command)
 ├── contracts/           # Phase 1 output (/speckit.plan command)
+│   ├── onboarding-contracts.md
+│   ├── capacity-contracts.md
+│   ├── offboarding-contracts.md
+│   └── reallocation-contracts.md
 └── tasks.md             # Phase 2 output (/speckit.tasks command - NOT created by /speckit.plan)
 ```
 
@@ -113,73 +97,73 @@ specs/001-ambassador-capacity-management/
 ```text
 src/
 ├── models/
-│   ├── CapacityLimits.ts          # NEW: Capacity limit configuration model
-│   ├── CapacityStatus.ts           # NEW: Capacity status enum/types
-│   ├── ReallocationSuggestion.ts  # NEW: Reallocation suggestion model
-│   ├── Region.ts                   # NEW: Region assignment model
+│   ├── CapacityStatus.ts          # NEW: Enum for capacity status (WITHIN/UNDER/OVER)
+│   ├── CapacityLimits.ts          # NEW: Interface for configurable limits
+│   ├── ReallocationSuggestion.ts  # NEW: Interface for reallocation suggestions
+│   ├── EventAmbassador.ts         # EXTENDED: Added capacityStatus, conflicts fields
+│   ├── RegionalAmbassador.ts      # EXTENDED: Added capacityStatus, conflicts fields
 │   └── [existing models...]
 ├── actions/
-│   ├── onboardAmbassador.ts        # NEW: Onboarding functionality
-│   ├── offboardAmbassador.ts      # NEW: Offboarding functionality with validation and cleanup
-│   ├── checkCapacity.ts           # NEW: Capacity checking logic
-│   ├── suggestReallocation.ts    # NEW: Reallocation suggestion engine
-│   ├── configureCapacityLimits.ts # NEW: Capacity limit configuration
-│   ├── validateOffboarding.ts    # NEW: Pre-offboarding validation (ensures all allocations can be reallocated)
+│   ├── onboardAmbassador.ts       # NEW: Onboarding logic
+│   ├── offboardAmbassador.ts     # NEW: Offboarding logic with reallocation
+│   ├── checkCapacity.ts          # NEW: Capacity checking and status calculation
+│   ├── suggestReallocation.ts    # NEW: Reallocation suggestion algorithm
+│   ├── configureCapacityLimits.ts # NEW: Capacity limits configuration
+│   ├── assignEventToAmbassador.ts # NEW: Event assignment logic
 │   └── [existing actions...]
 ├── utils/
-│   ├── geography.ts                # NEW: Geographic distance calculations
-│   ├── regions.ts                  # NEW: Region assignment logic
+│   ├── geography.ts               # NEW: Haversine formula for distance calculations
 │   └── [existing utils...]
-└── [existing files...]
+└── index.ts                        # MODIFIED: UI integration for new features
 
-public/
-└── index.html                      # MODIFY: Add UI for onboarding, offboarding, capacity display, configuration
+tests/
+└── [mirrors src/ structure with .test.ts files]
 ```
 
-**Structure Decision**: Single project structure maintained. New functionality added to existing `src/actions/`, `src/models/`, and `src/utils/` directories following current patterns. UI modifications extend existing HTML structure.
+**Structure Decision**: Single-page web application structure maintained. New functionality added as extensions to existing models and new action files following established patterns. No architectural changes required.
 
 ## Implementation Details
 
-### Offboarding Validation and Cleanup
+### Region Determination (Clarified 2026-01-09)
 
-The offboarding process requires strict validation and complete cleanup to ensure data integrity:
+**Critical Update**: Region is determined dynamically from the `supportsEAs` relationship, not stored as a separate field. Two Event Ambassadors are in the "same region" if they are both supported by the same Regional Ambassador (i.e., both appear in the same Regional Ambassador's `supportsEAs` list).
 
-1. **Pre-offboarding Validation** (`validateOffboarding.ts`):
-   - Validate that all Event Ambassador's events can be reallocated to existing ambassadors
-   - Validate that all Regional Ambassador's Event Ambassadors can be reallocated to existing Regional Ambassadors
-   - Block offboarding if validation fails (no recipient specified or recipient doesn't exist)
-   - Provide clear error messages indicating which allocations cannot be reallocated
+**Impact on Implementation**:
+- Remove `region` field from `EventAmbassador` and `RegionalAmbassador` interfaces (if present)
+- Update `suggestReallocation.ts` to determine region dynamically by finding which Regional Ambassador supports each Event Ambassador
+- Update `calculateReallocationScore` to use dynamic region lookup instead of stored region field
+- Remove `Region` enum and `regions.ts` utility (if region assignment logic exists)
 
-2. **Automatic Cleanup During Offboarding** (`offboardAmbassador.ts`):
-   - **Event Ambassador offboarding**:
-     - Reallocate all events to recipient (or block if no recipient)
-     - Remove Event Ambassador from all Regional Ambassadors' `supportsEAs` lists
-     - Update Event Teams table to show new Event Ambassador assignments
-     - Remove Event Ambassador from `eventAmbassadors` map
-     - Persist changes to localStorage
-   - **Regional Ambassador offboarding**:
-     - Reallocate all Event Ambassadors to recipient (or block if no recipient)
-     - Update Event Teams table to show new Regional Ambassador assignments
-     - Remove Regional Ambassador from `regionalAmbassadors` map
-     - Persist changes to localStorage
+### Capacity Checking Flow
 
-3. **UI Cleanup** (`refreshUI.ts`, `populateAmbassadorsTable.ts`, `populateMap.ts`):
-   - Event Ambassadors table: Only display ambassadors present in `eventAmbassadors` map
-   - Regional Ambassadors table: Only display ambassadors present in `regionalAmbassadors` map
-   - Event Teams table: Derived from `eventTeamsTableData` which is built from current ambassador maps
-   - Map view: Derived from `eventTeamsTableData` - automatically excludes offboarded ambassadors
-   - Changes log: Continues to show offboarded ambassadors in historical entries
+1. Load capacity limits from localStorage (defaults if not configured)
+2. Calculate capacity status for each ambassador based on current allocations
+3. Update `capacityStatus` field on ambassador objects
+4. Display status in UI with emoji indicators (⬇️ under, ✅ within, ⚠️ over)
 
-4. **Validation Flow**:
-   - User clicks "Offboard" button
-   - System validates that ambassador has allocations
-   - If allocations exist, system requires user to specify recipient (or blocks if no suitable recipients)
-   - System validates recipient exists and can accept allocations
-   - Only after validation passes, offboarding proceeds with automatic cleanup
-   - UI refreshes automatically to reflect changes
+### Reallocation Scoring Algorithm
+
+Multi-factor scoring system with weighted factors:
+- **Capacity** (30% weight): Available capacity, within limits preferred
+- **Region** (30% weight): Same Regional Ambassador preferred (determined dynamically)
+- **Proximity** (30% weight): Geographic proximity to existing events
+- **Conflicts** (10% weight): Penalty for conflicts of interest
+
+### Offboarding Validation
+
+Before offboarding starts:
+1. Validate all events/EAs can be reallocated to existing ambassadors
+2. Block offboarding if validation fails
+3. After validation passes, prompt user for recipient per event/EA
+4. Complete offboarding with automatic cleanup:
+   - Remove ambassador from all data structures
+   - Remove from Regional Ambassador's `supportsEAs` list (if EA)
+   - Update Event Teams table
+   - Refresh map view
+   - Log changes
 
 ## Complexity Tracking
 
 > **Fill ONLY if Constitution Check has violations that must be justified**
 
-No violations identified. Implementation follows existing patterns and adds focused functionality without architectural changes. The validation and cleanup logic is straightforward and follows single responsibility principle.
+No violations - all gates pass.

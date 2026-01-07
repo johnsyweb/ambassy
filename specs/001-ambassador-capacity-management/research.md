@@ -27,26 +27,27 @@
 - Handle missing or invalid coordinates gracefully (return null or large distance)
 - Cache distance calculations if performance becomes an issue (optimization for later)
 
-### 2. Region Assignment Strategy
+### 2. Region Determination Strategy
 
-**Decision**: Support both manual assignment and automatic derivation from event coordinates
+**Decision**: Determine region dynamically from the `supportsEAs` relationship (which Regional Ambassador supports each Event Ambassador)
 
 **Rationale**:
-- Victoria's three regions may not have clear geographic boundaries
-- Some events may span regions or have ambiguous assignments
-- Manual assignment provides flexibility for edge cases
-- Automatic derivation can assist but shouldn't override manual assignments
+- Clarified on 2026-01-09: "Region" means "supported by the same Regional Ambassador"
+- Two Event Ambassadors are in the same region if they are both supported by the same Regional Ambassador
+- Region is determined dynamically from existing data structure (supportsEAs relationship)
+- No separate region assignment or storage needed
+- Simplifies implementation by using existing relationship
 
 **Alternatives Considered**:
-- Purely manual assignment: More accurate but requires user input for every event
-- Purely automatic assignment: May be inaccurate for boundary cases or events with missing coordinates
-- Region boundaries as polygons: Complex to implement, may not match actual organisational boundaries
+- Stored region field: Adds complexity, requires manual assignment, may become inconsistent with supportsEAs
+- Geographic region boundaries: Complex to implement, may not match organisational structure
+- Manual region assignment: Unnecessary since region is determined from supportsEAs relationship
 
 **Implementation Notes**:
-- Store region assignment in EventDetails or separate mapping
-- Provide UI for manual region assignment
-- Optional automatic suggestion based on coordinates (can be overridden)
-- Default to "Unknown" region if assignment cannot be determined
+- Region is NOT stored as a separate field
+- To determine if two Event Ambassadors are in the same region: find which Regional Ambassador supports each EA (by checking which REA has them in their supportsEAs list), then compare
+- For reallocation suggestions: prefer recipients who are supported by the same Regional Ambassador as the offboarded ambassador
+- If an Event Ambassador is not supported by any Regional Ambassador, regional alignment cannot be determined (still provide suggestions based on other factors)
 
 ### 3. Landowner Information Extraction
 
@@ -105,7 +106,7 @@
 **Implementation Notes**:
 - Score each potential recipient ambassador based on:
   - Capacity availability (higher score for more available capacity)
-  - Regional alignment (higher score for same region)
+  - Regional alignment (higher score for same Regional Ambassador - determined dynamically from supportsEAs)
   - Geographic proximity (higher score for closer events)
   - Conflict avoidance (exclude or heavily penalize conflicts)
 - Weight factors based on importance (capacity > region > proximity)
