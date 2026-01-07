@@ -111,7 +111,8 @@ As a Regional Event Ambassador, I want to configure the preferred capacity range
 - What happens if capacity limits are set to 0 or negative values? System should validate and reject invalid limits
 - How does the system handle duplicate ambassador names during onboarding? System should prevent duplicates or require unique identifiers
 - What happens when reallocating events would push a recipient ambassador over capacity? System should warn but allow the reallocation if user confirms
-- How does the system handle partial reallocation (some events to one ambassador, others to another)? System should support distributing events across multiple ambassadors
+- How does the system handle partial reallocation (some events to one ambassador, others to another)? System should support distributing events across multiple ambassadors, with each reassignment logged as a separate row in the changelog
+- How does the system make it easy to select new assignments during offboarding? System displays clickable suggestion buttons (top 3-5 suggestions with scores and reasons) for each event/EA, with a dropdown fallback for "Other" or manual selection, reducing typing errors and making reasoning visible
 - What happens when an Event Ambassador is offboarded but their events are not reallocated? Offboarding is blocked until all events are reallocated - user must specify recipient for all events before offboarding can complete
 - What happens when geographic proximity conflicts with other principles (e.g., capacity)? System should balance principles pragmatically, allowing user override
 - How does the system handle conflicts of interest when no conflict-free ambassadors are available? System should flag conflicts but allow user to proceed if they confirm
