@@ -11,6 +11,14 @@
 
 - Q: Landowner extraction: Pattern matching from EventLocation field is probably not possible. Let's remove this as a requirement for now. → A: Landowner extraction requirement removed. Landowner grouping is no longer part of allocation principles. System will focus on capacity, region, geographic proximity, and conflict avoidance.
 
+### Session 2026-01-08
+
+- Q: Should offboarding be blocked if allocations remain unassigned, or should it proceed with automatic cleanup? → A: Block offboarding if any allocations remain unassigned - user must reallocate all events/EAs before offboarding can complete. This ensures data integrity and prevents orphaned references.
+- Q: When an Event Ambassador is offboarded, should they be automatically removed from their Regional Ambassador's supportsEAs list? → A: Automatically remove the offboarded EA from their REA's supportsEAs list during offboarding (no user action required). This ensures complete cleanup and prevents orphaned references.
+- Q: Should Event Teams table references be automatically updated when offboarding completes? → A: Automatically update Event Teams table to show new EA/REA assignments when offboarding completes (no user action required). This ensures the UI reflects the reallocation immediately.
+- Q: Should ambassador's visual representation (color/polygon/marker) be automatically removed from map when offboarding completes? → A: Automatically remove ambassador's color/polygon/marker from map when offboarding completes (map updates via eventTeamsTableData refresh). This ensures consistency across all UI views.
+- Q: When should the system validate that all allocations can be reallocated - before starting offboarding or during the process? → A: Validate that all allocations can be reallocated BEFORE allowing offboarding to start - block offboarding if validation fails. This prevents partial offboarding and ensures data integrity.
+
 ## User Scenarios & Testing *(mandatory)*
 
 ### User Story 1 - Onboard New Ambassadors (Priority: P1)
@@ -61,8 +69,8 @@ As a Regional Event Ambassador, I want to remove an ambassador from the system a
 1. **Given** an Event Ambassador supports 3 events and there are other Event Ambassadors with capacity, **When** the user offboards the ambassador, **Then** the system suggests reallocating the 3 events to ambassadors with available capacity, prioritising those in the same region, with nearby events, and avoiding conflicts of interest
 2. **Given** events are geographically close, **When** the system suggests reallocation, **Then** those events are prioritised for allocation to Event Ambassadors already supporting nearby events
 4. **Given** a Regional Ambassador supports 5 Event Ambassadors and there are other Regional Ambassadors with capacity, **When** the user offboards the Regional Ambassador, **Then** the system suggests reallocating the 5 Event Ambassadors to Regional Ambassadors with available capacity, prioritising those in the same region
-5. **Given** an ambassador is offboarded and events are reallocated, **When** the user confirms the reallocation, **Then** the events are moved to the new ambassador and the old ambassador is removed
-6. **Given** there are no ambassadors with available capacity for reallocation, **When** the user attempts to offboard an ambassador, **Then** the system warns that reallocation may exceed capacity limits but still provides suggestions
+5. **Given** an ambassador is offboarded and events are reallocated, **When** the user confirms the reallocation, **Then** the events are moved to the new ambassador, the old ambassador is removed from all UI views (except changelog), and all references are cleaned up (removed from REA's supportsEAs list, Event Teams table updated, map view updated)
+6. **Given** there are no ambassadors with available capacity for reallocation, **When** the user attempts to offboard an ambassador, **Then** the system blocks offboarding until all allocations can be reallocated (validation occurs before offboarding starts)
 7. **Given** reallocation suggestions cannot perfectly satisfy all principles (e.g., capacity vs proximity), **When** the system presents suggestions, **Then** the system prioritises pragmatically and allows users to override suggestions
 8. **Given** an ambassador is offboarded, **When** the reallocation is complete, **Then** the changes are logged in the changes log
 9. **Given** Victoria is divided into three regions, **When** events are displayed or reallocated, **Then** it is clear which region each event belongs to
@@ -89,13 +97,13 @@ As a Regional Event Ambassador, I want to configure the preferred capacity range
 
 ### Edge Cases
 
-- What happens when offboarding an ambassador who has no assigned events/EAs? The ambassador should be removed without reallocation prompts
-- How does the system handle offboarding when all remaining ambassadors are already at or over capacity? System should warn but allow offboarding with manual reallocation
+- What happens when offboarding an ambassador who has no assigned events/EAs? The ambassador should be removed without reallocation prompts, and all references cleaned up (removed from REA's supportsEAs if EA, removed from all UI views except changelog)
+- How does the system handle offboarding when all remaining ambassadors are already at or over capacity? System should block offboarding until user can reallocate all allocations to existing ambassadors (validation occurs before offboarding starts)
 - What happens if capacity limits are set to 0 or negative values? System should validate and reject invalid limits
 - How does the system handle duplicate ambassador names during onboarding? System should prevent duplicates or require unique identifiers
 - What happens when reallocating events would push a recipient ambassador over capacity? System should warn but allow the reallocation if user confirms
 - How does the system handle partial reallocation (some events to one ambassador, others to another)? System should support distributing events across multiple ambassadors
-- What happens when an Event Ambassador is offboarded but their events are not reallocated? Events should remain unassigned or be flagged for manual assignment
+- What happens when an Event Ambassador is offboarded but their events are not reallocated? Offboarding is blocked until all events are reallocated - user must specify recipient for all events before offboarding can complete
 - What happens when geographic proximity conflicts with other principles (e.g., capacity)? System should balance principles pragmatically, allowing user override
 - How does the system handle conflicts of interest when no conflict-free ambassadors are available? System should flag conflicts but allow user to proceed if they confirm
 - What happens when events span multiple regions or regions are not clearly defined? System should still provide suggestions, flagging ambiguity for user review
@@ -119,6 +127,11 @@ As a Regional Event Ambassador, I want to configure the preferred capacity range
 - **FR-012**: System MUST allow users to remove (offboard) Regional Ambassadors from the system
 - **FR-013**: System MUST suggest reallocation of events when offboarding an Event Ambassador
 - **FR-014**: System MUST suggest reallocation of Event Ambassadors when offboarding a Regional Ambassador
+- **FR-031**: System MUST validate that all allocations can be reallocated BEFORE allowing offboarding to start - block offboarding if any allocations remain unassigned
+- **FR-032**: System MUST automatically remove offboarded Event Ambassador from their Regional Ambassador's supportsEAs list during offboarding
+- **FR-033**: System MUST automatically update Event Teams table to show new EA/REA assignments when offboarding completes
+- **FR-034**: System MUST automatically remove offboarded ambassador's visual representation (color/polygon/marker) from map when offboarding completes
+- **FR-035**: System MUST ensure offboarded ambassadors do not appear in any UI view except the changes log after offboarding completes
 - **FR-015**: System MUST prioritise reallocation suggestions to ambassadors with available capacity (within preferred limits)
 - **FR-016**: System MUST warn users when reallocation would push recipients over capacity limits
 - **FR-023**: System MUST identify and display which region (of three Victoria regions) each event belongs to
@@ -155,6 +168,9 @@ As a Regional Event Ambassador, I want to configure the preferred capacity range
 - **SC-004**: Capacity status is visible to users within 1 second of viewing ambassador information
 - **SC-005**: Users can offboard an Event Ambassador and receive reallocation suggestions in under 2 minutes
 - **SC-006**: Users can offboard a Regional Ambassador and receive reallocation suggestions in under 2 minutes
+- **SC-014**: System blocks offboarding when allocations cannot be reallocated 100% of the time (validation occurs before offboarding starts)
+- **SC-015**: Offboarded ambassadors are completely removed from all UI views (Event Ambassadors table, Regional Ambassadors table, Event Teams table, map view) except changes log 100% of the time
+- **SC-016**: All references to offboarded ambassadors are cleaned up automatically (removed from REA's supportsEAs list, Event Teams table updated, map view updated) within 1 second of offboarding completion
 - **SC-007**: Reallocation suggestions prioritise ambassadors with available capacity (within preferred limits) 100% of the time when such ambassadors exist
 - **SC-012**: Reallocation suggestions consider regional alignment, geographic proximity, and conflict avoidance in addition to capacity 100% of the time
 - **SC-013**: Reallocation suggestions prioritise geographically nearby events for Event Ambassadors already supporting nearby events at least 70% of the time when such ambassadors have capacity
@@ -167,7 +183,7 @@ As a Regional Event Ambassador, I want to configure the preferred capacity range
 
 - Ambassadors have unique names within their type (Event Ambassador names are unique, Regional Ambassador names are unique, but an Event Ambassador and Regional Ambassador could share the same name)
 - Capacity limits are positive integers (no fractional or negative values)
-- When offboarding, users want suggestions but may choose to manually reallocate or leave events unassigned
+- When offboarding, users must reallocate all allocations before offboarding can complete - offboarding is blocked until all events/EAs are assigned to recipients
 - Capacity checking is based on current allocations only (does not consider future planned changes)
 - Reallocation suggestions are recommendations that users can accept, modify, or reject
 - Capacity limits apply globally to all ambassadors of the same type (not per-ambassador custom limits)
