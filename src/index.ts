@@ -270,8 +270,186 @@ function setupCapacityLimitsConfiguration(): void {
 
 setupCapacityLimitsConfiguration();
 
+function showReallocationDialog(
+  itemName: string,
+  suggestions: Array<{ toAmbassador: string; score: number; reasons?: string[]; warnings?: string[] }>,
+  availableOptions: string[],
+  itemType: "event" | "eventAmbassador"
+): Promise<string | null> {
+  return new Promise((resolve) => {
+    const dialog = document.getElementById("reallocationDialog") as HTMLElement;
+    const title = document.getElementById("reallocationDialogTitle") as HTMLElement;
+    const content = document.getElementById("reallocationDialogContent") as HTMLElement;
+    const cancelButton = document.getElementById("reallocationDialogCancel") as HTMLButtonElement;
+
+    if (!dialog || !title || !content || !cancelButton) {
+      resolve(null);
+      return;
+    }
+
+    const itemLabel = itemType === "event" ? "Event" : "Event Ambassador";
+    title.textContent = `Select Recipient for ${itemLabel}: ${itemName}`;
+    content.innerHTML = "";
+
+    const topSuggestions = suggestions.slice(0, 5);
+    const suggestionsContainer = document.createElement("div");
+    suggestionsContainer.style.marginBottom = "1em";
+
+    if (topSuggestions.length > 0) {
+      const suggestionsLabel = document.createElement("p");
+      suggestionsLabel.textContent = "Suggested recipients:";
+      suggestionsLabel.style.fontWeight = "bold";
+      suggestionsLabel.style.marginBottom = "0.5em";
+      suggestionsContainer.appendChild(suggestionsLabel);
+
+      const buttonsContainer = document.createElement("div");
+      buttonsContainer.style.display = "flex";
+      buttonsContainer.style.flexDirection = "column";
+      buttonsContainer.style.gap = "0.5em";
+      buttonsContainer.setAttribute("role", "group");
+      buttonsContainer.setAttribute("aria-label", "Suggested recipients");
+
+      topSuggestions.forEach((suggestion, index) => {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.textContent = `${suggestion.toAmbassador} (Score: ${suggestion.score.toFixed(2)})`;
+        button.setAttribute("data-recipient", suggestion.toAmbassador);
+        button.style.padding = "0.75em 1em";
+        button.style.textAlign = "left";
+        button.style.border = "1px solid #333";
+        button.style.borderRadius = "4px";
+        button.style.backgroundColor = index === 0 ? "#e3f2fd" : "white";
+        button.style.cursor = "pointer";
+        button.setAttribute("tabindex", index === 0 ? "0" : "-1");
+
+        const reasonsText = suggestion.reasons?.join("; ") || "";
+        const warningsText = suggestion.warnings?.join("; ") || "";
+        const tooltip = `${reasonsText}${warningsText ? ` (Warnings: ${warningsText})` : ""}`;
+        button.title = tooltip;
+        button.setAttribute("aria-label", `${suggestion.toAmbassador}, score ${suggestion.score.toFixed(2)}. ${tooltip}`);
+
+        if (warningsText) {
+          button.style.borderColor = "#ff9800";
+        }
+
+        button.addEventListener("click", () => {
+          dialog.style.display = "none";
+          resolve(suggestion.toAmbassador);
+        });
+
+        button.addEventListener("keydown", (e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            button.click();
+          } else if (e.key === "ArrowDown") {
+            e.preventDefault();
+            const nextButton = buttonsContainer.querySelector(`button:nth-child(${index + 2})`) as HTMLButtonElement;
+            if (nextButton) {
+              button.setAttribute("tabindex", "-1");
+              nextButton.setAttribute("tabindex", "0");
+              nextButton.focus();
+            } else {
+              const dropdown = content.querySelector("select") as HTMLSelectElement;
+              if (dropdown) {
+                button.setAttribute("tabindex", "-1");
+                dropdown.focus();
+              }
+            }
+          } else if (e.key === "ArrowUp") {
+            e.preventDefault();
+            const prevButton = buttonsContainer.querySelector(`button:nth-child(${index})`) as HTMLButtonElement;
+            if (prevButton) {
+              button.setAttribute("tabindex", "-1");
+              prevButton.setAttribute("tabindex", "0");
+              prevButton.focus();
+            }
+          }
+        });
+
+        buttonsContainer.appendChild(button);
+      });
+
+      suggestionsContainer.appendChild(buttonsContainer);
+    }
+
+    const otherContainer = document.createElement("div");
+    otherContainer.style.marginTop = "1em";
+
+    const otherLabel = document.createElement("label");
+    otherLabel.textContent = "Other:";
+    otherLabel.style.display = "block";
+    otherLabel.style.marginBottom = "0.5em";
+    otherLabel.setAttribute("for", "reallocationOtherSelect");
+    otherContainer.appendChild(otherLabel);
+
+    const dropdown = document.createElement("select");
+    dropdown.id = "reallocationOtherSelect";
+    dropdown.style.width = "100%";
+    dropdown.style.padding = "0.5em";
+    dropdown.setAttribute("tabindex", topSuggestions.length > 0 ? "-1" : "0");
+
+    const emptyOption = document.createElement("option");
+    emptyOption.value = "";
+    emptyOption.textContent = "Select or leave blank to unassign";
+    dropdown.appendChild(emptyOption);
+
+    availableOptions.forEach((option) => {
+      const optionElement = document.createElement("option");
+      optionElement.value = option;
+      optionElement.textContent = option;
+      dropdown.appendChild(optionElement);
+    });
+
+    dropdown.addEventListener("keydown", (e) => {
+      if (e.key === "ArrowUp" && dropdown.selectedIndex === 0) {
+        e.preventDefault();
+        const lastButton = content.querySelector("button:last-of-type") as HTMLButtonElement;
+        if (lastButton) {
+          dropdown.setAttribute("tabindex", "-1");
+          lastButton.setAttribute("tabindex", "0");
+          lastButton.focus();
+        }
+      }
+    });
+
+    dropdown.addEventListener("change", () => {
+      if (dropdown.value) {
+        dialog.style.display = "none";
+        resolve(dropdown.value);
+      }
+    });
+
+    otherContainer.appendChild(dropdown);
+    content.appendChild(suggestionsContainer);
+    content.appendChild(otherContainer);
+
+    const handleCancel = () => {
+      dialog.style.display = "none";
+      resolve(null);
+    };
+
+    cancelButton.onclick = handleCancel;
+
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        handleCancel();
+      }
+    };
+
+    dialog.addEventListener("keydown", handleEscape);
+
+    dialog.style.display = "block";
+    const firstButton = content.querySelector("button") as HTMLButtonElement;
+    if (firstButton) {
+      firstButton.focus();
+    } else {
+      dropdown.focus();
+    }
+  });
+}
+
 function setupOffboardingButtons(): void {
-  const handleOffboardEA = (name: string) => {
+  const handleOffboardEA = async (name: string) => {
     if (!confirm(`Are you sure you want to offboard Event Ambassador "${name}"?`)) {
       return;
     }
@@ -294,20 +472,7 @@ function setupOffboardingButtons(): void {
           regionalAmbassadors
         );
 
-        let promptMessage = `Event: ${eventName}\n\n`;
-        if (suggestions.length > 0) {
-          promptMessage += "Suggested recipients:\n";
-          suggestions.slice(0, 5).forEach((s, i) => {
-            promptMessage += `${i + 1}. ${s.toAmbassador} (Score: ${s.score.toFixed(2)}) - ${s.reasons?.join("; ")}\n`;
-          });
-          promptMessage += `\nAvailable Event Ambassadors: ${availableEAs.join(", ")}\n`;
-          promptMessage += "\nEnter recipient name (or leave blank to unassign):";
-        } else {
-          promptMessage += `Available Event Ambassadors: ${availableEAs.join(", ")}\n`;
-          promptMessage += "\nEnter recipient name (or leave blank to unassign):";
-        }
-
-        const recipientName = prompt(promptMessage);
+        const recipientName = await showReallocationDialog(eventName, suggestions, availableEAs, "event");
         if (recipientName === null) {
           return;
         }
@@ -351,7 +516,7 @@ function setupOffboardingButtons(): void {
     }
   };
 
-  const handleOffboardRA = (name: string) => {
+  const handleOffboardRA = async (name: string) => {
     if (!confirm(`Are you sure you want to offboard Regional Ambassador "${name}"?`)) {
       return;
     }
@@ -372,20 +537,7 @@ function setupOffboardingButtons(): void {
           loadCapacityLimits()
         );
 
-        let promptMessage = `Event Ambassador: ${eaName}\n\n`;
-        if (suggestions.length > 0) {
-          promptMessage += "Suggested recipients:\n";
-          suggestions.slice(0, 5).forEach((s, i) => {
-            promptMessage += `${i + 1}. ${s.toAmbassador} (Score: ${s.score.toFixed(2)}) - ${s.reasons?.join("; ")}\n`;
-          });
-          promptMessage += `\nAvailable Regional Ambassadors: ${availableREAs.join(", ")}\n`;
-          promptMessage += "\nEnter recipient name (or leave blank to unassign):";
-        } else {
-          promptMessage += `Available Regional Ambassadors: ${availableREAs.join(", ")}\n`;
-          promptMessage += "\nEnter recipient name (or leave blank to unassign):";
-        }
-
-        const recipientName = prompt(promptMessage);
+        const recipientName = await showReallocationDialog(eaName, suggestions, availableREAs, "eventAmbassador");
         if (recipientName === null) {
           return;
         }
