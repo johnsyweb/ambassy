@@ -44,19 +44,24 @@ As a Regional Event Ambassador, I want to see which ambassadors are within capac
 
 ### User Story 3 - Offboard Ambassadors with Event Reallocation (Priority: P3)
 
-As a Regional Event Ambassador, I want to remove an ambassador from the system and automatically suggest reallocation of their events to ambassadors with available capacity, so that events continue to be supported when ambassadors leave or change roles.
+As a Regional Event Ambassador, I want to remove an ambassador from the system and automatically suggest reallocation of their events to ambassadors with available capacity, following allocation principles (regional alignment, landowner grouping, geographic proximity, conflict avoidance, environmental considerations), so that events continue to be supported appropriately when ambassadors leave or change roles.
 
-**Why this priority**: Offboarding is a critical workflow that happens regularly as volunteers move on. Without reallocation suggestions, users must manually identify suitable recipients, which is time-consuming and error-prone.
+**Why this priority**: Offboarding is a critical workflow that happens regularly as volunteers move on. Without intelligent reallocation suggestions that consider organisational principles, users must manually identify suitable recipients, which is time-consuming and error-prone.
 
-**Independent Test**: Can be fully tested by removing an Event Ambassador with assigned events, verifying the system suggests reallocation to ambassadors with capacity, and confirming events can be reallocated. This delivers value by streamlining the offboarding process and ensuring events remain supported.
+**Independent Test**: Can be fully tested by removing an Event Ambassador with assigned events, verifying the system suggests reallocation to ambassadors considering capacity, region, landowner, proximity, and conflicts, and confirming events can be reallocated. This delivers value by streamlining the offboarding process while ensuring events are allocated according to organisational principles.
 
 **Acceptance Scenarios**:
 
-1. **Given** an Event Ambassador supports 3 events and there are other Event Ambassadors with capacity, **When** the user offboards the ambassador, **Then** the system suggests reallocating the 3 events to ambassadors with available capacity
-2. **Given** a Regional Ambassador supports 5 Event Ambassadors and there are other Regional Ambassadors with capacity, **When** the user offboards the Regional Ambassador, **Then** the system suggests reallocating the 5 Event Ambassadors to Regional Ambassadors with available capacity
-3. **Given** an ambassador is offboarded and events are reallocated, **When** the user confirms the reallocation, **Then** the events are moved to the new ambassador and the old ambassador is removed
-4. **Given** there are no ambassadors with available capacity for reallocation, **When** the user attempts to offboard an ambassador, **Then** the system warns that reallocation may exceed capacity limits
-5. **Given** an ambassador is offboarded, **When** the reallocation is complete, **Then** the changes are logged in the changes log
+1. **Given** an Event Ambassador supports 3 events and there are other Event Ambassadors with capacity, **When** the user offboards the ambassador, **Then** the system suggests reallocating the 3 events to ambassadors with available capacity, prioritising those in the same region, with nearby events, and avoiding conflicts of interest
+2. **Given** events share a common landowner, **When** the system suggests reallocation, **Then** those events are prioritised for allocation to the same Event Ambassador where possible
+3. **Given** events are geographically close, **When** the system suggests reallocation, **Then** those events are prioritised for allocation to Event Ambassadors already supporting nearby events
+4. **Given** a Regional Ambassador supports 5 Event Ambassadors and there are other Regional Ambassadors with capacity, **When** the user offboards the Regional Ambassador, **Then** the system suggests reallocating the 5 Event Ambassadors to Regional Ambassadors with available capacity, prioritising those in the same region
+5. **Given** an ambassador is offboarded and events are reallocated, **When** the user confirms the reallocation, **Then** the events are moved to the new ambassador and the old ambassador is removed
+6. **Given** there are no ambassadors with available capacity for reallocation, **When** the user attempts to offboard an ambassador, **Then** the system warns that reallocation may exceed capacity limits but still provides suggestions
+7. **Given** reallocation suggestions cannot perfectly satisfy all principles (e.g., capacity vs proximity), **When** the system presents suggestions, **Then** the system prioritises pragmatically and allows users to override suggestions
+8. **Given** an ambassador is offboarded, **When** the reallocation is complete, **Then** the changes are logged in the changes log
+9. **Given** Victoria is divided into three regions, **When** events are displayed or reallocated, **Then** it is clear which region each event belongs to
+10. **Given** the map shows event locations, **When** reallocation suggestions are made, **Then** the map informs but does not dictate allocations (geographic proximity is a factor but not the only factor)
 
 ---
 
@@ -86,6 +91,11 @@ As a Regional Event Ambassador, I want to configure the preferred capacity range
 - What happens when reallocating events would push a recipient ambassador over capacity? System should warn but allow the reallocation if user confirms
 - How does the system handle partial reallocation (some events to one ambassador, others to another)? System should support distributing events across multiple ambassadors
 - What happens when an Event Ambassador is offboarded but their events are not reallocated? Events should remain unassigned or be flagged for manual assignment
+- What happens when events have no identified landowner or landowner information is missing? System should still provide reallocation suggestions based on other factors (capacity, proximity, region)
+- What happens when geographic proximity conflicts with other principles (e.g., capacity or landowner)? System should balance principles pragmatically, allowing user override
+- How does the system handle conflicts of interest when no conflict-free ambassadors are available? System should flag conflicts but allow user to proceed if they confirm
+- What happens when events span multiple regions or regions are not clearly defined? System should still provide suggestions, flagging ambiguity for user review
+- How does the system handle events that are prospects (not yet started) with limited location data? System should use available data and flag limitations
 
 ## Requirements *(mandatory)*
 
@@ -107,6 +117,14 @@ As a Regional Event Ambassador, I want to configure the preferred capacity range
 - **FR-014**: System MUST suggest reallocation of Event Ambassadors when offboarding a Regional Ambassador
 - **FR-015**: System MUST prioritise reallocation suggestions to ambassadors with available capacity (within preferred limits)
 - **FR-016**: System MUST warn users when reallocation would push recipients over capacity limits
+- **FR-023**: System MUST identify and display which region (of three Victoria regions) each event belongs to
+- **FR-024**: System MUST prioritise reallocating events with common landowners to the same Event Ambassador where possible
+- **FR-025**: System MUST prioritise reallocating events to Event Ambassadors already supporting geographically nearby events
+- **FR-026**: System MUST prioritise reallocating Event Ambassadors to Regional Ambassadors in the same region where possible
+- **FR-027**: System MUST consider and flag potential conflicts of interest in reallocation suggestions
+- **FR-028**: System MUST use geographic proximity (map data) to inform but not dictate reallocation suggestions
+- **FR-029**: System MUST allow users to override reallocation suggestions when pragmatic trade-offs are needed
+- **FR-030**: System MUST balance multiple allocation principles (capacity, region, landowner, proximity, conflicts) when generating suggestions
 - **FR-017**: System MUST allow users to configure minimum and maximum capacity limits for Event Ambassadors
 - **FR-018**: System MUST allow users to configure minimum and maximum capacity limits for Regional Ambassadors
 - **FR-019**: System MUST persist configured capacity limits across application sessions
@@ -120,7 +138,10 @@ As a Regional Event Ambassador, I want to configure the preferred capacity range
 - **Regional Ambassador**: Represents a volunteer who supports multiple Event Ambassadors. Has a name, state, and a list of Event Ambassadors they support. Capacity is measured by the number of Event Ambassadors supported.
 - **Capacity Limits**: Configuration settings that define preferred ranges for ambassador capacity. Includes minimum and maximum values for both Event Ambassadors and Regional Ambassadors.
 - **Capacity Status**: Indicates whether an ambassador is within preferred limits, under capacity, or over capacity based on current allocations and configured limits.
-- **Reallocation Suggestion**: A recommendation to move events or Event Ambassadors from one ambassador to another, prioritised by recipient capacity availability.
+- **Reallocation Suggestion**: A recommendation to move events or Event Ambassadors from one ambassador to another, prioritised by multiple factors including capacity availability, regional alignment, landowner grouping, geographic proximity, and conflict avoidance.
+- **Region**: One of three regions that Victoria is divided into. Events and ambassadors belong to regions, which should be clearly identifiable.
+- **Landowner**: Entity that owns or manages land where events are held. Events with common landowners should be grouped together where possible.
+- **Conflict of Interest**: A situation where an ambassador's personal or professional relationships could create bias or inappropriate influence in their ambassador role. Must be considered in all allocations.
 
 ## Success Criteria *(mandatory)*
 
@@ -133,6 +154,9 @@ As a Regional Event Ambassador, I want to configure the preferred capacity range
 - **SC-005**: Users can offboard an Event Ambassador and receive reallocation suggestions in under 2 minutes
 - **SC-006**: Users can offboard a Regional Ambassador and receive reallocation suggestions in under 2 minutes
 - **SC-007**: Reallocation suggestions prioritise ambassadors with available capacity (within preferred limits) 100% of the time when such ambassadors exist
+- **SC-012**: Reallocation suggestions consider regional alignment, landowner grouping, geographic proximity, and conflict avoidance in addition to capacity 100% of the time
+- **SC-013**: Events with common landowners are suggested for allocation to the same Event Ambassador at least 80% of the time when such allocation is feasible
+- **SC-014**: Reallocation suggestions prioritise geographically nearby events for Event Ambassadors already supporting nearby events at least 70% of the time when such ambassadors have capacity
 - **SC-008**: Users can configure capacity limits in under 1 minute
 - **SC-009**: Configured capacity limits persist across application sessions 100% of the time
 - **SC-010**: System prevents invalid capacity limit configurations (minimum > maximum, negative values) 100% of the time
@@ -147,6 +171,13 @@ As a Regional Event Ambassador, I want to configure the preferred capacity range
 - Reallocation suggestions are recommendations that users can accept, modify, or reject
 - Capacity limits apply globally to all ambassadors of the same type (not per-ambassador custom limits)
 - The system will warn but allow reallocation that exceeds capacity limits if the user confirms
+- Victoria is divided into three regions, and events can be assigned to regions (region information may be derived from event location or explicitly assigned)
+- Events have geographic coordinates (latitude/longitude) available from event data, which can be used to calculate proximity
+- Landowner information may be available in event data (e.g., EventLocation field) or may need to be manually assigned
+- Conflicts of interest information may need to be manually tracked or flagged by users (system may not have automatic conflict detection)
+- Geographic proximity is calculated using event coordinates, but proximity is one factor among many and should not override other important principles
+- When allocation principles conflict (e.g., capacity vs proximity), the system should balance pragmatically and allow user override - "don't let perfect get in the way of better"
+- The map provides visual context but allocations are ultimately user decisions informed by multiple factors
 
 ## Dependencies
 
@@ -155,6 +186,9 @@ As a Regional Event Ambassador, I want to configure the preferred capacity range
 - Existing changes log functionality (`LogEntry` interface and logging infrastructure)
 - Existing data persistence (localStorage for state management)
 - Existing UI components for displaying ambassador information
+- Existing event geographic data (`EventDetails` interface with `geometry.coordinates` for latitude/longitude)
+- Existing event location data (`EventDetails.properties.EventLocation` which may contain landowner information)
+- Existing map functionality for visualising event locations and geographic relationships
 
 ## Out of Scope
 
@@ -165,3 +199,7 @@ As a Regional Event Ambassador, I want to configure the preferred capacity range
 - Integration with external systems for ambassador data
 - Bulk onboarding/offboarding operations (handled one at a time)
 - Role changes (e.g., Event Ambassador becoming Regional Ambassador) - treated as offboard + onboard
+- Automatic conflict of interest detection (conflicts must be manually flagged or tracked)
+- Automatic region assignment based on geography (regions may be manually assigned or derived from existing data)
+- Automatic landowner identification (landowner information must be available in event data or manually assigned)
+- Enforcing perfect adherence to all principles (system suggests pragmatically, user makes final decisions)
