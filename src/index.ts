@@ -422,8 +422,15 @@ async function ambassy() {
   updateButtonVisibility(hasData, isMapViewDisplayed());
 }
 
+let isRefreshing = false;
+
+let lastStorageEventTime = 0;
 window.addEventListener("storage", () => {
-  ambassy();
+  const now = Date.now();
+  if (now - lastStorageEventTime > 100) {
+    lastStorageEventTime = now;
+    ambassy();
+  }
 });
 
 document.addEventListener("DOMContentLoaded", () => {

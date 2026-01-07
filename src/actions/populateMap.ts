@@ -92,12 +92,16 @@ export function populateMap(
   // Add polygonsLayer to map
   polygonsLayer.addTo(map!);
 
-  // Add layer control
+  // Add or update layer control (remove existing if present)
+  if (_layersControl) {
+    _layersControl.remove();
+  }
   const overlayMaps = {
     "Event Markers": markersLayer,
     "Ambassador Polygons": polygonsLayer,
   };
-  L.control.layers(undefined, overlayMaps).addTo(map!);
+  _layersControl = L.control.layers(undefined, overlayMaps);
+  _layersControl.addTo(map!);
 }
 
 function setupMapView(countryCode: number) {
@@ -141,3 +145,4 @@ return Math.max(...Array.from(eventTeamsTableData.values())
 let _map: L.Map | null = null;
 let _markersLayer: L.LayerGroup;
 let _polygonsLayer: L.LayerGroup;
+let _layersControl: L.Control.Layers | null = null;
