@@ -131,19 +131,19 @@
 
 > **NOTE: Write these tests FIRST, ensure they FAIL before implementation**
 
-- [ ] T049 [P] [US3] Write unit test for calculateDistance function (Haversine formula) in src/utils/geography.test.ts
-- [ ] T050 [P] [US3] Write unit test for calculateAverageDistance function in src/utils/geography.test.ts
-- [ ] T051 [P] [US3] Write unit test for calculateGeographicProximityScore function in src/actions/suggestReallocation.test.ts
-- [ ] T052 [P] [US3] Write unit test for calculateReallocationScore function (capacity factor) in src/actions/suggestReallocation.test.ts
-- [ ] T053 [P] [US3] Write unit test for calculateReallocationScore function (region factor - determined dynamically from supportsEAs) in src/actions/suggestReallocation.test.ts
-- [ ] T054 [P] [US3] Write unit test for calculateReallocationScore function (proximity factor) in src/actions/suggestReallocation.test.ts
-- [ ] T055 [P] [US3] Write unit test for calculateReallocationScore function (conflict avoidance) in src/actions/suggestReallocation.test.ts
-- [ ] T056 [P] [US3] Write unit test for suggestEventReallocation function in src/actions/suggestReallocation.test.ts
-- [ ] T057 [P] [US3] Write unit test for suggestEventAmbassadorReallocation function in src/actions/suggestReallocation.test.ts
-- [ ] T058 [P] [US3] Write unit test for checkReallocationCapacityWarning function in src/actions/offboardAmbassador.test.ts
-- [ ] T059 [P] [US3] Write unit test for offboardEventAmbassador function in src/actions/offboardAmbassador.test.ts
-- [ ] T060 [P] [US3] Write unit test for offboardRegionalAmbassador function in src/actions/offboardAmbassador.test.ts
-- [ ] T061 [P] [US3] Write integration test for offboarding flow with reallocation suggestions in src/actions/offboardAmbassador.test.ts
+- [x] T049 [P] [US3] Write unit test for calculateDistance function (Haversine formula) in src/utils/geography.test.ts
+- [x] T050 [P] [US3] Write unit test for calculateAverageDistance function in src/utils/geography.test.ts
+- [x] T051 [P] [US3] Write unit test for calculateGeographicProximityScore function in src/actions/suggestReallocation.test.ts
+- [x] T052 [P] [US3] Write unit test for calculateReallocationScore function (capacity factor) in src/actions/suggestReallocation.test.ts
+- [x] T053 [P] [US3] Write unit test for calculateReallocationScore function (region factor - determined dynamically from supportsEAs) in src/actions/suggestReallocation.test.ts
+- [x] T054 [P] [US3] Write unit test for calculateReallocationScore function (proximity factor) in src/actions/suggestReallocation.test.ts
+- [x] T055 [P] [US3] Write unit test for calculateReallocationScore function (conflict avoidance) in src/actions/suggestReallocation.test.ts
+- [x] T056 [P] [US3] Write unit test for suggestEventReallocation function in src/actions/suggestReallocation.test.ts
+- [x] T057 [P] [US3] Write unit test for suggestEventAmbassadorReallocation function in src/actions/suggestReallocation.test.ts
+- [x] T058 [P] [US3] Write unit test for checkReallocationCapacityWarning function in src/actions/offboardAmbassador.test.ts
+- [x] T059 [P] [US3] Write unit test for offboardEventAmbassador function in src/actions/offboardAmbassador.test.ts
+- [x] T060 [P] [US3] Write unit test for offboardRegionalAmbassador function in src/actions/offboardAmbassador.test.ts
+- [x] T061 [P] [US3] Write integration test for offboarding flow with reallocation suggestions in src/actions/offboardAmbassador.test.ts
 
 ### Implementation for User Story 3
 
@@ -153,17 +153,17 @@
 - [x] T065 [US3] Implement calculateReallocationScore function in src/actions/suggestReallocation.ts with multi-factor scoring (capacity, region determined dynamically from supportsEAs, proximity, conflicts)
 - [x] T066 [US3] Implement suggestEventReallocation function in src/actions/suggestReallocation.ts (determine region dynamically from supportsEAs)
 - [x] T067 [US3] Implement suggestEventAmbassadorReallocation function in src/actions/suggestReallocation.ts
-- [ ] T068 [US3] Implement checkReallocationCapacityWarning function in src/actions/offboardAmbassador.ts
-- [ ] T069 [US3] Implement offboardEventAmbassador function in src/actions/offboardAmbassador.ts
-- [ ] T070 [US3] Implement offboardRegionalAmbassador function in src/actions/offboardAmbassador.ts
-- [ ] T071 [US3] Add logging for offboarding and reallocation actions in src/actions/offboardAmbassador.ts
+- [x] T068 [US3] Implement checkReallocationCapacityWarning function in src/actions/offboardAmbassador.ts
+- [x] T069 [US3] Implement offboardEventAmbassador function in src/actions/offboardAmbassador.ts
+- [x] T070 [US3] Implement offboardRegionalAmbassador function in src/actions/offboardAmbassador.ts
+- [x] T071 [US3] Add logging for offboarding and reallocation actions in src/actions/offboardAmbassador.ts
 - [x] T072 [US3] Extend EventAmbassador interface in src/models/EventAmbassador.ts to include optional conflicts field (region is determined dynamically, not stored)
 - [x] T073 [US3] Extend RegionalAmbassador interface in src/models/RegionalAmbassador.ts to include optional conflicts field (region is determined dynamically, not stored)
-- [ ] T074 [US3] Add "Offboard Ambassador" button and confirmation dialog to public/index.html
-- [ ] T075 [US3] Wire up offboarding button in src/index.ts to show reallocation suggestions dialog
-- [ ] T076 [US3] Implement reallocation suggestion display UI in public/index.html (show suggestions with scores, reasons, warnings)
-- [ ] T077 [US3] Wire up reallocation selection in src/index.ts to call offboard functions with selected recipient
-- [ ] T078 [US3] Ensure UI refreshes after offboarding and reallocation in src/index.ts
+- [x] T074 [US3] Add "Offboard Ambassador" button and confirmation dialog to public/index.html
+- [x] T075 [US3] Wire up offboarding button in src/index.ts to show reallocation suggestions dialog
+- [x] T076 [US3] Implement reallocation suggestion display UI in public/index.html (show suggestions with scores, reasons, warnings)
+- [x] T077 [US3] Wire up reallocation selection in src/index.ts to call offboard functions with selected recipient
+- [x] T078 [US3] Ensure UI refreshes after offboarding and reallocation in src/index.ts
 - [ ] T079 [US3] ~~Add region assignment UI~~ REMOVED: Region is determined dynamically from supportsEAs, no UI needed
 - [ ] T080 [US3] ~~Wire up region assignment~~ REMOVED: Region is determined dynamically, no assignment needed
 - [ ] T081 [US3] Add conflict of interest flagging UI to public/index.html
@@ -183,24 +183,24 @@
 
 > **NOTE: Write these tests FIRST, ensure they FAIL before implementation**
 
-- [ ] T083 [P] [US4] Write unit test for validateCapacityLimits function (valid limits) in src/actions/configureCapacityLimits.test.ts
-- [ ] T084 [P] [US4] Write unit test for validateCapacityLimits function (min > max) in src/actions/configureCapacityLimits.test.ts
-- [ ] T085 [P] [US4] Write unit test for validateCapacityLimits function (negative values) in src/actions/configureCapacityLimits.test.ts
-- [ ] T086 [P] [US4] Write unit test for validateCapacityLimits function (non-integers) in src/actions/configureCapacityLimits.test.ts
-- [ ] T087 [P] [US4] Write unit test for saveCapacityLimits function in src/actions/configureCapacityLimits.test.ts
-- [ ] T088 [P] [US4] Write integration test for configuring limits and verifying capacity statuses update in src/actions/configureCapacityLimits.test.ts
+- [x] T083 [P] [US4] Write unit test for validateCapacityLimits function (valid limits) in src/actions/configureCapacityLimits.test.ts
+- [x] T084 [P] [US4] Write unit test for validateCapacityLimits function (min > max) in src/actions/configureCapacityLimits.test.ts
+- [x] T085 [P] [US4] Write unit test for validateCapacityLimits function (negative values) in src/actions/configureCapacityLimits.test.ts
+- [x] T086 [P] [US4] Write unit test for validateCapacityLimits function (non-integers) in src/actions/configureCapacityLimits.test.ts
+- [x] T087 [P] [US4] Write unit test for saveCapacityLimits function in src/actions/configureCapacityLimits.test.ts
+- [x] T088 [P] [US4] Write integration test for configuring limits and verifying capacity statuses update in src/actions/configureCapacityLimits.test.ts
 
 ### Implementation for User Story 4
 
-- [ ] T089 [US4] Create validateCapacityLimits function in src/actions/configureCapacityLimits.ts
-- [ ] T090 [US4] Create saveCapacityLimits function in src/actions/configureCapacityLimits.ts to save to localStorage
-- [ ] T091 [US4] Update loadCapacityLimits function in src/actions/checkCapacity.ts to use saveCapacityLimits for persistence
-- [ ] T092 [US4] Add "Configure Capacity Limits" button and dialog to public/index.html
-- [ ] T093 [US4] Wire up configuration button in src/index.ts to show capacity limits dialog
-- [ ] T094 [US4] Implement capacity limits input form in public/index.html with validation
-- [ ] T095 [US4] Wire up save button in src/index.ts to validate and save capacity limits
-- [ ] T096 [US4] Ensure capacity statuses recalculate after limits are saved in src/index.ts
-- [ ] T097 [US4] Include capacity limits in ApplicationState export/import in src/models/ApplicationState.ts
+- [x] T089 [US4] Create validateCapacityLimits function in src/actions/configureCapacityLimits.ts
+- [x] T090 [US4] Create saveCapacityLimits function in src/actions/configureCapacityLimits.ts to save to localStorage
+- [x] T091 [US4] Update loadCapacityLimits function in src/actions/checkCapacity.ts to use saveCapacityLimits for persistence
+- [x] T092 [US4] Add "Configure Capacity Limits" button and dialog to public/index.html
+- [x] T093 [US4] Wire up configuration button in src/index.ts to show capacity limits dialog
+- [x] T094 [US4] Implement capacity limits input form in public/index.html with validation
+- [x] T095 [US4] Wire up save button in src/index.ts to validate and save capacity limits
+- [x] T096 [US4] Ensure capacity statuses recalculate after limits are saved in src/index.ts
+- [x] T097 [US4] Include capacity limits in ApplicationState export/import in src/models/ApplicationState.ts
 
 **Checkpoint**: At this point, all user stories should be independently functional. Users can configure capacity limits.
 
