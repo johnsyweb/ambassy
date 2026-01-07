@@ -1,6 +1,7 @@
 import { EventAmbassador } from "./models/EventAmbassador";
 import { EventAmbassadorMap } from "./models/EventAmbassadorMap";
 import { EventDetailsMap } from "./models/EventDetailsMap";
+import { EventTeamMap } from "./models/EventTeamMap";
 import { RegionalAmbassador } from "./models/RegionalAmbassador";
 import { RegionalAmbassadorMap } from "./models/RegionalAmbassadorMap";
 
@@ -44,6 +45,44 @@ const log: LogEntry[] = getLogFromSession();
 
 let eventTeamsTableData: Map<string, EventTeamsTableData> | null = null;
 let eventDetails: EventDetailsMap | null = null;
+
+function hasApplicationData(
+  eventTeams: EventTeamMap,
+  eventAmbassadors: EventAmbassadorMap,
+  regionalAmbassadors: RegionalAmbassadorMap
+): boolean {
+  return eventTeams.size > 0 && eventAmbassadors.size > 0 && regionalAmbassadors.size > 0;
+}
+
+function isMapViewDisplayed(): boolean {
+  const ambassyElement = document.getElementById("ambassy");
+  return ambassyElement !== null && ambassyElement.style.display !== "none";
+}
+
+function updateButtonVisibility(
+  hasData: boolean,
+  isMapViewVisible: boolean
+): void {
+  const exportButtonMap = document.getElementById("exportButtonMap");
+  const importButton = document.getElementById("importButton");
+  const importButtonMap = document.getElementById("importButtonMap");
+
+  if (exportButtonMap) {
+    if (hasData && isMapViewVisible) {
+      exportButtonMap.style.display = "";
+    } else {
+      exportButtonMap.style.display = "none";
+    }
+  }
+
+  if (importButton) {
+    importButton.style.display = "";
+  }
+
+  if (importButtonMap) {
+    importButtonMap.style.display = "";
+  }
+}
   
 document.getElementById("csvFileInput")?.addEventListener("change", (event) => {
   const input = event.target as HTMLInputElement;
@@ -81,7 +120,6 @@ function setupImportButton(buttonId: string): void {
   });
 }
 
-setupExportButton("exportButton");
 setupExportButton("exportButtonMap");
 setupImportButton("importButton");
 setupImportButton("importButtonMap");
@@ -144,7 +182,9 @@ async function ambassy() {
   const eventAmbassadors = getEventAmbassadorsFromSession();
   const eventTeams = getEventTeamsFromSession();
   
-  if (eventTeams.size && eventAmbassadors.size && regionalAmbassadors.size) {
+  const hasData = hasApplicationData(eventTeams, eventAmbassadors, regionalAmbassadors);
+
+  if (hasData) {
     // Update the UI
     introduction.style.display = "none";
     ambassy.style.display = "block";
@@ -153,6 +193,9 @@ async function ambassy() {
     
     refreshUI(eventDetails, eventTeamsTableData, log);
   } else {
+    introduction.style.display = "block";
+    ambassy.style.display = "none";
+
     const missingFiles = [];
     if (eventTeams.size === 0) {
       missingFiles.push("Event Teams CSV");
@@ -165,6 +208,8 @@ async function ambassy() {
     }
     uploadPrompt.textContent = `Please upload the following files: ${missingFiles.join(", ")}`;
   }
+
+  updateButtonVisibility(hasData, isMapViewDisplayed());
 }
 
 window.addEventListener("storage", () => {

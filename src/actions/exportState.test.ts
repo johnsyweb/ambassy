@@ -54,8 +54,8 @@ describe("exportState", () => {
       downloadStateFile(blob, filename);
 
       expect(createElementSpy).toHaveBeenCalledWith("a");
-      expect(appendChildSpy).toHaveBeenBeenCalled();
-      expect(removeChildSpy).toHaveBeenBeenCalled();
+      expect(appendChildSpy).toHaveBeenCalled();
+      expect(removeChildSpy).toHaveBeenCalled();
 
       createElementSpy.mockRestore();
       appendChildSpy.mockRestore();
