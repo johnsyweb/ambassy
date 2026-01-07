@@ -19,6 +19,10 @@
 - Q: Should ambassador's visual representation (color/polygon/marker) be automatically removed from map when offboarding completes? → A: Automatically remove ambassador's color/polygon/marker from map when offboarding completes (map updates via eventTeamsTableData refresh). This ensures consistency across all UI views.
 - Q: When should the system validate that all allocations can be reallocated - before starting offboarding or during the process? → A: Validate that all allocations can be reallocated BEFORE allowing offboarding to start - block offboarding if validation fails. This prevents partial offboarding and ensures data integrity.
 
+### Session 2026-01-09
+
+- Q: What does "the same region" mean in the context of reallocation suggestions? → A: By "the same region", we mean "supported by the same Regional Ambassador". Two Event Ambassadors are in the same region if they are both supported by the same Regional Ambassador (i.e., both appear in the same Regional Ambassador's supportsEAs list). Region is determined dynamically from the supportsEAs relationship, not stored as a separate field.
+
 ## User Scenarios & Testing *(mandatory)*
 
 ### User Story 1 - Onboard New Ambassadors (Priority: P1)
@@ -66,14 +70,14 @@ As a Regional Event Ambassador, I want to remove an ambassador from the system a
 
 **Acceptance Scenarios**:
 
-1. **Given** an Event Ambassador supports 3 events and there are other Event Ambassadors with capacity, **When** the user offboards the ambassador, **Then** the system suggests reallocating the 3 events to ambassadors with available capacity, prioritising those in the same region, with nearby events, and avoiding conflicts of interest
+1. **Given** an Event Ambassador supports 3 events and there are other Event Ambassadors with capacity, **When** the user offboards the ambassador, **Then** the system suggests reallocating the 3 events to ambassadors with available capacity, prioritising those supported by the same Regional Ambassador (same region), with nearby events, and avoiding conflicts of interest
 2. **Given** events are geographically close, **When** the system suggests reallocation, **Then** those events are prioritised for allocation to Event Ambassadors already supporting nearby events
-4. **Given** a Regional Ambassador supports 5 Event Ambassadors and there are other Regional Ambassadors with capacity, **When** the user offboards the Regional Ambassador, **Then** the system suggests reallocating the 5 Event Ambassadors to Regional Ambassadors with available capacity, prioritising those in the same region
+4. **Given** a Regional Ambassador supports 5 Event Ambassadors and there are other Regional Ambassadors with capacity, **When** the user offboards the Regional Ambassador, **Then** the system suggests reallocating the 5 Event Ambassadors to Regional Ambassadors with available capacity (regional alignment not applicable for REA-to-REA reallocation)
 5. **Given** an ambassador is offboarded and events are reallocated, **When** the user confirms the reallocation, **Then** the events are moved to the new ambassador, the old ambassador is removed from all UI views (except changelog), and all references are cleaned up (removed from REA's supportsEAs list, Event Teams table updated, map view updated)
 6. **Given** there are no ambassadors with available capacity for reallocation, **When** the user attempts to offboard an ambassador, **Then** the system blocks offboarding until all allocations can be reallocated (validation occurs before offboarding starts)
 7. **Given** reallocation suggestions cannot perfectly satisfy all principles (e.g., capacity vs proximity), **When** the system presents suggestions, **Then** the system prioritises pragmatically and allows users to override suggestions
 8. **Given** an ambassador is offboarded, **When** the reallocation is complete, **Then** the changes are logged in the changes log
-9. **Given** Victoria is divided into three regions, **When** events are displayed or reallocated, **Then** it is clear which region each event belongs to
+9. **Given** Event Ambassadors are supported by Regional Ambassadors, **When** events are displayed or reallocated, **Then** it is clear which Regional Ambassador supports each Event Ambassador (determining the region)
 10. **Given** the map shows event locations, **When** reallocation suggestions are made, **Then** the map informs but does not dictate allocations (geographic proximity is a factor but not the only factor)
 
 ---
@@ -106,7 +110,7 @@ As a Regional Event Ambassador, I want to configure the preferred capacity range
 - What happens when an Event Ambassador is offboarded but their events are not reallocated? Offboarding is blocked until all events are reallocated - user must specify recipient for all events before offboarding can complete
 - What happens when geographic proximity conflicts with other principles (e.g., capacity)? System should balance principles pragmatically, allowing user override
 - How does the system handle conflicts of interest when no conflict-free ambassadors are available? System should flag conflicts but allow user to proceed if they confirm
-- What happens when events span multiple regions or regions are not clearly defined? System should still provide suggestions, flagging ambiguity for user review
+- What happens when an Event Ambassador is not supported by any Regional Ambassador (not in any REA's supportsEAs list)? System should still provide reallocation suggestions based on capacity and proximity, noting that regional alignment cannot be determined
 - How does the system handle events that are prospects (not yet started) with limited location data? System should use available data and flag limitations
 
 ## Requirements *(mandatory)*
@@ -134,9 +138,9 @@ As a Regional Event Ambassador, I want to configure the preferred capacity range
 - **FR-035**: System MUST ensure offboarded ambassadors do not appear in any UI view except the changes log after offboarding completes
 - **FR-015**: System MUST prioritise reallocation suggestions to ambassadors with available capacity (within preferred limits)
 - **FR-016**: System MUST warn users when reallocation would push recipients over capacity limits
-- **FR-023**: System MUST identify and display which region (of three Victoria regions) each event belongs to
+- **FR-023**: System MUST identify and display which Regional Ambassador supports each Event Ambassador (determining the region)
 - **FR-025**: System MUST prioritise reallocating events to Event Ambassadors already supporting geographically nearby events
-- **FR-026**: System MUST prioritise reallocating Event Ambassadors to Regional Ambassadors in the same region where possible
+- **FR-026**: System MUST prioritise reallocating events to Event Ambassadors supported by the same Regional Ambassador (same region) where possible
 - **FR-027**: System MUST consider and flag potential conflicts of interest in reallocation suggestions
 - **FR-028**: System MUST use geographic proximity (map data) to inform but not dictate reallocation suggestions
 - **FR-029**: System MUST allow users to override reallocation suggestions when pragmatic trade-offs are needed
@@ -155,7 +159,7 @@ As a Regional Event Ambassador, I want to configure the preferred capacity range
 - **Capacity Limits**: Configuration settings that define preferred ranges for ambassador capacity. Includes minimum and maximum values for both Event Ambassadors and Regional Ambassadors.
 - **Capacity Status**: Indicates whether an ambassador is within preferred limits, under capacity, or over capacity based on current allocations and configured limits.
 - **Reallocation Suggestion**: A recommendation to move events or Event Ambassadors from one ambassador to another, prioritised by multiple factors including capacity availability, regional alignment, geographic proximity, and conflict avoidance.
-- **Region**: One of three regions that Victoria is divided into. Events and ambassadors belong to regions, which should be clearly identifiable.
+- **Region**: Determined by which Regional Ambassador supports an Event Ambassador. Two Event Ambassadors are in the "same region" if they are both supported by the same Regional Ambassador (i.e., both appear in the same Regional Ambassador's supportsEAs list). Region is determined dynamically from the supportsEAs relationship, not stored as a separate field.
 - **Conflict of Interest**: A situation where an ambassador's personal or professional relationships could create bias or inappropriate influence in their ambassador role. Must be considered in all allocations.
 
 ## Success Criteria *(mandatory)*
@@ -188,7 +192,7 @@ As a Regional Event Ambassador, I want to configure the preferred capacity range
 - Reallocation suggestions are recommendations that users can accept, modify, or reject
 - Capacity limits apply globally to all ambassadors of the same type (not per-ambassador custom limits)
 - The system will warn but allow reallocation that exceeds capacity limits if the user confirms
-- Victoria is divided into three regions, and events can be assigned to regions (region information may be derived from event location or explicitly assigned)
+- Region is determined by which Regional Ambassador supports each Event Ambassador (via the supportsEAs relationship). Two Event Ambassadors are in the same region if they are both supported by the same Regional Ambassador. Region is not stored as a separate field but determined dynamically from the supportsEAs relationship.
 - Events have geographic coordinates (latitude/longitude) available from event data, which can be used to calculate proximity
 - Conflicts of interest information may need to be manually tracked or flagged by users (system may not have automatic conflict detection)
 - Geographic proximity is calculated using event coordinates, but proximity is one factor among many and should not override other important principles
@@ -215,6 +219,6 @@ As a Regional Event Ambassador, I want to configure the preferred capacity range
 - Bulk onboarding/offboarding operations (handled one at a time)
 - Role changes (e.g., Event Ambassador becoming Regional Ambassador) - treated as offboard + onboard
 - Automatic conflict of interest detection (conflicts must be manually flagged or tracked)
-- Automatic region assignment based on geography (regions may be manually assigned or derived from existing data)
+- Region assignment as a separate field (region is determined dynamically from which Regional Ambassador supports each Event Ambassador via the supportsEAs relationship)
 - Landowner grouping or identification (not part of allocation principles)
 - Enforcing perfect adherence to all principles (system suggests pragmatically, user makes final decisions)
