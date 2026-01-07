@@ -1,169 +1,161 @@
 # Implementation Plan: Ambassador Capacity Management and Lifecycle
 
-**Branch**: `001-ambassador-capacity-management` | **Date**: 2026-01-09 | **Spec**: [spec.md](./spec.md)
+**Branch**: `001-ambassador-capacity-management` | **Date**: 2026-01-10 | **Spec**: [spec.md](./spec.md)
 **Input**: Feature specification from `/specs/001-ambassador-capacity-management/spec.md`
 
 ## Summary
 
-This feature enables onboarding and offboarding of Event Ambassadors and Regional Ambassadors, with capacity checking and intelligent reallocation suggestions. The system tracks ambassador capacity against configurable limits, flags ambassadors who are under or over capacity, and provides reallocation suggestions during offboarding that consider capacity availability, regional alignment (determined dynamically from supportsEAs relationship), geographic proximity, and conflict avoidance.
-
-**Technical Approach**: Extend existing TypeScript web application with new models (CapacityStatus, CapacityLimits, ReallocationSuggestion), utility functions for geographic calculations and capacity checking, and UI components for onboarding/offboarding workflows. Region determination is dynamic based on which Regional Ambassador supports each Event Ambassador (via supportsEAs relationship), not stored as a separate field.
+Enable onboarding and offboarding of Event Ambassadors and Regional Ambassadors with intelligent capacity checking and reallocation suggestions. The system provides configurable capacity limits, visual capacity status indicators, and streamlined offboarding workflows that log each reassignment separately and provide clickable suggestion buttons for easy selection. Reallocation suggestions consider capacity availability, regional alignment (determined dynamically from supportsEAs), geographic proximity, and conflict avoidance.
 
 ## Technical Context
 
-**Language/Version**: TypeScript 5.9.3 (strict mode enabled)
-
-**Primary Dependencies**: 
-- Existing: Leaflet (map visualization), d3-geo-voronoi (regional polygons), PapaParse (CSV parsing)
-- New: None required - using native JavaScript/TypeScript for geographic calculations (Haversine formula)
-
-**Storage**: localStorage (browser-based persistence, already implemented)
-
-**Testing**: Jest 30.2.0 with jest-environment-jsdom for browser API simulation
-
-**Target Platform**: Modern web browsers (ES6+)
-
-**Project Type**: Single-page web application
-
+**Language/Version**: TypeScript 5.9.3  
+**Primary Dependencies**: Existing project dependencies (no new external dependencies required)  
+**Storage**: localStorage (browser API) for persistence  
+**Testing**: Jest 30.2.0 with ts-jest 29.4.5, jsdom environment  
+**Target Platform**: Modern web browsers (ES6+ support)  
+**Project Type**: Single-page web application  
 **Performance Goals**: 
-- Capacity status calculation: < 100ms for 100 ambassadors
-- Reallocation suggestions: < 500ms for 50 potential recipients
-- UI updates: < 1 second for full refresh
-
+- Onboarding actions complete in <30 seconds (SC-001, SC-002)
+- Capacity status visible within 1 second (SC-004)
+- Offboarding with suggestions in <2 minutes (SC-005, SC-006)
+- Selection per event/EA in <10 seconds (SC-018)
 **Constraints**: 
 - Must work offline (localStorage-based)
-- Must maintain backward compatibility with existing data structures
-- All user inputs must be keyboard accessible
-- Australian English for all user-facing text
-
+- Must be keyboard accessible (constitution requirement)
+- Must use Australian English for all user-facing text
 **Scale/Scope**: 
-- Typical usage: 50-200 Event Ambassadors, 5-15 Regional Ambassadors, 100-300 events
-- Capacity limits: Configurable per ambassador type (Event/Regional)
-- Reallocation suggestions: Up to 10 suggestions per offboarding action
+- Typical usage: 50-200 events, 10-30 Event Ambassadors, 3-5 Regional Ambassadors
+- Capacity limits: Configurable, default EA: 2-9 events, REA: 3-10 EAs
 
 ## Constitution Check
 
 *GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
 
-### Quality Gates (I)
-✅ **PASS**: All code will be formatted with Prettier, linted with ESLint, type-checked with TypeScript, and tested with Jest before commit.
+### Quality Gates
+- ✅ **Prettier formatting**: Code will be formatted with Prettier before commit
+- ✅ **ESLint linting**: Code will pass ESLint checks before commit
+- ✅ **TypeScript type checking**: Code will pass `tsc --noEmit` before commit
+- ✅ **Tests pass**: All tests must pass before commit
+- ✅ **Disused code removal**: Unused code will be removed immediately
 
-### Test-Driven Development (II)
-✅ **PASS**: Tests will be written first (TDD), test production code directly, maintain high coverage, and not pollute console. Tests will not be skipped without explicit confirmation.
+### Test-Driven Development
+- ✅ **Tests written first**: Tests will be written before implementation (TDD)
+- ✅ **Production code testing**: Tests test production code directly, no test environment checks
+- ✅ **High coverage**: Functions will have high test coverage
+- ✅ **No test skipping**: Tests will not be skipped without explicit confirmation
 
-### Atomic Commits (III)
-✅ **PASS**: Each change will be committed atomically with semantic commit messages following Conventional Commits.
+### Atomic Commits
+- ✅ **Semantic commits**: Commits follow Conventional Commits specification
+- ✅ **Atomic changes**: Each commit represents a complete, working change
 
-### Single Responsibility & Clean Architecture (IV)
-✅ **PASS**: Code follows existing structure (models, actions, parsers, utils). Self-documenting code preferred over comments.
+### Single Responsibility & Clean Architecture
+- ✅ **Single responsibility**: Each component has a single responsibility
+- ✅ **Self-documenting code**: Code avoids comments, uses clear naming and dedicated functions
+- ✅ **Current structure**: Follows existing code layout (models, actions, parsers, utils)
 
-### Accessibility & UX (V)
-✅ **PASS**: All UI elements will be keyboard accessible. Australian English for user-facing text.
+### Accessibility & User Experience
+- ✅ **Keyboard accessible**: All user inputs controllable from keyboard (clickable buttons support keyboard navigation)
+- ✅ **Clean UI**: Professional, consistent interface
+- ✅ **Australian English**: All user-facing text uses Australian English
 
-### Open Source Preference (VI)
-✅ **PASS**: Using existing open source libraries (Leaflet, d3-geo-voronoi). Geographic calculations implemented natively (no new dependencies).
+### Open Source Preference
+- ✅ **No new dependencies**: Uses existing project dependencies, no new external libraries required
 
-### Documentation Currency (VII)
-✅ **PASS**: README will be updated with new features. Documentation reflects current state.
+### Documentation Currency
+- ✅ **README updated**: README will be updated with new features
 
-### Production/Test Parity (VIII)
-✅ **PASS**: Code behaves identically in production and test. No environment-specific branches.
-
-### Twelve-Factor App Principles (IX)
-✅ **PASS**: Configuration via localStorage (client-side equivalent of environment variables), stateless processes, disposability, development/production parity.
-
-**GATE STATUS**: ✅ **ALL GATES PASS**
+**Status**: All gates pass. Implementation can proceed.
 
 ## Project Structure
 
 ### Documentation (this feature)
 
 ```text
-specs/001-ambassador-capacity-management/
+specs/[###-feature]/
 ├── plan.md              # This file (/speckit.plan command output)
 ├── research.md          # Phase 0 output (/speckit.plan command)
 ├── data-model.md        # Phase 1 output (/speckit.plan command)
 ├── quickstart.md        # Phase 1 output (/speckit.plan command)
 ├── contracts/           # Phase 1 output (/speckit.plan command)
-│   ├── onboarding-contracts.md
-│   ├── capacity-contracts.md
-│   ├── offboarding-contracts.md
-│   └── reallocation-contracts.md
 └── tasks.md             # Phase 2 output (/speckit.tasks command - NOT created by /speckit.plan)
 ```
 
 ### Source Code (repository root)
+<!--
+  ACTION REQUIRED: Replace the placeholder tree below with the concrete layout
+  for this feature. Delete unused options and expand the chosen structure with
+  real paths (e.g., apps/admin, packages/something). The delivered plan must
+  not include Option labels.
+-->
 
 ```text
+# [REMOVE IF UNUSED] Option 1: Single project (DEFAULT)
 src/
 ├── models/
-│   ├── CapacityStatus.ts          # NEW: Enum for capacity status (WITHIN/UNDER/OVER)
-│   ├── CapacityLimits.ts          # NEW: Interface for configurable limits
-│   ├── ReallocationSuggestion.ts  # NEW: Interface for reallocation suggestions
-│   ├── EventAmbassador.ts         # EXTENDED: Added capacityStatus, conflicts fields
-│   ├── RegionalAmbassador.ts      # EXTENDED: Added capacityStatus, conflicts fields
-│   └── [existing models...]
-├── actions/
-│   ├── onboardAmbassador.ts       # NEW: Onboarding logic
-│   ├── offboardAmbassador.ts     # NEW: Offboarding logic with reallocation
-│   ├── checkCapacity.ts          # NEW: Capacity checking and status calculation
-│   ├── suggestReallocation.ts    # NEW: Reallocation suggestion algorithm
-│   ├── configureCapacityLimits.ts # NEW: Capacity limits configuration
-│   ├── assignEventToAmbassador.ts # NEW: Event assignment logic
-│   └── [existing actions...]
-├── utils/
-│   ├── geography.ts               # NEW: Haversine formula for distance calculations
-│   └── [existing utils...]
-└── index.ts                        # MODIFIED: UI integration for new features
+├── services/
+├── cli/
+└── lib/
 
 tests/
-└── [mirrors src/ structure with .test.ts files]
+├── contract/
+├── integration/
+└── unit/
+
+# [REMOVE IF UNUSED] Option 2: Web application (when "frontend" + "backend" detected)
+backend/
+├── src/
+│   ├── models/
+│   ├── services/
+│   └── api/
+└── tests/
+
+frontend/
+├── src/
+│   ├── components/
+│   ├── pages/
+│   └── services/
+└── tests/
+
+# [REMOVE IF UNUSED] Option 3: Mobile + API (when "iOS/Android" detected)
+api/
+└── [same as backend above]
+
+ios/ or android/
+└── [platform-specific structure: feature modules, UI flows, platform tests]
 ```
 
 **Structure Decision**: Single-page web application structure maintained. New functionality added as extensions to existing models and new action files following established patterns. No architectural changes required.
 
-## Implementation Details
+### Key Files Modified/Created
 
-### Region Determination (Clarified 2026-01-09)
+**New Files**:
+- `src/models/CapacityStatus.ts` - Enum for capacity status
+- `src/models/CapacityLimits.ts` - Interface for configurable limits
+- `src/models/ReallocationSuggestion.ts` - Interface for reallocation suggestions
+- `src/actions/onboardAmbassador.ts` - Onboarding logic
+- `src/actions/offboardAmbassador.ts` - Offboarding logic (updated for separate logging)
+- `src/actions/checkCapacity.ts` - Capacity checking logic
+- `src/actions/suggestReallocation.ts` - Reallocation suggestion algorithm
+- `src/actions/configureCapacityLimits.ts` - Capacity limits configuration
+- `src/utils/geography.ts` - Haversine formula for distance calculations
+- `src/utils/regions.ts` - Dynamic region determination helpers
+- `src/actions/populateAmbassadorsTable.ts` - Ambassador table display
 
-**Critical Update**: Region is determined dynamically from the `supportsEAs` relationship, not stored as a separate field. Two Event Ambassadors are in the "same region" if they are both supported by the same Regional Ambassador (i.e., both appear in the same Regional Ambassador's `supportsEAs` list).
-
-**Impact on Implementation**:
-- Remove `region` field from `EventAmbassador` and `RegionalAmbassador` interfaces (if present)
-- Update `suggestReallocation.ts` to determine region dynamically by finding which Regional Ambassador supports each Event Ambassador
-- Update `calculateReallocationScore` to use dynamic region lookup instead of stored region field
-- Remove `Region` enum and `regions.ts` utility (if region assignment logic exists)
-
-### Capacity Checking Flow
-
-1. Load capacity limits from localStorage (defaults if not configured)
-2. Calculate capacity status for each ambassador based on current allocations
-3. Update `capacityStatus` field on ambassador objects
-4. Display status in UI with emoji indicators (⬇️ under, ✅ within, ⚠️ over)
-
-### Reallocation Scoring Algorithm
-
-Multi-factor scoring system with weighted factors:
-- **Capacity** (30% weight): Available capacity, within limits preferred
-- **Region** (30% weight): Same Regional Ambassador preferred (determined dynamically)
-- **Proximity** (30% weight): Geographic proximity to existing events
-- **Conflicts** (10% weight): Penalty for conflicts of interest
-
-### Offboarding Validation
-
-Before offboarding starts:
-1. Validate all events/EAs can be reallocated to existing ambassadors
-2. Block offboarding if validation fails
-3. After validation passes, prompt user for recipient per event/EA
-4. Complete offboarding with automatic cleanup:
-   - Remove ambassador from all data structures
-   - Remove from Regional Ambassador's `supportsEAs` list (if EA)
-   - Update Event Teams table
-   - Refresh map view
-   - Log changes
+**Modified Files**:
+- `src/models/EventAmbassador.ts` - Added `capacityStatus` and `conflicts` fields
+- `src/models/RegionalAmbassador.ts` - Added `capacityStatus` and `conflicts` fields (removed `region` field)
+- `src/models/LogEntry.ts` - Existing interface supports separate log entries
+- `src/actions/offboardAmbassador.ts` - Updated to log each reassignment separately (FR-036)
+- `src/index.ts` - Updated offboarding UI to use clickable suggestion buttons with dropdown fallback (FR-037)
+- `public/index.html` - Added UI elements for onboarding, offboarding, capacity configuration, and suggestion buttons
+- `src/actions/populateAmbassadorsTable.ts` - Added capacity status display and offboard buttons
 
 ## Complexity Tracking
 
 > **Fill ONLY if Constitution Check has violations that must be justified**
 
-No violations - all gates pass.
+| Violation | Why Needed | Simpler Alternative Rejected Because |
+|-----------|------------|-------------------------------------|
+| [e.g., 4th project] | [current need] | [why 3 projects insufficient] |
+| [e.g., Repository pattern] | [specific problem] | [why direct DB access insufficient] |
