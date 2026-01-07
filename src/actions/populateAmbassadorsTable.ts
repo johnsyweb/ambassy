@@ -45,6 +45,8 @@ function populateEventAmbassadorsTable(eventAmbassadors: EventAmbassadorMap): vo
     a[0].localeCompare(b[0])
   );
 
+  const allEANames = Array.from(eventAmbassadors.keys()).sort((a, b) => a.localeCompare(b));
+
   sortedAmbassadors.forEach(([name, ambassador]) => {
     const row = document.createElement("tr");
 
@@ -53,6 +55,18 @@ function populateEventAmbassadorsTable(eventAmbassadors: EventAmbassadorMap): vo
     nameContainer.style.display = "flex";
     nameContainer.style.alignItems = "center";
     nameContainer.style.gap = "8px";
+    
+    const colorIndicator = document.createElement("span");
+    const color = assignColorToName(name, allEANames);
+    colorIndicator.style.display = "inline-block";
+    colorIndicator.style.width = "12px";
+    colorIndicator.style.height = "12px";
+    colorIndicator.style.borderRadius = "50%";
+    colorIndicator.style.backgroundColor = color;
+    colorIndicator.style.border = "1px solid #333";
+    colorIndicator.style.flexShrink = "0";
+    colorIndicator.title = `Map color: ${color}`;
+    nameContainer.appendChild(colorIndicator);
     
     const nameSpan = document.createElement("span");
     nameSpan.textContent = name;
@@ -116,6 +130,8 @@ function populateRegionalAmbassadorsTable(regionalAmbassadors: RegionalAmbassado
     a[0].localeCompare(b[0])
   );
 
+  const allREANames = Array.from(regionalAmbassadors.keys()).sort((a, b) => a.localeCompare(b));
+
   sortedAmbassadors.forEach(([name, ambassador]) => {
     const row = document.createElement("tr");
 
@@ -124,6 +140,18 @@ function populateRegionalAmbassadorsTable(regionalAmbassadors: RegionalAmbassado
     nameContainer.style.display = "flex";
     nameContainer.style.alignItems = "center";
     nameContainer.style.gap = "8px";
+    
+    const colorIndicator = document.createElement("span");
+    const color = assignColorToName(name, allREANames);
+    colorIndicator.style.display = "inline-block";
+    colorIndicator.style.width = "12px";
+    colorIndicator.style.height = "12px";
+    colorIndicator.style.borderRadius = "50%";
+    colorIndicator.style.backgroundColor = color;
+    colorIndicator.style.border = "1px solid #333";
+    colorIndicator.style.flexShrink = "0";
+    colorIndicator.title = `Map color: ${color}`;
+    nameContainer.appendChild(colorIndicator);
     
     const nameSpan = document.createElement("span");
     nameSpan.textContent = name;
