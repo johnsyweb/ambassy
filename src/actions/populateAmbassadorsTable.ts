@@ -3,6 +3,7 @@ import { RegionalAmbassadorMap } from "@models/RegionalAmbassadorMap";
 import { CapacityStatus } from "@models/CapacityStatus";
 import { loadCapacityLimits, checkEventAmbassadorCapacity, checkRegionalAmbassadorCapacity } from "@actions/checkCapacity";
 import { colorPalette } from "@actions/colorPalette";
+import { EventTeamsTableDataMap, eventAmbassadorsFrom, regionalAmbassadorsFrom } from "@models/EventTeamsTableData";
 
 // Forward declaration - will be set by index.ts
 let handleOffboardEventAmbassador: (name: string) => void = () => {
@@ -27,13 +28,14 @@ function assignColorToName(name: string, allNames: string[]): string {
 
 export function populateAmbassadorsTable(
   eventAmbassadors: EventAmbassadorMap,
-  regionalAmbassadors: RegionalAmbassadorMap
+  regionalAmbassadors: RegionalAmbassadorMap,
+  eventTeamsTableData?: EventTeamsTableDataMap
 ): void {
-  populateEventAmbassadorsTable(eventAmbassadors);
-  populateRegionalAmbassadorsTable(regionalAmbassadors);
+  populateEventAmbassadorsTable(eventAmbassadors, eventTeamsTableData);
+  populateRegionalAmbassadorsTable(regionalAmbassadors, eventTeamsTableData);
 }
 
-function populateEventAmbassadorsTable(eventAmbassadors: EventAmbassadorMap): void {
+function populateEventAmbassadorsTable(eventAmbassadors: EventAmbassadorMap, eventTeamsTableData?: EventTeamsTableDataMap): void {
   const tableBody = document.querySelector("#eventAmbassadorsTable tbody");
   if (!tableBody) {
     console.error("Event Ambassadors Table Body not found");
@@ -45,7 +47,9 @@ function populateEventAmbassadorsTable(eventAmbassadors: EventAmbassadorMap): vo
     a[0].localeCompare(b[0])
   );
 
-  const allEANames = Array.from(eventAmbassadors.keys()).sort((a, b) => a.localeCompare(b));
+  const allEANames = eventTeamsTableData 
+    ? eventAmbassadorsFrom(eventTeamsTableData)
+    : Array.from(eventAmbassadors.keys()).sort((a, b) => a.localeCompare(b));
 
   sortedAmbassadors.forEach(([name, ambassador]) => {
     const row = document.createElement("tr");
@@ -118,7 +122,7 @@ function populateEventAmbassadorsTable(eventAmbassadors: EventAmbassadorMap): vo
   });
 }
 
-function populateRegionalAmbassadorsTable(regionalAmbassadors: RegionalAmbassadorMap): void {
+function populateRegionalAmbassadorsTable(regionalAmbassadors: RegionalAmbassadorMap, eventTeamsTableData?: EventTeamsTableDataMap): void {
   const tableBody = document.querySelector("#regionalAmbassadorsTable tbody");
   if (!tableBody) {
     console.error("Regional Ambassadors Table Body not found");
@@ -130,7 +134,9 @@ function populateRegionalAmbassadorsTable(regionalAmbassadors: RegionalAmbassado
     a[0].localeCompare(b[0])
   );
 
-  const allREANames = Array.from(regionalAmbassadors.keys()).sort((a, b) => a.localeCompare(b));
+  const allREANames = eventTeamsTableData
+    ? regionalAmbassadorsFrom(eventTeamsTableData)
+    : Array.from(regionalAmbassadors.keys()).sort((a, b) => a.localeCompare(b));
 
   sortedAmbassadors.forEach(([name, ambassador]) => {
     const row = document.createElement("tr");

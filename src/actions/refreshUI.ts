@@ -40,6 +40,6 @@ export function refreshUI(
 
   populateEventTeamsTable(eventTeamsTableData, eventDetails, log, eventAmbassadorsToUse, regionalAmbassadorsToUse);
   populateMap(eventTeamsTableData, eventDetails);
-  populateAmbassadorsTable(eventAmbassadorsToUse, regionalAmbassadorsToUse);
+  populateAmbassadorsTable(eventAmbassadorsToUse, regionalAmbassadorsToUse, eventTeamsTableData);
   populateChangesLogTable(log);
 }
