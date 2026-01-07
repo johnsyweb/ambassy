@@ -38,7 +38,7 @@ export function refreshUI(
       return stored ? new Map<string, RegionalAmbassador>(stored) : new Map<string, RegionalAmbassador>();
     })();
 
-  populateEventTeamsTable(eventTeamsTableData, eventDetails, log);
+  populateEventTeamsTable(eventTeamsTableData, eventDetails, log, eventAmbassadorsToUse, regionalAmbassadorsToUse);
   populateMap(eventTeamsTableData, eventDetails);
   populateAmbassadorsTable(eventAmbassadorsToUse, regionalAmbassadorsToUse);
   populateChangesLogTable(log);
