@@ -7,7 +7,9 @@
 
 ## Summary
 
-This feature adds comprehensive ambassador lifecycle management to the Ambassy application, enabling onboarding and offboarding of Event Ambassadors and Regional Ambassadors with intelligent capacity checking and reallocation suggestions. The system will calculate capacity based on configurable limits, flag ambassadors who are under or over capacity, and provide reallocation suggestions that consider multiple allocation principles: capacity availability, regional alignment, landowner grouping, geographic proximity, and conflict avoidance. Capacity limits are configurable and persist across sessions. The implementation leverages existing data structures and geographic data while adding new models for capacity configuration and reallocation suggestions.
+This feature adds comprehensive ambassador lifecycle management to the Ambassy application, enabling onboarding and offboarding of Event Ambassadors and Regional Ambassadors with intelligent capacity checking and reallocation suggestions. The system will calculate capacity based on configurable limits, flag ambassadors who are under or over capacity, and provide reallocation suggestions that consider multiple allocation principles: capacity availability, regional alignment, geographic proximity, and conflict avoidance. Capacity limits are configurable and persist across sessions. 
+
+**Critical Offboarding Requirements**: The offboarding process must ensure complete data integrity by validating that all allocations can be reallocated BEFORE allowing offboarding to start. Once offboarding completes, the system must automatically clean up all references: remove Event Ambassadors from Regional Ambassadors' supportsEAs lists, update Event Teams table references, remove visual representations from the map view, and ensure offboarded ambassadors only appear in the changes log. The implementation leverages existing data structures and geographic data while adding new models for capacity configuration and reallocation suggestions.
 
 ## Technical Context
 
@@ -44,6 +46,9 @@ This feature adds comprehensive ambassador lifecycle management to the Ambassy a
 - Must preserve backward compatibility with existing CSV upload functionality
 - Geographic calculations must handle missing or invalid coordinate data gracefully
 - Region assignment may need manual input or derivation from existing data
+- **Offboarding validation**: Must validate that all allocations can be reallocated before allowing offboarding to start
+- **Complete cleanup**: Must automatically remove all references to offboarded ambassadors (REA's supportsEAs, Event Teams table, map view) except changes log
+- **Data integrity**: Must prevent partial offboarding - all allocations must be reallocated before ambassador removal
 
 **Scale/Scope**: 
 - Typical usage: 20-50 Event Ambassadors, 5-10 Regional Ambassadors, 100-200 events
@@ -115,10 +120,11 @@ src/
 │   └── [existing models...]
 ├── actions/
 │   ├── onboardAmbassador.ts        # NEW: Onboarding functionality
-│   ├── offboardAmbassador.ts      # NEW: Offboarding functionality
+│   ├── offboardAmbassador.ts      # NEW: Offboarding functionality with validation and cleanup
 │   ├── checkCapacity.ts           # NEW: Capacity checking logic
 │   ├── suggestReallocation.ts    # NEW: Reallocation suggestion engine
 │   ├── configureCapacityLimits.ts # NEW: Capacity limit configuration
+│   ├── validateOffboarding.ts    # NEW: Pre-offboarding validation (ensures all allocations can be reallocated)
 │   └── [existing actions...]
 ├── utils/
 │   ├── geography.ts                # NEW: Geographic distance calculations
@@ -132,8 +138,48 @@ public/
 
 **Structure Decision**: Single project structure maintained. New functionality added to existing `src/actions/`, `src/models/`, and `src/utils/` directories following current patterns. UI modifications extend existing HTML structure.
 
+## Implementation Details
+
+### Offboarding Validation and Cleanup
+
+The offboarding process requires strict validation and complete cleanup to ensure data integrity:
+
+1. **Pre-offboarding Validation** (`validateOffboarding.ts`):
+   - Validate that all Event Ambassador's events can be reallocated to existing ambassadors
+   - Validate that all Regional Ambassador's Event Ambassadors can be reallocated to existing Regional Ambassadors
+   - Block offboarding if validation fails (no recipient specified or recipient doesn't exist)
+   - Provide clear error messages indicating which allocations cannot be reallocated
+
+2. **Automatic Cleanup During Offboarding** (`offboardAmbassador.ts`):
+   - **Event Ambassador offboarding**:
+     - Reallocate all events to recipient (or block if no recipient)
+     - Remove Event Ambassador from all Regional Ambassadors' `supportsEAs` lists
+     - Update Event Teams table to show new Event Ambassador assignments
+     - Remove Event Ambassador from `eventAmbassadors` map
+     - Persist changes to localStorage
+   - **Regional Ambassador offboarding**:
+     - Reallocate all Event Ambassadors to recipient (or block if no recipient)
+     - Update Event Teams table to show new Regional Ambassador assignments
+     - Remove Regional Ambassador from `regionalAmbassadors` map
+     - Persist changes to localStorage
+
+3. **UI Cleanup** (`refreshUI.ts`, `populateAmbassadorsTable.ts`, `populateMap.ts`):
+   - Event Ambassadors table: Only display ambassadors present in `eventAmbassadors` map
+   - Regional Ambassadors table: Only display ambassadors present in `regionalAmbassadors` map
+   - Event Teams table: Derived from `eventTeamsTableData` which is built from current ambassador maps
+   - Map view: Derived from `eventTeamsTableData` - automatically excludes offboarded ambassadors
+   - Changes log: Continues to show offboarded ambassadors in historical entries
+
+4. **Validation Flow**:
+   - User clicks "Offboard" button
+   - System validates that ambassador has allocations
+   - If allocations exist, system requires user to specify recipient (or blocks if no suitable recipients)
+   - System validates recipient exists and can accept allocations
+   - Only after validation passes, offboarding proceeds with automatic cleanup
+   - UI refreshes automatically to reflect changes
+
 ## Complexity Tracking
 
 > **Fill ONLY if Constitution Check has violations that must be justified**
 
-No violations identified. Implementation follows existing patterns and adds focused functionality without architectural changes.
+No violations identified. Implementation follows existing patterns and adds focused functionality without architectural changes. The validation and cleanup logic is straightforward and follows single responsibility principle.
