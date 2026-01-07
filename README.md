@@ -56,3 +56,36 @@ graph TD
 ## How it will work
 
 This project is written in TypeScript, has unit tests, and the map will be displayed in any modern web browser.
+
+## Development with Speckit
+
+This project uses [Speckit](https://speckit.org/) (Spec Kit) for specification-driven development. Speckit helps ensure that features are well-specified before implementation, reducing errors and improving code quality.
+
+### Getting Started with Speckit
+
+Speckit is already installed and configured for this project. The Specify CLI tool is available via `uv`.
+
+### Using Speckit Commands
+
+Speckit provides several slash commands that you can use in your AI assistant (Cursor):
+
+- `/speckit.constitution` - Establish project principles
+- `/speckit.specify` - Create baseline specification for a new feature
+- `/speckit.clarify` - Ask structured questions to clarify ambiguous requirements
+- `/speckit.plan` - Create implementation plan from specification
+- `/speckit.checklist` - Generate quality checklists
+- `/speckit.tasks` - Generate actionable tasks from plan
+- `/speckit.analyze` - Cross-artifact consistency & alignment report
+- `/speckit.implement` - Execute implementation tasks
+
+### Workflow
+
+The typical Speckit workflow follows these phases:
+
+1. **Foundation**: Establish project principles and create specifications
+2. **Clarification**: Resolve ambiguities in requirements
+3. **Planning**: Choose tech stack and architecture
+4. **Tasks**: Break down into actionable items
+5. **Implementation**: Generate working code
+
+For more information, see the [Speckit documentation](https://speckit.org/).

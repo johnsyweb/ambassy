@@ -11,29 +11,29 @@ import { getEventTeamsFromSession } from "@parsers/parseEventTeams";
 import { LogEntry } from "@models/LogEntry";
 import { EventTeamsTableData } from "@models/EventTeamsTableData";
 import { refreshUI } from "./actions/refreshUI";
+import { restoreApplicationState } from "./actions/persistState";
+import { loadFromStorage } from "@utils/storage";
 
 function getRegionalAmbassadorsFromSession(): RegionalAmbassadorMap {
-  const storedRegionalAmbassadors = sessionStorage.getItem("Regional Ambassadors");
+  const storedRegionalAmbassadors = loadFromStorage<Array<[string, RegionalAmbassador]>>("regionalAmbassadors");
   if (storedRegionalAmbassadors) {
-    const parsedData = JSON.parse(storedRegionalAmbassadors);
-    return new Map<string, RegionalAmbassador>(parsedData);
+    return new Map<string, RegionalAmbassador>(storedRegionalAmbassadors);
   }
   return new Map<string, RegionalAmbassador>();
 }
 
 function getEventAmbassadorsFromSession(): EventAmbassadorMap {
-  const storedEventAmbassadors = sessionStorage.getItem("Event Ambassadors");
+  const storedEventAmbassadors = loadFromStorage<Array<[string, EventAmbassador]>>("eventAmbassadors");
   if (storedEventAmbassadors) {
-    const parsedData = JSON.parse(storedEventAmbassadors);
-    return new Map<string, EventAmbassador>(parsedData);
+    return new Map<string, EventAmbassador>(storedEventAmbassadors);
   }
   return new Map<string, EventAmbassador>();
 }
 
 function getLogFromSession(): LogEntry[] {
-  const storedLog = sessionStorage.getItem("log");
+  const storedLog = loadFromStorage<LogEntry[]>("changesLog");
   if (storedLog) {
-    return JSON.parse(storedLog);
+    return storedLog;
   }
   return [];
 }
@@ -56,6 +56,7 @@ document.getElementById("csvFileInput")?.addEventListener("change", (event) => {
 });
 
 document.getElementById("purgeButton")?.addEventListener("click", () => {
+  localStorage.clear();
   sessionStorage.clear();
   location.reload();
 });
@@ -72,6 +73,8 @@ async function ambassy() {
     console.error("Required elements not found");
     return;
   }
+
+  restoreApplicationState();
 
   const regionalAmbassadors = getRegionalAmbassadorsFromSession();
   const eventAmbassadors = getEventAmbassadorsFromSession();
@@ -99,6 +102,10 @@ async function ambassy() {
     uploadPrompt.textContent = `Please upload the following files: ${missingFiles.join(", ")}`;
   }
 }
+
+window.addEventListener("storage", () => {
+  ambassy();
+});
 
 document.addEventListener("DOMContentLoaded", () => {
   ambassy();

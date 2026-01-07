@@ -40,11 +40,12 @@ export function parseEventTeams(data: EventTeamRow[]): EventTeamMap {
   return eventTeamsMap;
 }
 
+import { loadFromStorage } from '@utils/storage';
+
 export function getEventTeamsFromSession(): EventTeamMap {
-  const storedEventTeams = sessionStorage.getItem("Event Teams");
+  const storedEventTeams = loadFromStorage<Array<[string, EventTeam]>>("eventTeams");
   if (storedEventTeams) {
-    const parsedData = JSON.parse(storedEventTeams);
-    return new Map<string, EventTeam>(parsedData);
+    return new Map<string, EventTeam>(storedEventTeams);
   }
   return new Map<string, EventTeam>();
 }

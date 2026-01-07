@@ -3,6 +3,9 @@ import { parseEventTeams, EventTeamRow } from '@parsers/parseEventTeams';
 import { parseEventAmbassadors, EventAmbassadorRow } from '@parsers/parseEventAmbassadors';
 import { parseRegionalAmbassadors, RegionalAmbassadorRow } from '@parsers/parseRegionalAmbassadors';
 import { FileUploadCallback } from '@localtypes/FileUploadCallback';
+import { persistEventAmbassadors } from './persistState';
+import { persistEventTeams } from './persistState';
+import { persistRegionalAmbassadors } from './persistState';
 
 export function handleFileUpload(file: File, callback: FileUploadCallback): void {
   Papa.parse(file, {
@@ -12,15 +15,15 @@ export function handleFileUpload(file: File, callback: FileUploadCallback): void
       const data = results.data;
       if (file.name.includes('Event Ambassadors')) {
         const eventAmbassadors = parseEventAmbassadors(data as EventAmbassadorRow[]);
-        sessionStorage.setItem('Event Ambassadors', JSON.stringify(Array.from(eventAmbassadors.entries())));
+        persistEventAmbassadors(eventAmbassadors);
         callback('Event Ambassadors');
       } else if (file.name.includes('Event Teams')) {
         const eventTeams = parseEventTeams(data as EventTeamRow[]);
-        sessionStorage.setItem('Event Teams', JSON.stringify(Array.from(eventTeams)));
+        persistEventTeams(eventTeams);
         callback('Event Teams');
       } else if (file.name.includes('Regional Ambassadors')) {
         const regionalAmbassadors = parseRegionalAmbassadors(data as RegionalAmbassadorRow[]);
-        sessionStorage.setItem('Regional Ambassadors', JSON.stringify(Array.from(regionalAmbassadors.entries())));
+        persistRegionalAmbassadors(regionalAmbassadors);
         callback('Regional Ambassadors');
       }
     },

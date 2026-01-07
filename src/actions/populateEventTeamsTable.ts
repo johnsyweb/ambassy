@@ -3,6 +3,7 @@ import { EventDetailsMap } from '@models/EventDetailsMap';
 import { EventTeamsTableDataMap, EventTeamsTableData } from '@models/EventTeamsTableData';
 import { LogEntry } from '@models/LogEntry';
 import { updateEventAmbassador } from '@actions/updateEventAmbassador';
+import { persistChangesLog } from './persistState';
 import { countries } from '@models/country';
 import { refreshUI } from './refreshUI';
 
@@ -87,6 +88,7 @@ function handleEventAmbassadorCellClick(
   dropdown.addEventListener('change', (event) => {
     const newEventAmbassador = (event.target as HTMLSelectElement).value;
     updateEventAmbassador(eventTeamsTableData, data.eventShortName, newEventAmbassador, changelog);
+    persistChangesLog(changelog);
 
     // Update the cell text and replace the dropdown with text
     data.eventAmbassador = newEventAmbassador;
@@ -128,7 +130,6 @@ function createEventShortNameDropdown(
       data.eventCountryCode = eventDetails.properties.countrycode;
       data.eventCountry = countries[eventDetails.properties.countrycode].url?.split('.').slice(-1)[0] || '?';
 
-      sessionStorage.setItem('eventTeamsTableData', JSON.stringify([...eventTeamsTableData]));
 
       eventShortNameCell.innerHTML = '';
       eventShortNameCell.textContent = newEventShortName;

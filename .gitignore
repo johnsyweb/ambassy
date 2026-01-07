@@ -29,3 +29,6 @@ jest-config/
 
 /dist
 /target
+
+# Speckit/Specify - agent folder may contain credentials
+.cursor/
