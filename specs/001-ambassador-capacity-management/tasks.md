@@ -34,15 +34,15 @@
 
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete
 
-- [ ] T004 [P] Create CapacityStatus enum in src/models/CapacityStatus.ts with values WITHIN, UNDER, OVER
-- [ ] T005 [P] Create CapacityLimits interface in src/models/CapacityLimits.ts with eventAmbassadorMin, eventAmbassadorMax, regionalAmbassadorMin, regionalAmbassadorMax fields
-- [ ] T006 [P] Create Region enum/type in src/models/Region.ts with REGION_1, REGION_2, REGION_3, UNKNOWN values
-- [ ] T007 [P] Create ReallocationSuggestion interface in src/models/ReallocationSuggestion.ts with fromAmbassador, toAmbassador, items, score, reasons, warnings fields
-- [ ] T008 [P] Create calculateDistance function using Haversine formula in src/utils/geography.ts
-- [ ] T009 [P] Create calculateAverageDistance function in src/utils/geography.ts for proximity scoring
-- [ ] T010 [P] Create assignRegion function in src/utils/regions.ts for region assignment
-- [ ] T011 [P] Create getRegionForEvent function in src/utils/regions.ts to get event region
-- [ ] T012 [P] Create defaultCapacityLimits constant in src/models/CapacityLimits.ts (EA: 2-9, REA: 3-10)
+- [x] T004 [P] Create CapacityStatus enum in src/models/CapacityStatus.ts with values WITHIN, UNDER, OVER
+- [x] T005 [P] Create CapacityLimits interface in src/models/CapacityLimits.ts with eventAmbassadorMin, eventAmbassadorMax, regionalAmbassadorMin, regionalAmbassadorMax fields
+- [x] T006 [P] Create Region enum/type in src/models/Region.ts with REGION_1, REGION_2, REGION_3, UNKNOWN values
+- [x] T007 [P] Create ReallocationSuggestion interface in src/models/ReallocationSuggestion.ts with fromAmbassador, toAmbassador, items, score, reasons, warnings fields
+- [x] T008 [P] Create calculateDistance function using Haversine formula in src/utils/geography.ts
+- [x] T009 [P] Create calculateAverageDistance function in src/utils/geography.ts for proximity scoring
+- [x] T010 [P] Create assignRegion function in src/utils/regions.ts for region assignment
+- [x] T011 [P] Create getRegionForEvent function in src/utils/regions.ts to get event region
+- [x] T012 [P] Create defaultCapacityLimits constant in src/models/CapacityLimits.ts (EA: 2-9, REA: 3-10)
 
 **Checkpoint**: Foundation ready - user story implementation can now begin in parallel
 
@@ -58,22 +58,22 @@
 
 > **NOTE: Write these tests FIRST, ensure they FAIL before implementation**
 
-- [ ] T013 [P] [US1] Write unit test for validateAmbassadorName function (valid unique name) in src/actions/onboardAmbassador.test.ts
-- [ ] T014 [P] [US1] Write unit test for validateAmbassadorName function (duplicate name) in src/actions/onboardAmbassador.test.ts
-- [ ] T015 [P] [US1] Write unit test for validateAmbassadorName function (empty name) in src/actions/onboardAmbassador.test.ts
-- [ ] T016 [P] [US1] Write unit test for onboardEventAmbassador function in src/actions/onboardAmbassador.test.ts
-- [ ] T017 [P] [US1] Write unit test for onboardRegionalAmbassador function in src/actions/onboardAmbassador.test.ts
-- [ ] T018 [P] [US1] Write integration test for onboarding Event Ambassador and verifying it appears in data in src/actions/onboardAmbassador.test.ts
-- [ ] T019 [P] [US1] Write integration test for onboarding Regional Ambassador and verifying it appears in data in src/actions/onboardAmbassador.test.ts
+- [x] T013 [P] [US1] Write unit test for validateAmbassadorName function (valid unique name) in src/actions/onboardAmbassador.test.ts
+- [x] T014 [P] [US1] Write unit test for validateAmbassadorName function (duplicate name) in src/actions/onboardAmbassador.test.ts
+- [x] T015 [P] [US1] Write unit test for validateAmbassadorName function (empty name) in src/actions/onboardAmbassador.test.ts
+- [x] T016 [P] [US1] Write unit test for onboardEventAmbassador function in src/actions/onboardAmbassador.test.ts
+- [x] T017 [P] [US1] Write unit test for onboardRegionalAmbassador function in src/actions/onboardAmbassador.test.ts
+- [x] T018 [P] [US1] Write integration test for onboarding Event Ambassador and verifying it appears in data in src/actions/onboardAmbassador.test.ts
+- [x] T019 [P] [US1] Write integration test for onboarding Regional Ambassador and verifying it appears in data in src/actions/onboardAmbassador.test.ts
 
 ### Implementation for User Story 1
 
-- [ ] T020 [US1] Create validateAmbassadorName function in src/actions/onboardAmbassador.ts to check for duplicate names
-- [ ] T021 [US1] Create onboardEventAmbassador function in src/actions/onboardAmbassador.ts that adds new Event Ambassador with empty events array
-- [ ] T022 [US1] Create onboardRegionalAmbassador function in src/actions/onboardAmbassador.ts that adds new Regional Ambassador with empty supportsEAs array
-- [ ] T023 [US1] Integrate onboardEventAmbassador with persistEventAmbassadors in src/actions/onboardAmbassador.ts to save to localStorage
-- [ ] T024 [US1] Integrate onboardRegionalAmbassador with persistRegionalAmbassadors in src/actions/onboardAmbassador.ts to save to localStorage
-- [ ] T025 [US1] Add logging for onboarding actions in src/actions/onboardAmbassador.ts using existing LogEntry infrastructure
+- [x] T020 [US1] Create validateAmbassadorName function in src/actions/onboardAmbassador.ts to check for duplicate names
+- [x] T021 [US1] Create onboardEventAmbassador function in src/actions/onboardAmbassador.ts that adds new Event Ambassador with empty events array
+- [x] T022 [US1] Create onboardRegionalAmbassador function in src/actions/onboardAmbassador.ts that adds new Regional Ambassador with empty supportsEAs array
+- [x] T023 [US1] Integrate onboardEventAmbassador with persistEventAmbassadors in src/actions/onboardAmbassador.ts to save to localStorage
+- [x] T024 [US1] Integrate onboardRegionalAmbassador with persistRegionalAmbassadors in src/actions/onboardAmbassador.ts to save to localStorage
+- [x] T025 [US1] Add logging for onboarding actions in src/actions/onboardAmbassador.ts using existing LogEntry infrastructure
 - [ ] T026 [US1] Add "Add Event Ambassador" button and input dialog to public/index.html
 - [ ] T027 [US1] Add "Add Regional Ambassador" button and input dialog to public/index.html
 - [ ] T028 [US1] Wire up onboarding buttons in src/index.ts to call onboardEventAmbassador and onboardRegionalAmbassador
