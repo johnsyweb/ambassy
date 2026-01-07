@@ -190,44 +190,49 @@ function setupOffboardingButtons(): void {
     const eventsToReallocate = eventAmbassadors.get(name)?.events || [];
 
     if (eventsToReallocate.length > 0) {
-      const suggestions = suggestEventReallocation(
-        name,
-        eventsToReallocate,
-        eventAmbassadors,
-        eventDetails!,
-        loadCapacityLimits()
-      );
+      const eventRecipients = new Map<string, string>();
+      const availableEAs = Array.from(eventAmbassadors.keys()).filter(ea => ea !== name).sort();
 
-      let suggestionMessage = `Offboarding "${name}" will unassign the following events: ${eventsToReallocate.join(", ")}.\n\n`;
-      suggestionMessage += "Suggested reallocations:\n";
-      if (suggestions.length > 0) {
-        suggestions.slice(0, 5).forEach((s, i) => {
-          suggestionMessage += `${i + 1}. ${s.toAmbassador} (Score: ${s.score.toFixed(2)}) - ${s.reasons?.join("; ")}\n`;
-        });
-        suggestionMessage += "\nEnter the name of the ambassador to reallocate events to, or leave blank to unassign all:";
-      } else {
-        suggestionMessage += "No suitable reallocation suggestions found.\nEnter the name of the ambassador to reallocate events to, or leave blank to unassign all:";
-      }
+      for (const eventName of eventsToReallocate) {
+        const suggestions = suggestEventReallocation(
+          name,
+          [eventName],
+          eventAmbassadors,
+          eventDetails!,
+          loadCapacityLimits()
+        );
 
-      const recipientName = prompt(suggestionMessage);
+        let promptMessage = `Event: ${eventName}\n\n`;
+        if (suggestions.length > 0) {
+          promptMessage += "Suggested recipients:\n";
+          suggestions.slice(0, 5).forEach((s, i) => {
+            promptMessage += `${i + 1}. ${s.toAmbassador} (Score: ${s.score.toFixed(2)}) - ${s.reasons?.join("; ")}\n`;
+          });
+          promptMessage += `\nAvailable Event Ambassadors: ${availableEAs.join(", ")}\n`;
+          promptMessage += "\nEnter recipient name (or leave blank to unassign):";
+        } else {
+          promptMessage += `Available Event Ambassadors: ${availableEAs.join(", ")}\n`;
+          promptMessage += "\nEnter recipient name (or leave blank to unassign):";
+        }
 
-      if (recipientName === null) {
-        return;
-      }
-
-      if (recipientName.trim() === "") {
-        if (!confirm("No recipient specified. Events will be unassigned. Continue?")) {
+        const recipientName = prompt(promptMessage);
+        if (recipientName === null) {
           return;
         }
-      } else if (!eventAmbassadors.has(recipientName)) {
-        alert(`Recipient Event Ambassador "${recipientName}" not found.`);
-        return;
+
+        const trimmedRecipient = recipientName.trim();
+        if (trimmedRecipient !== "" && !eventAmbassadors.has(trimmedRecipient)) {
+          alert(`Recipient Event Ambassador "${trimmedRecipient}" not found. Skipping this event.`);
+          eventRecipients.set(eventName, "");
+        } else {
+          eventRecipients.set(eventName, trimmedRecipient);
+        }
       }
 
       try {
         offboardEventAmbassador(
           name,
-          recipientName.trim(),
+          eventRecipients,
           eventAmbassadors,
           regionalAmbassadors,
           eventTeams,
@@ -235,14 +240,16 @@ function setupOffboardingButtons(): void {
         );
         persistChangesLog(log);
         ambassy();
-        alert(`Event Ambassador "${name}" offboarded. Events reallocated to "${recipientName.trim() || "no one"}".`);
+        const recipientsSummary = Array.from(new Set(Array.from(eventRecipients.values()).filter(r => r !== "")))
+          .join(", ") || "unassigned";
+        alert(`Event Ambassador "${name}" offboarded. Events reallocated to: ${recipientsSummary}.`);
       } catch (error) {
         alert(`Failed to offboard Event Ambassador: ${error instanceof Error ? error.message : "Unknown error"}`);
       }
     } else {
       try {
         const eventTeams = getEventTeamsFromSession();
-        offboardEventAmbassador(name, "", eventAmbassadors, regionalAmbassadors, eventTeams, log);
+        offboardEventAmbassador(name, new Map(), eventAmbassadors, regionalAmbassadors, eventTeams, log);
         persistChangesLog(log);
         ambassy();
         alert(`Event Ambassador "${name}" offboarded.`);
@@ -261,57 +268,64 @@ function setupOffboardingButtons(): void {
     const easToReallocate = regionalAmbassadors.get(name)?.supportsEAs || [];
 
     if (easToReallocate.length > 0) {
-      const suggestions = suggestEventAmbassadorReallocation(
-        name,
-        easToReallocate,
-        regionalAmbassadors,
-        eventAmbassadors,
-        loadCapacityLimits()
-      );
+      const eaRecipients = new Map<string, string>();
+      const availableREAs = Array.from(regionalAmbassadors.keys()).filter(rea => rea !== name).sort();
 
-      let suggestionMessage = `Offboarding "${name}" will unassign the following Event Ambassadors: ${easToReallocate.join(", ")}.\n\n`;
-      suggestionMessage += "Suggested reallocations:\n";
-      if (suggestions.length > 0) {
-        suggestions.slice(0, 5).forEach((s, i) => {
-          suggestionMessage += `${i + 1}. ${s.toAmbassador} (Score: ${s.score.toFixed(2)}) - ${s.reasons?.join("; ")}\n`;
-        });
-        suggestionMessage += "\nEnter the name of the Regional Ambassador to reallocate Event Ambassadors to, or leave blank to unassign all:";
-      } else {
-        suggestionMessage += "No suitable reallocation suggestions found.\nEnter the name of the Regional Ambassador to reallocate Event Ambassadors to, or leave blank to unassign all:";
-      }
+      for (const eaName of easToReallocate) {
+        const suggestions = suggestEventAmbassadorReallocation(
+          name,
+          [eaName],
+          regionalAmbassadors,
+          eventAmbassadors,
+          loadCapacityLimits()
+        );
 
-      const recipientName = prompt(suggestionMessage);
+        let promptMessage = `Event Ambassador: ${eaName}\n\n`;
+        if (suggestions.length > 0) {
+          promptMessage += "Suggested recipients:\n";
+          suggestions.slice(0, 5).forEach((s, i) => {
+            promptMessage += `${i + 1}. ${s.toAmbassador} (Score: ${s.score.toFixed(2)}) - ${s.reasons?.join("; ")}\n`;
+          });
+          promptMessage += `\nAvailable Regional Ambassadors: ${availableREAs.join(", ")}\n`;
+          promptMessage += "\nEnter recipient name (or leave blank to unassign):";
+        } else {
+          promptMessage += `Available Regional Ambassadors: ${availableREAs.join(", ")}\n`;
+          promptMessage += "\nEnter recipient name (or leave blank to unassign):";
+        }
 
-      if (recipientName === null) {
-        return;
-      }
-
-      if (recipientName.trim() === "") {
-        if (!confirm("No recipient specified. Event Ambassadors will be unassigned. Continue?")) {
+        const recipientName = prompt(promptMessage);
+        if (recipientName === null) {
           return;
         }
-      } else if (!regionalAmbassadors.has(recipientName)) {
-        alert(`Recipient Regional Ambassador "${recipientName}" not found.`);
-        return;
+
+        const trimmedRecipient = recipientName.trim();
+        if (trimmedRecipient !== "" && !regionalAmbassadors.has(trimmedRecipient)) {
+          alert(`Recipient Regional Ambassador "${trimmedRecipient}" not found. Skipping this Event Ambassador.`);
+          eaRecipients.set(eaName, "");
+        } else {
+          eaRecipients.set(eaName, trimmedRecipient);
+        }
       }
 
       try {
         offboardRegionalAmbassador(
           name,
-          recipientName.trim(),
+          eaRecipients,
           regionalAmbassadors,
           eventAmbassadors,
           log
         );
         persistChangesLog(log);
         ambassy();
-        alert(`Regional Ambassador "${name}" offboarded. Event Ambassadors reallocated to "${recipientName.trim() || "no one"}".`);
+        const recipientsSummary = Array.from(new Set(Array.from(eaRecipients.values()).filter(r => r !== "")))
+          .join(", ") || "unassigned";
+        alert(`Regional Ambassador "${name}" offboarded. Event Ambassadors reallocated to: ${recipientsSummary}.`);
       } catch (error) {
         alert(`Failed to offboard Regional Ambassador: ${error instanceof Error ? error.message : "Unknown error"}`);
       }
     } else {
       try {
-        offboardRegionalAmbassador(name, "", regionalAmbassadors, eventAmbassadors, log);
+        offboardRegionalAmbassador(name, new Map(), regionalAmbassadors, eventAmbassadors, log);
         persistChangesLog(log);
         ambassy();
         alert(`Regional Ambassador "${name}" offboarded.`);

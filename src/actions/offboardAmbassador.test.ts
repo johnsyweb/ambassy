@@ -66,9 +66,13 @@ describe("offboardAmbassador", () => {
       ]);
       const log: Array<{ type: string; event: string; oldValue: string; newValue: string; timestamp: number }> = [];
 
+      const eventRecipients = new Map<string, string>([
+        ["Event1", "EA2"],
+        ["Event2", "EA2"],
+      ]);
       offboardEventAmbassador(
         "EA1",
-        "EA2",
+        eventRecipients,
         eventAmbassadors,
         regionalAmbassadors,
         eventTeams,
@@ -92,9 +96,13 @@ describe("offboardAmbassador", () => {
       ]);
       const log: Array<{ type: string; event: string; oldValue: string; newValue: string; timestamp: number }> = [];
 
+      const eventRecipients = new Map<string, string>([
+        ["Event1", "EA2"],
+        ["Event2", "EA2"],
+      ]);
       offboardEventAmbassador(
         "EA1",
-        "EA2",
+        eventRecipients,
         eventAmbassadors,
         regionalAmbassadors,
         eventTeams,
@@ -116,7 +124,7 @@ describe("offboardAmbassador", () => {
 
       offboardEventAmbassador(
         "EA1",
-        "",
+        new Map(),
         eventAmbassadors,
         regionalAmbassadors,
         eventTeams,
@@ -140,9 +148,13 @@ describe("offboardAmbassador", () => {
       ]);
       const log: Array<{ type: string; event: string; oldValue: string; newValue: string; timestamp: number }> = [];
 
+      const eaRecipients = new Map<string, string>([
+        ["EA1", "REA2"],
+        ["EA2", "REA2"],
+      ]);
       offboardRegionalAmbassador(
         "REA1",
-        "REA2",
+        eaRecipients,
         regionalAmbassadors,
         eventAmbassadors,
         log
@@ -164,9 +176,13 @@ describe("offboardAmbassador", () => {
       ]);
       const log: Array<{ type: string; event: string; oldValue: string; newValue: string; timestamp: number }> = [];
 
+      const eaRecipients = new Map<string, string>([
+        ["EA1", "REA2"],
+        ["EA2", "REA2"],
+      ]);
       offboardRegionalAmbassador(
         "REA1",
-        "REA2",
+        eaRecipients,
         regionalAmbassadors,
         eventAmbassadors,
         log
@@ -191,9 +207,13 @@ describe("offboardAmbassador", () => {
       ]);
       const log: Array<{ type: string; event: string; oldValue: string; newValue: string; timestamp: number }> = [];
 
+      const eventRecipients = new Map<string, string>([
+        ["Event1", "EA2"],
+        ["Event2", "EA2"],
+      ]);
       offboardEventAmbassador(
         "EA1",
-        "EA2",
+        eventRecipients,
         eventAmbassadors,
         regionalAmbassadors,
         eventTeams,

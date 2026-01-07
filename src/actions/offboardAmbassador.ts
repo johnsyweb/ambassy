@@ -32,11 +32,12 @@ export function checkReallocationCapacityWarning(
 }
 
 /**
- * Offboard an Event Ambassador and reallocate their events to another ambassador.
+ * Offboard an Event Ambassador and reallocate their events to other ambassadors.
+ * @param eventRecipients Map of event name to recipient ambassador name (empty string means unassign)
  */
 export function offboardEventAmbassador(
   ambassadorName: string,
-  recipientName: string,
+  eventRecipients: Map<string, string>,
   eventAmbassadors: EventAmbassadorMap,
   regionalAmbassadors: RegionalAmbassadorMap,
   eventTeams: EventTeamMap,
@@ -49,15 +50,16 @@ export function offboardEventAmbassador(
 
   const eventsToReallocate = [...ambassador.events];
 
-  // Reallocate events if recipient specified
-  if (recipientName && recipientName.trim() !== "") {
-    const recipient = eventAmbassadors.get(recipientName);
-    if (!recipient) {
-      throw new Error(`Recipient Event Ambassador "${recipientName}" not found`);
-    }
+  // Reallocate each event to its specified recipient
+  for (const eventName of eventsToReallocate) {
+    const recipientName = eventRecipients.get(eventName) || "";
 
-    // Reallocate each event
-    for (const eventName of eventsToReallocate) {
+    if (recipientName && recipientName.trim() !== "") {
+      const recipient = eventAmbassadors.get(recipientName);
+      if (!recipient) {
+        throw new Error(`Recipient Event Ambassador "${recipientName}" not found`);
+      }
+
       assignEventToAmbassador(
         eventName,
         ambassadorName,
@@ -73,11 +75,8 @@ export function offboardEventAmbassador(
         eventTeam.eventAmbassador = recipientName;
         eventTeams.set(eventName, eventTeam);
       }
-    }
-  } else {
-    // No recipient specified - just remove events from ambassador
-    // Events will remain unassigned (or could be flagged for manual assignment)
-    for (const eventName of eventsToReallocate) {
+    } else {
+      // No recipient specified - unassign event
       const eventTeam = eventTeams.get(eventName);
       if (eventTeam) {
         eventTeam.eventAmbassador = "";
@@ -91,11 +90,14 @@ export function offboardEventAmbassador(
   persistEventAmbassadors(eventAmbassadors);
 
   // Log the offboarding
+  const recipientsList = Array.from(eventRecipients.values())
+    .filter(r => r && r.trim() !== "")
+    .join(", ") || "unassigned";
   log.push({
     type: "offboard event ambassador",
     event: ambassadorName,
     oldValue: ambassadorName,
-    newValue: recipientName || "unassigned",
+    newValue: recipientsList,
     timestamp: Date.now(),
   });
 
@@ -103,11 +105,12 @@ export function offboardEventAmbassador(
 }
 
 /**
- * Offboard a Regional Ambassador and reallocate their Event Ambassadors to another Regional Ambassador.
+ * Offboard a Regional Ambassador and reallocate their Event Ambassadors to other Regional Ambassadors.
+ * @param eaRecipients Map of Event Ambassador name to recipient Regional Ambassador name (empty string means unassign)
  */
 export function offboardRegionalAmbassador(
   ambassadorName: string,
-  recipientName: string,
+  eaRecipients: Map<string, string>,
   regionalAmbassadors: RegionalAmbassadorMap,
   eventAmbassadors: EventAmbassadorMap,
   log: LogEntry[]
@@ -119,15 +122,26 @@ export function offboardRegionalAmbassador(
 
   const easToReallocate = [...ambassador.supportsEAs];
 
-  // Reallocate Event Ambassadors if recipient specified
-  if (recipientName && recipientName.trim() !== "") {
+  // Group EAs by recipient
+  const recipientGroups = new Map<string, string[]>();
+  for (const eaName of easToReallocate) {
+    const recipientName = eaRecipients.get(eaName) || "";
+    if (recipientName && recipientName.trim() !== "") {
+      if (!recipientGroups.has(recipientName)) {
+        recipientGroups.set(recipientName, []);
+      }
+      recipientGroups.get(recipientName)!.push(eaName);
+    }
+  }
+
+  // Reallocate EAs to their specified recipients
+  for (const [recipientName, eas] of recipientGroups.entries()) {
     const recipient = regionalAmbassadors.get(recipientName);
     if (!recipient) {
       throw new Error(`Recipient Regional Ambassador "${recipientName}" not found`);
     }
 
-    // Add EAs to recipient
-    for (const eaName of easToReallocate) {
+    for (const eaName of eas) {
       if (!recipient.supportsEAs.includes(eaName)) {
         recipient.supportsEAs.push(eaName);
       }
@@ -141,11 +155,13 @@ export function offboardRegionalAmbassador(
   persistRegionalAmbassadors(regionalAmbassadors);
 
   // Log the offboarding
+  const recipientsList = Array.from(new Set(Array.from(eaRecipients.values()).filter(r => r && r.trim() !== "")))
+    .join(", ") || "unassigned";
   log.push({
     type: "offboard regional ambassador",
     event: ambassadorName,
     oldValue: ambassadorName,
-    newValue: recipientName || "unassigned",
+    newValue: recipientsList,
     timestamp: Date.now(),
   });
 
