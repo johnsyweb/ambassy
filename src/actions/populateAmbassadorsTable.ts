@@ -2,6 +2,22 @@ import { EventAmbassadorMap } from "@models/EventAmbassadorMap";
 import { RegionalAmbassadorMap } from "@models/RegionalAmbassadorMap";
 import { CapacityStatus } from "@models/CapacityStatus";
 
+// Forward declaration - will be set by index.ts
+let handleOffboardEventAmbassador: (name: string) => void = () => {
+  console.warn("handleOffboardEventAmbassador not initialized");
+};
+let handleOffboardRegionalAmbassador: (name: string) => void = () => {
+  console.warn("handleOffboardRegionalAmbassador not initialized");
+};
+
+export function setOffboardingHandlers(
+  eventHandler: (name: string) => void,
+  regionalHandler: (name: string) => void
+): void {
+  handleOffboardEventAmbassador = eventHandler;
+  handleOffboardRegionalAmbassador = regionalHandler;
+}
+
 export function populateAmbassadorsTable(
   eventAmbassadors: EventAmbassadorMap,
   regionalAmbassadors: RegionalAmbassadorMap
@@ -26,15 +42,19 @@ function populateEventAmbassadorsTable(eventAmbassadors: EventAmbassadorMap): vo
     const row = document.createElement("tr");
 
     const nameCell = document.createElement("td");
+    const nameContainer = document.createElement("div");
+    nameContainer.style.display = "flex";
+    nameContainer.style.alignItems = "center";
+    nameContainer.style.gap = "8px";
+    
     const nameSpan = document.createElement("span");
     nameSpan.textContent = name;
-    nameCell.appendChild(nameSpan);
+    nameContainer.appendChild(nameSpan);
     
     // Add capacity status badge
     if (ambassador.capacityStatus) {
       const badge = document.createElement("span");
-      badge.textContent = ` [${ambassador.capacityStatus}]`;
-      badge.style.marginLeft = "8px";
+      badge.textContent = `[${ambassador.capacityStatus}]`;
       badge.style.padding = "2px 6px";
       badge.style.borderRadius = "3px";
       badge.style.fontSize = "0.85em";
@@ -50,8 +70,23 @@ function populateEventAmbassadorsTable(eventAmbassadors: EventAmbassadorMap): vo
         badge.style.color = "#721c24";
       }
       
-      nameCell.appendChild(badge);
+      nameContainer.appendChild(badge);
     }
+    
+    // Add offboard button
+    const offboardButton = document.createElement("button");
+    offboardButton.textContent = "Offboard";
+    offboardButton.type = "button";
+    offboardButton.title = `Offboard ${name}`;
+    offboardButton.style.padding = "2px 8px";
+    offboardButton.style.fontSize = "0.85em";
+    offboardButton.style.cursor = "pointer";
+    offboardButton.addEventListener("click", () => {
+      handleOffboardEventAmbassador(name);
+    });
+    nameContainer.appendChild(offboardButton);
+    
+    nameCell.appendChild(nameContainer);
     row.appendChild(nameCell);
 
     const eventsCell = document.createElement("td");
@@ -84,15 +119,19 @@ function populateRegionalAmbassadorsTable(regionalAmbassadors: RegionalAmbassado
     const row = document.createElement("tr");
 
     const nameCell = document.createElement("td");
+    const nameContainer = document.createElement("div");
+    nameContainer.style.display = "flex";
+    nameContainer.style.alignItems = "center";
+    nameContainer.style.gap = "8px";
+    
     const nameSpan = document.createElement("span");
     nameSpan.textContent = name;
-    nameCell.appendChild(nameSpan);
+    nameContainer.appendChild(nameSpan);
     
     // Add capacity status badge
     if (ambassador.capacityStatus) {
       const badge = document.createElement("span");
-      badge.textContent = ` [${ambassador.capacityStatus}]`;
-      badge.style.marginLeft = "8px";
+      badge.textContent = `[${ambassador.capacityStatus}]`;
       badge.style.padding = "2px 6px";
       badge.style.borderRadius = "3px";
       badge.style.fontSize = "0.85em";
@@ -108,8 +147,23 @@ function populateRegionalAmbassadorsTable(regionalAmbassadors: RegionalAmbassado
         badge.style.color = "#721c24";
       }
       
-      nameCell.appendChild(badge);
+      nameContainer.appendChild(badge);
     }
+    
+    // Add offboard button
+    const offboardButton = document.createElement("button");
+    offboardButton.textContent = "Offboard";
+    offboardButton.type = "button";
+    offboardButton.title = `Offboard ${name}`;
+    offboardButton.style.padding = "2px 8px";
+    offboardButton.style.fontSize = "0.85em";
+    offboardButton.style.cursor = "pointer";
+    offboardButton.addEventListener("click", () => {
+      handleOffboardRegionalAmbassador(name);
+    });
+    nameContainer.appendChild(offboardButton);
+    
+    nameCell.appendChild(nameContainer);
     row.appendChild(nameCell);
 
     const stateCell = document.createElement("td");
