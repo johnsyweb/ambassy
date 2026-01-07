@@ -246,7 +246,7 @@ async function ambassy() {
 
     eventTeamsTableData = extractEventTeamsTableData(regionalAmbassadors, eventAmbassadors, eventTeams, eventDetails);
     
-    refreshUI(eventDetails, eventTeamsTableData, log);
+    refreshUI(eventDetails, eventTeamsTableData, log, eventAmbassadors, regionalAmbassadors);
   } else {
     introduction.style.display = "block";
     ambassy.style.display = "none";
