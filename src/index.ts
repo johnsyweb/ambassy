@@ -23,8 +23,6 @@ import { calculateAllCapacityStatuses, loadCapacityLimits } from "./actions/chec
 import { offboardEventAmbassador, offboardRegionalAmbassador } from "./actions/offboardAmbassador";
 import { suggestEventReallocation, suggestEventAmbassadorReallocation } from "./actions/suggestReallocation";
 import { setOffboardingHandlers } from "./actions/populateAmbassadorsTable";
-import { getEventTeamsFromSession } from "@parsers/parseEventTeams";
-import { EventTeamMap } from "./models/EventTeamMap";
 
 function getRegionalAmbassadorsFromSession(): RegionalAmbassadorMap {
   const storedRegionalAmbassadors = loadFromStorage<Array<[string, RegionalAmbassador]>>("regionalAmbassadors");
