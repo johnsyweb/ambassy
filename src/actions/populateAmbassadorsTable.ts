@@ -2,6 +2,7 @@ import { EventAmbassadorMap } from "@models/EventAmbassadorMap";
 import { RegionalAmbassadorMap } from "@models/RegionalAmbassadorMap";
 import { CapacityStatus } from "@models/CapacityStatus";
 import { loadCapacityLimits, checkEventAmbassadorCapacity, checkRegionalAmbassadorCapacity } from "@actions/checkCapacity";
+import { colorPalette } from "@actions/colorPalette";
 
 // Forward declaration - will be set by index.ts
 let handleOffboardEventAmbassador: (name: string) => void = () => {
@@ -17,6 +18,11 @@ export function setOffboardingHandlers(
 ): void {
   handleOffboardEventAmbassador = eventHandler;
   handleOffboardRegionalAmbassador = regionalHandler;
+}
+
+function assignColorToName(name: string, allNames: string[]): string {
+  const index = allNames.indexOf(name);
+  return index >= 0 ? colorPalette[index % colorPalette.length] : "#808080";
 }
 
 export function populateAmbassadorsTable(
