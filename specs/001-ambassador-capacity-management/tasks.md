@@ -210,20 +210,20 @@
 
 **Purpose**: Improvements that affect multiple user stories
 
-- [ ] T098 [P] Ensure all onboarding/offboarding actions are logged in changes log
-- [ ] T099 [P] Verify capacity status updates correctly when events are assigned/reassigned
-- [ ] T100 [P] ~~Verify region assignment persists~~ REMOVED: Region is determined dynamically, no persistence needed
-- [ ] T101 [P] Verify conflict flagging persists across sessions
-- [ ] T102 [P] Ensure geographic calculations handle missing coordinates gracefully
-- [ ] T103 [P] Verify reallocation suggestions handle edge cases (no recipients, all at capacity, etc.)
-- [ ] T104 [P] Ensure all new UI elements are keyboard accessible
-- [ ] T105 [P] Verify Australian English is used for all user-facing text
-- [ ] T106 [P] Update README.md with instructions for onboarding, offboarding, capacity checking, and configuration
-- [ ] T107 [P] Ensure all tests pass and maintain high code coverage
-- [ ] T108 [P] Review code for adherence to Single Responsibility Principle
+- [x] T098 [P] Ensure all onboarding/offboarding actions are logged in changes log
+- [x] T099 [P] Verify capacity status updates correctly when events are assigned/reassigned
+- [x] T100 [P] ~~Verify region assignment persists~~ REMOVED: Region is determined dynamically, no persistence needed
+- [ ] T101 [P] Verify conflict flagging persists across sessions (conflicts field exists but UI not yet implemented)
+- [x] T102 [P] Ensure geographic calculations handle missing coordinates gracefully
+- [x] T103 [P] Verify reallocation suggestions handle edge cases (no recipients, all at capacity, etc.)
+- [x] T104 [P] Ensure all new UI elements are keyboard accessible
+- [x] T105 [P] Verify Australian English is used for all user-facing text
+- [x] T106 [P] Update README.md with instructions for onboarding, offboarding, capacity checking, and configuration
+- [ ] T107 [P] Ensure all tests pass and maintain high code coverage (2 tests failing in storage.test.ts - unrelated to this feature)
+- [x] T108 [P] Review code for adherence to Single Responsibility Principle
 - [ ] T109 [P] Perform final lint:fix and lint check
-- [ ] T110 [P] Run TypeScript type checking (tsc --noEmit)
-- [ ] T111 [P] Run all tests (pnpm test)
+- [x] T110 [P] Run TypeScript type checking (tsc --noEmit) - passes
+- [ ] T111 [P] Run all tests (pnpm test) - 129/131 passing (2 failures in storage.test.ts unrelated)
 
 ---
 
