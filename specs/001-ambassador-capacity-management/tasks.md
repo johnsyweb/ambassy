@@ -157,8 +157,8 @@
 - [x] T069 [US3] Implement offboardEventAmbassador function in src/actions/offboardAmbassador.ts
 - [x] T070 [US3] Implement offboardRegionalAmbassador function in src/actions/offboardAmbassador.ts
 - [x] T071 [US3] Add logging for offboarding and reallocation actions in src/actions/offboardAmbassador.ts
-- [ ] T071a [US3] Update offboardEventAmbassador function in src/actions/offboardAmbassador.ts to log each event reassignment separately (remove grouped logging, rely on assignEventToAmbassador logging)
-- [ ] T071b [US3] Update offboardRegionalAmbassador function in src/actions/offboardAmbassador.ts to log each EA reassignment separately (create individual log entries for each EA moved, not grouped)
+- [x] T071a [US3] Update offboardEventAmbassador function in src/actions/offboardAmbassador.ts to log each event reassignment separately (remove grouped logging, rely on assignEventToAmbassador logging)
+- [x] T071b [US3] Update offboardRegionalAmbassador function in src/actions/offboardAmbassador.ts to log each EA reassignment separately (create individual log entries for each EA moved, not grouped)
 - [x] T072 [US3] Extend EventAmbassador interface in src/models/EventAmbassador.ts to include optional conflicts field (region is determined dynamically, not stored)
 - [x] T073 [US3] Extend RegionalAmbassador interface in src/models/RegionalAmbassador.ts to include optional conflicts field (region is determined dynamically, not stored)
 - [x] T074 [US3] Add "Offboard Ambassador" button and confirmation dialog to public/index.html
