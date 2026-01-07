@@ -111,3 +111,21 @@ tr:hover {
   background-color: #f2f2f2;
   font-weight: bold;
 }
+
+#reallocationDialog button {
+  transition: background-color 0.2s;
+}
+
+#reallocationDialog button:hover {
+  background-color: #f5f5f5 !important;
+}
+
+#reallocationDialog button:focus {
+  outline: 2px solid #2196f3;
+  outline-offset: 2px;
+}
+
+#reallocationDialog select:focus {
+  outline: 2px solid #2196f3;
+  outline-offset: 2px;
+}
