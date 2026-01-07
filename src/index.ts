@@ -63,19 +63,28 @@ document.getElementById("purgeButton")?.addEventListener("click", () => {
   location.reload();
 });
 
-document.getElementById("exportButton")?.addEventListener("click", () => {
-  try {
-    const blob = exportApplicationState();
-    const filename = `ambassy-state-${new Date().toISOString().split("T")[0]}.json`;
-    downloadStateFile(blob, filename);
-  } catch (error) {
-    alert(`Export failed: ${error instanceof Error ? error.message : "Unknown error"}`);
-  }
-});
+function setupExportButton(buttonId: string): void {
+  document.getElementById(buttonId)?.addEventListener("click", () => {
+    try {
+      const blob = exportApplicationState();
+      const filename = `ambassy-state-${new Date().toISOString().split("T")[0]}.json`;
+      downloadStateFile(blob, filename);
+    } catch (error) {
+      alert(`Export failed: ${error instanceof Error ? error.message : "Unknown error"}`);
+    }
+  });
+}
 
-document.getElementById("importButton")?.addEventListener("click", () => {
-  document.getElementById("importFileInput")?.click();
-});
+function setupImportButton(buttonId: string): void {
+  document.getElementById(buttonId)?.addEventListener("click", () => {
+    document.getElementById("importFileInput")?.click();
+  });
+}
+
+setupExportButton("exportButton");
+setupExportButton("exportButtonMap");
+setupImportButton("importButton");
+setupImportButton("importButtonMap");
 
 document.getElementById("importFileInput")?.addEventListener("change", async (event) => {
   const input = event.target as HTMLInputElement;
