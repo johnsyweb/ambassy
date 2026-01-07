@@ -1,5 +1,6 @@
 import { ApplicationState } from "@models/ApplicationState";
 import { saveToStorage } from "@utils/storage";
+import { saveCapacityLimits, validateCapacityLimits } from "./configureCapacityLimits";
 
 export class InvalidFileFormatError extends Error {
   constructor(message: string) {
@@ -107,5 +108,9 @@ export function importApplicationState(state: ApplicationState): void {
   saveToStorage("eventTeams", state.data.eventTeams);
   saveToStorage("regionalAmbassadors", state.data.regionalAmbassadors);
   saveToStorage("changesLog", state.data.changesLog);
+  
+  if (state.data.capacityLimits && validateCapacityLimits(state.data.capacityLimits)) {
+    saveCapacityLimits(state.data.capacityLimits);
+  }
 }
 

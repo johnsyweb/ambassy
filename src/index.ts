@@ -23,6 +23,8 @@ import { calculateAllCapacityStatuses, loadCapacityLimits } from "./actions/chec
 import { offboardEventAmbassador, offboardRegionalAmbassador } from "./actions/offboardAmbassador";
 import { suggestEventReallocation, suggestEventAmbassadorReallocation } from "./actions/suggestReallocation";
 import { setOffboardingHandlers } from "./actions/populateAmbassadorsTable";
+import { saveCapacityLimits, validateCapacityLimits } from "./actions/configureCapacityLimits";
+import { CapacityLimits } from "./models/CapacityLimits";
 
 function getRegionalAmbassadorsFromSession(): RegionalAmbassadorMap {
   const storedRegionalAmbassadors = loadFromStorage<Array<[string, RegionalAmbassador]>>("regionalAmbassadors");
@@ -178,6 +180,95 @@ function setupOnboardingButtons(): void {
 }
 
 setupOnboardingButtons();
+
+function setupCapacityLimitsConfiguration(): void {
+  const configureButton = document.getElementById("configureCapacityLimitsButton");
+  const dialog = document.getElementById("capacityLimitsDialog");
+  const form = document.getElementById("capacityLimitsForm") as HTMLFormElement;
+  const cancelButton = document.getElementById("cancelCapacityLimitsButton");
+  const errorDiv = document.getElementById("capacityLimitsError");
+
+  configureButton?.addEventListener("click", () => {
+    const limits = loadCapacityLimits();
+    const minEAInput = document.getElementById("eventAmbassadorMin") as HTMLInputElement;
+    const maxEAInput = document.getElementById("eventAmbassadorMax") as HTMLInputElement;
+    const minRAInput = document.getElementById("regionalAmbassadorMin") as HTMLInputElement;
+    const maxRAInput = document.getElementById("regionalAmbassadorMax") as HTMLInputElement;
+    
+    minEAInput.value = limits.eventAmbassadorMin.toString();
+    minEAInput.setAttribute("min", "0");
+    maxEAInput.value = limits.eventAmbassadorMax.toString();
+    maxEAInput.setAttribute("min", "0");
+    minRAInput.value = limits.regionalAmbassadorMin.toString();
+    minRAInput.setAttribute("min", "0");
+    maxRAInput.value = limits.regionalAmbassadorMax.toString();
+    maxRAInput.setAttribute("min", "0");
+    
+    if (errorDiv) {
+      errorDiv.style.display = "none";
+      errorDiv.textContent = "";
+    }
+    if (dialog) {
+      dialog.style.display = "block";
+      dialog.setAttribute("aria-hidden", "false");
+      minEAInput.focus();
+    }
+  });
+
+  cancelButton?.addEventListener("click", () => {
+    if (dialog) {
+      dialog.style.display = "none";
+      dialog.setAttribute("aria-hidden", "true");
+    }
+    if (form) {
+      form.reset();
+    }
+    configureButton?.focus();
+  });
+
+  form?.addEventListener("submit", (e) => {
+    e.preventDefault();
+    if (!errorDiv) return;
+
+    const minEAInput = document.getElementById("eventAmbassadorMin") as HTMLInputElement;
+    const newLimits: CapacityLimits = {
+      eventAmbassadorMin: parseInt(minEAInput.value, 10),
+      eventAmbassadorMax: parseInt((document.getElementById("eventAmbassadorMax") as HTMLInputElement).value, 10),
+      regionalAmbassadorMin: parseInt((document.getElementById("regionalAmbassadorMin") as HTMLInputElement).value, 10),
+      regionalAmbassadorMax: parseInt((document.getElementById("regionalAmbassadorMax") as HTMLInputElement).value, 10),
+    };
+
+    if (!validateCapacityLimits(newLimits)) {
+      errorDiv.style.display = "block";
+      errorDiv.textContent = "Invalid limits: minimum must be less than or equal to maximum, and all values must be non-negative integers.";
+      return;
+    }
+
+    try {
+      saveCapacityLimits(newLimits);
+      if (dialog) {
+        dialog.style.display = "none";
+        dialog.setAttribute("aria-hidden", "true");
+      }
+      if (form) {
+        form.reset();
+      }
+
+      const eventAmbassadors = getEventAmbassadorsFromSession();
+      const regionalAmbassadors = getRegionalAmbassadorsFromSession();
+      calculateAllCapacityStatuses(eventAmbassadors, regionalAmbassadors, newLimits);
+      ambassy();
+      alert("Capacity limits updated successfully.");
+      configureButton?.focus();
+    } catch (error) {
+      errorDiv.style.display = "block";
+      errorDiv.textContent = `Failed to save capacity limits: ${error instanceof Error ? error.message : "Unknown error"}`;
+      minEAInput.focus();
+    }
+  });
+}
+
+setupCapacityLimitsConfiguration();
 
 function setupOffboardingButtons(): void {
   const handleOffboardEA = (name: string) => {

@@ -1,5 +1,6 @@
 import { ApplicationState } from "@models/ApplicationState";
 import { loadFromStorage } from "@utils/storage";
+import { loadCapacityLimits } from "./checkCapacity";
 
 export function exportApplicationState(): Blob {
   const eventAmbassadors = loadFromStorage<Array<[string, import("@models/EventAmbassador").EventAmbassador]>>("eventAmbassadors");
@@ -11,6 +12,8 @@ export function exportApplicationState(): Blob {
     throw new Error("Cannot export: incomplete application state");
   }
 
+  const capacityLimits = loadCapacityLimits();
+
   const state: ApplicationState = {
     version: "1.0.0",
     exportedAt: new Date().toISOString(),
@@ -19,6 +22,7 @@ export function exportApplicationState(): Blob {
       eventTeams,
       regionalAmbassadors,
       changesLog,
+      capacityLimits,
     },
   };
 
