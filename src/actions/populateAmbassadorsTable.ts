@@ -1,6 +1,7 @@
 import { EventAmbassadorMap } from "@models/EventAmbassadorMap";
 import { RegionalAmbassadorMap } from "@models/RegionalAmbassadorMap";
 import { CapacityStatus } from "@models/CapacityStatus";
+import { loadCapacityLimits, checkEventAmbassadorCapacity, checkRegionalAmbassadorCapacity } from "@actions/checkCapacity";
 
 // Forward declaration - will be set by index.ts
 let handleOffboardEventAmbassador: (name: string) => void = () => {
@@ -51,29 +52,6 @@ function populateEventAmbassadorsTable(eventAmbassadors: EventAmbassadorMap): vo
     nameSpan.textContent = name;
     nameContainer.appendChild(nameSpan);
     
-    // Add capacity status badge
-    if (ambassador.capacityStatus) {
-      const badge = document.createElement("span");
-      badge.textContent = `[${ambassador.capacityStatus}]`;
-      badge.style.padding = "2px 6px";
-      badge.style.borderRadius = "3px";
-      badge.style.fontSize = "0.85em";
-      
-      if (ambassador.capacityStatus === CapacityStatus.WITHIN) {
-        badge.style.backgroundColor = "#d4edda";
-        badge.style.color = "#155724";
-      } else if (ambassador.capacityStatus === CapacityStatus.UNDER) {
-        badge.style.backgroundColor = "#fff3cd";
-        badge.style.color = "#856404";
-      } else if (ambassador.capacityStatus === CapacityStatus.OVER) {
-        badge.style.backgroundColor = "#f8d7da";
-        badge.style.color = "#721c24";
-      }
-      
-      nameContainer.appendChild(badge);
-    }
-    
-    // Add offboard button
     const offboardButton = document.createElement("button");
     offboardButton.textContent = "Offboard";
     offboardButton.type = "button";
@@ -88,6 +66,23 @@ function populateEventAmbassadorsTable(eventAmbassadors: EventAmbassadorMap): vo
     
     nameCell.appendChild(nameContainer);
     row.appendChild(nameCell);
+
+    const allocationsCell = document.createElement("td");
+    const eventCount = ambassador.events.length;
+    const limits = loadCapacityLimits();
+    const status = ambassador.capacityStatus ?? checkEventAmbassadorCapacity(eventCount, limits);
+    
+    let emoji = "";
+    if (status === CapacityStatus.UNDER) {
+      emoji = "⬇️";
+    } else if (status === CapacityStatus.WITHIN) {
+      emoji = "✅";
+    } else if (status === CapacityStatus.OVER) {
+      emoji = "⚠️";
+    }
+    
+    allocationsCell.textContent = `${eventCount} ${emoji}`;
+    row.appendChild(allocationsCell);
 
     const eventsCell = document.createElement("td");
     if (ambassador.events.length === 0) {
@@ -128,29 +123,6 @@ function populateRegionalAmbassadorsTable(regionalAmbassadors: RegionalAmbassado
     nameSpan.textContent = name;
     nameContainer.appendChild(nameSpan);
     
-    // Add capacity status badge
-    if (ambassador.capacityStatus) {
-      const badge = document.createElement("span");
-      badge.textContent = `[${ambassador.capacityStatus}]`;
-      badge.style.padding = "2px 6px";
-      badge.style.borderRadius = "3px";
-      badge.style.fontSize = "0.85em";
-      
-      if (ambassador.capacityStatus === CapacityStatus.WITHIN) {
-        badge.style.backgroundColor = "#d4edda";
-        badge.style.color = "#155724";
-      } else if (ambassador.capacityStatus === CapacityStatus.UNDER) {
-        badge.style.backgroundColor = "#fff3cd";
-        badge.style.color = "#856404";
-      } else if (ambassador.capacityStatus === CapacityStatus.OVER) {
-        badge.style.backgroundColor = "#f8d7da";
-        badge.style.color = "#721c24";
-      }
-      
-      nameContainer.appendChild(badge);
-    }
-    
-    // Add offboard button
     const offboardButton = document.createElement("button");
     offboardButton.textContent = "Offboard";
     offboardButton.type = "button";
@@ -169,6 +141,23 @@ function populateRegionalAmbassadorsTable(regionalAmbassadors: RegionalAmbassado
     const stateCell = document.createElement("td");
     stateCell.textContent = ambassador.state;
     row.appendChild(stateCell);
+
+    const allocationsCell = document.createElement("td");
+    const eaCount = ambassador.supportsEAs.length;
+    const limits = loadCapacityLimits();
+    const status = ambassador.capacityStatus ?? checkRegionalAmbassadorCapacity(eaCount, limits);
+    
+    let emoji = "";
+    if (status === CapacityStatus.UNDER) {
+      emoji = "⬇️";
+    } else if (status === CapacityStatus.WITHIN) {
+      emoji = "✅";
+    } else if (status === CapacityStatus.OVER) {
+      emoji = "⚠️";
+    }
+    
+    allocationsCell.textContent = `${eaCount} ${emoji}`;
+    row.appendChild(allocationsCell);
 
     const easCell = document.createElement("td");
     if (ambassador.supportsEAs.length === 0) {
