@@ -1,34 +1,28 @@
-import { Region } from "@models/Region";
-import { EventDetails } from "@models/EventDetails";
+import { RegionalAmbassadorMap } from "../models/RegionalAmbassadorMap";
 
-/**
- * Assign a region to an event or ambassador.
- * This is a placeholder implementation - region assignment logic will be enhanced
- * based on event location data or manual assignment.
- * @param eventOrAmbassadorName Name of event or ambassador
- * @param region Region to assign
- * @returns The assigned region
- */
-export function assignRegion(
-  eventOrAmbassadorName: string,
-  region: Region
-): Region {
-  // For now, return the provided region
-  // Future: Could validate against known regions, check for conflicts, etc.
-  if (region === Region.UNKNOWN) {
-    return Region.UNKNOWN;
+export function getRegionalAmbassadorForEventAmbassador(
+  eventAmbassadorName: string,
+  regionalAmbassadors: RegionalAmbassadorMap
+): string | null {
+  for (const [raName, ra] of regionalAmbassadors.entries()) {
+    if (ra.supportsEAs.includes(eventAmbassadorName)) {
+      return raName;
+    }
   }
-  return region;
+  return null;
 }
 
-/**
- * Get the region for a specific event.
- * @param event Event details
- * @returns The region for the event, or UNKNOWN if not assigned
- */
-export function getRegionForEvent(event: EventDetails): Region {
-  // For now, return UNKNOWN as region assignment is not yet implemented
-  // Future: Could derive from event location, coordinates, or stored assignment
-  return Region.UNKNOWN;
+export function areEventAmbassadorsInSameRegion(
+  ea1Name: string,
+  ea2Name: string,
+  regionalAmbassadors: RegionalAmbassadorMap
+): boolean {
+  const ra1 = getRegionalAmbassadorForEventAmbassador(ea1Name, regionalAmbassadors);
+  const ra2 = getRegionalAmbassadorForEventAmbassador(ea2Name, regionalAmbassadors);
+  
+  if (ra1 === null || ra2 === null) {
+    return false;
+  }
+  
+  return ra1 === ra2;
 }
-

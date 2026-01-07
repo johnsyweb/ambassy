@@ -11,7 +11,6 @@ import { CapacityLimits, defaultCapacityLimits } from "../models/CapacityLimits"
 import { EventAmbassador } from "../models/EventAmbassador";
 import { RegionalAmbassador } from "../models/RegionalAmbassador";
 import { EventDetails } from "../models/EventDetails";
-import { Region } from "../models/Region";
 
 describe("suggestReallocation", () => {
   const limits: CapacityLimits = defaultCapacityLimits;
@@ -124,31 +123,35 @@ describe("suggestReallocation", () => {
       };
 
       const items = ["Event9"];
-      const score1 = calculateReallocationScore(recipient1, items, "events", eventDetails, limits);
-      const score2 = calculateReallocationScore(recipient2, items, "events", eventDetails, limits);
+      const regionalAmbassadors: RegionalAmbassadorMap = new Map();
+      const score1 = calculateReallocationScore(recipient1, "EA1", items, "events", eventDetails, limits, regionalAmbassadors);
+      const score2 = calculateReallocationScore(recipient2, "EA2", items, "events", eventDetails, limits, regionalAmbassadors);
 
       expect(score1).toBeGreaterThan(score2);
     });
 
     it("should give higher score for same region", () => {
       const eventDetails: EventDetailsMap = new Map();
+      const regionalAmbassadors: RegionalAmbassadorMap = new Map([
+        ["REA1", { name: "REA1", state: "VIC", supportsEAs: ["EA1", "EA3"], capacityStatus: undefined }],
+        ["REA2", { name: "REA2", state: "VIC", supportsEAs: ["EA2"], capacityStatus: undefined }],
+      ]);
       const recipient1: EventAmbassador = {
         name: "EA1",
         events: ["Event1"],
         capacityStatus: undefined,
-        region: Region.REGION_1,
       };
       const recipient2: EventAmbassador = {
         name: "EA2",
         events: ["Event2"],
         capacityStatus: undefined,
-        region: Region.REGION_2,
       };
 
       const items = ["Event3"];
-      const options = { fromRegion: Region.REGION_1 };
-      const score1 = calculateReallocationScore(recipient1, items, "events", eventDetails, limits, options);
-      const score2 = calculateReallocationScore(recipient2, items, "events", eventDetails, limits, options);
+      const fromEA: EventAmbassador = { name: "EA3", events: [], capacityStatus: undefined };
+      const options = { fromRegionalAmbassador: "REA1" };
+      const score1 = calculateReallocationScore(recipient1, "EA1", items, "events", eventDetails, limits, regionalAmbassadors, options);
+      const score2 = calculateReallocationScore(recipient2, "EA2", items, "events", eventDetails, limits, regionalAmbassadors, options);
 
       expect(score1).toBeGreaterThan(score2);
     });
@@ -169,8 +172,9 @@ describe("suggestReallocation", () => {
       };
 
       const items = ["Event2"];
-      const score1 = calculateReallocationScore(recipient1, items, "events", eventDetails, limits);
-      const score2 = calculateReallocationScore(recipient2, items, "events", eventDetails, limits);
+      const regionalAmbassadors: RegionalAmbassadorMap = new Map();
+      const score1 = calculateReallocationScore(recipient1, "EA1", items, "events", eventDetails, limits, regionalAmbassadors);
+      const score2 = calculateReallocationScore(recipient2, "EA2", items, "events", eventDetails, limits, regionalAmbassadors);
 
       expect(score2).toBeGreaterThan(score1);
     });
@@ -219,8 +223,9 @@ describe("suggestReallocation", () => {
       };
 
       const items = ["Event2"];
-      const score1 = calculateReallocationScore(recipient1, items, "events", eventDetails, limits);
-      const score2 = calculateReallocationScore(recipient2, items, "events", eventDetails, limits);
+      const regionalAmbassadors: RegionalAmbassadorMap = new Map();
+      const score1 = calculateReallocationScore(recipient1, "EA1", items, "events", eventDetails, limits, regionalAmbassadors);
+      const score2 = calculateReallocationScore(recipient2, "EA2", items, "events", eventDetails, limits, regionalAmbassadors);
 
       // Recipient1 should score higher due to proximity (if both have capacity)
       expect(score1).toBeGreaterThanOrEqual(score2);
@@ -266,12 +271,14 @@ describe("suggestReallocation", () => {
         }],
       ]);
 
+      const regionalAmbassadors: RegionalAmbassadorMap = new Map();
       const suggestions = suggestEventReallocation(
         "EA1",
         ["Event1"],
         eventAmbassadors,
         eventDetails,
-        limits
+        limits,
+        regionalAmbassadors
       );
 
       expect(suggestions.length).toBeGreaterThan(0);
@@ -285,8 +292,9 @@ describe("suggestReallocation", () => {
       const eventAmbassadors: EventAmbassadorMap = new Map();
       const eventDetails: EventDetailsMap = new Map();
 
+      const regionalAmbassadors: RegionalAmbassadorMap = new Map();
       expect(() => {
-        suggestEventReallocation("Nonexistent", ["Event1"], eventAmbassadors, eventDetails, limits);
+        suggestEventReallocation("Nonexistent", ["Event1"], eventAmbassadors, eventDetails, limits, regionalAmbassadors);
       }).toThrow();
     });
 
@@ -296,8 +304,9 @@ describe("suggestReallocation", () => {
       ]);
       const eventDetails: EventDetailsMap = new Map();
 
+      const regionalAmbassadors: RegionalAmbassadorMap = new Map();
       expect(() => {
-        suggestEventReallocation("EA1", [], eventAmbassadors, eventDetails, limits);
+        suggestEventReallocation("EA1", [], eventAmbassadors, eventDetails, limits, regionalAmbassadors);
       }).toThrow();
     });
   });

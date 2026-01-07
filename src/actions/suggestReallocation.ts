@@ -6,12 +6,12 @@ import { ReallocationSuggestion } from "../models/ReallocationSuggestion";
 import { EventAmbassador } from "../models/EventAmbassador";
 import { RegionalAmbassador } from "../models/RegionalAmbassador";
 import { calculateDistance, calculateAverageDistance } from "../utils/geography";
-import { Region } from "../models/Region";
 import { checkEventAmbassadorCapacity, checkRegionalAmbassadorCapacity } from "./checkCapacity";
 import { CapacityStatus } from "../models/CapacityStatus";
+import { getRegionalAmbassadorForEventAmbassador, areEventAmbassadorsInSameRegion } from "../utils/regions";
 
 export interface ReallocationOptions {
-  fromRegion?: Region;
+  fromRegionalAmbassador?: string;
   conflicts?: string[];
 }
 
@@ -87,10 +87,12 @@ export function calculateGeographicProximityScore(
  */
 export function calculateReallocationScore(
   recipient: EventAmbassador | RegionalAmbassador,
+  recipientName: string,
   items: string[],
   itemType: "events" | "eventAmbassadors",
   eventDetails: EventDetailsMap,
   limits: CapacityLimits,
+  regionalAmbassadors: RegionalAmbassadorMap,
   options?: ReallocationOptions
 ): number {
   let score = 0;
@@ -99,7 +101,7 @@ export function calculateReallocationScore(
   if (recipient.conflicts && recipient.conflicts.length > 0) {
     const hasConflict = items.some((item) => recipient.conflicts?.includes(item));
     if (hasConflict) {
-      return CONFLICT_PENALTY; // Heavy penalty for conflicts
+      return CONFLICT_PENALTY;
     }
   }
 
@@ -114,9 +116,9 @@ export function calculateReallocationScore(
       const availableCapacity = limits.eventAmbassadorMax - currentCount;
       capacityScore = Math.min(100, (availableCapacity / limits.eventAmbassadorMax) * 100);
     } else if (status === CapacityStatus.UNDER) {
-      capacityScore = 50; // Moderate score for under capacity
+      capacityScore = 50;
     } else {
-      capacityScore = 10; // Low score for over capacity (but still suggested)
+      capacityScore = 10;
     }
   } else if (itemType === "eventAmbassadors" && "supportsEAs" in recipient) {
     const currentCount = recipient.supportsEAs.length;
@@ -135,15 +137,19 @@ export function calculateReallocationScore(
 
   score += capacityScore * CAPACITY_WEIGHT;
 
-  // Region factor
-  if (options?.fromRegion && recipient.region) {
-    if (recipient.region === options.fromRegion) {
-      score += 100 * REGION_WEIGHT; // Full score for same region
-    } else if (recipient.region !== Region.UNKNOWN) {
-      score += 30 * REGION_WEIGHT; // Partial score for different region
+  // Region factor (determined dynamically from supportsEAs)
+  if (options?.fromRegionalAmbassador && itemType === "events" && "events" in recipient) {
+    const recipientRA = getRegionalAmbassadorForEventAmbassador(recipientName, regionalAmbassadors);
+    if (recipientRA === options.fromRegionalAmbassador) {
+      score += 100 * REGION_WEIGHT;
+    } else if (recipientRA !== null) {
+      score += 30 * REGION_WEIGHT;
     }
-  } else if (recipient.region && recipient.region !== Region.UNKNOWN) {
-    score += 50 * REGION_WEIGHT; // Moderate score if region is set but no fromRegion specified
+  } else if (itemType === "events" && "events" in recipient) {
+    const recipientRA = getRegionalAmbassadorForEventAmbassador(recipientName, regionalAmbassadors);
+    if (recipientRA !== null) {
+      score += 50 * REGION_WEIGHT;
+    }
   }
 
   // Proximity factor (only for events)
@@ -156,7 +162,7 @@ export function calculateReallocationScore(
     score += proximityScore * PROXIMITY_WEIGHT;
   }
 
-  return Math.max(0, Math.min(100, score)); // Clamp to 0-100
+  return Math.max(0, Math.min(100, score));
 }
 
 /**
@@ -168,6 +174,7 @@ export function suggestEventReallocation(
   eventAmbassadors: EventAmbassadorMap,
   eventDetails: EventDetailsMap,
   limits: CapacityLimits,
+  regionalAmbassadors: RegionalAmbassadorMap,
   options?: ReallocationOptions
 ): ReallocationSuggestion[] {
   if (!eventAmbassadors.has(fromAmbassador)) {
@@ -179,32 +186,35 @@ export function suggestEventReallocation(
   }
 
   const fromEA = eventAmbassadors.get(fromAmbassador)!;
+  const fromEA_RA = getRegionalAmbassadorForEventAmbassador(fromAmbassador, regionalAmbassadors);
   const suggestions: ReallocationSuggestion[] = [];
 
   // Generate suggestions for each potential recipient
   eventAmbassadors.forEach((recipient, recipientName) => {
     if (recipientName === fromAmbassador) {
-      return; // Skip the ambassador being offboarded
+      return;
     }
 
     const score = calculateReallocationScore(
       recipient,
+      recipientName,
       events,
       "events",
       eventDetails,
       limits,
-      { ...options, fromRegion: fromEA.region }
+      regionalAmbassadors,
+      { ...options, fromRegionalAmbassador: fromEA_RA || undefined }
     );
 
     if (score < 0) {
-      return; // Skip conflicts
+      return;
     }
 
     const reasons: string[] = [];
     const warnings: string[] = [];
 
-    // Add reasons
-    if (recipient.region === fromEA.region && recipient.region !== Region.UNKNOWN) {
+    const recipientRA = getRegionalAmbassadorForEventAmbassador(recipientName, regionalAmbassadors);
+    if (fromEA_RA !== null && recipientRA === fromEA_RA) {
       reasons.push("Same region");
     }
     if (recipient.events.length < limits.eventAmbassadorMin) {
@@ -220,7 +230,6 @@ export function suggestEventReallocation(
       reasons.push("Geographic proximity");
     }
 
-    // Add warnings
     if (recipient.events.length + events.length > limits.eventAmbassadorMax) {
       warnings.push(`Would exceed maximum capacity (${limits.eventAmbassadorMax})`);
     }
@@ -235,7 +244,6 @@ export function suggestEventReallocation(
     });
   });
 
-  // Sort by score (highest first)
   return suggestions.sort((a, b) => b.score - a.score);
 }
 
@@ -261,35 +269,31 @@ export function suggestEventAmbassadorReallocation(
   const fromREA = regionalAmbassadors.get(fromAmbassador)!;
   const suggestions: ReallocationSuggestion[] = [];
 
-  // Generate suggestions for each potential recipient
   regionalAmbassadors.forEach((recipient, recipientName) => {
     if (recipientName === fromAmbassador) {
-      return; // Skip the ambassador being offboarded
+      return;
     }
 
-    // Create a dummy EventDetailsMap for scoring (not needed for EA reallocation)
     const dummyEventDetails: EventDetailsMap = new Map();
 
     const score = calculateReallocationScore(
       recipient,
+      recipientName,
       eventAmbassadorNames,
       "eventAmbassadors",
       dummyEventDetails,
       limits,
-      { ...options, fromRegion: fromREA.region }
+      regionalAmbassadors,
+      { ...options, fromRegionalAmbassador: fromAmbassador }
     );
 
     if (score < 0) {
-      return; // Skip conflicts
+      return;
     }
 
     const reasons: string[] = [];
     const warnings: string[] = [];
 
-    // Add reasons
-    if (recipient.region === fromREA.region && recipient.region !== Region.UNKNOWN) {
-      reasons.push("Same region");
-    }
     if (recipient.supportsEAs.length < limits.regionalAmbassadorMin) {
       reasons.push("Under capacity");
     } else if (recipient.supportsEAs.length + eventAmbassadorNames.length <= limits.regionalAmbassadorMax) {
@@ -298,7 +302,6 @@ export function suggestEventAmbassadorReallocation(
       warnings.push("Would exceed capacity limit");
     }
 
-    // Add warnings
     if (recipient.supportsEAs.length + eventAmbassadorNames.length > limits.regionalAmbassadorMax) {
       warnings.push(`Would exceed maximum capacity (${limits.regionalAmbassadorMax})`);
     }
@@ -313,7 +316,6 @@ export function suggestEventAmbassadorReallocation(
     });
   });
 
-  // Sort by score (highest first)
   return suggestions.sort((a, b) => b.score - a.score);
 }
 

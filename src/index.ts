@@ -290,7 +290,8 @@ function setupOffboardingButtons(): void {
           [eventName],
           eventAmbassadors,
           eventDetails!,
-          loadCapacityLimits()
+          loadCapacityLimits(),
+          regionalAmbassadors
         );
 
         let promptMessage = `Event: ${eventName}\n\n`;
