@@ -179,6 +179,153 @@ function setupOnboardingButtons(): void {
 
 setupOnboardingButtons();
 
+function setupOffboardingButtons(): void {
+  const handleOffboardEA = (name: string) => {
+    if (!confirm(`Are you sure you want to offboard Event Ambassador "${name}"?`)) {
+      return;
+    }
+    const eventAmbassadors = getEventAmbassadorsFromSession();
+    const regionalAmbassadors = getRegionalAmbassadorsFromSession();
+    const eventTeams = getEventTeamsFromSession();
+    const eventsToReallocate = eventAmbassadors.get(name)?.events || [];
+
+    if (eventsToReallocate.length > 0) {
+      const suggestions = suggestEventReallocation(
+        name,
+        eventsToReallocate,
+        eventAmbassadors,
+        eventDetails!,
+        loadCapacityLimits()
+      );
+
+      let suggestionMessage = `Offboarding "${name}" will unassign the following events: ${eventsToReallocate.join(", ")}.\n\n`;
+      suggestionMessage += "Suggested reallocations:\n";
+      if (suggestions.length > 0) {
+        suggestions.slice(0, 5).forEach((s, i) => {
+          suggestionMessage += `${i + 1}. ${s.toAmbassador} (Score: ${s.score.toFixed(2)}) - ${s.reasons?.join("; ")}\n`;
+        });
+        suggestionMessage += "\nEnter the name of the ambassador to reallocate events to, or leave blank to unassign all:";
+      } else {
+        suggestionMessage += "No suitable reallocation suggestions found.\nEnter the name of the ambassador to reallocate events to, or leave blank to unassign all:";
+      }
+
+      const recipientName = prompt(suggestionMessage);
+
+      if (recipientName === null) {
+        return;
+      }
+
+      if (recipientName.trim() === "") {
+        if (!confirm("No recipient specified. Events will be unassigned. Continue?")) {
+          return;
+        }
+      } else if (!eventAmbassadors.has(recipientName)) {
+        alert(`Recipient Event Ambassador "${recipientName}" not found.`);
+        return;
+      }
+
+      try {
+        offboardEventAmbassador(
+          name,
+          recipientName.trim(),
+          eventAmbassadors,
+          regionalAmbassadors,
+          eventTeams,
+          log
+        );
+        persistChangesLog(log);
+        ambassy();
+        alert(`Event Ambassador "${name}" offboarded. Events reallocated to "${recipientName.trim() || "no one"}".`);
+      } catch (error) {
+        alert(`Failed to offboard Event Ambassador: ${error instanceof Error ? error.message : "Unknown error"}`);
+      }
+    } else {
+      try {
+        const eventTeams = getEventTeamsFromSession();
+        offboardEventAmbassador(name, "", eventAmbassadors, regionalAmbassadors, eventTeams, log);
+        persistChangesLog(log);
+        ambassy();
+        alert(`Event Ambassador "${name}" offboarded.`);
+      } catch (error) {
+        alert(`Failed to offboard Event Ambassador: ${error instanceof Error ? error.message : "Unknown error"}`);
+      }
+    }
+  };
+
+  const handleOffboardRA = (name: string) => {
+    if (!confirm(`Are you sure you want to offboard Regional Ambassador "${name}"?`)) {
+      return;
+    }
+    const regionalAmbassadors = getRegionalAmbassadorsFromSession();
+    const eventAmbassadors = getEventAmbassadorsFromSession();
+    const easToReallocate = regionalAmbassadors.get(name)?.supportsEAs || [];
+
+    if (easToReallocate.length > 0) {
+      const suggestions = suggestEventAmbassadorReallocation(
+        name,
+        easToReallocate,
+        regionalAmbassadors,
+        eventAmbassadors,
+        loadCapacityLimits()
+      );
+
+      let suggestionMessage = `Offboarding "${name}" will unassign the following Event Ambassadors: ${easToReallocate.join(", ")}.\n\n`;
+      suggestionMessage += "Suggested reallocations:\n";
+      if (suggestions.length > 0) {
+        suggestions.slice(0, 5).forEach((s, i) => {
+          suggestionMessage += `${i + 1}. ${s.toAmbassador} (Score: ${s.score.toFixed(2)}) - ${s.reasons?.join("; ")}\n`;
+        });
+        suggestionMessage += "\nEnter the name of the Regional Ambassador to reallocate Event Ambassadors to, or leave blank to unassign all:";
+      } else {
+        suggestionMessage += "No suitable reallocation suggestions found.\nEnter the name of the Regional Ambassador to reallocate Event Ambassadors to, or leave blank to unassign all:";
+      }
+
+      const recipientName = prompt(suggestionMessage);
+
+      if (recipientName === null) {
+        return;
+      }
+
+      if (recipientName.trim() === "") {
+        if (!confirm("No recipient specified. Event Ambassadors will be unassigned. Continue?")) {
+          return;
+        }
+      } else if (!regionalAmbassadors.has(recipientName)) {
+        alert(`Recipient Regional Ambassador "${recipientName}" not found.`);
+        return;
+      }
+
+      try {
+        offboardRegionalAmbassador(
+          name,
+          recipientName.trim(),
+          regionalAmbassadors,
+          eventAmbassadors,
+          log
+        );
+        persistChangesLog(log);
+        ambassy();
+        alert(`Regional Ambassador "${name}" offboarded. Event Ambassadors reallocated to "${recipientName.trim() || "no one"}".`);
+      } catch (error) {
+        alert(`Failed to offboard Regional Ambassador: ${error instanceof Error ? error.message : "Unknown error"}`);
+      }
+    } else {
+      try {
+        offboardRegionalAmbassador(name, "", regionalAmbassadors, eventAmbassadors, log);
+        persistChangesLog(log);
+        ambassy();
+        alert(`Regional Ambassador "${name}" offboarded.`);
+      } catch (error) {
+        alert(`Failed to offboard Regional Ambassador: ${error instanceof Error ? error.message : "Unknown error"}`);
+      }
+    }
+  };
+
+  setOffboardingHandlers(handleOffboardEA, handleOffboardRA);
+}
+
+setupOffboardingButtons();
+
 document.getElementById("importFileInput")?.addEventListener("change", async (event) => {
   const input = event.target as HTMLInputElement;
   if (input.files && input.files.length > 0) {

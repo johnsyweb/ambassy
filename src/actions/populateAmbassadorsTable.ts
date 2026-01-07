@@ -80,6 +80,7 @@ function populateEventAmbassadorsTable(eventAmbassadors: EventAmbassadorMap, eve
     offboardButton.textContent = "Offboard";
     offboardButton.type = "button";
     offboardButton.title = `Offboard ${name}`;
+    offboardButton.setAttribute("aria-label", `Offboard Event Ambassador ${name}`);
     offboardButton.style.padding = "2px 8px";
     offboardButton.style.fontSize = "0.85em";
     offboardButton.style.cursor = "pointer";
@@ -167,6 +168,7 @@ function populateRegionalAmbassadorsTable(regionalAmbassadors: RegionalAmbassado
     offboardButton.textContent = "Offboard";
     offboardButton.type = "button";
     offboardButton.title = `Offboard ${name}`;
+    offboardButton.setAttribute("aria-label", `Offboard Regional Ambassador ${name}`);
     offboardButton.style.padding = "2px 8px";
     offboardButton.style.fontSize = "0.85em";
     offboardButton.style.cursor = "pointer";
