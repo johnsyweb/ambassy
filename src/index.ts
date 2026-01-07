@@ -232,6 +232,11 @@ async function ambassy() {
   const eventAmbassadors = getEventAmbassadorsFromSession();
   const eventTeams = getEventTeamsFromSession();
   
+  // Reload log from storage to ensure consistency
+  const currentLog = getLogFromSession();
+  log.length = 0;
+  log.push(...currentLog);
+  
   const hasData = hasApplicationData(eventTeams, eventAmbassadors, regionalAmbassadors);
 
   if (hasData) {
