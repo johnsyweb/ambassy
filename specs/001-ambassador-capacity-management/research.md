@@ -175,7 +175,7 @@
 | Risk | Impact | Mitigation |
 |------|--------|------------|
 | Geographic calculations slow for large datasets | Medium | Implement caching, optimize algorithm, limit calculation scope |
-| Region boundaries unclear or ambiguous | Medium | Support manual assignment, default to "Unknown", flag for review |
+| Event Ambassador not supported by any Regional Ambassador | Low | Still provide suggestions based on capacity and proximity, note that regional alignment cannot be determined |
 | Landowner information missing or inconsistent | Low | Support manual assignment, use pattern matching for common cases |
 | Reallocation suggestions don't match user expectations | Medium | Provide multiple suggestions, allow override, gather user feedback for tuning |
 | Capacity limits not intuitive | Low | Provide sensible defaults, clear UI, validation messages |
