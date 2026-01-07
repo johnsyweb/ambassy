@@ -82,47 +82,33 @@ specs/[###-feature]/
 ```
 
 ### Source Code (repository root)
-<!--
-  ACTION REQUIRED: Replace the placeholder tree below with the concrete layout
-  for this feature. Delete unused options and expand the chosen structure with
-  real paths (e.g., apps/admin, packages/something). The delivered plan must
-  not include Option labels.
--->
 
 ```text
-# [REMOVE IF UNUSED] Option 1: Single project (DEFAULT)
 src/
 ├── models/
-├── services/
-├── cli/
-└── lib/
+│   ├── CapacityStatus.ts          # NEW: Capacity status enum
+│   ├── CapacityLimits.ts          # NEW: Capacity limits interface
+│   ├── ReallocationSuggestion.ts # NEW: Reallocation suggestion interface
+│   ├── EventAmbassador.ts         # MODIFIED: Added capacityStatus, conflicts; removed region
+│   └── RegionalAmbassador.ts      # MODIFIED: Added capacityStatus, conflicts; removed region
+├── actions/
+│   ├── onboardAmbassador.ts       # NEW: Onboarding logic
+│   ├── offboardAmbassador.ts      # MODIFIED: Separate logging per reassignment
+│   ├── checkCapacity.ts           # NEW: Capacity checking logic
+│   ├── suggestReallocation.ts    # NEW: Reallocation suggestion algorithm
+│   ├── configureCapacityLimits.ts # NEW: Capacity limits configuration
+│   ├── populateAmbassadorsTable.ts # NEW: Ambassador table display
+│   └── assignEventToAmbassador.ts # EXISTING: Used for reassignment logging
+├── utils/
+│   ├── geography.ts               # NEW: Haversine formula for distance calculations
+│   └── regions.ts                 # NEW: Dynamic region determination helpers
+└── index.ts                       # MODIFIED: UI integration with clickable suggestion buttons
+
+public/
+└── index.html                     # MODIFIED: Added UI elements for onboarding, offboarding, capacity config
 
 tests/
-├── contract/
-├── integration/
-└── unit/
-
-# [REMOVE IF UNUSED] Option 2: Web application (when "frontend" + "backend" detected)
-backend/
-├── src/
-│   ├── models/
-│   ├── services/
-│   └── api/
-└── tests/
-
-frontend/
-├── src/
-│   ├── components/
-│   ├── pages/
-│   └── services/
-└── tests/
-
-# [REMOVE IF UNUSED] Option 3: Mobile + API (when "iOS/Android" detected)
-api/
-└── [same as backend above]
-
-ios/ or android/
-└── [platform-specific structure: feature modules, UI flows, platform tests]
+└── [mirrors src/ structure with .test.ts files]
 ```
 
 **Structure Decision**: Single-page web application structure maintained. New functionality added as extensions to existing models and new action files following established patterns. No architectural changes required.
