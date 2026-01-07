@@ -47,7 +47,7 @@ describe("storage", () => {
       localStorage.setItem = originalSetItem;
     });
 
-    it.skip("should handle quota exceeded errors gracefully", () => {
+    it("should handle quota exceeded errors gracefully", () => {
       // This test verifies that when localStorage.setItem throws QuotaExceededError,
       // the function falls back to sessionStorage. However, isStorageAvailable() 
       // is called first and may also throw. The actual behavior depends on when
