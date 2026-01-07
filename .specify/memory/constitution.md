@@ -1,11 +1,9 @@
 <!--
 Sync Impact Report:
-Version change: 1.0.0 → 1.1.0 (added new principles: test skipping policy, production/test parity, 12-factor apps)
+Version change: 1.1.0 → 1.1.1 (strengthened comment avoidance principle)
 Modified principles: 
-  - II. Test-Driven Development - Added explicit prohibition on skipping tests without confirmation
-Added sections: 
-  - VIII. Production/Test Parity (new principle)
-  - IX. Twelve-Factor App Principles (new principle)
+  - IV. Single Responsibility & Clean Architecture - Strengthened guidance on avoiding comments, preferring self-documenting code
+Added sections: N/A
 Removed sections: N/A
 Templates requiring updates:
   ✅ plan-template.md - Constitution Check section exists and aligns
@@ -43,9 +41,9 @@ Each change MUST be committed atomically with a meaningful, semantic commit mess
 
 ### IV. Single Responsibility & Clean Architecture
 
-Each component MUST have a single responsibility. Code layout MUST follow current structure with clear separation: models, actions, parsers, types, and utils. Prefer dedicated functions or named variables over explanatory comments.
+Each component MUST have a single responsibility. Code layout MUST follow current structure with clear separation: models, actions, parsers, types, and utils. Comments MUST be avoided where code can be made self-documenting through clear naming, dedicated functions, or named variables. Comments are a failure to express intent clearly in code and often become outdated or misleading.
 
-**Rationale**: Maintains code clarity and makes the codebase easier to understand, test, and modify. Single responsibility reduces coupling and increases cohesion.
+**Rationale**: Maintains code clarity and makes the codebase easier to understand, test, and modify. Single responsibility reduces coupling and increases cohesion. Self-documenting code eliminates the need for comments that can become lies when code evolves but comments don't. See <https://johnsy.com/blog/2012/10/31/comments-are-lies/> for rationale.
 
 ### V. Accessibility & User Experience
 
@@ -156,4 +154,4 @@ This constitution supersedes all other development practices. All code changes M
 
 **Runtime Guidance**: See `README.md` for project setup, development workflow, and usage instructions.
 
-**Version**: 1.1.0 | **Ratified**: 2026-01-07 | **Last Amended**: 2026-01-08
+**Version**: 1.1.1 | **Ratified**: 2026-01-07 | **Last Amended**: 2026-01-08
