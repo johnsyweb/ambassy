@@ -51,8 +51,7 @@ export function selectMapEvent(
     centerMapOnEvents([eventShortName], eventDetails, map);
   }
 
-  const eventTeamsTab = document.getElementById("eventTeamsTab");
-  if (eventTeamsTab && !eventTeamsTab.hidden) {
+  if (isEventTeamsTabVisible()) {
     highlightTableRow("eventTeamsTable", eventShortName, true);
     scrollToTableRow("eventTeamsTable", eventShortName);
   }
@@ -108,5 +107,28 @@ export function scrollToTableRow(tableId: string, identifier: string): void {
   }
 
   row.scrollIntoView({ behavior: "smooth", block: "nearest" });
+}
+
+export function isEventTeamsTabVisible(): boolean {
+  const eventTeamsTab = document.getElementById("eventTeamsTab");
+  return eventTeamsTab !== null && !eventTeamsTab.hidden;
+}
+
+export function applyDeferredTableSelection(
+  state: SelectionState,
+  eventTeamsTableData: EventTeamsTableDataMap,
+  markerMap: Map<string, L.CircleMarker>,
+  highlightLayer: L.LayerGroup | null,
+  eventDetails: EventDetailsMap,
+  map: L.Map | null
+): void {
+  if (!isEventTeamsTabVisible()) {
+    return;
+  }
+
+  if (state.selectedEventShortName && eventTeamsTableData.has(state.selectedEventShortName)) {
+    highlightTableRow("eventTeamsTable", state.selectedEventShortName, true);
+    scrollToTableRow("eventTeamsTable", state.selectedEventShortName);
+  }
 }
 

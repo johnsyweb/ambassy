@@ -3,6 +3,8 @@ import {
   selectMapEvent,
   highlightTableRow,
   scrollToTableRow,
+  isEventTeamsTabVisible,
+  applyDeferredTableSelection,
 } from "./tableMapNavigation";
 import { SelectionState, createSelectionState } from "../models/SelectionState";
 import { EventTeamsTableDataMap } from "../models/EventTeamsTableData";
@@ -226,6 +228,105 @@ describe("tableMapNavigation", () => {
       ) as HTMLTableRowElement;
 
       expect(row.classList.contains("selected")).toBe(true);
+    });
+  });
+
+  describe("User Story 2 - Tab visibility", () => {
+    it("should check if Event Teams tab is visible", () => {
+      const eventTeamsTab = document.getElementById("eventTeamsTab");
+      if (eventTeamsTab) {
+        eventTeamsTab.hidden = false;
+        expect(isEventTeamsTabVisible()).toBe(true);
+        
+        eventTeamsTab.hidden = true;
+        expect(isEventTeamsTabVisible()).toBe(false);
+      }
+    });
+
+    it("should defer table highlighting when tab is not visible", () => {
+      const eventTeamsTab = document.getElementById("eventTeamsTab");
+      if (eventTeamsTab) {
+        eventTeamsTab.hidden = true;
+      }
+
+      selectMapEvent(selectionState, "event1", markerMap, highlightLayer, eventDetails, map);
+
+      const row = document.querySelector(
+        'tr[data-event-short-name="event1"]'
+      ) as HTMLTableRowElement;
+
+      expect(row.classList.contains("selected")).toBe(false);
+      expect(selectionState.selectedEventShortName).toBe("event1");
+    });
+
+    it("should highlight table immediately when tab is visible", () => {
+      const eventTeamsTab = document.getElementById("eventTeamsTab");
+      if (eventTeamsTab) {
+        eventTeamsTab.hidden = false;
+      }
+
+      selectMapEvent(selectionState, "event1", markerMap, highlightLayer, eventDetails, map);
+
+      const row = document.querySelector(
+        'tr[data-event-short-name="event1"]'
+      ) as HTMLTableRowElement;
+
+      expect(row.classList.contains("selected")).toBe(true);
+    });
+
+    it("should apply deferred selection when tab becomes visible", () => {
+      const eventTeamsTab = document.getElementById("eventTeamsTab");
+      if (eventTeamsTab) {
+        eventTeamsTab.hidden = true;
+      }
+
+      selectMapEvent(selectionState, "event1", markerMap, highlightLayer, eventDetails, map);
+
+      if (eventTeamsTab) {
+        eventTeamsTab.hidden = false;
+      }
+
+      applyDeferredTableSelection(selectionState, eventTeamsTableData, markerMap, highlightLayer, eventDetails, map);
+
+      const row = document.querySelector(
+        'tr[data-event-short-name="event1"]'
+      ) as HTMLTableRowElement;
+
+      expect(row.classList.contains("selected")).toBe(true);
+    });
+
+    it("should not apply deferred selection if no selection exists", () => {
+      selectionState.selectedEventShortName = null;
+
+      const eventTeamsTab = document.getElementById("eventTeamsTab");
+      if (eventTeamsTab) {
+        eventTeamsTab.hidden = false;
+      }
+
+      applyDeferredTableSelection(selectionState, eventTeamsTableData, markerMap, highlightLayer, eventDetails, map);
+
+      const row = document.querySelector(
+        'tr[data-event-short-name="event1"]'
+      ) as HTMLTableRowElement;
+
+      expect(row?.classList.contains("selected")).toBe(false);
+    });
+
+    it("should not apply deferred selection if tab is not visible", () => {
+      const eventTeamsTab = document.getElementById("eventTeamsTab");
+      if (eventTeamsTab) {
+        eventTeamsTab.hidden = true;
+      }
+
+      selectionState.selectedEventShortName = "event1";
+
+      applyDeferredTableSelection(selectionState, eventTeamsTableData, markerMap, highlightLayer, eventDetails, map);
+
+      const row = document.querySelector(
+        'tr[data-event-short-name="event1"]'
+      ) as HTMLTableRowElement;
+
+      expect(row?.classList.contains("selected")).toBe(false);
     });
   });
 });

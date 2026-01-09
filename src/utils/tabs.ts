@@ -2,6 +2,12 @@
  * Tab management utilities for the tabbed interface
  */
 
+let eventTeamsTabVisibleCallback: (() => void) | null = null;
+
+export function setEventTeamsTabVisibleCallback(callback: () => void): void {
+  eventTeamsTabVisibleCallback = callback;
+}
+
 export function initializeTabs(): void {
   const tabButtons = document.querySelectorAll<HTMLButtonElement>(".tab-button");
 
@@ -58,6 +64,11 @@ function switchTab(index: number): void {
     tabButtons[index].classList.add("active");
     tabButtons[index].setAttribute("aria-selected", "true");
     tabButtons[index].tabIndex = 0;
+
+    // Event Teams tab is at index 0
+    if (index === 0 && eventTeamsTabVisibleCallback) {
+      eventTeamsTabVisibleCallback();
+    }
   }
 }
 

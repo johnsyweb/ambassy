@@ -26,9 +26,10 @@ import { setOffboardingHandlers } from "./actions/populateAmbassadorsTable";
 import { saveCapacityLimits, validateCapacityLimits } from "./actions/configureCapacityLimits";
 import { CapacityLimits } from "./models/CapacityLimits";
 import { SelectionState, createSelectionState } from "./models/SelectionState";
-import { selectEventTeamRow, selectMapEvent } from "./actions/tableMapNavigation";
+import { selectEventTeamRow, selectMapEvent, applyDeferredTableSelection } from "./actions/tableMapNavigation";
 import { getMarkerMap, getHighlightLayer, getMap, setMarkerClickHandler } from "./actions/populateMap";
 import { setRowClickHandler } from "./actions/populateEventTeamsTable";
+import { setEventTeamsTabVisibleCallback } from "./utils/tabs";
 
 function getRegionalAmbassadorsFromSession(): RegionalAmbassadorMap {
   const storedRegionalAmbassadors = loadFromStorage<Array<[string, RegionalAmbassador]>>("regionalAmbassadors");
@@ -711,6 +712,17 @@ function initializeTableMapNavigation(): void {
     selectEventTeamRow(
       selectionState,
       eventShortName,
+      eventTeamsTableData!,
+      markerMap,
+      highlightLayer,
+      eventDetails!,
+      map
+    );
+  });
+
+  setEventTeamsTabVisibleCallback(() => {
+    applyDeferredTableSelection(
+      selectionState,
       eventTeamsTableData!,
       markerMap,
       highlightLayer,

@@ -98,19 +98,19 @@
 
 > **NOTE: Write these tests FIRST, ensure they FAIL before implementation**
 
-- [ ] T035 [P] [US2] Write unit test for tab visibility check function in src/actions/tableMapNavigation.test.ts
-- [ ] T036 [P] [US2] Write unit test for deferred table highlighting (tab not visible) in src/actions/tableMapNavigation.test.ts
-- [ ] T037 [P] [US2] Write integration test for map click → table highlight when tab visible in src/actions/tableMapNavigation.test.ts
-- [ ] T038 [P] [US2] Write integration test for map click → deferred highlight when tab not visible in src/actions/tableMapNavigation.test.ts
-- [ ] T039 [P] [US2] Write integration test for tab switch → apply deferred selection in src/actions/tableMapNavigation.test.ts
+- [X] T035 [P] [US2] Write unit test for tab visibility check function in src/actions/tableMapNavigation.test.ts
+- [X] T036 [P] [US2] Write unit test for deferred table highlighting (tab not visible) in src/actions/tableMapNavigation.test.ts
+- [X] T037 [P] [US2] Write integration test for map click → table highlight when tab visible in src/actions/tableMapNavigation.test.ts
+- [X] T038 [P] [US2] Write integration test for map click → deferred highlight when tab not visible in src/actions/tableMapNavigation.test.ts
+- [X] T039 [P] [US2] Write integration test for tab switch → apply deferred selection in src/actions/tableMapNavigation.test.ts
 
 ### Implementation for User Story 2
 
-- [ ] T040 [US2] Implement tab visibility check function in src/actions/tableMapNavigation.ts
-- [ ] T041 [US2] Add tab visibility awareness to map → table navigation logic
-- [ ] T042 [US2] Store selection state when tab is not visible
-- [ ] T043 [US2] Apply stored selection when Event Teams tab becomes visible
-- [ ] T044 [US2] Wire up tab switch handler to apply deferred selections in src/index.ts
+- [X] T040 [US2] Implement tab visibility check function in src/actions/tableMapNavigation.ts
+- [X] T041 [US2] Add tab visibility awareness to map → table navigation logic
+- [X] T042 [US2] Store selection state when tab is not visible
+- [X] T043 [US2] Apply stored selection when Event Teams tab becomes visible
+- [X] T044 [US2] Wire up tab switch handler to apply deferred selections in src/index.ts
 
 **Checkpoint**: At this point, User Story 2 should be fully functional. Map clicks highlight table rows when tab is visible, and selection persists across tab switches.
 
