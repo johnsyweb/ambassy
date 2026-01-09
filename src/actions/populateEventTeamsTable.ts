@@ -7,6 +7,8 @@ import { countries } from '@models/country';
 import { refreshUI } from './refreshUI';
 import { EventAmbassadorMap } from '@models/EventAmbassadorMap';
 import { RegionalAmbassadorMap } from '@models/RegionalAmbassadorMap';
+import { EventAmbassador } from '@models/EventAmbassador';
+import { RegionalAmbassador } from '@models/RegionalAmbassador';
 import { assignEventToAmbassador } from './assignEventToAmbassador';
 import { loadFromStorage } from '@utils/storage';
 
