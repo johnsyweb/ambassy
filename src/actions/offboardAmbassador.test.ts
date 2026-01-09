@@ -7,9 +7,7 @@ import { EventAmbassadorMap } from "../models/EventAmbassadorMap";
 import { RegionalAmbassadorMap } from "../models/RegionalAmbassadorMap";
 import { EventTeamMap } from "../models/EventTeamMap";
 import { EventAmbassador } from "../models/EventAmbassador";
-import { RegionalAmbassador } from "../models/RegionalAmbassador";
 import { CapacityLimits, defaultCapacityLimits } from "../models/CapacityLimits";
-import { EventTeam } from "../models/EventTeam";
 import { persistEventAmbassadors, persistRegionalAmbassadors, persistChangesLog } from "./persistState";
 
 jest.mock("./persistState");

@@ -680,8 +680,6 @@ async function ambassy() {
   updateButtonVisibility(hasData, isMapViewDisplayed());
 }
 
-const isRefreshing = false;
-
 let lastStorageEventTime = 0;
 window.addEventListener("storage", () => {
   const now = Date.now();

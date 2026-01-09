@@ -2,8 +2,8 @@ import {
   validateCapacityLimits,
   saveCapacityLimits,
 } from "./configureCapacityLimits";
-import { CapacityLimits, defaultCapacityLimits } from "../models/CapacityLimits";
-import { saveToStorage, loadFromStorage } from "../utils/storage";
+import { CapacityLimits } from "../models/CapacityLimits";
+import { loadFromStorage } from "../utils/storage";
 
 jest.mock("../utils/storage");
 

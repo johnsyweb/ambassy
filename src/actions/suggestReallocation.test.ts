@@ -8,9 +8,6 @@ import { EventAmbassadorMap } from "../models/EventAmbassadorMap";
 import { RegionalAmbassadorMap } from "../models/RegionalAmbassadorMap";
 import { EventDetailsMap } from "../models/EventDetailsMap";
 import { CapacityLimits, defaultCapacityLimits } from "../models/CapacityLimits";
-import { EventAmbassador } from "../models/EventAmbassador";
-import { RegionalAmbassador } from "../models/RegionalAmbassador";
-import { EventDetails } from "../models/EventDetails";
 
 describe("suggestReallocation", () => {
   const limits: CapacityLimits = defaultCapacityLimits;
@@ -148,7 +145,6 @@ describe("suggestReallocation", () => {
       };
 
       const items = ["Event3"];
-      const fromEA: EventAmbassador = { name: "EA3", events: [], capacityStatus: undefined };
       const options = { fromRegionalAmbassador: "REA1" };
       const score1 = calculateReallocationScore(recipient1, "EA1", items, "events", eventDetails, limits, regionalAmbassadors, options);
       const score2 = calculateReallocationScore(recipient2, "EA2", items, "events", eventDetails, limits, regionalAmbassadors, options);

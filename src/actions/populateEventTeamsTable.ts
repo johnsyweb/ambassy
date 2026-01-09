@@ -1,4 +1,3 @@
-import { eventAmbassadorsFrom } from '@models/EventTeamsTableData';
 import { EventDetailsMap } from '@models/EventDetailsMap';
 import { EventTeamsTableDataMap, EventTeamsTableData } from '@models/EventTeamsTableData';
 import { LogEntry } from '@models/LogEntry';
@@ -10,8 +9,6 @@ import { EventAmbassadorMap } from '@models/EventAmbassadorMap';
 import { RegionalAmbassadorMap } from '@models/RegionalAmbassadorMap';
 import { assignEventToAmbassador } from './assignEventToAmbassador';
 import { loadFromStorage } from '@utils/storage';
-import { EventAmbassador } from '@models/EventAmbassador';
-import { RegionalAmbassador } from '@models/RegionalAmbassador';
 
 export function populateEventTeamsTable(
   eventTeamsTableData: EventTeamsTableDataMap,

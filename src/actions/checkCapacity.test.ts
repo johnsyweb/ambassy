@@ -8,9 +8,7 @@ import { CapacityStatus } from "../models/CapacityStatus";
 import { CapacityLimits, defaultCapacityLimits } from "../models/CapacityLimits";
 import { EventAmbassadorMap } from "../models/EventAmbassadorMap";
 import { RegionalAmbassadorMap } from "../models/RegionalAmbassadorMap";
-import { EventAmbassador } from "../models/EventAmbassador";
-import { RegionalAmbassador } from "../models/RegionalAmbassador";
-import { saveToStorage, loadFromStorage } from "../utils/storage";
+import { loadFromStorage } from "../utils/storage";
 
 jest.mock("../utils/storage");
 

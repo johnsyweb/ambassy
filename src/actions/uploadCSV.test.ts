@@ -3,7 +3,6 @@ import { persistEventAmbassadors, persistEventTeams, persistRegionalAmbassadors 
 import { parseEventTeams } from "@parsers/parseEventTeams";
 import { parseEventAmbassadors } from "@parsers/parseEventAmbassadors";
 import { parseRegionalAmbassadors } from "@parsers/parseRegionalAmbassadors";
-import Papa from "papaparse";
 
 jest.mock("./persistState");
 jest.mock("@parsers/parseEventTeams");
@@ -14,7 +13,7 @@ jest.mock("@parsers/parseRegionalAmbassadors");
 jest.mock("papaparse", () => ({
   __esModule: true,
   default: {
-    parse: jest.fn((file: File, options: any) => {
+    parse: jest.fn((file: File, options: { complete?: (result: { data: unknown[] }) => void }) => {
       if (options.complete) {
         const csvContent = file.name.includes("Event Teams")
           ? [{ "Event Short Name": "Event1", "Event Ambassador": "EA1", "Event Director(s)": "ED1" }]

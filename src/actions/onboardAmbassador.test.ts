@@ -5,10 +5,7 @@ import {
 } from "./onboardAmbassador";
 import { EventAmbassadorMap } from "../models/EventAmbassadorMap";
 import { RegionalAmbassadorMap } from "../models/RegionalAmbassadorMap";
-import { EventAmbassador } from "../models/EventAmbassador";
-import { RegionalAmbassador } from "../models/RegionalAmbassador";
 import { persistEventAmbassadors, persistRegionalAmbassadors } from "./persistState";
-import { saveToStorage } from "../utils/storage";
 
 jest.mock("./persistState");
 jest.mock("@utils/storage");

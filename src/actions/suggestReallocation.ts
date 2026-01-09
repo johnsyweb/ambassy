@@ -5,10 +5,10 @@ import { CapacityLimits } from "../models/CapacityLimits";
 import { ReallocationSuggestion } from "../models/ReallocationSuggestion";
 import { EventAmbassador } from "../models/EventAmbassador";
 import { RegionalAmbassador } from "../models/RegionalAmbassador";
-import { calculateDistance, calculateAverageDistance } from "../utils/geography";
+import { calculateAverageDistance } from "../utils/geography";
 import { checkEventAmbassadorCapacity, checkRegionalAmbassadorCapacity } from "./checkCapacity";
 import { CapacityStatus } from "../models/CapacityStatus";
-import { getRegionalAmbassadorForEventAmbassador, areEventAmbassadorsInSameRegion } from "../utils/regions";
+import { getRegionalAmbassadorForEventAmbassador } from "../utils/regions";
 
 export interface ReallocationOptions {
   fromRegionalAmbassador?: string;
@@ -185,7 +185,6 @@ export function suggestEventReallocation(
     throw new Error("Events array cannot be empty");
   }
 
-  const fromEA = eventAmbassadors.get(fromAmbassador)!;
   const fromEA_RA = getRegionalAmbassadorForEventAmbassador(fromAmbassador, regionalAmbassadors);
   const suggestions: ReallocationSuggestion[] = [];
 
@@ -266,7 +265,6 @@ export function suggestEventAmbassadorReallocation(
     throw new Error("Event Ambassadors array cannot be empty");
   }
 
-  const fromREA = regionalAmbassadors.get(fromAmbassador)!;
   const suggestions: ReallocationSuggestion[] = [];
 
   regionalAmbassadors.forEach((recipient, recipientName) => {
