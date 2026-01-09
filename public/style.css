@@ -129,3 +129,18 @@ tr:hover {
   outline: 2px solid #2196f3;
   outline-offset: 2px;
 }
+
+/* Table row selection highlighting */
+tr.selected {
+  background-color: #4a90e2 !important;
+  color: white;
+}
+
+tr.selected:hover {
+  background-color: #357abd !important;
+}
+
+/* Map marker highlighting */
+.leaflet-marker-highlight {
+  filter: drop-shadow(0 0 8px rgba(255, 0, 0, 0.8));
+}

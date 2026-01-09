@@ -22,9 +22,9 @@
 
 **Purpose**: Project initialization and verification
 
-- [ ] T001 Verify project structure matches implementation plan in specs/002-table-map-navigation/plan.md
-- [ ] T002 [P] Verify TypeScript 5.9.3 configuration in tsconfig.json supports strict mode and ES6 target
-- [ ] T003 [P] Verify Jest 30.2.0 and ts-jest 29.4.5 are configured for testing with jsdom environment
+- [X] T001 Verify project structure matches implementation plan in specs/002-table-map-navigation/plan.md
+- [X] T002 [P] Verify TypeScript 5.9.3 configuration in tsconfig.json supports strict mode and ES6 target
+- [X] T003 [P] Verify Jest 30.2.0 and ts-jest 29.4.5 are configured for testing with jsdom environment
 
 ---
 
@@ -34,12 +34,12 @@
 
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete
 
-- [ ] T004 [P] Create SelectionState interface in src/models/SelectionState.ts with selectedEventShortName, selectedEventAmbassador, selectedRegionalAmbassador, highlightedEvents, activeTab fields
-- [ ] T005 [P] Create createSelectionState function in src/models/SelectionState.ts that returns new SelectionState instance
-- [ ] T006 [P] Create clearSelection function in src/models/SelectionState.ts to reset all selection fields
-- [ ] T007 [P] Create mapNavigation utility functions in src/utils/mapNavigation.ts for centerMapOnEvents (single and multiple events)
-- [ ] T008 [P] Add CSS class `.selected` for table row highlighting in public/style.css
-- [ ] T009 [P] Add CSS styles for map marker highlighting (larger radius, different color) in public/style.css
+- [X] T004 [P] Create SelectionState interface in src/models/SelectionState.ts with selectedEventShortName, selectedEventAmbassador, selectedRegionalAmbassador, highlightedEvents, activeTab fields
+- [X] T005 [P] Create createSelectionState function in src/models/SelectionState.ts that returns new SelectionState instance
+- [X] T006 [P] Create clearSelection function in src/models/SelectionState.ts to reset all selection fields
+- [X] T007 [P] Create mapNavigation utility functions in src/utils/mapNavigation.ts for centerMapOnEvents (single and multiple events)
+- [X] T008 [P] Add CSS class `.selected` for table row highlighting in public/style.css
+- [X] T009 [P] Add CSS styles for map marker highlighting (larger radius, different color) in public/style.css
 
 **Checkpoint**: Foundation ready - user story implementation can now begin
 
@@ -55,34 +55,34 @@
 
 > **NOTE: Write these tests FIRST, ensure they FAIL before implementation**
 
-- [ ] T010 [P] [US1] Write unit test for selectEventTeamRow function (updates selection state) in src/actions/tableMapNavigation.test.ts
-- [ ] T011 [P] [US1] Write unit test for selectEventTeamRow function (validates event exists) in src/actions/tableMapNavigation.test.ts
-- [ ] T012 [P] [US1] Write unit test for selectMapEvent function (updates selection state) in src/actions/tableMapNavigation.test.ts
-- [ ] T013 [P] [US1] Write unit test for highlightEventsOnMap function (highlights single event) in src/utils/mapNavigation.test.ts
-- [ ] T014 [P] [US1] Write unit test for highlightEventsOnMap function (clears previous highlights) in src/utils/mapNavigation.test.ts
-- [ ] T015 [P] [US1] Write unit test for centerMapOnEvents function (single event uses setView) in src/utils/mapNavigation.test.ts
-- [ ] T016 [P] [US1] Write unit test for highlightTableRow function (adds selected class) in src/actions/tableMapNavigation.test.ts
-- [ ] T017 [P] [US1] Write unit test for highlightTableRow function (clears previous selection) in src/actions/tableMapNavigation.test.ts
-- [ ] T018 [P] [US1] Write unit test for scrollToTableRow function (scrolls to row) in src/actions/tableMapNavigation.test.ts
-- [ ] T019 [P] [US1] Write integration test for table row click → map highlight in src/actions/tableMapNavigation.test.ts
-- [ ] T020 [P] [US1] Write integration test for map marker click → table highlight in src/actions/tableMapNavigation.test.ts
+- [X] T010 [P] [US1] Write unit test for selectEventTeamRow function (updates selection state) in src/actions/tableMapNavigation.test.ts
+- [X] T011 [P] [US1] Write unit test for selectEventTeamRow function (validates event exists) in src/actions/tableMapNavigation.test.ts
+- [X] T012 [P] [US1] Write unit test for selectMapEvent function (updates selection state) in src/actions/tableMapNavigation.test.ts
+- [X] T013 [P] [US1] Write unit test for highlightEventsOnMap function (highlights single event) in src/utils/mapNavigation.test.ts
+- [X] T014 [P] [US1] Write unit test for highlightEventsOnMap function (clears previous highlights) in src/utils/mapNavigation.test.ts
+- [X] T015 [P] [US1] Write unit test for centerMapOnEvents function (single event uses setView) in src/utils/mapNavigation.test.ts
+- [X] T016 [P] [US1] Write unit test for highlightTableRow function (adds selected class) in src/actions/tableMapNavigation.test.ts
+- [X] T017 [P] [US1] Write unit test for highlightTableRow function (clears previous selection) in src/actions/tableMapNavigation.test.ts
+- [X] T018 [P] [US1] Write unit test for scrollToTableRow function (scrolls to row) in src/actions/tableMapNavigation.test.ts
+- [X] T019 [P] [US1] Write integration test for table row click → map highlight in src/actions/tableMapNavigation.test.ts
+- [X] T020 [P] [US1] Write integration test for map marker click → table highlight in src/actions/tableMapNavigation.test.ts
 
 ### Implementation for User Story 1
 
-- [ ] T021 [US1] Implement selectEventTeamRow function in src/actions/tableMapNavigation.ts
-- [ ] T022 [US1] Implement selectMapEvent function in src/actions/tableMapNavigation.ts
-- [ ] T023 [US1] Implement highlightEventsOnMap function in src/utils/mapNavigation.ts
-- [ ] T024 [US1] Implement centerMapOnEvents function in src/utils/mapNavigation.ts (single event case)
-- [ ] T025 [US1] Implement highlightTableRow function in src/actions/tableMapNavigation.ts
-- [ ] T026 [US1] Implement scrollToTableRow function in src/actions/tableMapNavigation.ts
-- [ ] T027 [US1] Extend populateMap.ts to store marker references in Map<string, L.CircleMarker> keyed by event short name
-- [ ] T028 [US1] Extend populateMap.ts to create highlightLayer (L.LayerGroup) for highlighted markers
-- [ ] T029 [US1] Add click handlers to map markers in populateMap.ts to call selectMapEvent
-- [ ] T030 [US1] Add click handlers to Event Teams table rows in populateEventTeamsTable.ts to call selectEventTeamRow
-- [ ] T031 [US1] Wire up table selection → map highlighting in src/index.ts or tableMapNavigation.ts
-- [ ] T032 [US1] Wire up map selection → table highlighting in src/index.ts or tableMapNavigation.ts
-- [ ] T033 [US1] Ensure map highlights update when Event Teams table row is selected
-- [ ] T034 [US1] Ensure table highlights update when map marker is clicked (if tab visible)
+- [X] T021 [US1] Implement selectEventTeamRow function in src/actions/tableMapNavigation.ts
+- [X] T022 [US1] Implement selectMapEvent function in src/actions/tableMapNavigation.ts
+- [X] T023 [US1] Implement highlightEventsOnMap function in src/utils/mapNavigation.ts
+- [X] T024 [US1] Implement centerMapOnEvents function in src/utils/mapNavigation.ts (single event case)
+- [X] T025 [US1] Implement highlightTableRow function in src/actions/tableMapNavigation.ts
+- [X] T026 [US1] Implement scrollToTableRow function in src/actions/tableMapNavigation.ts
+- [X] T027 [US1] Extend populateMap.ts to store marker references in Map<string, L.CircleMarker> keyed by event short name
+- [X] T028 [US1] Extend populateMap.ts to create highlightLayer (L.LayerGroup) for highlighted markers
+- [X] T029 [US1] Add click handlers to map markers in populateMap.ts to call selectMapEvent
+- [X] T030 [US1] Add click handlers to Event Teams table rows in populateEventTeamsTable.ts to call selectEventTeamRow
+- [X] T031 [US1] Wire up table selection → map highlighting in src/index.ts or tableMapNavigation.ts
+- [X] T032 [US1] Wire up map selection → table highlighting in src/index.ts or tableMapNavigation.ts
+- [X] T033 [US1] Ensure map highlights update when Event Teams table row is selected
+- [X] T034 [US1] Ensure table highlights update when map marker is clicked (if tab visible)
 
 **Checkpoint**: At this point, User Story 1 should be fully functional. Users can navigate between Event Teams table and map bidirectionally.
 

@@ -28,6 +28,7 @@ export function populateEventTeamsTable(
 
   eventTeamsTableData.forEach((data) => {
     const row = document.createElement('tr');
+    row.setAttribute('data-event-short-name', data.eventShortName);
 
     const regionalAmbassadorCell = document.createElement('td');
     regionalAmbassadorCell.textContent = data.regionalAmbassador;
@@ -70,8 +71,21 @@ export function populateEventTeamsTable(
     eventCountryCell.textContent = data.eventCountry;
     row.appendChild(eventCountryCell);
 
+    if (_rowClickHandler) {
+      row.addEventListener('click', () => {
+        _rowClickHandler!(data.eventShortName);
+      });
+      row.style.cursor = 'pointer';
+    }
+
     tableBody.appendChild(row);
   });
+}
+
+let _rowClickHandler: ((eventShortName: string) => void) | null = null;
+
+export function setRowClickHandler(handler: (eventShortName: string) => void): void {
+  _rowClickHandler = handler;
 }
 
 function handleEventAmbassadorCellClick(

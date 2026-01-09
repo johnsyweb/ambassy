@@ -27,6 +27,7 @@ export function populateMap(
 
   markersLayer.clearLayers();
   polygonsLayer.clearLayers();
+  _markerMap.clear();
   
   const voronoiPoints: [number, number, string][] = [];
 
@@ -49,7 +50,14 @@ export function populateMap(
         color: eaColor,
       });
       marker.bindTooltip(tooltip);
+      _markerMap.set(eventName, marker);
       markersLayer.addLayer(marker);
+      
+      if (_markerClickHandler) {
+        marker.on("click", () => {
+          _markerClickHandler!(eventName);
+        });
+      }
 
       voronoiPoints.push([longitude, latitiude, JSON.stringify({ raColor, tooltip })]);
     } else {
@@ -58,7 +66,14 @@ export function populateMap(
         color: DEFAULT_EVENT_COLOUR,
       });
       marker.bindTooltip(eventName);
+      _markerMap.set(eventName, marker);
       markersLayer.addLayer(marker);
+      
+      if (_markerClickHandler) {
+        marker.on("click", () => {
+          _markerClickHandler!(eventName);
+        });
+      }
       
       if (countryCode === event.properties.countrycode) {
         voronoiPoints.push([
@@ -111,8 +126,10 @@ function setupMapView(countryCode: number) {
       attribution: "&copy; OpenStreetMap contributors",
     }).addTo(_map);
     setMapCenterToCountry(_map, countryCode);
-    _markersLayer = L.layerGroup()
-    _polygonsLayer = L.layerGroup()
+    _markersLayer = L.layerGroup();
+    _polygonsLayer = L.layerGroup();
+    _highlightLayer = L.layerGroup();
+    _highlightLayer.addTo(_map);
   }
   return {map: _map, markersLayer: _markersLayer, polygonsLayer: _polygonsLayer};
 }
@@ -146,3 +163,22 @@ let _map: L.Map | null = null;
 let _markersLayer: L.LayerGroup;
 let _polygonsLayer: L.LayerGroup;
 let _layersControl: L.Control.Layers | null = null;
+const _markerMap: Map<string, L.CircleMarker> = new Map();
+let _highlightLayer: L.LayerGroup | null = null;
+let _markerClickHandler: ((eventShortName: string) => void) | null = null;
+
+export function getMarkerMap(): Map<string, L.CircleMarker> {
+  return _markerMap;
+}
+
+export function getHighlightLayer(): L.LayerGroup | null {
+  return _highlightLayer;
+}
+
+export function getMap(): L.Map | null {
+  return _map;
+}
+
+export function setMarkerClickHandler(handler: (eventShortName: string) => void): void {
+  _markerClickHandler = handler;
+}

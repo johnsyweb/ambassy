@@ -25,6 +25,10 @@ import { suggestEventReallocation, suggestEventAmbassadorReallocation } from "./
 import { setOffboardingHandlers } from "./actions/populateAmbassadorsTable";
 import { saveCapacityLimits, validateCapacityLimits } from "./actions/configureCapacityLimits";
 import { CapacityLimits } from "./models/CapacityLimits";
+import { SelectionState, createSelectionState } from "./models/SelectionState";
+import { selectEventTeamRow, selectMapEvent } from "./actions/tableMapNavigation";
+import { getMarkerMap, getHighlightLayer, getMap, setMarkerClickHandler } from "./actions/populateMap";
+import { setRowClickHandler } from "./actions/populateEventTeamsTable";
 
 function getRegionalAmbassadorsFromSession(): RegionalAmbassadorMap {
   const storedRegionalAmbassadors = loadFromStorage<Array<[string, RegionalAmbassador]>>("regionalAmbassadors");
@@ -54,6 +58,7 @@ const log: LogEntry[] = getLogFromSession();
 
 let eventTeamsTableData: Map<string, EventTeamsTableData> | null = null;
 let eventDetails: EventDetailsMap | null = null;
+const selectionState: SelectionState = createSelectionState();
 
 function hasApplicationData(
   eventTeams: EventTeamMap,
@@ -660,6 +665,8 @@ async function ambassy() {
     eventTeamsTableData = extractEventTeamsTableData(regionalAmbassadors, eventAmbassadors, eventTeams, eventDetails);
     
     refreshUI(eventDetails, eventTeamsTableData, log, eventAmbassadors, regionalAmbassadors);
+    
+    initializeTableMapNavigation();
   } else {
     introduction.style.display = "block";
     ambassy.style.display = "none";
@@ -678,6 +685,39 @@ async function ambassy() {
   }
 
   updateButtonVisibility(hasData, isMapViewDisplayed());
+}
+
+function initializeTableMapNavigation(): void {
+  if (!eventTeamsTableData || !eventDetails) {
+    return;
+  }
+
+  const markerMap = getMarkerMap();
+  const highlightLayer = getHighlightLayer();
+  const map = getMap();
+
+  setMarkerClickHandler((eventShortName: string) => {
+    selectMapEvent(
+      selectionState,
+      eventShortName,
+      markerMap,
+      highlightLayer,
+      eventDetails!,
+      map
+    );
+  });
+
+  setRowClickHandler((eventShortName: string) => {
+    selectEventTeamRow(
+      selectionState,
+      eventShortName,
+      eventTeamsTableData!,
+      markerMap,
+      highlightLayer,
+      eventDetails!,
+      map
+    );
+  });
 }
 
 let lastStorageEventTime = 0;
