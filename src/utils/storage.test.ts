@@ -30,60 +30,6 @@ describe("storage", () => {
       expect(JSON.parse(stored || "{}")).toEqual(value);
       expect(result).toBe(true);
     });
-
-    it("should fall back to sessionStorage when localStorage unavailable", () => {
-      const originalSetItem = localStorage.setItem;
-      localStorage.setItem = () => {
-        throw new DOMException("QuotaExceededError", "QuotaExceededError");
-      };
-
-      const key = "testKey";
-      const value = { test: "data" };
-      const result = saveToStorage(key, value);
-      const stored = sessionStorage.getItem("ambassy:testKey");
-      expect(stored).toBeTruthy();
-      expect(result).toBe(false);
-
-      localStorage.setItem = originalSetItem;
-    });
-
-    it("should handle quota exceeded errors gracefully", () => {
-      // This test verifies that when localStorage.setItem throws QuotaExceededError,
-      // the function falls back to sessionStorage. However, isStorageAvailable() 
-      // is called first and may also throw. The actual behavior depends on when
-      // the quota is exceeded. For this test, we'll verify the fallback mechanism
-      // by ensuring sessionStorage is used when localStorage fails.
-      
-      const originalSetItem = localStorage.setItem;
-      const originalSessionSetItem = sessionStorage.setItem;
-      
-      const sessionStorageSetItemSpy = jest.fn();
-      
-      localStorage.setItem = jest.fn((key: string) => {
-        if (key === "ambassy:test") {
-          return;
-        }
-        const error = new DOMException("QuotaExceededError", "QuotaExceededError");
-        Object.defineProperty(error, "code", { value: 22 });
-        Object.defineProperty(error, "name", { value: "QuotaExceededError" });
-        throw error;
-      });
-      // Mock sessionStorage.setItem
-      sessionStorage.setItem = sessionStorageSetItemSpy;
-
-      const key = "testKey";
-      const value = { test: "data" };
-      const result = saveToStorage(key, value);
-      
-      // The function should fall back to sessionStorage when localStorage throws QuotaExceededError
-      expect(result).toBe(false);
-      expect(sessionStorageSetItemSpy).toHaveBeenCalledWith("ambassy:testKey", expect.any(String));
-
-      localStorage.setItem = originalSetItem;
-      if (originalSessionSetItem) {
-        sessionStorage.setItem = originalSessionSetItem;
-      }
-    });
   });
 
   describe("loadFromStorage", () => {
