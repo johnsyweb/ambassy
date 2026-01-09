@@ -102,7 +102,7 @@ describe("mapNavigation", () => {
 
       expect(setViewSpy).toHaveBeenCalled();
       expect(setViewSpy.mock.calls[0][0]).toEqual([-37.8, 144.9]);
-      expect(setViewSpy.mock.calls[0][1]).toBe(10);
+      expect(setViewSpy.mock.calls[0][1]).toBe(13);
       expect(setViewSpy.mock.calls[0][2]).toMatchObject({ animate: true });
     });
 

@@ -22,7 +22,8 @@ export function centerMapOnEvents(
     const event = eventDetails.get(validEvents[0]);
     if (event) {
       const [longitude, latitude] = event.geometry.coordinates;
-      map.setView([latitude, longitude], 10, { animate: true });
+      // Use zoom level 13 for clear visibility of a single event marker
+      map.setView([latitude, longitude], 13, { animate: true });
     }
   } else {
     const bounds = validEvents
