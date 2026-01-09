@@ -19,7 +19,7 @@ jest.mock("papaparse", () => ({
           ? [{ "Event Short Name": "Event1", "Event Ambassador": "EA1", "Event Director(s)": "ED1" }]
           : file.name.includes("Event Ambassadors")
           ? [{ Name: "Test EA", Events: "Event1" }]
-          : [{ Name: "Test REA", State: "VIC", "Supports EAs": "EA1" }];
+          : [{ "RA Name": "Test REA", "RA State": "VIC", "EA Name": "EA1" }];
         options.complete({ data: csvContent });
       }
     }),
