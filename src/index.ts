@@ -665,9 +665,10 @@ async function ambassy() {
     
     eventTeamsTableData = extractEventTeamsTableData(regionalAmbassadors, eventAmbassadors, eventTeams, eventDetails);
     
-    refreshUI(eventDetails, eventTeamsTableData, log, eventAmbassadors, regionalAmbassadors);
-    
+    // Initialize navigation handlers BEFORE populating tables
     initializeTableMapNavigation();
+    
+    refreshUI(eventDetails, eventTeamsTableData, log, eventAmbassadors, regionalAmbassadors);
   } else {
     introduction.style.display = "block";
     ambassy.style.display = "none";
@@ -723,11 +724,7 @@ function initializeTableMapNavigation(): void {
   setEventTeamsTabVisibleCallback(() => {
     applyDeferredTableSelection(
       selectionState,
-      eventTeamsTableData!,
-      markerMap,
-      highlightLayer,
-      eventDetails!,
-      map
+      eventTeamsTableData!
     );
   });
 }

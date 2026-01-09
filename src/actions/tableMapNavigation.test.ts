@@ -286,7 +286,7 @@ describe("tableMapNavigation", () => {
         eventTeamsTab.hidden = false;
       }
 
-      applyDeferredTableSelection(selectionState, eventTeamsTableData, markerMap, highlightLayer, eventDetails, map);
+      applyDeferredTableSelection(selectionState, eventTeamsTableData);
 
       const row = document.querySelector(
         'tr[data-event-short-name="event1"]'
@@ -303,7 +303,7 @@ describe("tableMapNavigation", () => {
         eventTeamsTab.hidden = false;
       }
 
-      applyDeferredTableSelection(selectionState, eventTeamsTableData, markerMap, highlightLayer, eventDetails, map);
+      applyDeferredTableSelection(selectionState, eventTeamsTableData);
 
       const row = document.querySelector(
         'tr[data-event-short-name="event1"]'
@@ -320,7 +320,7 @@ describe("tableMapNavigation", () => {
 
       selectionState.selectedEventShortName = "event1";
 
-      applyDeferredTableSelection(selectionState, eventTeamsTableData, markerMap, highlightLayer, eventDetails, map);
+      applyDeferredTableSelection(selectionState, eventTeamsTableData);
 
       const row = document.querySelector(
         'tr[data-event-short-name="event1"]'

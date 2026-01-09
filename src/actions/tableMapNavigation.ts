@@ -116,11 +116,7 @@ export function isEventTeamsTabVisible(): boolean {
 
 export function applyDeferredTableSelection(
   state: SelectionState,
-  eventTeamsTableData: EventTeamsTableDataMap,
-  markerMap: Map<string, L.CircleMarker>,
-  highlightLayer: L.LayerGroup | null,
-  eventDetails: EventDetailsMap,
-  map: L.Map | null
+  eventTeamsTableData: EventTeamsTableDataMap
 ): void {
   if (!isEventTeamsTabVisible()) {
     return;
