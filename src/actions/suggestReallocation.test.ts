@@ -8,6 +8,7 @@ import { EventAmbassadorMap } from "../models/EventAmbassadorMap";
 import { RegionalAmbassadorMap } from "../models/RegionalAmbassadorMap";
 import { EventDetailsMap } from "../models/EventDetailsMap";
 import { CapacityLimits, defaultCapacityLimits } from "../models/CapacityLimits";
+import { EventAmbassador } from "../models/EventAmbassador";
 
 describe("suggestReallocation", () => {
   const limits: CapacityLimits = defaultCapacityLimits;

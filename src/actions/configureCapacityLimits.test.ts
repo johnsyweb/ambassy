@@ -3,7 +3,7 @@ import {
   saveCapacityLimits,
 } from "./configureCapacityLimits";
 import { CapacityLimits } from "../models/CapacityLimits";
-import { loadFromStorage } from "../utils/storage";
+import { saveToStorage, loadFromStorage } from "../utils/storage";
 
 jest.mock("../utils/storage");
 
