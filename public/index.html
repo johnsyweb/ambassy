@@ -322,6 +322,7 @@
           <button class="tab-button" role="tab" aria-selected="false" aria-controls="eventAmbassadorsTab" id="eventAmbassadorsTabButton" tabindex="-1">Event Ambassadors</button>
           <button class="tab-button" role="tab" aria-selected="false" aria-controls="regionalAmbassadorsTab" id="regionalAmbassadorsTabButton" tabindex="-1">Regional Ambassadors</button>
           <button class="tab-button" role="tab" aria-selected="false" aria-controls="changesLogTab" id="changesLogTabButton" tabindex="-1">Changes Log</button>
+          <button class="tab-button" role="tab" aria-selected="false" aria-controls="issuesTab" id="issuesTabButton" tabindex="-1">Issues</button>
         </div>
 
         <div id="eventTeamsTab" class="tab-content active" role="tabpanel" aria-labelledby="eventTeamsTabButton">
@@ -390,6 +391,23 @@
             </thead>
             <tbody>
               <!-- Changes log rows will be populated here -->
+            </tbody>
+          </table>
+        </div>
+
+        <div id="issuesTab" class="tab-content" role="tabpanel" aria-labelledby="issuesTabButton" hidden>
+          <table id="issuesTable" border="1">
+            <thead>
+              <tr>
+                <th>Event Name</th>
+                <th>Event Ambassador</th>
+                <th>Regional Ambassador</th>
+                <th>Issue Type</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <!-- Issues rows will be populated here -->
             </tbody>
           </table>
         </div>
