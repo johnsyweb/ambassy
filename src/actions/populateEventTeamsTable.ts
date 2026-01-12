@@ -40,7 +40,9 @@ export function populateEventTeamsTable(
         data,
         eventDetailsMap,
         eventTeamsTableData,
-        changelog
+        changelog,
+        eventAmbassadors,
+        regionalAmbassadors
       );
     } else {
       eventShortNameCell.textContent = data.eventShortName;
@@ -176,8 +178,10 @@ function createEventShortNameDropdown(
   data: EventTeamsTableData,
   eventDetailsMap: EventDetailsMap,
   eventTeamsTableData: EventTeamsTableDataMap,
-  changelog: LogEntry[]
-) {
+  changelog: LogEntry[],
+  eventAmbassadors?: EventAmbassadorMap,
+  regionalAmbassadors?: RegionalAmbassadorMap
+): void {
   const dropdown = document.createElement('select');
   const eventShortNames = [data.eventShortName, ...Array.from(eventDetailsMap.keys()).sort()];
 
@@ -206,7 +210,7 @@ function createEventShortNameDropdown(
       eventShortNameCell.textContent = newEventShortName;
 
       // There's more work to do here, but I'm going to leave it for now
-      refreshUI(eventDetailsMap, eventTeamsTableData, changelog);
+      refreshUI(eventDetailsMap, eventTeamsTableData, changelog, eventAmbassadors, regionalAmbassadors);
     }
   });
 
