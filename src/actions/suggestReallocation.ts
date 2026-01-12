@@ -320,7 +320,8 @@ export function suggestEventReallocation(
     }
     
     if (neighboringEvents.length > 0) {
-      reasons.push(`Nearby events: ${neighboringEvents.join(", ")}`);
+      const eventList = neighboringEvents.map(e => `${e.name} (${e.distanceKm.toFixed(1)}km)`).join(", ");
+      reasons.push(`Nearby events: ${eventList}`);
     }
 
     if (recipient.events.length + events.length > limits.eventAmbassadorMax) {
