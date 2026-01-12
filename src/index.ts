@@ -18,7 +18,7 @@ import { loadFromStorage } from "@utils/storage";
 import { exportApplicationState, downloadStateFile } from "./actions/exportState";
 import { validateStateFile, importApplicationState, InvalidFileFormatError, MissingFieldError, VersionMismatchError, InvalidDataError } from "./actions/importState";
 import { onboardEventAmbassador, onboardRegionalAmbassador } from "./actions/onboardAmbassador";
-import { persistChangesLog } from "./actions/persistState";
+import { persistChangesLog, persistEventDetails } from "./actions/persistState";
 import { initializeTabs } from "./utils/tabs";
 import { calculateAllCapacityStatuses, loadCapacityLimits } from "./actions/checkCapacity";
 import { offboardEventAmbassador, offboardRegionalAmbassador } from "./actions/offboardAmbassador";
