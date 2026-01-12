@@ -305,12 +305,14 @@ function setupOffboardingButtons(): void {
 
     if (eventsToReallocate.length > 0) {
       const eventRecipients = new Map<string, string>();
+      // Create a working copy of eventAmbassadors to track allocations during offboarding
+      const workingEventAmbassadors = new Map(eventAmbassadors);
 
       for (const eventName of eventsToReallocate) {
         const suggestions = suggestEventReallocation(
           name,
           [eventName],
-          eventAmbassadors,
+          workingEventAmbassadors,
           eventDetails!,
           loadCapacityLimits(),
           regionalAmbassadors
@@ -321,7 +323,7 @@ function setupOffboardingButtons(): void {
             eventName,
             name,
             suggestions,
-            eventAmbassadors,
+            workingEventAmbassadors,
             regionalAmbassadors,
             (selectedAmbassador: string) => {
               resolve(selectedAmbassador);
@@ -337,11 +339,18 @@ function setupOffboardingButtons(): void {
         }
 
         const trimmedRecipient = recipientName.trim();
-        if (trimmedRecipient !== "" && !eventAmbassadors.has(trimmedRecipient)) {
+        if (trimmedRecipient !== "" && !workingEventAmbassadors.has(trimmedRecipient)) {
           alert(`Recipient Event Ambassador "${trimmedRecipient}" not found. Skipping this event.`);
           eventRecipients.set(eventName, "");
         } else {
           eventRecipients.set(eventName, trimmedRecipient);
+          // Update the working copy to reflect the new allocation
+          if (trimmedRecipient !== "") {
+            const recipient = workingEventAmbassadors.get(trimmedRecipient);
+            if (recipient) {
+              recipient.events = [...recipient.events, eventName];
+            }
+          }
         }
       }
 
@@ -385,12 +394,14 @@ function setupOffboardingButtons(): void {
 
     if (easToReallocate.length > 0) {
       const eaRecipients = new Map<string, string>();
+      // Create a working copy of regionalAmbassadors to track allocations during offboarding
+      const workingRegionalAmbassadors = new Map(regionalAmbassadors);
 
       for (const eaName of easToReallocate) {
         const suggestions = suggestEventAmbassadorReallocation(
           name,
           [eaName],
-          regionalAmbassadors,
+          workingRegionalAmbassadors,
           eventAmbassadors,
           loadCapacityLimits()
         );
@@ -401,7 +412,7 @@ function setupOffboardingButtons(): void {
             name,
             suggestions,
             undefined,
-            regionalAmbassadors,
+            workingRegionalAmbassadors,
             (selectedAmbassador: string) => {
               resolve(selectedAmbassador);
             },
@@ -416,11 +427,18 @@ function setupOffboardingButtons(): void {
         }
 
         const trimmedRecipient = recipientName.trim();
-        if (trimmedRecipient !== "" && !regionalAmbassadors.has(trimmedRecipient)) {
+        if (trimmedRecipient !== "" && !workingRegionalAmbassadors.has(trimmedRecipient)) {
           alert(`Recipient Regional Ambassador "${trimmedRecipient}" not found. Skipping this Event Ambassador.`);
           eaRecipients.set(eaName, "");
         } else {
           eaRecipients.set(eaName, trimmedRecipient);
+          // Update the working copy to reflect the new allocation
+          if (trimmedRecipient !== "") {
+            const recipient = workingRegionalAmbassadors.get(trimmedRecipient);
+            if (recipient) {
+              recipient.supportsEAs = [...recipient.supportsEAs, eaName];
+            }
+          }
         }
       }
 
