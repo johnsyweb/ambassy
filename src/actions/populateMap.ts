@@ -50,6 +50,17 @@ export function populateMap(
   let eventsWithData = 0;
   let eventsWithoutData = 0;
 
+  // Will be populated after bounds calculation
+  const constrainingEvents: Array<{coords: [number, number], isConstraining: boolean, raColor?: string, tooltip?: string}> = [];
+
+  // Build Voronoi points from constraining events
+  constrainingEvents.forEach(({coords: [lng, lat], isConstraining}, index) => {
+    if (isConstraining) {
+      // Constraining points don't create polygons, just help define boundaries
+      voronoiPoints.push([lng, lat, JSON.stringify({ raColor: 'transparent', tooltip: '' })]);
+    }
+  });
+
   // Calculate bounds of events with ambassador data to filter out outliers
   const ambassadorEventCoords: [number, number][] = [];
   eventDetails.forEach((event, eventName) => {
@@ -83,6 +94,57 @@ export function populateMap(
     console.log(`No valid bounds calculated - disabling bounds filter`);
   }
 
+  // Build constraining events for Voronoi calculation
+
+  // Add ambassador events (these create polygons)
+  eventDetails.forEach((event, eventName) => {
+    const data = eventTeamsTableData.get(eventName);
+    if (data) {
+      const raColor = raColorMap.get(data.regionalAmbassador) ?? DEFAULT_POLYGON_COLOUR;
+      const tooltip = `
+        <strong>Event:</strong> ${eventName}<br>
+        <strong>Event Director(s):</strong> ${data.eventDirectors}<br>
+        <strong>Event Ambassador(s):</strong> ${data.eventAmbassador}<br>
+        <strong>Regional Ambassador(s):</strong> ${data.regionalAmbassador}<br>
+      `;
+
+      constrainingEvents.push({
+        coords: [event.geometry.coordinates[0], event.geometry.coordinates[1]],
+        isConstraining: false,
+        raColor,
+        tooltip
+      });
+    }
+  });
+
+  // Add nearby parkrun events as constraining points (don't create polygons)
+  if (useBoundsFilter) {
+    const expandedBounds = {
+      minLng: minLng - 2, // Additional 2 degrees for constraining points
+      maxLng: maxLng + 2,
+      minLat: minLat - 2,
+      maxLat: maxLat + 2
+    };
+
+    eventDetails.forEach((event, eventName) => {
+      const lng = event.geometry.coordinates[0];
+      const lat = event.geometry.coordinates[1];
+      const hasAmbassador = eventTeamsTableData.has(eventName);
+
+      // Include as constraining point if it's near ambassador events but doesn't have an ambassador
+      if (!hasAmbassador &&
+          lng >= expandedBounds.minLng && lng <= expandedBounds.maxLng &&
+          lat >= expandedBounds.minLat && lat <= expandedBounds.maxLat) {
+        constrainingEvents.push({
+          coords: [lng, lat],
+          isConstraining: true
+        });
+      }
+    });
+
+    console.log(`Voronoi calculation: ${constrainingEvents.filter(c => !c.isConstraining).length} ambassador events, ${constrainingEvents.filter(c => c.isConstraining).length} constraining points`);
+  }
+
   eventDetails.forEach((event, eventName) => {
     const latitude = event.geometry.coordinates[1];
     const longitude = event.geometry.coordinates[0];
@@ -93,7 +155,6 @@ export function populateMap(
 
     if (data) {
       eventsWithData++;
-      const raColor = raColorMap.get(data.regionalAmbassador) ?? DEFAULT_POLYGON_COLOUR;
       const eaColor = eaColorMap.get(data.eventAmbassador) ?? DEFAULT_EVENT_COLOUR;
       const tooltip = `
         <strong>Event:</strong> ${eventName}<br>
@@ -109,20 +170,11 @@ export function populateMap(
       marker.bindTooltip(tooltip);
       _markerMap.set(eventName, marker);
       markersLayer.addLayer(marker);
-      
+
       if (_markerClickHandler) {
         marker.on("click", () => {
           _markerClickHandler!(eventName);
         });
-      }
-
-      // Check if coordinates are within reasonable bounds (if we have bounds to check)
-      const isWithinBounds = !useBoundsFilter || (longitude >= minLng && longitude <= maxLng && latitude >= minLat && latitude <= maxLat);
-
-      if (isWithinBounds) {
-        voronoiPoints.push([longitude, latitude, JSON.stringify({ raColor, tooltip })]);
-      } else {
-        console.warn(`Skipping ${eventName} from Voronoi calculation due to out-of-bounds coordinates [${longitude}, ${latitude}]`);
       }
     } else {
       const marker = L.circleMarker([latitude, longitude], {
@@ -154,6 +206,12 @@ export function populateMap(
 
   polygons.features.forEach((feature, index) => {
     const { raColor, tooltip } = JSON.parse(voronoiPoints[index][2]);
+
+    // Skip polygons for constraining points (they have transparent color)
+    if (raColor === 'transparent') {
+      return;
+    }
+
     const coordinates = (
       feature.geometry.coordinates[0] as [number, number][]
     ).map((coord) => [coord[1], coord[0]] as L.LatLngTuple);
