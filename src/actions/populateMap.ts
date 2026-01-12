@@ -123,15 +123,15 @@ export function populateMap(
         });
       }
 
-      // TEMPORARILY DISABLE BOUNDS FILTERING FOR DEBUGGING
-      // const isWithinBounds = !useBoundsFilter || (longitude >= minLng && longitude <= maxLng && latitude >= minLat && latitude <= maxLat);
-      const isWithinBounds = true; // Always include for now
+      // Check if coordinates are within reasonable bounds (if we have bounds to check)
+      const isWithinBounds = !useBoundsFilter || (longitude >= minLng && longitude <= maxLng && latitude >= minLat && latitude <= maxLat);
 
-      console.log(`Event ${eventName}: coords [${longitude}, ${latitude}], bounds check: DISABLED, within bounds: ${isWithinBounds}`);
+      console.log(`Event ${eventName}: coords [${longitude}, ${latitude}], bounds check: ${useBoundsFilter ? 'enabled' : 'disabled'}, within bounds: ${isWithinBounds}`);
 
       if (isWithinBounds) {
+        // d3-geo-voronoi expects [longitude, latitude] for spherical coordinates
         voronoiPoints.push([longitude, latitude, JSON.stringify({ raColor, tooltip })]);
-        console.log(`✓ Added ${eventName} to voronoiPoints`);
+        console.log(`✓ Added ${eventName} to voronoiPoints at [${longitude}, ${latitude}]`);
       } else {
         console.warn(`✗ Skipping ${eventName} from Voronoi calculation due to out-of-bounds coordinates [${longitude}, ${latitude}]`);
       }
@@ -168,12 +168,22 @@ export function populateMap(
     const coordinates = (
       feature.geometry.coordinates[0] as [number, number][]
     ).map((coord) => [coord[1], coord[0]] as L.LatLngTuple);
-    const poly = L.polygon(coordinates, {
-      color: raColor,
-      fillOpacity: 0.1,
+
+    // Clip polygons to bounds to prevent them from extending to infinity
+    const clippedCoordinates = coordinates.filter(coord => {
+      const [lat, lng] = coord;
+      return lng >= minLng - 10 && lng <= maxLng + 10 &&
+             lat >= minLat - 10 && lat <= maxLat + 10;
     });
-    poly.bindTooltip(tooltip);
-    polygonsLayer.addLayer(poly);
+
+    if (clippedCoordinates.length >= 3) { // Need at least 3 points for a polygon
+      const poly = L.polygon(clippedCoordinates, {
+        color: raColor,
+        fillOpacity: 0.1,
+      });
+      poly.bindTooltip(tooltip);
+      polygonsLayer.addLayer(poly);
+    }
   });
 
   // Add polygonsLayer to map
