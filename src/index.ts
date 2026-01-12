@@ -729,6 +729,8 @@ async function onEnterAddress(issue: EventIssue): Promise<void> {
     log,
     () => {
       // Success callback - refresh UI
+      persistEventDetails(eventDetails!);
+      persistChangesLog(log);
       refreshIssuesTable();
       refreshUI(eventDetails!, eventTeamsTableData!, log);
     },

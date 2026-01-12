@@ -152,6 +152,10 @@ Replace console error messages for missing event details with an Issues tab that
 - Q: Should issue resolution be logged in the change log and persisted across reloads? → A: Yes, resolution must be logged in the changes log with event name, resolution method, timestamp, and source details. Resolution state persists via localStorage (eventDetailsMap and changes log).
 - Q: How should closed/restricted events be resolved? → A: Replace pin placement entirely with address geocoding (loses manual precision).
 
+### Session 2026-01-12
+
+- Q: When geocoding an address for a closed/restricted event, do we have all the information needed for the event to be properly displayed in tables and maps? → A: Geocoded events have sufficient information for core functionality. EventShortName provides the display name, coordinates enable mapping, and ambassador assignments come from CSV data. Rich metadata like EventLocation is not critical for the primary use cases.
+
 ## Success Criteria
 
 - Console errors for missing events are eliminated
