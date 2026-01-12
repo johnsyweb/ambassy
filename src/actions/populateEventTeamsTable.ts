@@ -2,6 +2,7 @@ import { EventDetailsMap } from '@models/EventDetailsMap';
 import { EventTeamsTableDataMap, EventTeamsTableData } from '@models/EventTeamsTableData';
 import { LogEntry } from '@models/LogEntry';
 import { countries } from '@models/country';
+import { refreshUI } from './refreshUI';
 import { EventAmbassadorMap } from '@models/EventAmbassadorMap';
 import { RegionalAmbassadorMap } from '@models/RegionalAmbassadorMap';
 import { SelectionState } from '@models/SelectionState';
