@@ -76,6 +76,7 @@ function createProspectRow(
   log?: LogEntry[]
 ): HTMLTableRowElement {
   const row = document.createElement('tr');
+  row.setAttribute('data-prospect-id', prospect.id);
 
   // Prospect Event
   const prospectEventCell = document.createElement('td');
@@ -239,6 +240,15 @@ function createProspectRow(
   actionsCell.appendChild(buttonContainer);
 
   row.appendChild(actionsCell);
+
+  // Add click handler for map navigation (only if prospect has coordinates)
+  if (_prospectRowClickHandler && prospect.coordinates && prospect.geocodingStatus === 'success') {
+    row.addEventListener('click', () => {
+      _prospectRowClickHandler!(prospect.id);
+    });
+    row.style.cursor = 'pointer';
+    row.title = 'Click to view on map';
+  }
 
   return row;
 }
@@ -513,4 +523,11 @@ function getStatusText(status: string): string {
     default:
       return status;
   }
+}
+
+// Global row click handler for prospects
+let _prospectRowClickHandler: ((prospectId: string) => void) | null = null;
+
+export function setProspectRowClickHandler(handler: (prospectId: string) => void): void {
+  _prospectRowClickHandler = handler;
 }

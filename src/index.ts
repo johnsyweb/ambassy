@@ -29,9 +29,10 @@ import { setProspectReallocationRefreshCallback } from "./actions/populateProspe
 import { saveCapacityLimits, validateCapacityLimits } from "./actions/configureCapacityLimits";
 import { CapacityLimits } from "./models/CapacityLimits";
 import { SelectionState, createSelectionState } from "./models/SelectionState";
-import { selectEventTeamRow, selectMapEvent, applyDeferredTableSelection } from "./actions/tableMapNavigation";
+import { selectEventTeamRow, selectMapEvent, selectProspectRow, applyDeferredTableSelection, highlightProspectTableRow, scrollToProspectTableRow } from "./actions/tableMapNavigation";
 import { getMarkerMap, getHighlightLayer, getMap, setMarkerClickHandler } from "./actions/populateMap";
 import { setRowClickHandler, setReallocateButtonHandler } from "./actions/populateEventTeamsTable";
+import { setProspectRowClickHandler } from "./actions/populateProspectsTable";
 import { setEventTeamsTabVisibleCallback, setIssuesTabVisibleCallback, setProspectsTabVisibleCallback } from "./utils/tabs";
 import { getReallocationSuggestions } from "./actions/getReallocationSuggestions";
 import { showReallocationDialog as showEventTeamReallocationDialog } from "./actions/showReallocationDialog";
@@ -855,11 +856,37 @@ function initializeTableMapNavigation(): void {
     );
   });
 
+  setProspectRowClickHandler((prospectId: string) => {
+    const map = getMap();
+    const prospectiveEvents = loadProspectiveEvents();
+    const prospectsList = new ProspectiveEventList(prospectiveEvents);
+    selectProspectRow(
+      selectionState,
+      prospectId,
+      prospectsList,
+      map
+    );
+  });
+
   setEventTeamsTabVisibleCallback(() => {
     applyDeferredTableSelection(
       selectionState,
       eventTeamsTableData!
     );
+  });
+
+  setProspectsTabVisibleCallback(() => {
+    // Handle deferred prospect selection when prospects tab becomes visible
+    if (selectionState.selectedEventShortName?.startsWith('prospect:')) {
+      const prospectId = selectionState.selectedEventShortName.substring(9); // Remove 'prospect:' prefix
+      const prospectiveEvents = loadProspectiveEvents();
+      const prospectsList = new ProspectiveEventList(prospectiveEvents);
+      const prospect = prospectsList.findById(prospectId);
+      if (prospect && prospect.coordinates && prospect.geocodingStatus === 'success') {
+        highlightProspectTableRow("prospectsTable", prospectId, true);
+        scrollToProspectTableRow("prospectsTable", prospectId);
+      }
+    }
   });
 
   setReallocateButtonHandler(selectionState, (eventShortName: string) => {
