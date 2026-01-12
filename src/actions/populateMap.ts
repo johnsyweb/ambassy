@@ -45,7 +45,6 @@ export function populateMap(
   _markerMap.clear();
 
   const voronoiPoints: [number, number, string][] = [];
-  const processedCoords: Array<{lng: number, lat: number, eventName: string}> = []; // Track all coordinates to detect proximity conflicts
 
   let processedEvents = 0;
   let eventsWithData = 0;
@@ -149,37 +148,10 @@ export function populateMap(
     constrainingEvents.forEach((event) => {
       let [lng, lat] = event.coords;
 
-      // Check for proximity conflicts with already processed coordinates
-      const proximityThreshold = 0.001; // ~100 meters
-      let hasConflict = false;
-      let conflictIndex = 0;
-
-      for (let i = 0; i < processedCoords.length; i++) {
-        const existing = processedCoords[i];
-        const distance = Math.sqrt(
-          Math.pow(lng - existing.lng, 2) + Math.pow(lat - existing.lat, 2)
-        );
-
-        if (distance < proximityThreshold) {
-          hasConflict = true;
-          conflictIndex = i + 1;
-          break;
-        }
-      }
-
-      // Apply offset if there's a proximity conflict
-      if (hasConflict) {
-        const offset = 0.0005 * conflictIndex; // ~50 meters offset
-        // Use event name for consistent positioning
-        const eventName = event.tooltip?.match(/Event: ([^<]+)/)?.[1] || 'unknown';
-        const nameHash = eventName.split('').reduce((a, b) => a + b.charCodeAt(0), 0);
-        const angle = (nameHash * 137.5) % 360 * (Math.PI / 180);
-        lng += offset * Math.cos(angle);
-        lat += offset * Math.sin(angle);
-      }
-
-      // Track this coordinate for future conflict detection
-      processedCoords.push({ lng, lat, eventName: event.tooltip?.match(/Event: ([^<]+)/)?.[1] || 'unknown' });
+      // Add tiny random offset to avoid exact duplicate coordinates that break Voronoi
+      // This is much smaller than the proximity-based approach to preserve correct positioning
+      lng += (Math.random() - 0.5) * 0.00001; // ~1 meter random offset
+      lat += (Math.random() - 0.5) * 0.00001;
 
       if (event.isConstraining) {
         // Constraining points don't create polygons, just help define boundaries
@@ -196,40 +168,10 @@ export function populateMap(
       if (data) {
         let lng = event.geometry.coordinates[0];
         let lat = event.geometry.coordinates[1];
-        const coordKey = `${lng.toFixed(6)},${lat.toFixed(6)}`;
-        const usageCount = coordinateUsage.get(coordKey) || 0;
-        coordinateUsage.set(coordKey, usageCount + 1);
 
-        // Check for proximity conflicts with already processed coordinates
-        const proximityThreshold = 0.001; // ~100 meters
-        let hasConflict = false;
-        let conflictIndex = 0;
-
-        for (let i = 0; i < processedCoords.length; i++) {
-          const existing = processedCoords[i];
-          const distance = Math.sqrt(
-            Math.pow(lng - existing.lng, 2) + Math.pow(lat - existing.lat, 2)
-          );
-
-          if (distance < proximityThreshold) {
-            hasConflict = true;
-            conflictIndex = i + 1;
-            break;
-          }
-        }
-
-        // Apply offset if there's a proximity conflict
-        if (hasConflict) {
-          const offset = 0.0005 * conflictIndex; // ~50 meters offset
-          // Use event name for consistent positioning
-          const nameHash = eventName.split('').reduce((a, b) => a + b.charCodeAt(0), 0);
-          const angle = (nameHash * 137.5) % 360 * (Math.PI / 180);
-          lng += offset * Math.cos(angle);
-          lat += offset * Math.sin(angle);
-        }
-
-        // Track this coordinate for future conflict detection
-        processedCoords.push({ lng, lat, eventName });
+        // Add tiny random offset to avoid exact duplicate coordinates that break Voronoi
+        lng += (Math.random() - 0.5) * 0.00001; // ~1 meter random offset
+        lat += (Math.random() - 0.5) * 0.00001;
 
         const raColor = raColorMap.get(data.regionalAmbassador) ?? DEFAULT_POLYGON_COLOUR;
         const tooltip = `
