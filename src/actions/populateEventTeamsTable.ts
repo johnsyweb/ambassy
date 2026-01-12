@@ -2,7 +2,6 @@ import { EventDetailsMap } from '@models/EventDetailsMap';
 import { EventTeamsTableDataMap, EventTeamsTableData, eventAmbassadorsFrom, regionalAmbassadorsFrom } from '@models/EventTeamsTableData';
 import { LogEntry } from '@models/LogEntry';
 import { countries } from '@models/country';
-import { refreshUI } from './refreshUI';
 import { EventAmbassadorMap } from '@models/EventAmbassadorMap';
 import { RegionalAmbassadorMap } from '@models/RegionalAmbassadorMap';
 import { SelectionState } from '@models/SelectionState';
@@ -86,19 +85,7 @@ export function populateEventTeamsTable(
     row.appendChild(eventAmbassadorCell);
 
     const eventShortNameCell = document.createElement('td');
-    if (data.eventSeries === 0) {
-      createEventShortNameDropdown(
-        eventShortNameCell,
-        data,
-        eventDetailsMap,
-        eventTeamsTableData,
-        changelog,
-        eventAmbassadors,
-        regionalAmbassadors
-      );
-    } else {
-      eventShortNameCell.textContent = data.eventShortName;
-    }
+    eventShortNameCell.textContent = data.eventShortName;
     row.appendChild(eventShortNameCell);
 
     const eventDirectorsCell = document.createElement('td');
@@ -229,47 +216,3 @@ export function updateReallocateButtonStates(): void {
   });
 }
 
-function createEventShortNameDropdown(
-  eventShortNameCell: HTMLElement,
-  data: EventTeamsTableData,
-  eventDetailsMap: EventDetailsMap,
-  eventTeamsTableData: EventTeamsTableDataMap,
-  changelog: LogEntry[],
-  eventAmbassadors?: EventAmbassadorMap,
-  regionalAmbassadors?: RegionalAmbassadorMap
-): void {
-  const dropdown = document.createElement('select');
-  const eventShortNames = [data.eventShortName, ...Array.from(eventDetailsMap.keys()).sort()];
-
-  eventShortNames.forEach((eventShortName) => {
-    const option = document.createElement('option');
-    option.value = eventShortName;
-    option.textContent = eventShortName;
-    dropdown.appendChild(option);
-  });
-
-  dropdown.value = data.eventShortName;
-
-  dropdown.addEventListener('change', () => {
-    const newEventShortName = dropdown.value;
-    data.eventShortName = newEventShortName;
-
-    const eventDetails = eventDetailsMap.get(newEventShortName);
-    if (eventDetails) {
-      data.eventSeries = eventDetails.properties.seriesid;
-      data.eventCoordinates = `${eventDetails.geometry.coordinates[1]}, ${eventDetails.geometry.coordinates[0]}`;
-      data.eventCountryCode = eventDetails.properties.countrycode;
-      data.eventCountry = countries[eventDetails.properties.countrycode.toString()].url?.split('.').slice(-1)[0] || '?';
-
-
-      eventShortNameCell.innerHTML = '';
-      eventShortNameCell.textContent = newEventShortName;
-
-      // There's more work to do here, but I'm going to leave it for now
-      refreshUI(eventDetailsMap, eventTeamsTableData, changelog, eventAmbassadors, regionalAmbassadors);
-    }
-  });
-
-  eventShortNameCell.innerHTML = '';
-  eventShortNameCell.appendChild(dropdown);
-}
