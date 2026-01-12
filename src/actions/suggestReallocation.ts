@@ -85,15 +85,15 @@ export function calculateGeographicProximityScore(
 
 /**
  * Find neighboring events within a distance threshold.
- * Returns array of event names that are within thresholdKm of any reallocating event.
+ * Returns array of neighboring events with their distances.
  */
 function findNeighboringEvents(
   recipientEvents: string[],
   reallocatingEvents: string[],
   eventDetails: EventDetailsMap,
   thresholdKm: number = 50
-): string[] {
-  const neighbors: string[] = [];
+): Array<{ name: string; distanceKm: number }> {
+  const neighbors: Array<{ name: string; distanceKm: number }> = [];
   
   if (reallocatingEvents.length === 0 || recipientEvents.length === 0) {
     return neighbors;
@@ -122,16 +122,24 @@ function findNeighboringEvents(
 
     const [recipientLon, recipientLat] = recipientDetails.geometry.coordinates;
     
-    // Check if this recipient event is within threshold of any reallocating event
+    // Find the closest reallocating event and its distance
+    let closestDistance = Infinity;
     for (const realloc of reallocatingCoords) {
       const distance = calculateDistance(recipientLat, recipientLon, realloc.lat, realloc.lon);
-      if (distance <= thresholdKm) {
-        neighbors.push(recipientEventName);
-        break; // Only add once even if close to multiple reallocating events
+      if (distance <= thresholdKm && distance < closestDistance) {
+        closestDistance = distance;
       }
+    }
+    
+    // Add to neighbors if within threshold
+    if (closestDistance !== Infinity) {
+      neighbors.push({ name: recipientEventName, distanceKm: closestDistance });
     }
   }
 
+  // Sort by distance (closest first)
+  neighbors.sort((a, b) => a.distanceKm - b.distanceKm);
+  
   return neighbors;
 }
 

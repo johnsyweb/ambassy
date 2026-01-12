@@ -1,3 +1,8 @@
+export interface NeighboringEvent {
+  name: string;
+  distanceKm: number;
+}
+
 export interface ReallocationSuggestion {
   fromAmbassador: string;
   toAmbassador: string;
@@ -6,6 +11,6 @@ export interface ReallocationSuggestion {
   reasons?: string[];
   warnings?: string[];
   allocationCount?: number;
-  neighboringEvents?: string[];
+  neighboringEvents?: NeighboringEvent[];
 }
 
