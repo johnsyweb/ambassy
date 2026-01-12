@@ -116,15 +116,13 @@ export function populateMap(
         });
       }
 
-      // Check if coordinates are within reasonable bounds AND same country
+      // Check if coordinates are within reasonable bounds (if we have bounds to check)
       const isWithinBounds = !useBoundsFilter || (longitude >= minLng && longitude <= maxLng && latitude >= minLat && latitude <= maxLat);
-      const isSameCountry = event.properties.countrycode === countryCode;
 
-      if (isWithinBounds && isSameCountry) {
+      if (isWithinBounds) {
         voronoiPoints.push([longitude, latitude, JSON.stringify({ raColor, tooltip })]);
-        console.log(`✓ Added ${eventName} to voronoiPoints (country: ${event.properties.countrycode})`);
       } else {
-        console.log(`✗ Skipping ${eventName} from Voronoi: bounds=${isWithinBounds}, country=${isSameCountry} (event country: ${event.properties.countrycode}, dataset country: ${countryCode})`);
+        console.warn(`Skipping ${eventName} from Voronoi calculation due to out-of-bounds coordinates [${longitude}, ${latitude}]`);
       }
     } else {
       const marker = L.circleMarker([latitude, longitude], {
