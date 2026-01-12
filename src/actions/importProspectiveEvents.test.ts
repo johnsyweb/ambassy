@@ -226,6 +226,43 @@ describe('importProspectiveEvents', () => {
       expect(saveCall.some((p: any) => p.prospectEvent === 'Existing Event')).toBe(true);
       expect(saveCall.some((p: any) => p.prospectEvent === 'Botanical Gardens')).toBe(true);
     });
+
+    it('should prevent duplicate prospects from being imported', async () => {
+      // Set up existing prospects that would already be in storage
+      const existingProspects = [
+        {
+          id: 'existing-botanical-gardens',
+          prospectEvent: 'Botanical Gardens',
+          country: 'Australia',
+          state: 'VIC',
+          prospectEDs: 'John Smith',
+          eventAmbassador: 'Jane Doe',
+          dateMadeContact: new Date('2024-01-15'),
+          courseFound: true,
+          landownerPermission: false,
+          fundingConfirmed: true,
+          geocodingStatus: 'success' as const,
+          ambassadorMatchStatus: 'matched' as const,
+          importTimestamp: Date.now() - 1000,
+          sourceRow: 2
+        }
+      ];
+
+      // Set up the mock BEFORE the import call
+      mockLoadProspectiveEvents.mockReturnValue(existingProspects);
+
+      // Try to import the same prospect again
+      const duplicateResult = await importProspectiveEvents(
+        validCSV,
+        mockEventAmbassadors,
+        mockRegionalAmbassadors
+      );
+
+      expect(duplicateResult.success).toBe(true);
+      expect(duplicateResult.imported).toBe(0); // No new prospects imported
+      expect(duplicateResult.warnings).toHaveLength(1);
+      expect(duplicateResult.warnings[0]).toContain('Duplicate prospect skipped');
+    });
   });
 
   describe('ambassador matching', () => {

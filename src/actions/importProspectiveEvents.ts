@@ -72,20 +72,40 @@ export async function importProspectiveEvents(
       }
     }
 
-    // Add processing errors and warnings
+      // Add processing errors and warnings (excluding deduplication warnings which come later)
     result.errors.push(...processingErrors);
-    result.warnings.push(...processingWarnings);
 
     // If we have processed events and no critical errors, save them
     if (processedEvents.length > 0 && processingErrors.length === 0) {
       const existingEvents = loadProspectiveEvents();
+
+      // Deduplicate prospects based on prospectEvent, country, and state
+      const existingMap = new Map<string, any>();
+      existingEvents.forEach(event => {
+        const key = `${event.prospectEvent}|${event.country}|${event.state}`;
+        existingMap.set(key, event);
+      });
+
+      // Filter out duplicates from processed events
+      const newEvents = processedEvents.filter(event => {
+        const key = `${event.prospectEvent}|${event.country}|${event.state}`;
+        if (existingMap.has(key)) {
+          processingWarnings.push(`Duplicate prospect skipped: "${event.prospectEvent}" (${event.country}, ${event.state})`);
+          return false;
+        }
+        return true;
+      });
+
       const updatedEvents = new ProspectiveEventList([
         ...existingEvents,
-        ...processedEvents
+        ...newEvents
       ]);
 
+      // Only count newly added events
+      result.imported = newEvents.length;
+
       // Update EventAmbassador prospectiveEvents arrays
-      processedEvents.forEach(event => {
+      newEvents.forEach(event => {
         if (event.eventAmbassador && event.ambassadorMatchStatus === 'matched') {
           const ea = eventAmbassadors.get(event.eventAmbassador);
           if (ea) {
@@ -100,8 +120,10 @@ export async function importProspectiveEvents(
       });
 
       saveProspectiveEvents(updatedEvents.getAll());
-      result.imported = processedEvents.length;
       result.success = true;
+
+      // Add all processing warnings (including deduplication warnings)
+      result.warnings.push(...processingWarnings);
     } else if (processingErrors.length > 0) {
       result.success = false;
     } else {
