@@ -45,7 +45,7 @@ export function populateMap(
   _markerMap.clear();
 
   const voronoiPoints: [number, number, string][] = [];
-  const coordinateUsage = new Map<string, number>(); // Track coordinate usage to offset duplicates
+  const processedCoords: Array<{lng: number, lat: number, eventName: string}> = []; // Track all coordinates to detect proximity conflicts
 
   let processedEvents = 0;
   let eventsWithData = 0;
@@ -98,6 +98,7 @@ export function populateMap(
   eventDetails.forEach((event, eventName) => {
     const data = eventTeamsTableData.get(eventName);
     if (data) {
+
       const raColor = raColorMap.get(data.regionalAmbassador) ?? DEFAULT_POLYGON_COLOUR;
       const tooltip = `
         <strong>Event:</strong> ${eventName}<br>
@@ -147,19 +148,38 @@ export function populateMap(
     // Build Voronoi points from constraining events
     constrainingEvents.forEach((event) => {
       let [lng, lat] = event.coords;
-      const coordKey = `${lng.toFixed(6)},${lat.toFixed(6)}`;
-      const usageCount = coordinateUsage.get(coordKey) || 0;
-      coordinateUsage.set(coordKey, usageCount + 1);
 
-      // Apply deterministic small offset for duplicate coordinates to avoid degenerate polygons
-      // Use event index/order for consistent positioning instead of random values
-      if (usageCount > 0) {
-        const offset = 0.0005 * usageCount; // ~50 meters offset
-        // Create consistent offset pattern based on usage count
-        const angle = (usageCount * 137.5) * (Math.PI / 180); // Golden angle approximation
+      // Check for proximity conflicts with already processed coordinates
+      const proximityThreshold = 0.001; // ~100 meters
+      let hasConflict = false;
+      let conflictIndex = 0;
+
+      for (let i = 0; i < processedCoords.length; i++) {
+        const existing = processedCoords[i];
+        const distance = Math.sqrt(
+          Math.pow(lng - existing.lng, 2) + Math.pow(lat - existing.lat, 2)
+        );
+
+        if (distance < proximityThreshold) {
+          hasConflict = true;
+          conflictIndex = i + 1;
+          break;
+        }
+      }
+
+      // Apply offset if there's a proximity conflict
+      if (hasConflict) {
+        const offset = 0.0005 * conflictIndex; // ~50 meters offset
+        // Use event name for consistent positioning
+        const eventName = event.tooltip?.match(/Event: ([^<]+)/)?.[1] || 'unknown';
+        const nameHash = eventName.split('').reduce((a, b) => a + b.charCodeAt(0), 0);
+        const angle = (nameHash * 137.5) % 360 * (Math.PI / 180);
         lng += offset * Math.cos(angle);
         lat += offset * Math.sin(angle);
       }
+
+      // Track this coordinate for future conflict detection
+      processedCoords.push({ lng, lat, eventName: event.tooltip?.match(/Event: ([^<]+)/)?.[1] || 'unknown' });
 
       if (event.isConstraining) {
         // Constraining points don't create polygons, just help define boundaries
@@ -180,16 +200,36 @@ export function populateMap(
         const usageCount = coordinateUsage.get(coordKey) || 0;
         coordinateUsage.set(coordKey, usageCount + 1);
 
-        // Apply deterministic small offset for duplicate coordinates to avoid degenerate polygons
-        // Use event name hash for consistent positioning instead of random values
-        if (usageCount > 0) {
-          const offset = 0.0005 * usageCount; // ~50 meters offset
-          // Create consistent offset pattern based on event name
+        // Check for proximity conflicts with already processed coordinates
+        const proximityThreshold = 0.001; // ~100 meters
+        let hasConflict = false;
+        let conflictIndex = 0;
+
+        for (let i = 0; i < processedCoords.length; i++) {
+          const existing = processedCoords[i];
+          const distance = Math.sqrt(
+            Math.pow(lng - existing.lng, 2) + Math.pow(lat - existing.lat, 2)
+          );
+
+          if (distance < proximityThreshold) {
+            hasConflict = true;
+            conflictIndex = i + 1;
+            break;
+          }
+        }
+
+        // Apply offset if there's a proximity conflict
+        if (hasConflict) {
+          const offset = 0.0005 * conflictIndex; // ~50 meters offset
+          // Use event name for consistent positioning
           const nameHash = eventName.split('').reduce((a, b) => a + b.charCodeAt(0), 0);
-          const angle = (nameHash * 137.5) % 360 * (Math.PI / 180); // Golden angle with name-based variation
+          const angle = (nameHash * 137.5) % 360 * (Math.PI / 180);
           lng += offset * Math.cos(angle);
           lat += offset * Math.sin(angle);
         }
+
+        // Track this coordinate for future conflict detection
+        processedCoords.push({ lng, lat, eventName });
 
         const raColor = raColorMap.get(data.regionalAmbassador) ?? DEFAULT_POLYGON_COLOUR;
         const tooltip = `
