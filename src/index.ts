@@ -29,7 +29,7 @@ import { SelectionState, createSelectionState } from "./models/SelectionState";
 import { selectEventTeamRow, selectMapEvent, applyDeferredTableSelection } from "./actions/tableMapNavigation";
 import { getMarkerMap, getHighlightLayer, getMap, setMarkerClickHandler } from "./actions/populateMap";
 import { setRowClickHandler, setReallocateButtonHandler } from "./actions/populateEventTeamsTable";
-import { setEventTeamsTabVisibleCallback } from "./utils/tabs";
+import { setEventTeamsTabVisibleCallback, setIssuesTabVisibleCallback } from "./utils/tabs";
 import { getReallocationSuggestions } from "./actions/getReallocationSuggestions";
 import { showReallocationDialog as showEventTeamReallocationDialog } from "./actions/showReallocationDialog";
 import { reallocateEventTeam } from "./actions/reallocateEventTeam";
@@ -38,6 +38,10 @@ import { clearSelection } from "./models/SelectionState";
 import { getEAReallocationSuggestions } from "./actions/getEAReallocationSuggestions";
 import { reallocateEventAmbassador } from "./actions/reallocateEventAmbassador";
 import { getRegionalAmbassadorForEventAmbassador } from "./utils/regions";
+import { detectIssues } from "./actions/detectIssues";
+import { populateIssuesTable } from "./actions/populateIssuesTable";
+import { IssuesState, createIssuesState, setSelectedIssue } from "./models/IssuesState";
+import { EventIssue } from "./models/EventIssue";
 
 function getRegionalAmbassadorsFromSession(): RegionalAmbassadorMap {
   const storedRegionalAmbassadors = loadFromStorage<Array<[string, RegionalAmbassador]>>("regionalAmbassadors");

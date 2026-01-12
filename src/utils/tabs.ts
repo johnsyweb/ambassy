@@ -3,9 +3,14 @@
  */
 
 let eventTeamsTabVisibleCallback: (() => void) | null = null;
+let issuesTabVisibleCallback: (() => void) | null = null;
 
 export function setEventTeamsTabVisibleCallback(callback: () => void): void {
   eventTeamsTabVisibleCallback = callback;
+}
+
+export function setIssuesTabVisibleCallback(callback: () => void): void {
+  issuesTabVisibleCallback = callback;
 }
 
 export function initializeTabs(): void {
@@ -68,6 +73,11 @@ function switchTab(index: number): void {
     // Event Teams tab is at index 0
     if (index === 0 && eventTeamsTabVisibleCallback) {
       eventTeamsTabVisibleCallback();
+    }
+
+    // Issues tab is at index 4 (after Event Teams, Event Ambassadors, Regional Ambassadors, Changes Log)
+    if (index === 4 && issuesTabVisibleCallback) {
+      issuesTabVisibleCallback();
     }
   }
 }
