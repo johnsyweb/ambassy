@@ -150,6 +150,38 @@ export function populateMap(
       raColor: c.raColor,
       hasTooltip: !!c.tooltip
     })));
+
+    // Build Voronoi points from constraining events
+    console.log(`Building Voronoi points from ${constrainingEvents.length} constraining events`);
+    constrainingEvents.forEach((event) => {
+      const [lng, lat] = event.coords;
+      if (event.isConstraining) {
+        // Constraining points don't create polygons, just help define boundaries
+        voronoiPoints.push([lng, lat, JSON.stringify({ raColor: 'transparent', tooltip: '' })]);
+        console.log(`Added constraining point at [${lng}, ${lat}]`);
+      } else {
+        // Ambassador events create polygons
+        voronoiPoints.push([lng, lat, JSON.stringify({ raColor: event.raColor, tooltip: event.tooltip })]);
+        console.log(`Added ambassador point at [${lng}, ${lat}] with color ${event.raColor}`);
+      }
+    });
+    console.log(`Total Voronoi points created: ${voronoiPoints.length}`);
+  } else {
+    // No bounds filtering - just include ambassador events
+    eventDetails.forEach((event, eventName) => {
+      const data = eventTeamsTableData.get(eventName);
+      if (data) {
+        const raColor = raColorMap.get(data.regionalAmbassador) ?? DEFAULT_POLYGON_COLOUR;
+        const tooltip = `
+          <strong>Event:</strong> ${eventName}<br>
+          <strong>Event Director(s):</strong> ${data.eventDirectors}<br>
+          <strong>Event Ambassador(s):</strong> ${data.eventAmbassador}<br>
+          <strong>Regional Ambassador(s):</strong> ${data.regionalAmbassador}<br>
+        `;
+        voronoiPoints.push([event.geometry.coordinates[0], event.geometry.coordinates[1], JSON.stringify({ raColor, tooltip })]);
+        console.log(`Added ambassador point (no bounds) at [${event.geometry.coordinates[0]}, ${event.geometry.coordinates[1]}] with color ${raColor}`);
+      }
+    });
   }
 
   eventDetails.forEach((event, eventName) => {
