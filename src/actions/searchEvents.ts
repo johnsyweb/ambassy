@@ -8,9 +8,9 @@ interface MatchResult {
   matchType: "exact" | "normalized" | "fuzzy";
 }
 
-const MAX_RESULTS = 10;
-const FUZZY_THRESHOLD_SHORT = 2;
-const FUZZY_THRESHOLD_LONG = 3;
+const MAX_RESULTS = 20; // Increased to show more suggestions
+const FUZZY_THRESHOLD_SHORT = 3; // More lenient
+const FUZZY_THRESHOLD_LONG = 5; // More lenient
 
 export function searchEvents(query: string, events: EventDetailsMap): EventDetails[] {
   if (!query || query.trim() === "") {
@@ -46,32 +46,76 @@ export function searchEvents(query: string, events: EventDetailsMap): EventDetai
 
     let foundExact = false;
     let foundNormalized = false;
+    let foundSubstring = false;
 
+    // Check for exact matches first
     for (const field of fields) {
       if (field.name.toLowerCase() === query.toLowerCase()) {
         bestScore = 0;
         matchType = "exact";
         foundExact = true;
         break;
-      } else if (field.normalized === normalizedQuery) {
-        if (!foundExact) {
+      }
+    }
+
+    if (!foundExact) {
+      // Check for normalized matches
+      for (const field of fields) {
+        if (field.normalized === normalizedQuery) {
           bestScore = 1;
           matchType = "normalized";
           foundNormalized = true;
+          break;
         }
       }
     }
 
     if (!foundExact && !foundNormalized) {
+      // Check for substring matches (query contained in field)
       for (const field of fields) {
-        const threshold =
-          field.normalized.length < 10 ? FUZZY_THRESHOLD_SHORT : FUZZY_THRESHOLD_LONG;
-        const distance = levenshteinDistance(field.normalized, normalizedQuery);
-        if (distance <= threshold) {
-          const fuzzyScore = 100 + distance;
-          if (bestScore > fuzzyScore) {
-            bestScore = fuzzyScore;
+        if (field.normalized.includes(normalizedQuery) ||
+            field.name.toLowerCase().includes(query.toLowerCase())) {
+          const substringScore = 10 + (field.normalized.length - normalizedQuery.length); // Prefer shorter matches
+          if (bestScore > substringScore) {
+            bestScore = substringScore;
             matchType = "fuzzy";
+            foundSubstring = true;
+          }
+        }
+      }
+
+      // Check for word-based matches (all query words appear in field)
+      if (!foundSubstring && normalizedQuery.split(' ').length > 1) {
+        const queryWords = normalizedQuery.split(' ').filter(word => word.length > 2); // Ignore short words
+        for (const field of fields) {
+          const fieldWords = field.normalized.split(' ');
+          const matchedWords = queryWords.filter(qWord =>
+            fieldWords.some(fWord => fWord.includes(qWord) || qWord.includes(fWord))
+          );
+          if (matchedWords.length === queryWords.length) {
+            const wordScore = 20 + (queryWords.length - matchedWords.length) * 5;
+            if (bestScore > wordScore) {
+              bestScore = wordScore;
+              matchType = "fuzzy";
+            }
+          }
+        }
+      }
+
+      // Finally, check fuzzy matches
+      if (!foundSubstring) {
+        for (const field of fields) {
+          const threshold = Math.min(
+            FUZZY_THRESHOLD_LONG,
+            Math.max(FUZZY_THRESHOLD_SHORT, Math.floor(normalizedQuery.length * 0.3)) // Adaptive threshold
+          );
+          const distance = levenshteinDistance(field.normalized, normalizedQuery);
+          if (distance <= threshold) {
+            const fuzzyScore = 50 + distance; // Lower than substring scores
+            if (bestScore > fuzzyScore) {
+              bestScore = fuzzyScore;
+              matchType = "fuzzy";
+            }
           }
         }
       }
@@ -83,6 +127,7 @@ export function searchEvents(query: string, events: EventDetailsMap): EventDetai
         score: bestScore,
         matchType,
       });
+      console.log(`Match found: "${query}" -> "${event.properties.EventLongName}" (score: ${bestScore}, type: ${matchType})`);
     }
   });
 
