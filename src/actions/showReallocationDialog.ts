@@ -67,7 +67,23 @@ export function showReallocationDialog(
         allocationSpan.style.marginLeft = "0.5em";
         allocationSpan.style.color = "#666";
         allocationSpan.style.fontWeight = "normal";
-        allocationSpan.textContent = `(${suggestion.allocationCount} allocation${suggestion.allocationCount !== 1 ? "s" : ""})`;
+
+        // Get the REA for this EA
+        let reaName = "?";
+        if (eventAmbassadors && regionalAmbassadors) {
+          const ea = eventAmbassadors.get(suggestion.toAmbassador);
+          if (ea) {
+            // Find which RA supports this EA
+            for (const [raName, ra] of regionalAmbassadors) {
+              if (ra.supportsEAs.includes(suggestion.toAmbassador)) {
+                reaName = raName;
+                break;
+              }
+            }
+          }
+        }
+
+        allocationSpan.textContent = `(${suggestion.allocationCount} allocation${suggestion.allocationCount !== 1 ? "s" : ""}) [${reaName}]`;
         buttonText.appendChild(allocationSpan);
       }
       
@@ -183,7 +199,26 @@ export function showReallocationDialog(
   allAmbassadors.forEach((ambassador) => {
     const optionElement = document.createElement("option");
     optionElement.value = ambassador;
-    optionElement.textContent = ambassador;
+
+    let displayText = ambassador;
+    if (isEventReallocation && eventAmbassadors) {
+      const ea = eventAmbassadors.get(ambassador);
+      if (ea) {
+        let reaName = "?";
+        if (regionalAmbassadors) {
+          // Find which RA supports this EA
+          for (const [raName, ra] of regionalAmbassadors) {
+            if (ra.supportsEAs.includes(ambassador)) {
+              reaName = raName;
+              break;
+            }
+          }
+        }
+        displayText = `${ambassador} (${ea.events.length} allocation${ea.events.length !== 1 ? "s" : ""}) [${reaName}]`;
+      }
+    }
+
+    optionElement.textContent = displayText;
     dropdown.appendChild(optionElement);
   });
 

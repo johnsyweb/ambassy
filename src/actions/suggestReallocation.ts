@@ -299,21 +299,20 @@ export function suggestEventReallocation(
     const proximityScore = calculateGeographicProximityScore(recipient.events, events, eventDetails);
     const neighboringEvents = findNeighboringEvents(recipient.events, events, eventDetails, 50);
     const allocationCount = recipient.events.length;
-    
-    // Apply prioritization bonuses:
-    // 1. Zero allocations get highest priority
-    if (allocationCount === 0) {
-      score += ZERO_ALLOCATIONS_BONUS;
-    }
-    
-    // 2. Neighboring events get second priority
+
+    // Primary ordering: allocation count (fewer = higher priority)
+    // Use a base score that decreases with allocation count
+    const baseScore = Math.max(0, 1000 - (allocationCount * 10));
+
+    // Secondary ordering: distance to nearest supported event (closer = higher priority)
+    let distanceBonus = 0;
     if (neighboringEvents.length > 0) {
-      score += NEIGHBORING_EVENTS_BONUS;
+      // Closest neighboring event gets bonus (inverse of distance)
+      const closestDistance = neighboringEvents[0].distanceKm;
+      distanceBonus = Math.max(0, 100 - closestDistance);
     }
-    
-    // 3. Within each group, prioritize by fewer allocations (subtract allocation count)
-    // This ensures that within the same priority group, fewer allocations rank higher
-    score -= allocationCount;
+
+    score = baseScore + distanceBonus;
     
     if (proximityScore > 50) {
       reasons.push("Geographic proximity");
