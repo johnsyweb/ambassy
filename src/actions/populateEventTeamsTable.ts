@@ -1,11 +1,17 @@
 import { EventDetailsMap } from '@models/EventDetailsMap';
-import { EventTeamsTableDataMap, EventTeamsTableData } from '@models/EventTeamsTableData';
+import { EventTeamsTableDataMap, EventTeamsTableData, eventAmbassadorsFrom, regionalAmbassadorsFrom } from '@models/EventTeamsTableData';
 import { LogEntry } from '@models/LogEntry';
 import { countries } from '@models/country';
 import { refreshUI } from './refreshUI';
 import { EventAmbassadorMap } from '@models/EventAmbassadorMap';
 import { RegionalAmbassadorMap } from '@models/RegionalAmbassadorMap';
 import { SelectionState } from '@models/SelectionState';
+import { colorPalette } from './colorPalette';
+
+function assignColorToName(name: string, allNames: string[]): string {
+  const index = allNames.indexOf(name);
+  return index >= 0 ? colorPalette[index % colorPalette.length] : "#808080";
+}
 
 export function populateEventTeamsTable(
   eventTeamsTableData: EventTeamsTableDataMap,
@@ -21,16 +27,62 @@ export function populateEventTeamsTable(
   }
   tableBody.innerHTML = '';
 
+  // Get all REA and EA names for color assignment
+  const allREANames = regionalAmbassadorsFrom(eventTeamsTableData);
+  const allEANames = eventAmbassadorsFrom(eventTeamsTableData);
+
   eventTeamsTableData.forEach((data) => {
     const row = document.createElement('tr');
     row.setAttribute('data-event-short-name', data.eventShortName);
 
     const regionalAmbassadorCell = document.createElement('td');
-    regionalAmbassadorCell.textContent = data.regionalAmbassador;
+    const reaContainer = document.createElement('div');
+    reaContainer.style.display = 'flex';
+    reaContainer.style.alignItems = 'center';
+    reaContainer.style.gap = '8px';
+    
+    const reaColorIndicator = document.createElement('span');
+    const reaColor = assignColorToName(data.regionalAmbassador, allREANames);
+    reaColorIndicator.style.display = 'inline-block';
+    reaColorIndicator.style.width = '12px';
+    reaColorIndicator.style.height = '12px';
+    reaColorIndicator.style.borderRadius = '50%';
+    reaColorIndicator.style.backgroundColor = reaColor;
+    reaColorIndicator.style.border = '1px solid #333';
+    reaColorIndicator.style.flexShrink = '0';
+    reaColorIndicator.title = `Map color: ${reaColor}`;
+    reaContainer.appendChild(reaColorIndicator);
+    
+    const reaNameSpan = document.createElement('span');
+    reaNameSpan.textContent = data.regionalAmbassador;
+    reaContainer.appendChild(reaNameSpan);
+    
+    regionalAmbassadorCell.appendChild(reaContainer);
     row.appendChild(regionalAmbassadorCell);
 
     const eventAmbassadorCell = document.createElement('td');
-    eventAmbassadorCell.textContent = data.eventAmbassador;
+    const eaContainer = document.createElement('div');
+    eaContainer.style.display = 'flex';
+    eaContainer.style.alignItems = 'center';
+    eaContainer.style.gap = '8px';
+    
+    const eaColorIndicator = document.createElement('span');
+    const eaColor = assignColorToName(data.eventAmbassador, allEANames);
+    eaColorIndicator.style.display = 'inline-block';
+    eaColorIndicator.style.width = '12px';
+    eaColorIndicator.style.height = '12px';
+    eaColorIndicator.style.borderRadius = '50%';
+    eaColorIndicator.style.backgroundColor = eaColor;
+    eaColorIndicator.style.border = '1px solid #333';
+    eaColorIndicator.style.flexShrink = '0';
+    eaColorIndicator.title = `Map color: ${eaColor}`;
+    eaContainer.appendChild(eaColorIndicator);
+    
+    const eaNameSpan = document.createElement('span');
+    eaNameSpan.textContent = data.eventAmbassador;
+    eaContainer.appendChild(eaNameSpan);
+    
+    eventAmbassadorCell.appendChild(eaContainer);
     row.appendChild(eventAmbassadorCell);
 
     const eventShortNameCell = document.createElement('td');
