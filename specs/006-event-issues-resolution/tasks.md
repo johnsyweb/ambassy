@@ -40,7 +40,8 @@
 - [ ] T007 [P] Create `detectIssues` function in `src/actions/detectIssues.ts` that identifies events without coordinates
 - [ ] T008 [P] Create `normalizeEventName` utility function in `src/utils/fuzzyMatch.ts` for string normalization (lowercase, remove parentheses, trim)
 - [ ] T009 [P] Create `levenshteinDistance` function in `src/utils/fuzzyMatch.ts` for fuzzy matching
-- [ ] T010 [P] Modify `extractEventTeamsTableData` in `src/models/EventTeamsTable.ts` to collect issues instead of calling `console.error`
+- [ ] T010 [P] Create `geocodeAddress` utility function in `src/utils/geocoding.ts` for converting addresses to coordinates
+- [ ] T012 [P] Modify `extractEventTeamsTableData` in `src/models/EventTeamsTable.ts` to collect issues instead of calling `console.error`
 
 **Checkpoint**: Foundation ready - user story implementation can now begin in parallel
 
@@ -56,13 +57,13 @@
 
 > **NOTE: Write these tests FIRST, ensure they FAIL before implementation**
 
-- [ ] T011 [P] [US1] Write unit test for `detectIssues` function identifying events without coordinates in `src/actions/detectIssues.test.ts`
-- [ ] T012 [P] [US1] Write unit test for `detectIssues` function creating EventIssue objects with correct fields in `src/actions/detectIssues.test.ts`
-- [ ] T013 [P] [US1] Write unit test for `detectIssues` function handling events with missing ambassadors gracefully in `src/actions/detectIssues.test.ts`
-- [ ] T014 [P] [US1] Write unit test for `populateIssuesTable` function creating table rows in `src/actions/populateIssuesTable.test.ts`
-- [ ] T015 [P] [US1] Write unit test for `populateIssuesTable` function displaying event name, ambassadors, issue type in `src/actions/populateIssuesTable.test.ts`
-- [ ] T016 [P] [US1] Write unit test for `populateIssuesTable` function showing empty state when no issues in `src/actions/populateIssuesTable.test.ts`
-- [ ] T017 [P] [US1] Write integration test for Issues tab displaying issues table in `src/actions/populateIssuesTable.test.ts`
+- [ ] T013 [P] [US1] Write unit test for `detectIssues` function identifying events without coordinates in `src/actions/detectIssues.test.ts`
+- [ ] T014 [P] [US1] Write unit test for `detectIssues` function creating EventIssue objects with correct fields in `src/actions/detectIssues.test.ts`
+- [ ] T015 [P] [US1] Write unit test for `detectIssues` function handling events with missing ambassadors gracefully in `src/actions/detectIssues.test.ts`
+- [ ] T016 [P] [US1] Write unit test for `populateIssuesTable` function creating table rows in `src/actions/populateIssuesTable.test.ts`
+- [ ] T017 [P] [US1] Write unit test for `populateIssuesTable` function displaying event name, ambassadors, issue type in `src/actions/populateIssuesTable.test.ts`
+- [ ] T018 [P] [US1] Write unit test for `populateIssuesTable` function showing empty state when no issues in `src/actions/populateIssuesTable.test.ts`
+- [ ] T019 [P] [US1] Write integration test for Issues tab displaying issues table in `src/actions/populateIssuesTable.test.ts`
 
 ### Implementation for User Story 1
 
@@ -126,45 +127,47 @@
 
 ---
 
-## Phase 5: User Story 3 - Resolve Issue by Placing Pin (Priority: P2)
+## Phase 5: User Story 3 - Resolve Issue by Providing Address (Priority: P2)
 
-**Goal**: Enable users to place a pin on the map to manually set coordinates for events not in events.json.
+**Goal**: Enable users to enter a street address that gets automatically geocoded to coordinates for closed/restricted events not in events.json.
 
-**Independent Test**: Select an issue from Issues table, click "Place Pin", click on map location, verify pin is placed, verify issue is resolved, verify event appears on map with manual coordinates. This delivers value by enabling users to resolve issues for restricted, discontinued, or other events not in events.json.
+**Independent Test**: Select an issue from Issues table, enter a street address (e.g., "Quentin Rd, Puckapunyal VIC 3662"), verify geocoding succeeds, verify issue is resolved, verify event appears on map with geocoded coordinates. This delivers value by enabling users to resolve issues for closed/restricted events using simple address entry.
 
 ### Tests for User Story 3
 
 > **NOTE: Write these tests FIRST, ensure they FAIL before implementation**
 
-- [ ] T055 [P] [US3] Write unit test for `placeMapPin` function adding click handler to map in `src/actions/placeMapPin.test.ts`
-- [ ] T056 [P] [US3] Write unit test for `placeMapPin` function calling callback with coordinates in `src/actions/placeMapPin.test.ts`
-- [ ] T057 [P] [US3] Write unit test for `placeMapPin` function returning cleanup function in `src/actions/placeMapPin.test.ts`
-- [ ] T058 [P] [US3] Write unit test for `resolveIssueWithPin` function creating EventDetails with manual coordinates in `src/actions/resolveIssue.test.ts`
-- [ ] T059 [P] [US3] Write unit test for `resolveIssueWithPin` function setting manualCoordinates flag in `src/actions/resolveIssue.test.ts`
-- [ ] T060 [P] [US3] Write unit test for `resolveIssueWithPin` function validating coordinates range in `src/actions/resolveIssue.test.ts`
-- [ ] T061 [P] [US3] Write unit test for `resolveIssueWithPin` function marking issue as resolved in `src/actions/resolveIssue.test.ts`
-- [ ] T062 [P] [US3] Write integration test for pin placement workflow in `src/actions/placeMapPin.test.ts`
+- [ ] T055 [P] [US3] Write unit test for `geocodeAddress` function calling geocoding service in `src/utils/geocoding.test.ts`
+- [ ] T056 [P] [US3] Write unit test for `geocodeAddress` function returning lat/lng coordinates in `src/utils/geocoding.test.ts`
+- [ ] T057 [P] [US3] Write unit test for `geocodeAddress` function handling service failures in `src/utils/geocoding.test.ts`
+- [ ] T058 [P] [US3] Write unit test for `resolveIssueWithAddress` function calling geocoding service in `src/actions/resolveIssue.test.ts`
+- [ ] T059 [P] [US3] Write unit test for `resolveIssueWithAddress` function creating EventDetails with geocoded coordinates in `src/actions/resolveIssue.test.ts`
+- [ ] T060 [P] [US3] Write unit test for `resolveIssueWithAddress` function setting geocodedAddress flag in `src/actions/resolveIssue.test.ts`
+- [ ] T061 [P] [US3] Write unit test for `resolveIssueWithAddress` function storing source address in `src/actions/resolveIssue.test.ts`
+- [ ] T062 [P] [US3] Write unit test for `resolveIssueWithAddress` function handling geocoding failures in `src/actions/resolveIssue.test.ts`
+- [ ] T063 [P] [US3] Write unit test for `showAddressDialog` function displaying input field in `src/actions/showAddressDialog.test.ts`
+- [ ] T064 [P] [US3] Write unit test for `showAddressDialog` function handling address submission in `src/actions/showAddressDialog.test.ts`
+- [ ] T065 [P] [US3] Write integration test for address geocoding workflow in `src/actions/showAddressDialog.test.ts`
 
 ### Implementation for User Story 3
 
-- [ ] T063 [US3] Implement `placeMapPin` function in `src/actions/placeMapPin.ts` to enable map click handler
-- [ ] T064 [US3] Add "Place Pin" button to Issues table row in `src/actions/populateIssuesTable.ts`
-- [ ] T065 [US3] Wire up "Place Pin" button to enable pin placement mode in `src/actions/populateIssuesTable.ts`
-- [ ] T066 [US3] Change map cursor to indicate pin placement mode in `src/actions/placeMapPin.ts`
-- [ ] T067 [US3] Capture map click coordinates (lat/lng) in `src/actions/placeMapPin.ts`
-- [ ] T068 [US3] Convert Leaflet lat/lng to GeoJSON [longitude, latitude] format in `src/actions/placeMapPin.ts`
-- [ ] T069 [US3] Implement `resolveIssueWithPin` function in `src/actions/resolveIssue.ts`
-- [ ] T070 [US3] Create EventDetails object with manual coordinates and minimal properties in `src/actions/resolveIssue.ts`
-- [ ] T071 [US3] Set `manualCoordinates: true` flag on EventDetails in `src/actions/resolveIssue.ts`
-- [ ] T072 [US3] Add resolved event to eventDetailsMap in `src/actions/resolveIssue.ts`
-- [ ] T073 [US3] Remove resolved issue from issues list and refresh Issues table in `src/actions/resolveIssue.ts`
-- [ ] T074 [US3] Refresh map and Event Teams table after resolution in `src/index.ts`
-- [ ] T075 [US3] Disable pin placement mode after pin is placed in `src/actions/placeMapPin.ts`
-- [ ] T076 [US3] Restore normal map cursor after pin placement in `src/actions/placeMapPin.ts`
-- [ ] T077 [US3] Add visual feedback (pin marker) when pin is placed in `src/actions/placeMapPin.ts`
-- [ ] T078 [US3] Handle pin placement cancellation (ESC key or cancel button) in `src/actions/placeMapPin.ts`
+- [ ] T066 [US3] Implement `geocodeAddress` function in `src/utils/geocoding.ts` using browser Geolocation API + Nominatim fallback
+- [ ] T067 [US3] Add address validation in `src/utils/geocoding.ts` (non-empty, reasonable length)
+- [ ] T068 [US3] Implement `showAddressDialog` function in `src/actions/showAddressDialog.ts` with input field and buttons
+- [ ] T069 [US3] Add "Enter Address" button to Issues table row in `src/actions/populateIssuesTable.ts`
+- [ ] T070 [US3] Wire up "Enter Address" button to show address dialog in `src/actions/populateIssuesTable.ts`
+- [ ] T071 [US3] Implement `resolveIssueWithAddress` function in `src/actions/resolveIssue.ts`
+- [ ] T072 [US3] Create EventDetails object with geocoded coordinates and minimal properties in `src/actions/resolveIssue.ts`
+- [ ] T073 [US3] Set `geocodedAddress: true` flag and `sourceAddress` field on EventDetails in `src/actions/resolveIssue.ts`
+- [ ] T074 [US3] Add resolved event to eventDetailsMap in `src/actions/resolveIssue.ts`
+- [ ] T075 [US3] Remove resolved issue from issues list and refresh Issues table in `src/actions/resolveIssue.ts`
+- [ ] T076 [US3] Refresh map and Event Teams table after resolution in `src/index.ts`
+- [ ] T077 [US3] Add loading indicator during geocoding in `src/actions/showAddressDialog.ts`
+- [ ] T078 [US3] Handle geocoding errors with clear user messages in `src/actions/showAddressDialog.ts`
+- [ ] T079 [US3] Add keyboard navigation (Enter to submit, Escape to cancel) in `src/actions/showAddressDialog.ts`
+- [ ] T080 [US3] Add ARIA attributes for address dialog accessibility in `src/actions/showAddressDialog.ts`
 
-**Checkpoint**: At this point, User Story 3 should be fully functional. Users can place pins on the map to manually set coordinates and resolve issues for events not in events.json.
+**Checkpoint**: At this point, User Story 3 should be fully functional. Users can enter street addresses that get geocoded to coordinates and resolve issues for closed/restricted events not in events.json.
 
 ---
 
@@ -172,22 +175,22 @@
 
 **Purpose**: Final touches, error handling, accessibility, and integration
 
-- [ ] T079 [P] Add error handling for invalid coordinates in `src/actions/resolveIssue.ts`
-- [ ] T080 [P] Add error handling for search failures in `src/actions/searchEvents.ts`
-- [ ] T081 [P] Add loading states for search operations in `src/actions/searchEvents.ts`
-- [ ] T082 [P] Ensure Issues table is keyboard navigable (Tab, Enter, Arrow keys) in `src/actions/populateIssuesTable.ts`
-- [ ] T083 [P] Add screen reader announcements for issue resolution in `src/actions/resolveIssue.ts`
-- [ ] T084 [P] Persist resolved events (manual coordinates) to localStorage in `src/actions/resolveIssue.ts`
-- [ ] T085 [P] Load persisted manual events on application startup in `src/index.ts`
-- [ ] T086 [P] Ensure Issues table updates when issues are resolved in `src/actions/populateIssuesTable.ts`
-- [ ] T087 [P] Add confirmation dialog before resolving issue (optional, for safety) in `src/actions/resolveIssue.ts`
-- [ ] T088 [P] Add "Resolved" status column to Issues table (for tracking resolved issues) in `src/actions/populateIssuesTable.ts`
-- [ ] T089 [P] Filter resolved issues from active Issues table (show only unresolved) in `src/actions/populateIssuesTable.ts`
-- [ ] T090 [P] Update README.md with Issues tab feature documentation
-- [ ] T091 [P] Run all tests and ensure they pass
-- [ ] T092 [P] Run linting and fix any issues
-- [ ] T093 [P] Run TypeScript type checking and fix any errors
-- [ ] T094 [P] Format code with Prettier
+- [ ] T081 [P] Add error handling for geocoding failures in `src/actions/resolveIssue.ts`
+- [ ] T082 [P] Add error handling for search failures in `src/actions/searchEvents.ts`
+- [ ] T083 [P] Add loading states for search operations in `src/actions/searchEvents.ts`
+- [ ] T084 [P] Ensure Issues table is keyboard navigable (Tab, Enter, Arrow keys) in `src/actions/populateIssuesTable.ts`
+- [ ] T085 [P] Add screen reader announcements for issue resolution in `src/actions/resolveIssue.ts`
+- [ ] T086 [P] Persist resolved events (geocoded coordinates) to localStorage in `src/actions/resolveIssue.ts`
+- [ ] T087 [P] Load persisted geocoded events on application startup in `src/index.ts`
+- [ ] T088 [P] Ensure Issues table updates when issues are resolved in `src/actions/populateIssuesTable.ts`
+- [ ] T089 [P] Add confirmation dialog before resolving issue (optional, for safety) in `src/actions/resolveIssue.ts`
+- [ ] T090 [P] Add "Resolved" status column to Issues table (for tracking resolved issues) in `src/actions/populateIssuesTable.ts`
+- [ ] T091 [P] Filter resolved issues from active Issues table (show only unresolved) in `src/actions/populateIssuesTable.ts`
+- [ ] T092 [P] Update README.md with Issues tab feature documentation
+- [ ] T093 [P] Run all tests and ensure they pass
+- [ ] T094 [P] Run linting and fix any issues
+- [ ] T095 [P] Run TypeScript type checking and fix any errors
+- [ ] T096 [P] Format code with Prettier
 
 **Checkpoint**: All polish tasks complete. Feature is production-ready with proper error handling, accessibility, and integration.
 
@@ -195,17 +198,17 @@
 
 ## Summary
 
-**Total Tasks**: 94
+**Total Tasks**: 96
 **Phase 1 (Setup)**: 4 tasks
 **Phase 2 (Foundational)**: 6 tasks
 **Phase 3 (US1 - View Issues)**: 17 tasks (7 tests + 10 implementation)
 **Phase 4 (US2 - Search Resolution)**: 27 tasks (12 tests + 15 implementation)
-**Phase 5 (US3 - Pin Resolution)**: 24 tasks (8 tests + 16 implementation)
-**Phase 6 (Polish)**: 16 tasks
+**Phase 5 (US3 - Address Geocoding)**: 25 tasks (11 tests + 14 implementation)
+**Phase 6 (Polish)**: 17 tasks
 
-**Estimated Complexity**: Medium-High (fuzzy matching, map interaction, tab integration)
+**Estimated Complexity**: Medium-High (fuzzy matching, geocoding API integration, tab integration)
 
-**Dependencies**: 
+**Dependencies**:
 - Phase 2 must complete before any user story work
 - US2 and US3 can be implemented in parallel after US1
 - Phase 6 depends on all user stories being complete
