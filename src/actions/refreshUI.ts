@@ -2,7 +2,9 @@ import { populateChangesLogTable } from "@actions/populateChangesLogTable";
 import { populateEventTeamsTable } from "@actions/populateEventTeamsTable";
 import { populateMap } from "@actions/populateMap";
 import { populateAmbassadorsTable } from "@actions/populateAmbassadorsTable";
+import { populateProspectsTable } from "@actions/populateProspectsTable";
 import { loadProspectiveEvents } from "@actions/persistProspectiveEvents";
+import { ProspectiveEventList } from "@models/ProspectiveEventList";
 import { EventDetailsMap } from "@models/EventDetailsMap";
 import { EventTeamsTableDataMap } from "@models/EventTeamsTableData";
 import { EventAmbassadorMap } from "@models/EventAmbassadorMap";
@@ -40,9 +42,11 @@ export function refreshUI(
     })();
 
   const prospectiveEvents = loadProspectiveEvents();
+  const prospectsList = new ProspectiveEventList(prospectiveEvents);
 
   populateEventTeamsTable(eventTeamsTableData, eventDetails, log, eventAmbassadorsToUse, regionalAmbassadorsToUse);
   populateMap(eventTeamsTableData, eventDetails, prospectiveEvents);
   populateAmbassadorsTable(eventAmbassadorsToUse, regionalAmbassadorsToUse, eventTeamsTableData);
+  populateProspectsTable(prospectsList, eventAmbassadorsToUse, regionalAmbassadorsToUse);
   populateChangesLogTable(log);
 }
