@@ -498,6 +498,18 @@ function setupOffboardingButtons(): void {
 
             persistChangesLog(log);
 
+            // Recalculate eventTeamsTableData because REA relationships have changed
+            // All events under this EA now belong to a different REA
+            const eventTeams = getEventTeamsFromSession();
+            if (eventDetails && eventTeams) {
+              eventTeamsTableData = extractEventTeamsTableData(
+                regionalAmbassadors,
+                eventAmbassadors,
+                eventTeams,
+                eventDetails
+              );
+            }
+
             refreshUI(eventDetails!, eventTeamsTableData!, log, eventAmbassadors, regionalAmbassadors);
 
             alert(`Event Ambassador "${eaName}" reallocated to "${selectedREA}"`);
