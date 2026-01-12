@@ -108,6 +108,8 @@ export function populateMap(
         <strong>Regional Ambassador(s):</strong> ${data.regionalAmbassador}<br>
       `;
 
+      console.log(`Adding ambassador event ${eventName} with RA ${data.regionalAmbassador}, color: ${raColor}`);
+
       constrainingEvents.push({
         coords: [event.geometry.coordinates[0], event.geometry.coordinates[1]],
         isConstraining: false,
@@ -143,6 +145,11 @@ export function populateMap(
     });
 
     console.log(`Voronoi calculation: ${constrainingEvents.filter(c => !c.isConstraining).length} ambassador events, ${constrainingEvents.filter(c => c.isConstraining).length} constraining points`);
+    console.log(`Constraining events details:`, constrainingEvents.map(c => ({
+      isConstraining: c.isConstraining,
+      raColor: c.raColor,
+      hasTooltip: !!c.tooltip
+    })));
   }
 
   eventDetails.forEach((event, eventName) => {
@@ -204,11 +211,16 @@ export function populateMap(
   const voronoi = d3GeoVoronoi.geoVoronoi(voronoiPoints.map((p) => [p[0], p[1]]));
   const polygons = voronoi.polygons();
 
+  console.log(`Processing ${polygons.features.length} Voronoi polygons from ${voronoiPoints.length} points`);
+
   polygons.features.forEach((feature, index) => {
     const { raColor, tooltip } = JSON.parse(voronoiPoints[index][2]);
 
+    console.log(`Polygon ${index}: raColor=${raColor}, tooltip length=${tooltip.length}`);
+
     // Skip polygons for constraining points (they have transparent color)
     if (raColor === 'transparent') {
+      console.log(`Skipping constraining point polygon ${index}`);
       return;
     }
 
