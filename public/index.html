@@ -321,6 +321,7 @@
           <button class="tab-button active" role="tab" aria-selected="true" aria-controls="eventTeamsTab" id="eventTeamsTabButton" tabindex="0">Event Teams</button>
           <button class="tab-button" role="tab" aria-selected="false" aria-controls="eventAmbassadorsTab" id="eventAmbassadorsTabButton" tabindex="-1">Event Ambassadors</button>
           <button class="tab-button" role="tab" aria-selected="false" aria-controls="regionalAmbassadorsTab" id="regionalAmbassadorsTabButton" tabindex="-1">Regional Ambassadors</button>
+          <button class="tab-button" role="tab" aria-selected="false" aria-controls="prospectsTab" id="prospectsTabButton" tabindex="-1">Prospects</button>
           <button class="tab-button" role="tab" aria-selected="false" aria-controls="changesLogTab" id="changesLogTabButton" tabindex="-1">Changes Log</button>
           <button class="tab-button" role="tab" aria-selected="false" aria-controls="issuesTab" id="issuesTabButton" tabindex="-1">Issues</button>
         </div>
@@ -374,6 +375,40 @@
             </thead>
             <tbody>
               <!-- Regional Ambassador rows will be populated here -->
+            </tbody>
+          </table>
+        </div>
+
+        <div id="prospectsTab" class="tab-content" role="tabpanel" aria-labelledby="prospectsTabButton" hidden>
+          <div style="margin-bottom: 1em;">
+            <button type="button" id="importProspectsButton" title="Import Prospects CSV">📥 Import Prospects</button>
+            <input
+              type="file"
+              title="upload prospects CSV"
+              id="prospectsCsvFileInput"
+              accept=".csv"
+              style="display: none;"
+            />
+          </div>
+          <table id="prospectsTable" border="1">
+            <thead>
+              <tr>
+                <th>Prospect Event</th>
+                <th>Country</th>
+                <th>State</th>
+                <th>Prospect ED/s</th>
+                <th>Event Ambassador</th>
+                <th>Date Made Contact</th>
+                <th>Course Found</th>
+                <th>Landowner Permission</th>
+                <th>Funding Confirmed</th>
+                <th>Geocoding Status</th>
+                <th>Ambassador Match</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <!-- Prospects rows will be populated here -->
             </tbody>
           </table>
         </div>

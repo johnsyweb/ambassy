@@ -8,6 +8,7 @@ import { RegionalAmbassadorMap } from "./models/RegionalAmbassadorMap";
 
 import { getEvents } from "./actions/fetchEvents";
 import { handleFileUpload } from "./actions/uploadCSV";
+import { importProspectiveEvents } from "./actions/importProspectiveEvents";
 import { extractEventTeamsTableData } from "./models/EventTeamsTable";
 import { getEventTeamsFromSession } from "@parsers/parseEventTeams";
 import { LogEntry } from "@models/LogEntry";
@@ -30,7 +31,7 @@ import { SelectionState, createSelectionState } from "./models/SelectionState";
 import { selectEventTeamRow, selectMapEvent, applyDeferredTableSelection } from "./actions/tableMapNavigation";
 import { getMarkerMap, getHighlightLayer, getMap, setMarkerClickHandler } from "./actions/populateMap";
 import { setRowClickHandler, setReallocateButtonHandler } from "./actions/populateEventTeamsTable";
-import { setEventTeamsTabVisibleCallback, setIssuesTabVisibleCallback } from "./utils/tabs";
+import { setEventTeamsTabVisibleCallback, setIssuesTabVisibleCallback, setProspectsTabVisibleCallback } from "./utils/tabs";
 import { getReallocationSuggestions } from "./actions/getReallocationSuggestions";
 import { showReallocationDialog as showEventTeamReallocationDialog } from "./actions/showReallocationDialog";
 import { reallocateEventTeam } from "./actions/reallocateEventTeam";
@@ -41,6 +42,9 @@ import { reallocateEventAmbassador } from "./actions/reallocateEventAmbassador";
 import { getRegionalAmbassadorForEventAmbassador } from "./utils/regions";
 import { detectIssues } from "./actions/detectIssues";
 import { populateIssuesTable } from "./actions/populateIssuesTable";
+import { populateProspectsTable } from "./actions/populateProspectsTable";
+import { loadProspectiveEvents } from "./actions/persistProspectiveEvents";
+import { ProspectiveEventList } from "./models/ProspectiveEventList";
 import { createIssuesState, setSelectedIssue } from "./models/IssuesState";
 import { EventIssue } from "./models/EventIssue";
 import { showEventSearchDialog } from "./actions/showEventSearchDialog";
@@ -152,9 +156,31 @@ function setupImportButton(buttonId: string): void {
   });
 }
 
+function setupProspectsImportButton(): void {
+  const button = document.getElementById("importProspectsButton");
+  const input = document.getElementById("prospectsCsvFileInput");
+
+  if (!button || !input) {
+    return;
+  }
+
+  button.addEventListener("click", () => {
+    input.click();
+  });
+
+  input.addEventListener("change", (event) => {
+    const target = event.target as HTMLInputElement;
+    const file = target.files?.[0];
+    if (file) {
+      handleProspectsFileUpload(file);
+    }
+  });
+}
+
 setupExportButton("exportButtonMap");
 setupImportButton("importButton");
 setupImportButton("importButtonMap");
+setupProspectsImportButton();
 
 function setupOnboardingButtons(): void {
   const addEventAmbassadorButton = document.getElementById("addEventAmbassadorButton");
@@ -636,6 +662,9 @@ async function ambassy() {
     
     // Initialize Issues tab callback
     initializeIssuesTab();
+
+    // Initialize Prospects tab callback
+    initializeProspectsTab();
     
     refreshUI(eventDetails, eventTeamsTableData, log, eventAmbassadors, regionalAmbassadors);
   } else {
@@ -681,6 +710,20 @@ function refreshIssuesTable(): void {
     onSearchEvents,
     onEnterAddress
   );
+}
+
+function refreshProspectsTable(): void {
+  const eventAmbassadors = getEventAmbassadorsFromSession();
+  const regionalAmbassadors = getRegionalAmbassadorsFromSession();
+
+  if (eventAmbassadors.size === 0 || regionalAmbassadors.size === 0) {
+    return;
+  }
+
+  const prospects = loadProspectiveEvents();
+  const prospectsList = new ProspectiveEventList(prospects);
+
+  populateProspectsTable(prospectsList, eventAmbassadors, regionalAmbassadors);
 }
 
 function onIssueSelect(issue: EventIssue): void {
@@ -761,6 +804,12 @@ async function onEnterAddress(issue: EventIssue): Promise<void> {
 function initializeIssuesTab(): void {
   setIssuesTabVisibleCallback(() => {
     refreshIssuesTable();
+  });
+}
+
+function initializeProspectsTab(): void {
+  setProspectsTabVisibleCallback(() => {
+    refreshProspectsTable();
   });
 }
 
@@ -888,6 +937,35 @@ function initializeTableMapNavigation(): void {
       alert(`Failed to get reallocation suggestions: ${error instanceof Error ? error.message : "Unknown error"}`);
     }
   });
+}
+
+async function handleProspectsFileUpload(file: File): Promise<void> {
+  try {
+    const csvContent = await file.text();
+    const eventAmbassadors = getEventAmbassadorsFromSession();
+    const regionalAmbassadors = getRegionalAmbassadorsFromSession();
+
+    const result = await importProspectiveEvents(
+      csvContent,
+      eventAmbassadors,
+      regionalAmbassadors
+    );
+
+    if (result.success) {
+      alert(`Successfully imported ${result.imported} prospective events.\n\nWarnings:\n${result.warnings.join('\n')}`);
+      refreshProspectsTable();
+    } else {
+      alert(`Import failed:\n\nErrors:\n${result.errors.join('\n')}\n\nWarnings:\n${result.warnings.join('\n')}`);
+    }
+
+    // Clear the input
+    const input = document.getElementById("prospectsCsvFileInput") as HTMLInputElement;
+    if (input) {
+      input.value = "";
+    }
+  } catch (error) {
+    alert(`Failed to process prospects file: ${error instanceof Error ? error.message : 'Unknown error'}`);
+  }
 }
 
 let lastStorageEventTime = 0;

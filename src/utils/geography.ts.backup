@@ -61,12 +61,9 @@ export function calculateAverageDistance(
 
 /**
  * Geocode a prospective event using country and state
-/**
- * Geocode a prospective event using prospect event name, country and state
  */
 export async function geocodeProspectiveEvent(
   prospectEvent: string,
-  country: string,
   state: string
 ): Promise<{
   success: boolean;

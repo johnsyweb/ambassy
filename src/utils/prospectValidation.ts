@@ -5,7 +5,8 @@
  * including business rules and data integrity checks.
  */
 
-import { ProspectiveEvent, ValidationResult, ValidationError } from '../types/ProspectiveEventTypes';
+import { ProspectiveEvent } from '../models/ProspectiveEvent';
+import { ValidationResult, ValidationError } from '../types/ProspectiveEventTypes';
 
 /**
  * Validate a prospective event
@@ -31,13 +32,7 @@ export function validateProspectiveEvent(event: ProspectiveEvent): ValidationRes
     });
   }
 
-  if (!event.eventAmbassador?.trim()) {
-    errors.push({
-      field: 'eventAmbassador',
-      message: 'Event ambassador is required',
-      value: event.eventAmbassador
-    });
-  }
+  // Note: Event ambassador can be empty and resolved later during import
 
   // Data type validations
   if (typeof event.courseFound !== 'boolean') {
@@ -201,13 +196,8 @@ export function validateCSVHeaders(headers: string[]): { isValid: boolean; error
     }
   }
 
-  // Check for unexpected headers
-  const expectedHeaders = [...requiredHeaders, ...optionalHeaders];
-  for (const header of headers) {
-    if (!expectedHeaders.includes(header)) {
-      errors.push(`Unexpected header: ${header}`);
-    }
-  }
+  // Note: We now allow unexpected headers and ignore them rather than treating them as errors
+  // This allows for CSV files with additional columns that we don't need
 
   return {
     isValid: errors.length === 0,

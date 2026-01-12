@@ -13,6 +13,12 @@ export interface CSVImportOptions {
   dateFormat?: string;
 }
 
+export interface CSVParseError {
+  row: number;
+  column?: string;
+  message: string;
+}
+
 export interface CSVParseResult {
   events: ProspectiveEvent[];
   errors: CSVParseError[];
@@ -115,19 +121,7 @@ export class ProspectiveEventsError extends Error {
   }
 }
 
-export class CSVParseError extends ProspectiveEventsError {
-  constructor(message: string, public readonly row?: number, public readonly column?: string) {
-    super(message, 'CSV_PARSE_ERROR');
-    this.name = 'CSVParseError';
-  }
-}
 
-export class ValidationError extends ProspectiveEventsError {
-  constructor(message: string, public readonly field?: keyof ProspectiveEvent) {
-    super(message, 'VALIDATION_ERROR');
-    this.name = 'ValidationError';
-  }
-}
 
 export class GeocodingError extends ProspectiveEventsError {
   constructor(message: string, event: ProspectiveEvent) {

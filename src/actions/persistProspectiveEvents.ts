@@ -47,7 +47,12 @@ export function loadProspectiveEvents(): ProspectiveEvent[] {
       // Add migration logic here if needed in future versions
     }
 
-    return storageData.events || [];
+    // Convert date strings back to Date objects
+    const events = storageData.events || [];
+    return events.map(event => ({
+      ...event,
+      dateMadeContact: event.dateMadeContact ? new Date(event.dateMadeContact) : null
+    }));
   } catch (error) {
     console.error('Failed to load prospective events:', error);
     return [];
