@@ -151,11 +151,14 @@ export function populateMap(
       const usageCount = coordinateUsage.get(coordKey) || 0;
       coordinateUsage.set(coordKey, usageCount + 1);
 
-      // Apply small offset for duplicate coordinates to avoid degenerate polygons
+      // Apply deterministic small offset for duplicate coordinates to avoid degenerate polygons
+      // Use event index/order for consistent positioning instead of random values
       if (usageCount > 0) {
-        const offset = 0.001 * usageCount; // ~100 meters offset
-        lng += offset * (Math.random() - 0.5) * 2;
-        lat += offset * (Math.random() - 0.5) * 2;
+        const offset = 0.0005 * usageCount; // ~50 meters offset
+        // Create consistent offset pattern based on usage count
+        const angle = (usageCount * 137.5) * (Math.PI / 180); // Golden angle approximation
+        lng += offset * Math.cos(angle);
+        lat += offset * Math.sin(angle);
       }
 
       if (event.isConstraining) {
@@ -177,11 +180,15 @@ export function populateMap(
         const usageCount = coordinateUsage.get(coordKey) || 0;
         coordinateUsage.set(coordKey, usageCount + 1);
 
-        // Apply small offset for duplicate coordinates to avoid degenerate polygons
+        // Apply deterministic small offset for duplicate coordinates to avoid degenerate polygons
+        // Use event name hash for consistent positioning instead of random values
         if (usageCount > 0) {
-          const offset = 0.001 * usageCount; // ~100 meters offset
-          lng += offset * (Math.random() - 0.5) * 2;
-          lat += offset * (Math.random() - 0.5) * 2;
+          const offset = 0.0005 * usageCount; // ~50 meters offset
+          // Create consistent offset pattern based on event name
+          const nameHash = eventName.split('').reduce((a, b) => a + b.charCodeAt(0), 0);
+          const angle = (nameHash * 137.5) % 360 * (Math.PI / 180); // Golden angle with name-based variation
+          lng += offset * Math.cos(angle);
+          lat += offset * Math.sin(angle);
         }
 
         const raColor = raColorMap.get(data.regionalAmbassador) ?? DEFAULT_POLYGON_COLOUR;
@@ -265,15 +272,9 @@ export function populateMap(
       feature.geometry.coordinates[0] as [number, number][]
     ).map((coord) => [coord[1], coord[0]] as L.LatLngTuple);
 
-    // Use more generous clipping bounds for cleaner REA territory polygons
-    const clippedCoordinates = coordinates.filter(coord => {
-      const [lat, lng] = coord;
-      return lng >= minLng - 20 && lng <= maxLng + 20 &&
-             lat >= minLat - 20 && lat <= maxLat + 20;
-    });
-
-    if (clippedCoordinates.length >= 3) { // Need at least 3 points for a polygon
-      const poly = L.polygon(clippedCoordinates, {
+    // Let Leaflet handle coordinate bounds - don't pre-clip to avoid splitting polygons
+    if (coordinates.length >= 3) { // Need at least 3 points for a polygon
+      const poly = L.polygon(coordinates, {
         color: raColor,
         fillOpacity: 0.1,
       });
