@@ -5,5 +5,7 @@ export interface ReallocationSuggestion {
   score: number;
   reasons?: string[];
   warnings?: string[];
+  allocationCount?: number;
+  neighboringEvents?: string[];
 }
 

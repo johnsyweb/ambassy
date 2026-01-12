@@ -5,7 +5,7 @@ import { CapacityLimits } from "../models/CapacityLimits";
 import { ReallocationSuggestion } from "../models/ReallocationSuggestion";
 import { EventAmbassador } from "../models/EventAmbassador";
 import { RegionalAmbassador } from "../models/RegionalAmbassador";
-import { calculateAverageDistance } from "../utils/geography";
+import { calculateAverageDistance, calculateDistance } from "../utils/geography";
 import { checkEventAmbassadorCapacity, checkRegionalAmbassadorCapacity } from "./checkCapacity";
 import { CapacityStatus } from "../models/CapacityStatus";
 import { getRegionalAmbassadorForEventAmbassador } from "../utils/regions";
@@ -82,6 +82,58 @@ export function calculateGeographicProximityScore(
 }
 
 /**
+ * Find neighboring events within a distance threshold.
+ * Returns array of event names that are within thresholdKm of any reallocating event.
+ */
+function findNeighboringEvents(
+  recipientEvents: string[],
+  reallocatingEvents: string[],
+  eventDetails: EventDetailsMap,
+  thresholdKm: number = 50
+): string[] {
+  const neighbors: string[] = [];
+  
+  if (reallocatingEvents.length === 0 || recipientEvents.length === 0) {
+    return neighbors;
+  }
+
+  // Get coordinates for reallocating events
+  const reallocatingCoords: Array<{ name: string; lat: number; lon: number }> = [];
+  for (const eventName of reallocatingEvents) {
+    const details = eventDetails.get(eventName);
+    if (details?.geometry?.coordinates) {
+      const [lon, lat] = details.geometry.coordinates;
+      reallocatingCoords.push({ name: eventName, lat, lon });
+    }
+  }
+
+  if (reallocatingCoords.length === 0) {
+    return neighbors;
+  }
+
+  // Check each recipient event to see if it's within threshold of any reallocating event
+  for (const recipientEventName of recipientEvents) {
+    const recipientDetails = eventDetails.get(recipientEventName);
+    if (!recipientDetails?.geometry?.coordinates) {
+      continue;
+    }
+
+    const [recipientLon, recipientLat] = recipientDetails.geometry.coordinates;
+    
+    // Check if this recipient event is within threshold of any reallocating event
+    for (const realloc of reallocatingCoords) {
+      const distance = calculateDistance(recipientLat, recipientLon, realloc.lat, realloc.lon);
+      if (distance <= thresholdKm) {
+        neighbors.push(recipientEventName);
+        break; // Only add once even if close to multiple reallocating events
+      }
+    }
+  }
+
+  return neighbors;
+}
+
+/**
  * Calculate reallocation score for a recipient ambassador.
  * Higher score = better match.
  */
@@ -105,19 +157,26 @@ export function calculateReallocationScore(
     }
   }
 
-  // Capacity factor
+  // Capacity factor - prioritize those with fewer allocations
   let capacityScore = 0;
   if (itemType === "events" && "events" in recipient) {
     const currentCount = recipient.events.length;
     const newCount = currentCount + items.length;
     const status = checkEventAmbassadorCapacity(newCount, limits);
     
+    // Prioritize fewer allocations: lower currentCount = higher score
+    // Score ranges from 0-100, with 100 for 0 allocations, decreasing as allocations increase
+    const maxAllocations = limits.eventAmbassadorMax;
+    const allocationScore = Math.max(0, 100 * (1 - currentCount / maxAllocations));
+    
     if (status === CapacityStatus.WITHIN) {
-      const availableCapacity = limits.eventAmbassadorMax - currentCount;
-      capacityScore = Math.min(100, (availableCapacity / limits.eventAmbassadorMax) * 100);
+      // Within capacity: use allocation score (fewer = better)
+      capacityScore = allocationScore;
     } else if (status === CapacityStatus.UNDER) {
-      capacityScore = 50;
+      // Under capacity: still prioritize fewer, but less weight
+      capacityScore = allocationScore * 0.5;
     } else {
+      // Over capacity: minimal score
       capacityScore = 10;
     }
   } else if (itemType === "eventAmbassadors" && "supportsEAs" in recipient) {
@@ -125,11 +184,14 @@ export function calculateReallocationScore(
     const newCount = currentCount + items.length;
     const status = checkRegionalAmbassadorCapacity(newCount, limits);
     
+    // Prioritize fewer allocations
+    const maxAllocations = limits.regionalAmbassadorMax;
+    const allocationScore = Math.max(0, 100 * (1 - currentCount / maxAllocations));
+    
     if (status === CapacityStatus.WITHIN) {
-      const availableCapacity = limits.regionalAmbassadorMax - currentCount;
-      capacityScore = Math.min(100, (availableCapacity / limits.regionalAmbassadorMax) * 100);
+      capacityScore = allocationScore;
     } else if (status === CapacityStatus.UNDER) {
-      capacityScore = 50;
+      capacityScore = allocationScore * 0.5;
     } else {
       capacityScore = 10;
     }
@@ -225,8 +287,14 @@ export function suggestEventReallocation(
     }
 
     const proximityScore = calculateGeographicProximityScore(recipient.events, events, eventDetails);
+    const neighboringEvents = findNeighboringEvents(recipient.events, events, eventDetails, 50);
+    
     if (proximityScore > 50) {
       reasons.push("Geographic proximity");
+    }
+    
+    if (neighboringEvents.length > 0) {
+      reasons.push(`Nearby events: ${neighboringEvents.join(", ")}`);
     }
 
     if (recipient.events.length + events.length > limits.eventAmbassadorMax) {
@@ -240,6 +308,8 @@ export function suggestEventReallocation(
       score,
       reasons: reasons.length > 0 ? reasons : undefined,
       warnings: warnings.length > 0 ? warnings : undefined,
+      allocationCount: recipient.events.length,
+      neighboringEvents: neighboringEvents.length > 0 ? neighboringEvents : undefined,
     });
   });
 

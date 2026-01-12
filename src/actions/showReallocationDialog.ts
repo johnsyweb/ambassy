@@ -57,10 +57,20 @@ export function showReallocationDialog(
       nameSpan.textContent = suggestion.toAmbassador;
       buttonText.appendChild(nameSpan);
       
+      if (suggestion.allocationCount !== undefined) {
+        const allocationSpan = document.createElement("span");
+        allocationSpan.style.marginLeft = "0.5em";
+        allocationSpan.style.color = "#666";
+        allocationSpan.style.fontWeight = "normal";
+        allocationSpan.textContent = `(${suggestion.allocationCount} allocation${suggestion.allocationCount !== 1 ? "s" : ""})`;
+        buttonText.appendChild(allocationSpan);
+      }
+      
       const scoreSpan = document.createElement("span");
       scoreSpan.style.marginLeft = "0.5em";
-      scoreSpan.style.color = "#666";
-      scoreSpan.textContent = `(Score: ${suggestion.score.toFixed(0)})`;
+      scoreSpan.style.color = "#999";
+      scoreSpan.style.fontSize = "0.9em";
+      scoreSpan.textContent = `Score: ${suggestion.score.toFixed(0)}`;
       buttonText.appendChild(scoreSpan);
       
       if (suggestion.reasons && suggestion.reasons.length > 0) {
