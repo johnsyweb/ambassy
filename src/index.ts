@@ -658,18 +658,9 @@ function refreshIssuesTable(): void {
   populateIssuesTable(
     issues,
     issuesState,
-    (issue: EventIssue) => {
-      setSelectedIssue(issuesState, issue.eventShortName);
-      populateIssuesTable(issues, issuesState, onIssueSelect, onSearchEvents, onPlacePin);
-    },
-    (issue: EventIssue) => {
-      // TODO: Implement search events dialog (Phase 4)
-      alert(`Search Events for "${issue.eventShortName}" - Coming soon`);
-    },
-    (issue: EventIssue) => {
-      // TODO: Implement pin placement (Phase 5)
-      alert(`Place Pin for "${issue.eventShortName}" - Coming soon`);
-    }
+    onIssueSelect,
+    onSearchEvents,
+    onPlacePin
   );
 }
 
