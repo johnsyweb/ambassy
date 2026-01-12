@@ -50,6 +50,38 @@ export function populateMap(
   let eventsWithData = 0;
   let eventsWithoutData = 0;
 
+  // Calculate bounds of events with ambassador data to filter out outliers
+  const ambassadorEventCoords: [number, number][] = [];
+  eventDetails.forEach((event, eventName) => {
+    const data = eventTeamsTableData.get(eventName);
+    if (data) {
+      ambassadorEventCoords.push([event.geometry.coordinates[0], event.geometry.coordinates[1]]);
+    }
+  });
+
+  // Calculate bounding box with some padding
+  let minLng = Infinity, maxLng = -Infinity, minLat = Infinity, maxLat = -Infinity;
+  ambassadorEventCoords.forEach(([lng, lat]) => {
+    minLng = Math.min(minLng, lng);
+    maxLng = Math.max(maxLng, lng);
+    minLat = Math.min(minLat, lat);
+    maxLat = Math.max(maxLat, lat);
+  });
+
+  // Add padding (about 5 degrees) if we have valid bounds
+  let useBoundsFilter = false;
+  if (ambassadorEventCoords.length > 0 && minLng !== Infinity) {
+    const padding = 5;
+    minLng -= padding;
+    maxLng += padding;
+    minLat -= padding;
+    maxLat += padding;
+    useBoundsFilter = true;
+    console.log(`Ambassador events bounds: [${minLng}, ${minLat}] to [${maxLng}, ${maxLat}]`);
+  } else {
+    console.log(`No ambassador events found for bounds calculation`);
+  }
+
   eventDetails.forEach((event, eventName) => {
     const latitude = event.geometry.coordinates[1];
     const longitude = event.geometry.coordinates[0];
@@ -59,7 +91,6 @@ export function populateMap(
 
     if (data) {
       eventsWithData++;
-      processedEvents++;
       const raColor = raColorMap.get(data.regionalAmbassador) ?? DEFAULT_POLYGON_COLOUR;
       const eaColor = eaColorMap.get(data.eventAmbassador) ?? DEFAULT_EVENT_COLOUR;
       const tooltip = `
@@ -83,7 +114,16 @@ export function populateMap(
         });
       }
 
-      voronoiPoints.push([longitude, latitude, JSON.stringify({ raColor, tooltip })]);
+      // Check if coordinates are within reasonable bounds (if we have bounds to check)
+      const isWithinBounds = !useBoundsFilter || (longitude >= minLng && longitude <= maxLng && latitude >= minLat && latitude <= maxLat);
+      console.log(`Event ${eventName} with ambassador data: coords [${longitude}, ${latitude}], within bounds: ${isWithinBounds}`);
+
+      if (isWithinBounds) {
+        voronoiPoints.push([longitude, latitude, JSON.stringify({ raColor, tooltip })]);
+        console.log(`Added to voronoiPoints: [${longitude}, ${latitude}] for ${eventName}`);
+      } else {
+        console.warn(`Skipping ${eventName} from Voronoi calculation due to out-of-bounds coordinates`);
+      }
     } else {
       const marker = L.circleMarker([latitude, longitude], {
         radius: 1,
