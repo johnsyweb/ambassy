@@ -258,7 +258,7 @@ export function suggestEventReallocation(
       return;
     }
 
-    const score = calculateReallocationScore(
+    let score = calculateReallocationScore(
       recipient,
       recipientName,
       events,
