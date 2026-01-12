@@ -1,11 +1,13 @@
 import { EventIssue } from "@models/EventIssue";
 import { EventDetails } from "@models/EventDetails";
 import { EventDetailsMap } from "@models/EventDetailsMap";
+import { LogEntry } from "@models/LogEntry";
 
 export function resolveIssueWithEvent(
   issue: EventIssue,
   eventDetails: EventDetails,
-  eventDetailsMap: EventDetailsMap
+  eventDetailsMap: EventDetailsMap,
+  log: LogEntry[]
 ): void {
   if (
     !eventDetails.geometry?.coordinates ||
@@ -32,12 +34,23 @@ export function resolveIssueWithEvent(
   };
 
   eventDetailsMap.set(issue.eventShortName, eventToAdd);
+
+  const logEntry: LogEntry = {
+    type: "Issue Resolved",
+    event: issue.eventShortName,
+    oldValue: "Missing coordinates",
+    newValue: `Found in events.json: ${eventDetails.properties.EventLongName || eventDetails.properties.EventShortName} (${eventDetails.geometry.coordinates[1]}, ${eventDetails.geometry.coordinates[0]})`,
+    timestamp: Date.now(),
+  };
+
+  log.push(logEntry);
 }
 
 export function resolveIssueWithPin(
   issue: EventIssue,
   coordinates: [number, number],
-  eventDetailsMap: EventDetailsMap
+  eventDetailsMap: EventDetailsMap,
+  log: LogEntry[]
 ): void {
   const [longitude, latitude] = coordinates;
 
@@ -72,4 +85,14 @@ export function resolveIssueWithPin(
   };
 
   eventDetailsMap.set(issue.eventShortName, eventDetails);
+
+  const logEntry: LogEntry = {
+    type: "Issue Resolved",
+    event: issue.eventShortName,
+    oldValue: "Missing coordinates",
+    newValue: `Manual pin placement: (${latitude}, ${longitude})`,
+    timestamp: Date.now(),
+  };
+
+  log.push(logEntry);
 }

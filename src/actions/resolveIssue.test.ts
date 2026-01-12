@@ -2,13 +2,16 @@ import { resolveIssueWithEvent, resolveIssueWithPin } from "./resolveIssue";
 import { EventIssue } from "@models/EventIssue";
 import { EventDetails } from "@models/EventDetails";
 import { EventDetailsMap } from "@models/EventDetailsMap";
+import { LogEntry } from "@models/LogEntry";
 
 describe("resolveIssueWithEvent", () => {
   let issue: EventIssue;
   let eventDetails: EventDetails;
   let eventDetailsMap: EventDetailsMap;
+  let log: LogEntry[];
 
   beforeEach(() => {
+    log = [];
     issue = {
       eventShortName: "missing-event",
       eventAmbassador: "EA1",
@@ -55,7 +58,7 @@ describe("resolveIssueWithEvent", () => {
     };
 
     expect(() => {
-      resolveIssueWithEvent(issue, invalidEvent, eventDetailsMap);
+      resolveIssueWithEvent(issue, invalidEvent, eventDetailsMap, log);
     }).toThrow("Event details must have valid coordinates");
   });
 
@@ -68,7 +71,7 @@ describe("resolveIssueWithEvent", () => {
       },
     };
 
-    resolveIssueWithEvent(issue, differentEvent, eventDetailsMap);
+    resolveIssueWithEvent(issue, differentEvent, eventDetailsMap, log);
 
     expect(eventDetailsMap.has(issue.eventShortName)).toBe(true);
     expect(eventDetailsMap.has("different-name")).toBe(false);
@@ -78,8 +81,10 @@ describe("resolveIssueWithEvent", () => {
 describe("resolveIssueWithPin", () => {
   let issue: EventIssue;
   let eventDetailsMap: EventDetailsMap;
+  let log: LogEntry[];
 
   beforeEach(() => {
+    log = [];
     issue = {
       eventShortName: "missing-event",
       eventAmbassador: "EA1",
@@ -94,7 +99,7 @@ describe("resolveIssueWithPin", () => {
   it("should create EventDetails with manual coordinates", () => {
     const coordinates: [number, number] = [144.9631, -37.8136];
 
-    resolveIssueWithPin(issue, coordinates, eventDetailsMap);
+    resolveIssueWithPin(issue, coordinates, eventDetailsMap, log);
 
     const createdEvent = eventDetailsMap.get(issue.eventShortName);
     expect(createdEvent).toBeDefined();
@@ -105,17 +110,31 @@ describe("resolveIssueWithPin", () => {
   it("should set manualCoordinates flag", () => {
     const coordinates: [number, number] = [144.9631, -37.8136];
 
-    resolveIssueWithPin(issue, coordinates, eventDetailsMap);
+    resolveIssueWithPin(issue, coordinates, eventDetailsMap, log);
 
     const createdEvent = eventDetailsMap.get(issue.eventShortName);
     expect((createdEvent as any).manualCoordinates).toBe(true);
+  });
+
+  it("should log resolution to changes log", () => {
+    const coordinates: [number, number] = [144.9631, -37.8136];
+
+    resolveIssueWithPin(issue, coordinates, eventDetailsMap, log);
+
+    expect(log.length).toBe(1);
+    expect(log[0].type).toBe("Issue Resolved");
+    expect(log[0].event).toBe(issue.eventShortName);
+    expect(log[0].oldValue).toBe("Missing coordinates");
+    expect(log[0].newValue).toContain("Manual pin placement");
+    expect(log[0].newValue).toContain("-37.8136");
+    expect(log[0].newValue).toContain("144.9631");
   });
 
   it("should throw error for invalid longitude", () => {
     const invalidCoordinates: [number, number] = [200, -37.8136];
 
     expect(() => {
-      resolveIssueWithPin(issue, invalidCoordinates, eventDetailsMap);
+      resolveIssueWithPin(issue, invalidCoordinates, eventDetailsMap, log);
     }).toThrow("Invalid coordinates");
   });
 
@@ -123,14 +142,14 @@ describe("resolveIssueWithPin", () => {
     const invalidCoordinates: [number, number] = [144.9631, -100];
 
     expect(() => {
-      resolveIssueWithPin(issue, invalidCoordinates, eventDetailsMap);
+      resolveIssueWithPin(issue, invalidCoordinates, eventDetailsMap, log);
     }).toThrow("Invalid coordinates");
   });
 
   it("should create minimal EventDetails with required fields", () => {
     const coordinates: [number, number] = [144.9631, -37.8136];
 
-    resolveIssueWithPin(issue, coordinates, eventDetailsMap);
+    resolveIssueWithPin(issue, coordinates, eventDetailsMap, log);
 
     const createdEvent = eventDetailsMap.get(issue.eventShortName);
     expect(createdEvent?.properties.EventShortName).toBe(issue.eventShortName);

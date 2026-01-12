@@ -678,31 +678,32 @@ function onSearchEvents(issue: EventIssue): void {
   showEventSearchDialog(
     issue.eventShortName,
     eventDetails,
-    (selectedEvent: EventDetails) => {
-      try {
-        resolveIssueWithEvent(issue, selectedEvent, eventDetails!);
+      (selectedEvent: EventDetails) => {
+        try {
+          resolveIssueWithEvent(issue, selectedEvent, eventDetails!, log);
+          persistChangesLog(log);
 
-        const eventTeams = getEventTeamsFromSession();
-        const eventAmbassadors = getEventAmbassadorsFromSession();
-        const regionalAmbassadors = getRegionalAmbassadorsFromSession();
+          const eventTeams = getEventTeamsFromSession();
+          const eventAmbassadors = getEventAmbassadorsFromSession();
+          const regionalAmbassadors = getRegionalAmbassadorsFromSession();
 
-        if (eventTeams && eventDetails) {
-          eventTeamsTableData = extractEventTeamsTableData(
-            regionalAmbassadors,
-            eventAmbassadors,
-            eventTeams,
-            eventDetails
-          );
+          if (eventTeams && eventDetails) {
+            eventTeamsTableData = extractEventTeamsTableData(
+              regionalAmbassadors,
+              eventAmbassadors,
+              eventTeams,
+              eventDetails
+            );
+          }
+
+          refreshUI(eventDetails!, eventTeamsTableData!, log, eventAmbassadors, regionalAmbassadors);
+          refreshIssuesTable();
+
+          alert(`Event "${issue.eventShortName}" resolved successfully!`);
+        } catch (error) {
+          alert(`Failed to resolve issue: ${error instanceof Error ? error.message : "Unknown error"}`);
         }
-
-        refreshUI(eventDetails!, eventTeamsTableData!, log, eventAmbassadors, regionalAmbassadors);
-        refreshIssuesTable();
-
-        alert(`Event "${issue.eventShortName}" resolved successfully!`);
-      } catch (error) {
-        alert(`Failed to resolve issue: ${error instanceof Error ? error.message : "Unknown error"}`);
-      }
-    },
+      },
     () => {
       // Cancel - dialog already closed
     }
