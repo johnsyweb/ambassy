@@ -43,6 +43,8 @@ import { detectIssues } from "./actions/detectIssues";
 import { populateIssuesTable } from "./actions/populateIssuesTable";
 import { IssuesState, createIssuesState, setSelectedIssue } from "./models/IssuesState";
 import { EventIssue } from "./models/EventIssue";
+import { showEventSearchDialog } from "./actions/showEventSearchDialog";
+import { resolveIssueWithEvent } from "./actions/resolveIssue";
 
 function getRegionalAmbassadorsFromSession(): RegionalAmbassadorMap {
   const storedRegionalAmbassadors = loadFromStorage<Array<[string, RegionalAmbassador]>>("regionalAmbassadors");
@@ -682,42 +684,38 @@ function onSearchEvents(issue: EventIssue): void {
     return;
   }
 
-  import("./actions/showEventSearchDialog").then(({ showEventSearchDialog }) => {
-    showEventSearchDialog(
-      issue.eventShortName,
-      eventDetails!,
-      (selectedEvent: EventDetails) => {
-        try {
-          import("./actions/resolveIssue").then(({ resolveIssueWithEvent }) => {
-            resolveIssueWithEvent(issue, selectedEvent, eventDetails!);
+  showEventSearchDialog(
+    issue.eventShortName,
+    eventDetails,
+    (selectedEvent: EventDetails) => {
+      try {
+        resolveIssueWithEvent(issue, selectedEvent, eventDetails!);
 
-            const eventTeams = getEventTeamsFromSession();
-            const eventAmbassadors = getEventAmbassadorsFromSession();
-            const regionalAmbassadors = getRegionalAmbassadorsFromSession();
+        const eventTeams = getEventTeamsFromSession();
+        const eventAmbassadors = getEventAmbassadorsFromSession();
+        const regionalAmbassadors = getRegionalAmbassadorsFromSession();
 
-            if (eventTeams && eventDetails) {
-              eventTeamsTableData = extractEventTeamsTableData(
-                regionalAmbassadors,
-                eventAmbassadors,
-                eventTeams,
-                eventDetails
-              );
-            }
-
-            refreshUI(eventDetails!, eventTeamsTableData!, log, eventAmbassadors, regionalAmbassadors);
-            refreshIssuesTable();
-
-            alert(`Event "${issue.eventShortName}" resolved successfully!`);
-          });
-        } catch (error) {
-          alert(`Failed to resolve issue: ${error instanceof Error ? error.message : "Unknown error"}`);
+        if (eventTeams && eventDetails) {
+          eventTeamsTableData = extractEventTeamsTableData(
+            regionalAmbassadors,
+            eventAmbassadors,
+            eventTeams,
+            eventDetails
+          );
         }
-      },
-      () => {
-        // Cancel - dialog already closed
+
+        refreshUI(eventDetails!, eventTeamsTableData!, log, eventAmbassadors, regionalAmbassadors);
+        refreshIssuesTable();
+
+        alert(`Event "${issue.eventShortName}" resolved successfully!`);
+      } catch (error) {
+        alert(`Failed to resolve issue: ${error instanceof Error ? error.message : "Unknown error"}`);
       }
-    );
-  });
+    },
+    () => {
+      // Cancel - dialog already closed
+    }
+  );
 }
 
 function onPlacePin(issue: EventIssue): void {
