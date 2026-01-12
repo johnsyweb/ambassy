@@ -19,6 +19,8 @@ const CAPACITY_WEIGHT = 0.3;
 const REGION_WEIGHT = 0.3;
 const PROXIMITY_WEIGHT = 0.3;
 const CONFLICT_PENALTY = -100;
+const ZERO_ALLOCATIONS_BONUS = 1000; // Very high bonus for 0 allocations
+const NEIGHBORING_EVENTS_BONUS = 500; // High bonus for having neighboring events
 
 /**
  * Calculate geographic proximity score based on average distance.
@@ -288,6 +290,22 @@ export function suggestEventReallocation(
 
     const proximityScore = calculateGeographicProximityScore(recipient.events, events, eventDetails);
     const neighboringEvents = findNeighboringEvents(recipient.events, events, eventDetails, 50);
+    const allocationCount = recipient.events.length;
+    
+    // Apply prioritization bonuses:
+    // 1. Zero allocations get highest priority
+    if (allocationCount === 0) {
+      score += ZERO_ALLOCATIONS_BONUS;
+    }
+    
+    // 2. Neighboring events get second priority
+    if (neighboringEvents.length > 0) {
+      score += NEIGHBORING_EVENTS_BONUS;
+    }
+    
+    // 3. Within each group, prioritize by fewer allocations (subtract allocation count)
+    // This ensures that within the same priority group, fewer allocations rank higher
+    score -= allocationCount;
     
     if (proximityScore > 50) {
       reasons.push("Geographic proximity");
@@ -308,11 +326,17 @@ export function suggestEventReallocation(
       score,
       reasons: reasons.length > 0 ? reasons : undefined,
       warnings: warnings.length > 0 ? warnings : undefined,
-      allocationCount: recipient.events.length,
+      allocationCount,
       neighboringEvents: neighboringEvents.length > 0 ? neighboringEvents : undefined,
     });
   });
 
+  // Sort by score (highest first)
+  // This will naturally group:
+  // 1. Zero allocations (score ~1000+)
+  // 2. With neighboring events (score ~500+)
+  // 3. Without neighboring events (score <500)
+  // Within each group, sorted by allocation count (fewer = higher score)
   return suggestions.sort((a, b) => b.score - a.score);
 }
 
