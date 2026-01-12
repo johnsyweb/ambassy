@@ -1,17 +1,19 @@
 import { ReallocationSuggestion } from "@models/ReallocationSuggestion";
 import { EventAmbassadorMap } from "@models/EventAmbassadorMap";
+import { RegionalAmbassadorMap } from "@models/RegionalAmbassadorMap";
 
 /**
- * Display a modal dialog with prioritised ambassador suggestions for reallocating an event.
+ * Display a modal dialog with prioritised ambassador suggestions for reallocating an event or event ambassador.
  * Shows top 3-5 suggestions as buttons and provides "Other" dropdown for manual selection.
  */
 export function showReallocationDialog(
-  eventShortName: string,
+  itemName: string,
   currentAmbassador: string,
   suggestions: ReallocationSuggestion[],
-  eventAmbassadors: EventAmbassadorMap,
-  onSelect: (ambassadorName: string) => void,
-  onCancel: () => void
+  eventAmbassadors?: EventAmbassadorMap,
+  regionalAmbassadors?: RegionalAmbassadorMap,
+  onSelect?: (ambassadorName: string) => void,
+  onCancel?: () => void
 ): void {
   const dialog = document.getElementById("reallocationDialog") as HTMLElement;
   const title = document.getElementById("reallocationDialogTitle") as HTMLElement;
@@ -23,7 +25,10 @@ export function showReallocationDialog(
     return;
   }
 
-  title.textContent = `Reallocate Event: ${eventShortName}`;
+  // Determine if this is for events (EA) or event ambassadors (RA)
+  const isEventReallocation = eventAmbassadors !== undefined;
+  const itemLabel = isEventReallocation ? "Event" : "Event Ambassador";
+  title.textContent = `Reallocate ${itemLabel}: ${itemName}`;
   content.innerHTML = "";
 
   const topSuggestions = suggestions.slice(0, 5);
@@ -105,7 +110,7 @@ export function showReallocationDialog(
       button.addEventListener("click", () => {
         dialog.style.display = "none";
         cleanup();
-        onSelect(suggestion.toAmbassador);
+        onSelect?.(suggestion.toAmbassador);
       });
 
       button.addEventListener("keydown", (e) => {
@@ -114,7 +119,7 @@ export function showReallocationDialog(
           e.stopPropagation();
           dialog.style.display = "none";
           cleanup();
-          onSelect(suggestion.toAmbassador);
+          onSelect?.(suggestion.toAmbassador);
         } else if (e.key === "ArrowDown") {
           e.preventDefault();
           const nextButton = buttonsContainer.querySelector(`button.suggestion-button:nth-child(${index + 2})`) as HTMLButtonElement;
@@ -165,12 +170,16 @@ export function showReallocationDialog(
 
   const emptyOption = document.createElement("option");
   emptyOption.value = "";
-  emptyOption.textContent = "Select an ambassador";
+  emptyOption.textContent = isEventReallocation ? "Select an ambassador" : "Select or leave blank to unassign";
   dropdown.appendChild(emptyOption);
 
-  const allAmbassadors = Array.from(eventAmbassadors.keys())
-    .filter(ambassador => ambassador !== currentAmbassador)
-    .sort();
+  const allAmbassadors = isEventReallocation
+    ? Array.from((eventAmbassadors as EventAmbassadorMap).keys())
+        .filter(ambassador => ambassador !== currentAmbassador)
+        .sort()
+    : Array.from((regionalAmbassadors as RegionalAmbassadorMap).keys())
+        .filter(ambassador => ambassador !== currentAmbassador)
+        .sort();
   allAmbassadors.forEach((ambassador) => {
     const optionElement = document.createElement("option");
     optionElement.value = ambassador;
@@ -194,10 +203,10 @@ export function showReallocationDialog(
   });
 
   dropdown.addEventListener("change", () => {
-    if (dropdown.value) {
+    if (dropdown.value || !isEventReallocation) {
       dialog.style.display = "none";
       cleanup();
-      onSelect(dropdown.value);
+      onSelect?.(dropdown.value);
     }
   });
 
@@ -208,7 +217,7 @@ export function showReallocationDialog(
   const handleCancel = () => {
     dialog.style.display = "none";
     cleanup();
-    onCancel();
+    onCancel?.();
   };
 
   const handleEscape = (e: KeyboardEvent) => {

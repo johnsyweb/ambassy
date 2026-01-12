@@ -1,6 +1,7 @@
 import { showReallocationDialog } from "./showReallocationDialog";
 import { ReallocationSuggestion } from "@models/ReallocationSuggestion";
 import { EventAmbassadorMap } from "@models/EventAmbassadorMap";
+import { RegionalAmbassadorMap } from "@models/RegionalAmbassadorMap";
 
 jest.mock("./getReallocationSuggestions");
 
@@ -64,14 +65,14 @@ describe("showReallocationDialog", () => {
   });
 
   it("should display dialog with suggestions", () => {
-    showReallocationDialog("test-event", "Current EA", suggestions, eventAmbassadors, onSelect, onCancel);
+    showReallocationDialog("test-event", "Current EA", suggestions, eventAmbassadors, undefined, onSelect, onCancel);
 
     expect(dialog.style.display).not.toBe("none");
     expect(title.textContent).toContain("test-event");
   });
 
   it("should create suggestion buttons for top suggestions", () => {
-    showReallocationDialog("test-event", "Current EA", suggestions, eventAmbassadors, onSelect, onCancel);
+    showReallocationDialog("test-event", "Current EA", suggestions, eventAmbassadors, undefined, onSelect, onCancel);
 
     const buttons = content.querySelectorAll("button.suggestion-button");
     expect(buttons.length).toBeGreaterThan(0);
@@ -79,7 +80,7 @@ describe("showReallocationDialog", () => {
   });
 
   it("should display ambassador name and score on suggestion buttons", () => {
-    showReallocationDialog("test-event", "Current EA", suggestions, eventAmbassadors, onSelect, onCancel);
+    showReallocationDialog("test-event", "Current EA", suggestions, eventAmbassadors, undefined, onSelect, onCancel);
 
     const firstButton = content.querySelector("button.suggestion-button") as HTMLButtonElement;
     expect(firstButton).not.toBeNull();
@@ -88,7 +89,7 @@ describe("showReallocationDialog", () => {
   });
 
   it("should display reasons for suggestions", () => {
-    showReallocationDialog("test-event", "Current EA", suggestions, eventAmbassadors, onSelect, onCancel);
+    showReallocationDialog("test-event", "Current EA", suggestions, eventAmbassadors, undefined, onSelect, onCancel);
 
     const firstButton = content.querySelector("button.suggestion-button") as HTMLButtonElement;
     const reasonsText = firstButton.textContent || "";
@@ -97,7 +98,7 @@ describe("showReallocationDialog", () => {
   });
 
   it("should display warnings for suggestions", () => {
-    showReallocationDialog("test-event", "Current EA", suggestions, eventAmbassadors, onSelect, onCancel);
+    showReallocationDialog("test-event", "Current EA", suggestions, eventAmbassadors, undefined, onSelect, onCancel);
 
     const buttons = Array.from(content.querySelectorAll("button.suggestion-button")) as HTMLButtonElement[];
     const buttonWithWarning = buttons.find((btn) => btn.textContent?.includes("Would exceed capacity limit"));
@@ -105,14 +106,14 @@ describe("showReallocationDialog", () => {
   });
 
   it("should create Other dropdown with all ambassadors", () => {
-    showReallocationDialog("test-event", "Current EA", suggestions, eventAmbassadors, onSelect, onCancel);
+    showReallocationDialog("test-event", "Current EA", suggestions, eventAmbassadors, undefined, onSelect, onCancel);
 
     const dropdown = content.querySelector("select#otherRecipientSelect") as HTMLSelectElement;
     expect(dropdown).not.toBeNull();
   });
 
   it("should call onSelect when suggestion button is clicked", () => {
-    showReallocationDialog("test-event", "Current EA", suggestions, eventAmbassadors, onSelect, onCancel);
+    showReallocationDialog("test-event", "Current EA", suggestions, eventAmbassadors, undefined, onSelect, onCancel);
 
     const firstButton = content.querySelector("button.suggestion-button") as HTMLButtonElement;
     firstButton.click();
@@ -121,7 +122,7 @@ describe("showReallocationDialog", () => {
   });
 
   it("should call onSelect when Other dropdown option is selected", () => {
-    showReallocationDialog("test-event", "Current EA", suggestions, eventAmbassadors, onSelect, onCancel);
+    showReallocationDialog("test-event", "Current EA", suggestions, eventAmbassadors, undefined, onSelect, onCancel);
 
     const dropdown = content.querySelector("select#otherRecipientSelect") as HTMLSelectElement;
     dropdown.value = "EA 4";
@@ -131,7 +132,7 @@ describe("showReallocationDialog", () => {
   });
 
   it("should call onCancel when Cancel button is clicked", () => {
-    showReallocationDialog("test-event", "Current EA", suggestions, eventAmbassadors, onSelect, onCancel);
+    showReallocationDialog("test-event", "Current EA", suggestions, eventAmbassadors, undefined, onSelect, onCancel);
 
     cancelButton.click();
 
@@ -139,7 +140,7 @@ describe("showReallocationDialog", () => {
   });
 
   it("should call onCancel when Escape key is pressed", () => {
-    showReallocationDialog("test-event", "Current EA", suggestions, eventAmbassadors, onSelect, onCancel);
+    showReallocationDialog("test-event", "Current EA", suggestions, eventAmbassadors, undefined, onSelect, onCancel);
 
     const escapeEvent = new KeyboardEvent("keydown", { key: "Escape" });
     document.dispatchEvent(escapeEvent);
@@ -148,14 +149,14 @@ describe("showReallocationDialog", () => {
   });
 
   it("should move focus to first suggestion button when dialog opens", () => {
-    showReallocationDialog("test-event", "Current EA", suggestions, eventAmbassadors, onSelect, onCancel);
+    showReallocationDialog("test-event", "Current EA", suggestions, eventAmbassadors, undefined, onSelect, onCancel);
 
     const firstButton = content.querySelector("button.suggestion-button") as HTMLButtonElement;
     expect(document.activeElement).toBe(firstButton);
   });
 
   it("should handle Arrow key navigation between buttons", () => {
-    showReallocationDialog("test-event", "Current EA", suggestions, eventAmbassadors, onSelect, onCancel);
+    showReallocationDialog("test-event", "Current EA", suggestions, eventAmbassadors, undefined, onSelect, onCancel);
 
     const firstButton = content.querySelector("button.suggestion-button") as HTMLButtonElement;
     firstButton.focus();
@@ -168,7 +169,7 @@ describe("showReallocationDialog", () => {
   });
 
   it("should close dialog after selection", () => {
-    showReallocationDialog("test-event", "Current EA", suggestions, eventAmbassadors, onSelect, onCancel);
+    showReallocationDialog("test-event", "Current EA", suggestions, eventAmbassadors, undefined, onSelect, onCancel);
 
     const firstButton = content.querySelector("button.suggestion-button") as HTMLButtonElement;
     firstButton.click();
@@ -177,7 +178,7 @@ describe("showReallocationDialog", () => {
   });
 
   it("should close dialog after cancel", () => {
-    showReallocationDialog("test-event", "Current EA", suggestions, eventAmbassadors, onSelect, onCancel);
+    showReallocationDialog("test-event", "Current EA", suggestions, eventAmbassadors, undefined, onSelect, onCancel);
 
     cancelButton.click();
 
