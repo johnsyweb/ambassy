@@ -68,9 +68,13 @@ export function populateEventTeamsTable(
     const actionsCell = document.createElement('td');
     const reallocateButton = document.createElement('button');
     reallocateButton.className = 'reallocate-button';
-    reallocateButton.textContent = 'Reallocate';
+    reallocateButton.innerHTML = '🤝🏼 Reallocate';
     reallocateButton.type = 'button';
+    reallocateButton.title = `Reallocate ${data.eventShortName} to a different Event Ambassador`;
     reallocateButton.setAttribute('aria-label', `Reallocate ${data.eventShortName}`);
+    reallocateButton.style.padding = "2px 8px";
+    reallocateButton.style.fontSize = "0.85em";
+    reallocateButton.style.cursor = "pointer";
     
     if (_reallocateButtonHandler && _selectionState) {
       const isSelected = _selectionState.selectedEventShortName === data.eventShortName;

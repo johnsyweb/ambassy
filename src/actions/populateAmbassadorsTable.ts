@@ -219,19 +219,6 @@ function populateRegionalAmbassadorsTable(regionalAmbassadors: RegionalAmbassado
     nameSpan.textContent = name;
     nameContainer.appendChild(nameSpan);
     
-    const offboardButton = document.createElement("button");
-    offboardButton.textContent = "Offboard";
-    offboardButton.type = "button";
-    offboardButton.title = `Offboard ${name}`;
-    offboardButton.setAttribute("aria-label", `Offboard Regional Ambassador ${name}`);
-    offboardButton.style.padding = "2px 8px";
-    offboardButton.style.fontSize = "0.85em";
-    offboardButton.style.cursor = "pointer";
-    offboardButton.addEventListener("click", () => {
-      handleOffboardRegionalAmbassador(name);
-    });
-    nameContainer.appendChild(offboardButton);
-    
     nameCell.appendChild(nameContainer);
     row.appendChild(nameCell);
 
@@ -265,6 +252,31 @@ function populateRegionalAmbassadorsTable(regionalAmbassadors: RegionalAmbassado
       easCell.textContent = ambassador.supportsEAs.join(", ");
     }
     row.appendChild(easCell);
+
+    const actionsCell = document.createElement("td");
+    const offboardButton = document.createElement("button");
+    offboardButton.innerHTML = "🚪 Offboard";
+    offboardButton.type = "button";
+    offboardButton.title = `Offboard ${name}`;
+    offboardButton.setAttribute("aria-label", `Offboard Regional Ambassador ${name}`);
+    offboardButton.style.padding = "2px 8px";
+    offboardButton.style.fontSize = "0.85em";
+    offboardButton.style.cursor = "pointer";
+    offboardButton.addEventListener("click", (e) => {
+      e.stopPropagation();
+      handleOffboardRegionalAmbassador(name);
+    });
+    
+    offboardButton.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        e.stopPropagation();
+        handleOffboardRegionalAmbassador(name);
+      }
+    });
+    
+    actionsCell.appendChild(offboardButton);
+    row.appendChild(actionsCell);
 
     tableBody.appendChild(row);
   });
