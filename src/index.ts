@@ -729,8 +729,45 @@ function initializeTableMapNavigation(): void {
   });
 
   setReallocateButtonHandler(selectionState, (eventShortName: string) => {
-    // TODO: Open reallocation dialog (User Story 2)
-    console.log("Reallocate clicked for:", eventShortName);
+    if (!eventTeamsTableData || !eventDetails) {
+      return;
+    }
+
+    const eventAmbassadors = getEventAmbassadorsFromSession();
+    const regionalAmbassadors = getRegionalAmbassadorsFromSession();
+
+    const eventData = eventTeamsTableData.get(eventShortName);
+    if (!eventData || !eventData.eventAmbassador) {
+      alert("Event is not currently assigned to any ambassador.");
+      return;
+    }
+
+    try {
+      const suggestions = getReallocationSuggestions(
+        eventShortName,
+        eventTeamsTableData,
+        eventAmbassadors,
+        eventDetails,
+        loadCapacityLimits(),
+        regionalAmbassadors
+      );
+
+      showReallocationDialog(
+        eventShortName,
+        eventData.eventAmbassador,
+        suggestions,
+        eventAmbassadors,
+        (selectedAmbassador: string) => {
+          // Handle selection (User Story 3)
+          console.log("Selected ambassador:", selectedAmbassador);
+        },
+        () => {
+          // Handle cancel
+        }
+      );
+    } catch (error) {
+      alert(`Failed to get reallocation suggestions: ${error instanceof Error ? error.message : "Unknown error"}`);
+    }
   });
 }
 
