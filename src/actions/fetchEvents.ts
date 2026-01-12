@@ -16,10 +16,29 @@ async function fetchEvents(): Promise<void> {
       eventDetailsMap.set(event.properties.EventShortName, event);
     });
 
-    // Save the events to localStorage
+    // Preserve manually resolved events from existing cache
+    const existingCache = localStorage.getItem(CACHE_KEY);
+    if (existingCache) {
+      try {
+        const parsedCache = JSON.parse(existingCache);
+        if (parsedCache.eventDetailsMap) {
+          const existingEvents = new Map<string, EventDetails>(parsedCache.eventDetailsMap);
+          // Add any manually resolved events that aren't in the fresh API data
+          existingEvents.forEach((event, key) => {
+            if (!eventDetailsMap.has(key)) {
+              eventDetailsMap.set(key, event);
+            }
+          });
+        }
+      } catch (e) {
+        // Ignore parse errors, proceed with fresh data
+      }
+    }
+
+    // Save the merged events to localStorage
     localStorage.setItem(CACHE_KEY, JSON.stringify({
-       timestamp: Date.now(), 
-       eventDetailsMap: Array.from(eventDetailsMap.entries()) 
+       timestamp: Date.now(),
+       eventDetailsMap: Array.from(eventDetailsMap.entries())
       }));
     console.log('Events fetched and cached successfully.');
   } catch (error) {

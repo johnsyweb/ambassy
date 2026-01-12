@@ -17,25 +17,49 @@ export function populateMap(
   eventTeamsTableData: EventTeamsTableDataMap,
   eventDetails: EventDetailsMap
 ) {
+  console.log("populateMap called with:", {
+    eventTeamsTableDataSize: eventTeamsTableData.size,
+    eventDetailsSize: eventDetails.size,
+    eventTeamsTableDataKeys: Array.from(eventTeamsTableData.keys()).slice(0, 5),
+    eventDetailsKeys: Array.from(eventDetails.keys()).slice(0, 5)
+  });
+
   const raNames = regionalAmbassadorsFrom(eventTeamsTableData);
   const eaNames = eventAmbassadorsFrom(eventTeamsTableData);
   const raColorMap = assignColorsToNames(raNames);
   const eaColorMap = assignColorsToNames(eaNames);
   const countryCode = country(eventTeamsTableData);
 
+  console.log("Map setup:", {
+    raNames,
+    eaNames,
+    countryCode,
+    raColorMap: Object.fromEntries(raColorMap),
+    eaColorMap: Object.fromEntries(eaColorMap)
+  });
+
   const {map, markersLayer, polygonsLayer} = setupMapView(countryCode);
 
   markersLayer.clearLayers();
   polygonsLayer.clearLayers();
   _markerMap.clear();
-  
+
   const voronoiPoints: [number, number, string][] = [];
 
+  let processedEvents = 0;
+  let eventsWithData = 0;
+  let eventsWithoutData = 0;
+
   eventDetails.forEach((event, eventName) => {
-    const latitiude = event.geometry.coordinates[1];
+    const latitude = event.geometry.coordinates[1];
     const longitude = event.geometry.coordinates[0];
     const data = eventTeamsTableData.get(eventName);
+
+    console.log(`Processing event ${eventName}: coords [${longitude}, ${latitude}], hasData: ${!!data}, country: ${event.properties.countrycode}`);
+
     if (data) {
+      eventsWithData++;
+      processedEvents++;
       const raColor = raColorMap.get(data.regionalAmbassador) ?? DEFAULT_POLYGON_COLOUR;
       const eaColor = eaColorMap.get(data.eventAmbassador) ?? DEFAULT_EVENT_COLOUR;
       const tooltip = `
@@ -45,7 +69,7 @@ export function populateMap(
         <strong>Regional Ambassador(s):</strong> ${data.regionalAmbassador}<br>
       `;
 
-      const marker = L.circleMarker([latitiude, longitude], {
+      const marker = L.circleMarker([latitude, longitude], {
         radius: 5,
         color: eaColor,
       });
@@ -59,9 +83,9 @@ export function populateMap(
         });
       }
 
-      voronoiPoints.push([longitude, latitiude, JSON.stringify({ raColor, tooltip })]);
+      voronoiPoints.push([longitude, latitude, JSON.stringify({ raColor, tooltip })]);
     } else {
-      const marker = L.circleMarker([latitiude, longitude], {
+      const marker = L.circleMarker([latitude, longitude], {
         radius: 1,
         color: DEFAULT_EVENT_COLOUR,
       });
@@ -85,11 +109,17 @@ export function populateMap(
     }
   });
 
+  console.log(`Map population summary: ${processedEvents} total events processed, ${eventsWithData} with ambassador data, ${eventsWithoutData} without data, ${voronoiPoints.length} voronoi points created`);
+
   // Add markersLayer to map
   markersLayer.addTo(map!);
 
+  console.log("Creating Voronoi polygons from points:", voronoiPoints.map(p => [p[0], p[1]]));
+
   const voronoi = d3GeoVoronoi.geoVoronoi(voronoiPoints.map((p) => [p[0], p[1]]));
   const polygons = voronoi.polygons();
+
+  console.log(`Generated ${polygons.features.length} Voronoi polygons`);
 
   polygons.features.forEach((feature, index) => {
     const { raColor, tooltip } = JSON.parse(voronoiPoints[index][2]);
