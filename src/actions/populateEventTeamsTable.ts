@@ -259,7 +259,7 @@ function createEventShortNameDropdown(
       data.eventSeries = eventDetails.properties.seriesid;
       data.eventCoordinates = `${eventDetails.geometry.coordinates[1]}, ${eventDetails.geometry.coordinates[0]}`;
       data.eventCountryCode = eventDetails.properties.countrycode;
-      data.eventCountry = countries[eventDetails.properties.countrycode].url?.split('.').slice(-1)[0] || '?';
+      data.eventCountry = countries[eventDetails.properties.countrycode.toString()].url?.split('.').slice(-1)[0] || '?';
 
 
       eventShortNameCell.innerHTML = '';

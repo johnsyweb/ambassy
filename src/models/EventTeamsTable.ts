@@ -30,7 +30,7 @@ export function extractEventTeamsTableData(
             "N/A",
           eventSeries: eventDetails?.properties.seriesid ?? 0,
           eventCountryCode: countryCode,
-          eventCountry: countries[countryCode]?.url?.split('.').slice(-1)[0] ?? "N/A",
+          eventCountry: countries[countryCode.toString()]?.url?.split('.').slice(-1)[0] ?? "N/A",
         });
       });
     });

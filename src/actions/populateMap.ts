@@ -310,7 +310,7 @@ function setupMapView(countryCode: number) {
 
 
 function setMapCenterToCountry(map: L.Map, countryCode: number) {
-  const bounds = countries[countryCode].bounds;
+  const bounds = countries[countryCode.toString()].bounds;
   map?.fitBounds([
     [bounds[1], bounds[0]],
     [bounds[3], bounds[2]],
