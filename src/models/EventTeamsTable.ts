@@ -17,9 +17,6 @@ export function extractEventTeamsTableData(
     ra.supportsEAs.forEach((ea) => {
       eventAmbassadors.get(ea)?.events.forEach((eventName) => {
         const eventDetails = eventDetailsMap.get(eventName);
-        if (!eventDetails) {
-          console.error(`Event details not found for ${eventName}`);
-        }
         const eventTeam = eventTeams.get(eventName);
         const countryCode =
           eventDetails?.properties.countrycode ?? 0;
