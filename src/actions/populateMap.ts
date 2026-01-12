@@ -6,6 +6,8 @@ import {
   EventTeamsTableDataMap,
 } from "@models/EventTeamsTableData";
 import { ProspectiveEvent } from "@models/ProspectiveEvent";
+import { EventAmbassadorMap } from "@models/EventAmbassadorMap";
+import { RegionalAmbassadorMap } from "@models/RegionalAmbassadorMap";
 
 import * as d3GeoVoronoi from "d3-geo-voronoi";
 import L from "leaflet";
@@ -17,6 +19,8 @@ const DEFAULT_POLYGON_COLOUR = "lightgrey";
 export function populateMap(
   eventTeamsTableData: EventTeamsTableDataMap,
   eventDetails: EventDetailsMap,
+  eventAmbassadors: EventAmbassadorMap,
+  regionalAmbassadors: RegionalAmbassadorMap,
   prospectiveEvents?: ProspectiveEvent[]
 ) {
   console.log("populateMap called with:", {
@@ -236,13 +240,18 @@ export function populateMap(
       if (prospect.coordinates && prospect.geocodingStatus === 'success') {
         const [longitude, latitude] = prospect.coordinates;
 
-        // Use a different style for prospective events (diamond shape, different color)
+        // Get the EA's color for the prospective event marker
+        const eaColor = prospect.eventAmbassador
+          ? eaColorMap.get(prospect.eventAmbassador) ?? DEFAULT_EVENT_COLOUR
+          : DEFAULT_EVENT_COLOUR; // Default color for unassigned prospects
+
+        // Use diamond shape with EA's color
         const marker = L.marker([latitude, longitude], {
           icon: L.divIcon({
             className: 'prospective-event-marker',
-            html: '◆',
-            iconSize: [12, 12],
-            iconAnchor: [6, 6]
+            html: `<span style="color: ${eaColor}; font-size: 16px;">◆</span>`,
+            iconSize: [16, 16],
+            iconAnchor: [8, 8]
           })
         });
 
@@ -262,6 +271,32 @@ export function populateMap(
 
   // Add markersLayer to map
   markersLayer.addTo(map!);
+
+  // Add prospective events to voronoi calculation
+  if (prospectiveEvents) {
+    prospectiveEvents.forEach((prospect) => {
+      if (prospect.coordinates && prospect.geocodingStatus === 'success' && prospect.eventAmbassador) {
+        const [lng, lat] = prospect.coordinates;
+
+        // Get the RA color for the voronoi polygon
+        const ea = eventAmbassadors.get(prospect.eventAmbassador);
+        const raColor = ea?.regionalAmbassador
+          ? raColorMap.get(ea.regionalAmbassador) ?? DEFAULT_POLYGON_COLOUR
+          : DEFAULT_POLYGON_COLOUR;
+
+        const tooltip = `
+          <strong>Prospective Event:</strong> ${prospect.prospectEvent}<br>
+          <strong>Country:</strong> ${prospect.country}<br>
+          <strong>State:</strong> ${prospect.state}<br>
+          <strong>Event Ambassador:</strong> ${prospect.eventAmbassador}<br>
+          <strong>Regional Ambassador:</strong> ${ea?.regionalAmbassador || 'Unknown'}<br>
+          <strong>Status:</strong> ${prospect.ambassadorMatchStatus}
+        `;
+
+        voronoiPoints.push([lng, lat, JSON.stringify({ raColor, tooltip })]);
+      }
+    });
+  }
 
   // Remove duplicate coordinates to prevent degenerate Voronoi polygons
   const uniquePoints = voronoiPoints.filter((point, index, arr) => {

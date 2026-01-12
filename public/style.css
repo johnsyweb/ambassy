@@ -173,8 +173,8 @@ tr.selected:hover {
 }
 /* Prospective Event Markers */
 .prospective-event-marker {
-  color: #ff6b35; /* Orange color for prospective events */
-  font-size: 14px;
+  /* Color is set dynamically via inline styles based on EA assignment */
+  font-size: 16px;
   font-weight: bold;
   text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.5);
   background: transparent;
