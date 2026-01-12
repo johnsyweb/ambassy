@@ -144,28 +144,17 @@ export function populateMap(
       }
     });
 
-    console.log(`Voronoi calculation: ${constrainingEvents.filter(c => !c.isConstraining).length} ambassador events, ${constrainingEvents.filter(c => c.isConstraining).length} constraining points`);
-    console.log(`Constraining events details:`, constrainingEvents.map(c => ({
-      isConstraining: c.isConstraining,
-      raColor: c.raColor,
-      hasTooltip: !!c.tooltip
-    })));
-
     // Build Voronoi points from constraining events
-    console.log(`Building Voronoi points from ${constrainingEvents.length} constraining events`);
     constrainingEvents.forEach((event) => {
       const [lng, lat] = event.coords;
       if (event.isConstraining) {
         // Constraining points don't create polygons, just help define boundaries
         voronoiPoints.push([lng, lat, JSON.stringify({ raColor: 'transparent', tooltip: '' })]);
-        console.log(`Added constraining point at [${lng}, ${lat}]`);
       } else {
         // Ambassador events create polygons
         voronoiPoints.push([lng, lat, JSON.stringify({ raColor: event.raColor, tooltip: event.tooltip })]);
-        console.log(`Added ambassador point at [${lng}, ${lat}] with color ${event.raColor}`);
       }
     });
-    console.log(`Total Voronoi points created: ${voronoiPoints.length}`);
   } else {
     // No bounds filtering - just include ambassador events
     eventDetails.forEach((event, eventName) => {
