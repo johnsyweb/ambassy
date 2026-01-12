@@ -11,6 +11,8 @@ import { loadCapacityLimits } from './checkCapacity';
 import { LogEntry } from '../models/LogEntry';
 import { CapacityStatus } from '../models/CapacityStatus';
 import { ReallocationSuggestion } from '../models/ReallocationSuggestion';
+import { geocodeAddress } from '../utils/geography';
+import { saveProspectiveEvents } from './persistProspectiveEvents';
 
 // Forward declaration - will be set by index.ts
 let refreshUIAfterReallocation: (() => void) | null = null;
@@ -153,12 +155,17 @@ function createProspectRow(
   const actionsCell = document.createElement('td');
   actionsCell.style.textAlign = 'center';
 
+  const buttonContainer = document.createElement('div');
+  buttonContainer.style.display = 'flex';
+  buttonContainer.style.flexWrap = 'wrap';
+  buttonContainer.style.gap = '0.25em';
+  buttonContainer.style.justifyContent = 'center';
+
   // Reallocate button
   const reallocateButton = document.createElement('button');
   reallocateButton.type = 'button';
   reallocateButton.title = 'Reallocate to different Event Ambassador';
   reallocateButton.textContent = '🤝 Reallocate';
-  reallocateButton.style.marginRight = '0.5em';
   reallocateButton.addEventListener('click', () => {
     if (!log) {
       console.error('Cannot reallocate prospect: log not available');
@@ -206,7 +213,17 @@ function createProspectRow(
       }
     );
   });
-  actionsCell.appendChild(reallocateButton);
+  buttonContainer.appendChild(reallocateButton);
+
+  // Reset Location button
+  const resetLocationButton = document.createElement('button');
+  resetLocationButton.type = 'button';
+  resetLocationButton.title = 'Reset prospect location';
+  resetLocationButton.textContent = '📍 Reset Location';
+  resetLocationButton.addEventListener('click', () => {
+    showProspectLocationDialog(prospect, prospects);
+  });
+  buttonContainer.appendChild(resetLocationButton);
 
   // Remove button
   const removeButton = document.createElement('button');
@@ -217,7 +234,9 @@ function createProspectRow(
     // TODO: Implement prospect removal
     console.log('Remove prospect:', prospect.prospectEvent);
   });
-  actionsCell.appendChild(removeButton);
+  buttonContainer.appendChild(removeButton);
+
+  actionsCell.appendChild(buttonContainer);
 
   row.appendChild(actionsCell);
 
@@ -275,6 +294,208 @@ function generateProspectReallocationSuggestions(
 
   // Sort by score (highest first)
   return suggestions.sort((a, b) => b.score - a.score);
+}
+
+function showProspectLocationDialog(prospect: any, prospects: ProspectiveEventList): void {
+  const dialog = document.createElement('div');
+  dialog.style.position = 'fixed';
+  dialog.style.top = '0';
+  dialog.style.left = '0';
+  dialog.style.width = '100%';
+  dialog.style.height = '100%';
+  dialog.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';
+  dialog.style.display = 'flex';
+  dialog.style.alignItems = 'center';
+  dialog.style.justifyContent = 'center';
+  dialog.style.zIndex = '1000';
+
+  const dialogContent = document.createElement('div');
+  dialogContent.style.backgroundColor = 'white';
+  dialogContent.style.padding = '2em';
+  dialogContent.style.borderRadius = '8px';
+  dialogContent.style.maxWidth = '500px';
+  dialogContent.style.width = '90%';
+  dialogContent.style.boxShadow = '0 4px 6px rgba(0, 0, 0, 0.1)';
+
+  const title = document.createElement('h2');
+  title.textContent = `Reset Location for ${prospect.prospectEvent}`;
+  title.style.marginTop = '0';
+  dialogContent.appendChild(title);
+
+  const currentLocation = document.createElement('p');
+  currentLocation.textContent = prospect.coordinates
+    ? `Current coordinates: ${prospect.coordinates[1].toFixed(6)}, ${prospect.coordinates[0].toFixed(6)}`
+    : 'No coordinates set';
+  currentLocation.style.fontSize = '0.9em';
+  currentLocation.style.color = '#666';
+  dialogContent.appendChild(currentLocation);
+
+  const instructions = document.createElement('p');
+  instructions.textContent = 'Choose how to set the new location:';
+  dialogContent.appendChild(instructions);
+
+  // Address input option
+  const addressContainer = document.createElement('div');
+  addressContainer.style.marginBottom = '1em';
+
+  const addressLabel = document.createElement('label');
+  addressLabel.textContent = 'Enter Address:';
+  addressLabel.style.display = 'block';
+  addressLabel.style.marginBottom = '0.5em';
+  addressLabel.style.fontWeight = 'bold';
+  addressContainer.appendChild(addressLabel);
+
+  const addressInput = document.createElement('input');
+  addressInput.type = 'text';
+  addressInput.placeholder = 'e.g., 123 Main St, Melbourne, VIC, Australia';
+  addressInput.style.width = '100%';
+  addressInput.style.padding = '0.5em';
+  addressInput.style.border = '1px solid #ccc';
+  addressInput.style.borderRadius = '4px';
+  addressContainer.appendChild(addressInput);
+
+  const geocodeButton = document.createElement('button');
+  geocodeButton.textContent = 'Geocode Address';
+  geocodeButton.style.marginTop = '0.5em';
+  geocodeButton.style.padding = '0.5em 1em';
+  geocodeButton.style.backgroundColor = '#007bff';
+  geocodeButton.style.color = 'white';
+  geocodeButton.style.border = 'none';
+  geocodeButton.style.borderRadius = '4px';
+  geocodeButton.style.cursor = 'pointer';
+  addressContainer.appendChild(geocodeButton);
+
+  dialogContent.appendChild(addressContainer);
+
+  // Geolocation option
+  const geolocationContainer = document.createElement('div');
+  geolocationContainer.style.marginBottom = '1em';
+
+  const geolocationButton = document.createElement('button');
+  geolocationButton.textContent = '📍 Use Current Location';
+  geolocationButton.style.padding = '0.5em 1em';
+  geolocationButton.style.backgroundColor = '#28a745';
+  geolocationButton.style.color = 'white';
+  geolocationButton.style.border = 'none';
+  geolocationButton.style.borderRadius = '4px';
+  geolocationButton.style.cursor = 'pointer';
+  geolocationButton.title = 'Use browser geolocation to set coordinates';
+  geolocationContainer.appendChild(geolocationButton);
+
+  dialogContent.appendChild(geolocationContainer);
+
+  // Buttons
+  const buttonContainer = document.createElement('div');
+  buttonContainer.style.display = 'flex';
+  buttonContainer.style.gap = '1em';
+  buttonContainer.style.justifyContent = 'flex-end';
+  buttonContainer.style.marginTop = '1em';
+
+  const cancelButton = document.createElement('button');
+  cancelButton.textContent = 'Cancel';
+  cancelButton.style.padding = '0.5em 1em';
+  cancelButton.style.backgroundColor = '#6c757d';
+  cancelButton.style.color = 'white';
+  cancelButton.style.border = 'none';
+  cancelButton.style.borderRadius = '4px';
+  cancelButton.style.cursor = 'pointer';
+  cancelButton.addEventListener('click', () => {
+    document.body.removeChild(dialog);
+  });
+  buttonContainer.appendChild(cancelButton);
+
+  dialogContent.appendChild(buttonContainer);
+  dialog.appendChild(dialogContent);
+  document.body.appendChild(dialog);
+
+  // Event handlers
+  geocodeButton.addEventListener('click', async () => {
+    const address = addressInput.value.trim();
+    if (!address) {
+      alert('Please enter an address');
+      return;
+    }
+
+    geocodeButton.disabled = true;
+    geocodeButton.textContent = 'Geocoding...';
+
+    try {
+      const result = await geocodeAddress(address);
+      if (result.success && result.coordinates) {
+        updateProspectLocation(prospect, prospects, result.coordinates, `Geocoded from address: ${address}`);
+        document.body.removeChild(dialog);
+      } else {
+        alert(`Geocoding failed: ${result.error || 'Unknown error'}`);
+      }
+    } catch (error) {
+      alert(`Geocoding error: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    } finally {
+      geocodeButton.disabled = false;
+      geocodeButton.textContent = 'Geocode Address';
+    }
+  });
+
+  geolocationButton.addEventListener('click', () => {
+    if (!navigator.geolocation) {
+      alert('Geolocation is not supported by this browser');
+      return;
+    }
+
+    geolocationButton.disabled = true;
+    geolocationButton.textContent = 'Getting Location...';
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const coordinates: [number, number] = [position.coords.longitude, position.coords.latitude];
+        updateProspectLocation(prospect, prospects, coordinates, 'Set from browser geolocation');
+        document.body.removeChild(dialog);
+      },
+      (error) => {
+        let errorMessage = 'Unknown geolocation error';
+        switch (error.code) {
+          case error.PERMISSION_DENIED:
+            errorMessage = 'Location access denied by user';
+            break;
+          case error.POSITION_UNAVAILABLE:
+            errorMessage = 'Location information unavailable';
+            break;
+          case error.TIMEOUT:
+            errorMessage = 'Location request timed out';
+            break;
+        }
+        alert(`Geolocation failed: ${errorMessage}`);
+        geolocationButton.disabled = false;
+        geolocationButton.textContent = '📍 Use Current Location';
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 300000 // 5 minutes
+      }
+    );
+  });
+}
+
+function updateProspectLocation(
+  prospect: any,
+  prospects: ProspectiveEventList,
+  coordinates: [number, number],
+  source: string
+): void {
+  prospects.update({
+    ...prospect,
+    coordinates,
+    geocodingStatus: 'manual'
+  });
+
+  saveProspectiveEvents(prospects.getAll());
+
+  // Refresh the prospects table
+  if (refreshUIAfterReallocation) {
+    refreshUIAfterReallocation();
+  }
+
+  alert(`Location updated for "${prospect.prospectEvent}" using ${source}`);
 }
 
 function getStatusText(status: string): string {

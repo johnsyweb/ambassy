@@ -156,7 +156,7 @@ async function processProspectiveEvent(
 
   // Attempt geocoding
   try {
-    const geocodingResult = await geocodeProspectiveEvent(event.prospectEvent, event.country, event.state);
+    const geocodingResult = await geocodeProspectiveEvent(event.country, event.state);
     if (geocodingResult.success && geocodingResult.coordinates) {
       processedEvent.coordinates = geocodingResult.coordinates;
       processedEvent.geocodingStatus = 'success';

@@ -58,14 +58,81 @@ export function calculateAverageDistance(
   return sum / distances.length;
 }
 
+/**
+ * Geocode an address using Nominatim API
+ */
+export async function geocodeAddress(
+  address: string
+): Promise<{
+  success: boolean;
+  coordinates?: [number, number];
+  error?: string;
+}> {
+  try {
+    const encodedQuery = encodeURIComponent(address);
+
+    // Use Nominatim API for geocoding
+    const response = await fetch(
+      `https://nominatim.openstreetmap.org/search?format=json&q=${encodedQuery}&limit=1`,
+      {
+        headers: {
+          'User-Agent': 'Ambassy-Prospective-Events/1.0'
+        }
+      }
+    );
+
+    if (!response.ok) {
+      return {
+        success: false,
+        error: `Geocoding service returned ${response.status}`
+      };
+    }
+
+    const results = await response.json();
+
+    if (results.length === 0) {
+      return {
+        success: false,
+        error: `No location found for "${address}"`
+      };
+    }
+
+    const result = results[0];
+    const lat = parseFloat(result.lat);
+    const lon = parseFloat(result.lon);
+
+    if (isNaN(lat) || isNaN(lon)) {
+      return {
+        success: false,
+        error: 'Invalid coordinates returned from geocoding service'
+      };
+    }
+
+    // Validate coordinate ranges
+    if (lat < -90 || lat > 90 || lon < -180 || lon > 180) {
+      return {
+        success: false,
+        error: 'Coordinates out of valid range'
+      };
+    }
+
+    return {
+      success: true,
+      coordinates: [lat, lon]
+    };
+
+  } catch (error) {
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Geocoding request failed'
+    };
+  }
+}
 
 /**
  * Geocode a prospective event using country and state
-/**
- * Geocode a prospective event using prospect event name, country and state
  */
 export async function geocodeProspectiveEvent(
-  prospectEvent: string,
   country: string,
   state: string
 ): Promise<{
@@ -74,8 +141,8 @@ export async function geocodeProspectiveEvent(
   error?: string;
 }> {
   try {
-    // Create a search query from prospect event, state and country
-    const query = `${prospectEvent}, ${state}, ${country}`;
+    // Create a search query from country and state
+    const query = `${state}, ${country}`;
     const encodedQuery = encodeURIComponent(query);
 
     // Use Nominatim API for geocoding
