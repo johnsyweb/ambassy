@@ -52,19 +52,12 @@ export function populateMap(
 
   // Calculate bounds of events with ambassador data to filter out outliers
   const ambassadorEventCoords: [number, number][] = [];
-  const ambassadorEventNames: string[] = [];
   eventDetails.forEach((event, eventName) => {
     const data = eventTeamsTableData.get(eventName);
     if (data) {
-      const lng = event.geometry.coordinates[0];
-      const lat = event.geometry.coordinates[1];
-      ambassadorEventCoords.push([lng, lat]);
-      ambassadorEventNames.push(eventName);
-      console.log(`Ambassador event: ${eventName} at [${lng}, ${lat}]`);
+      ambassadorEventCoords.push([event.geometry.coordinates[0], event.geometry.coordinates[1]]);
     }
   });
-
-  console.log(`Found ${ambassadorEventCoords.length} events with ambassador data and coordinates`);
 
   // Calculate bounding box with some padding
   let minLng = Infinity, maxLng = -Infinity, minLat = Infinity, maxLat = -Infinity;
@@ -96,7 +89,7 @@ export function populateMap(
     const data = eventTeamsTableData.get(eventName);
     processedEvents++;
 
-    // console.log(`Processing event ${eventName}: coords [${longitude}, ${latitude}], hasData: ${!!data}, country: ${event.properties.countrycode}`);
+    // Skip events without ambassador data for processing
 
     if (data) {
       eventsWithData++;
@@ -126,14 +119,10 @@ export function populateMap(
       // Check if coordinates are within reasonable bounds (if we have bounds to check)
       const isWithinBounds = !useBoundsFilter || (longitude >= minLng && longitude <= maxLng && latitude >= minLat && latitude <= maxLat);
 
-      console.log(`Event ${eventName}: coords [${longitude}, ${latitude}], bounds check: ${useBoundsFilter ? 'enabled' : 'disabled'}, within bounds: ${isWithinBounds}`);
-
       if (isWithinBounds) {
-        // d3-geo-voronoi expects [longitude, latitude] for spherical coordinates
         voronoiPoints.push([longitude, latitude, JSON.stringify({ raColor, tooltip })]);
-        console.log(`✓ Added ${eventName} to voronoiPoints at [${longitude}, ${latitude}]`);
       } else {
-        console.warn(`✗ Skipping ${eventName} from Voronoi calculation due to out-of-bounds coordinates [${longitude}, ${latitude}]`);
+        console.warn(`Skipping ${eventName} from Voronoi calculation due to out-of-bounds coordinates [${longitude}, ${latitude}]`);
       }
     } else {
       const marker = L.circleMarker([latitude, longitude], {
