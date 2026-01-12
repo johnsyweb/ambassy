@@ -45,6 +45,7 @@ export function populateMap(
   _markerMap.clear();
 
   const voronoiPoints: [number, number, string][] = [];
+  const coordinateUsage = new Map<string, number>(); // Track coordinate usage to offset duplicates
 
   let processedEvents = 0;
   let eventsWithData = 0;
@@ -141,7 +142,18 @@ export function populateMap(
 
     // Build Voronoi points from constraining events
     constrainingEvents.forEach((event) => {
-      const [lng, lat] = event.coords;
+      let [lng, lat] = event.coords;
+      const coordKey = `${lng.toFixed(6)},${lat.toFixed(6)}`;
+      const usageCount = coordinateUsage.get(coordKey) || 0;
+      coordinateUsage.set(coordKey, usageCount + 1);
+
+      // Apply small offset for duplicate coordinates to avoid degenerate polygons
+      if (usageCount > 0) {
+        const offset = 0.001 * usageCount; // ~100 meters offset
+        lng += offset * (Math.random() - 0.5) * 2;
+        lat += offset * (Math.random() - 0.5) * 2;
+      }
+
       if (event.isConstraining) {
         // Constraining points don't create polygons, just help define boundaries
         voronoiPoints.push([lng, lat, JSON.stringify({ raColor: 'transparent', tooltip: '' })]);
@@ -155,6 +167,19 @@ export function populateMap(
     eventDetails.forEach((event, eventName) => {
       const data = eventTeamsTableData.get(eventName);
       if (data) {
+        let lng = event.geometry.coordinates[0];
+        let lat = event.geometry.coordinates[1];
+        const coordKey = `${lng.toFixed(6)},${lat.toFixed(6)}`;
+        const usageCount = coordinateUsage.get(coordKey) || 0;
+        coordinateUsage.set(coordKey, usageCount + 1);
+
+        // Apply small offset for duplicate coordinates to avoid degenerate polygons
+        if (usageCount > 0) {
+          const offset = 0.001 * usageCount; // ~100 meters offset
+          lng += offset * (Math.random() - 0.5) * 2;
+          lat += offset * (Math.random() - 0.5) * 2;
+        }
+
         const raColor = raColorMap.get(data.regionalAmbassador) ?? DEFAULT_POLYGON_COLOUR;
         const tooltip = `
           <strong>Event:</strong> ${eventName}<br>
@@ -162,7 +187,7 @@ export function populateMap(
           <strong>Event Ambassador(s):</strong> ${data.eventAmbassador}<br>
           <strong>Regional Ambassador(s):</strong> ${data.regionalAmbassador}<br>
         `;
-        voronoiPoints.push([event.geometry.coordinates[0], event.geometry.coordinates[1], JSON.stringify({ raColor, tooltip })]);
+        voronoiPoints.push([lng, lat, JSON.stringify({ raColor, tooltip })]);
       }
     });
   }
@@ -262,7 +287,7 @@ export function populateMap(
   }
   const overlayMaps = {
     "Event Markers": markersLayer,
-    "Ambassador Polygons": polygonsLayer,
+    "Regional Event Ambassador": polygonsLayer,
   };
   _layersControl = L.control.layers(undefined, overlayMaps);
   _layersControl.addTo(map!);
