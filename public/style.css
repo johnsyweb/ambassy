@@ -171,3 +171,12 @@ tr.selected:hover {
 .leaflet-marker-highlight {
   filter: drop-shadow(0 0 8px rgba(255, 0, 0, 0.8));
 }
+/* Prospective Event Markers */
+.prospective-event-marker {
+  color: #ff6b35; /* Orange color for prospective events */
+  font-size: 14px;
+  font-weight: bold;
+  text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.5);
+  background: transparent;
+  border: none;
+}

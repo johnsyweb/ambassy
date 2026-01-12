@@ -5,6 +5,7 @@ import {
   eventAmbassadorsFrom,
   EventTeamsTableDataMap,
 } from "@models/EventTeamsTableData";
+import { ProspectiveEvent } from "@models/ProspectiveEvent";
 
 import * as d3GeoVoronoi from "d3-geo-voronoi";
 import L from "leaflet";
@@ -15,7 +16,8 @@ const DEFAULT_POLYGON_COLOUR = "lightgrey";
 
 export function populateMap(
   eventTeamsTableData: EventTeamsTableDataMap,
-  eventDetails: EventDetailsMap
+  eventDetails: EventDetailsMap,
+  prospectiveEvents?: ProspectiveEvent[]
 ) {
   console.log("populateMap called with:", {
     eventTeamsTableDataSize: eventTeamsTableData.size,
@@ -227,6 +229,36 @@ export function populateMap(
       // Polygons should only represent territories based on events with ambassador assignments
     }
   });
+
+  // Add markers for prospective events
+  if (prospectiveEvents) {
+    prospectiveEvents.forEach((prospect) => {
+      if (prospect.coordinates && prospect.geocodingStatus === 'success') {
+        const [longitude, latitude] = prospect.coordinates;
+
+        // Use a different style for prospective events (diamond shape, different color)
+        const marker = L.marker([latitude, longitude], {
+          icon: L.divIcon({
+            className: 'prospective-event-marker',
+            html: '◆',
+            iconSize: [12, 12],
+            iconAnchor: [6, 6]
+          })
+        });
+
+        const tooltip = `
+          <strong>Prospective Event:</strong> ${prospect.prospectEvent}<br>
+          <strong>Country:</strong> ${prospect.country}<br>
+          <strong>State:</strong> ${prospect.state}<br>
+          <strong>Event Ambassador:</strong> ${prospect.eventAmbassador || 'Unassigned'}<br>
+          <strong>Status:</strong> ${prospect.ambassadorMatchStatus}
+        `;
+
+        marker.bindTooltip(tooltip);
+        markersLayer.addLayer(marker);
+      }
+    });
+  }
 
   // Add markersLayer to map
   markersLayer.addTo(map!);
