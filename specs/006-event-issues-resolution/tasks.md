@@ -22,10 +22,10 @@
 
 **Purpose**: Project initialization and verification
 
-- [ ] T001 Verify project structure matches implementation plan in specs/006-event-issues-resolution/plan.md
-- [ ] T002 [P] Verify existing tab system (`src/utils/tabs.ts`) supports adding new tabs
-- [ ] T003 [P] Verify existing `extractEventTeamsTableData` function location and structure in `src/models/EventTeamsTable.ts`
-- [ ] T004 [P] Verify existing `getEvents()` function fetches events.json in `src/actions/fetchEvents.ts`
+- [X] T001 Verify project structure matches implementation plan in specs/006-event-issues-resolution/plan.md
+- [X] T002 [P] Verify existing tab system (`src/utils/tabs.ts`) supports adding new tabs
+- [X] T003 [P] Verify existing `extractEventTeamsTableData` function location and structure in `src/models/EventTeamsTable.ts`
+- [X] T004 [P] Verify existing `getEvents()` function fetches events.json in `src/actions/fetchEvents.ts`
 
 ---
 
@@ -35,13 +35,13 @@
 
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete
 
-- [ ] T005 [P] Create `EventIssue` interface in `src/models/EventIssue.ts` with eventShortName, eventAmbassador, regionalAmbassador, issueType, status, resolutionMethod, resolvedAt fields
-- [ ] T006 [P] Create `IssuesState` interface in `src/models/IssuesState.ts` with issues and selectedIssue fields
-- [ ] T007 [P] Create `detectIssues` function in `src/actions/detectIssues.ts` that identifies events without coordinates
-- [ ] T008 [P] Create `normalizeEventName` utility function in `src/utils/fuzzyMatch.ts` for string normalization (lowercase, remove parentheses, trim)
-- [ ] T009 [P] Create `levenshteinDistance` function in `src/utils/fuzzyMatch.ts` for fuzzy matching
-- [ ] T010 [P] Create `geocodeAddress` utility function in `src/utils/geocoding.ts` for converting addresses to coordinates
-- [ ] T011 [P] Modify `extractEventTeamsTableData` in `src/models/EventTeamsTable.ts` to collect issues instead of calling `console.error`
+- [X] T005 [P] Create `EventIssue` interface in `src/models/EventIssue.ts` with eventShortName, eventAmbassador, regionalAmbassador, issueType, status, resolutionMethod, resolvedAt fields
+- [X] T006 [P] Create `IssuesState` interface in `src/models/IssuesState.ts` with issues and selectedIssue fields
+- [X] T007 [P] Create `detectIssues` function in `src/actions/detectIssues.ts` that identifies events without coordinates
+- [X] T008 [P] Create `normalizeEventName` utility function in `src/utils/fuzzyMatch.ts` for string normalization (lowercase, remove parentheses, trim)
+- [X] T009 [P] Create `levenshteinDistance` function in `src/utils/fuzzyMatch.ts` for fuzzy matching
+- [X] T010 [P] Create `geocodeAddress` utility function in `src/utils/geocoding.ts` for converting addresses to coordinates
+- [X] T011 [P] Modify `extractEventTeamsTableData` in `src/models/EventTeamsTable.ts` to collect issues instead of calling `console.error`
 
 **Checkpoint**: Foundation ready - user story implementation can now begin in parallel
 
@@ -57,26 +57,26 @@
 
 > **NOTE: Write these tests FIRST, ensure they FAIL before implementation**
 
-- [ ] T012 [P] [US1] Write unit test for `detectIssues` function identifying events without coordinates in `src/actions/detectIssues.test.ts`
-- [ ] T013 [P] [US1] Write unit test for `detectIssues` function creating EventIssue objects with correct fields in `src/actions/detectIssues.test.ts`
-- [ ] T014 [P] [US1] Write unit test for `detectIssues` function handling events with missing ambassadors gracefully in `src/actions/detectIssues.test.ts`
-- [ ] T015 [P] [US1] Write unit test for `populateIssuesTable` function creating table rows in `src/actions/populateIssuesTable.test.ts`
-- [ ] T016 [P] [US1] Write unit test for `populateIssuesTable` function displaying event name, ambassadors, issue type in `src/actions/populateIssuesTable.test.ts`
-- [ ] T017 [P] [US1] Write unit test for `populateIssuesTable` function showing empty state when no issues in `src/actions/populateIssuesTable.test.ts`
-- [ ] T018 [P] [US1] Write integration test for Issues tab displaying issues table in `src/actions/populateIssuesTable.test.ts`
+- [X] T012 [P] [US1] Write unit test for `detectIssues` function identifying events without coordinates in `src/actions/detectIssues.test.ts`
+- [X] T013 [P] [US1] Write unit test for `detectIssues` function creating EventIssue objects with correct fields in `src/actions/detectIssues.test.ts`
+- [X] T014 [P] [US1] Write unit test for `detectIssues` function handling events with missing ambassadors gracefully in `src/actions/detectIssues.test.ts`
+- [X] T015 [P] [US1] Write unit test for `populateIssuesTable` function creating table rows in `src/actions/populateIssuesTable.test.ts`
+- [X] T016 [P] [US1] Write unit test for `populateIssuesTable` function displaying event name, ambassadors, issue type in `src/actions/populateIssuesTable.test.ts`
+- [X] T017 [P] [US1] Write unit test for `populateIssuesTable` function showing empty state when no issues in `src/actions/populateIssuesTable.test.ts`
+- [X] T018 [P] [US1] Write integration test for Issues tab displaying issues table in `src/actions/populateIssuesTable.test.ts`
 
 ### Implementation for User Story 1
 
-- [ ] T017 [US1] Implement `detectIssues` function in `src/actions/detectIssues.ts` to scan eventTeams and identify missing events
-- [ ] T018 [US1] Modify `extractEventTeamsTableData` in `src/models/EventTeamsTable.ts` to remove `console.error` calls
-- [ ] T019 [US1] Add "Issues" tab button to tab navigation in `public/index.html`
-- [ ] T020 [US1] Add Issues tab content panel HTML structure in `public/index.html` with table element
-- [ ] T021 [US1] Implement `populateIssuesTable` function in `src/actions/populateIssuesTable.ts` to create table rows
-- [ ] T022 [US1] Display event name, Event Ambassador, Regional Ambassador, issue type columns in Issues table in `src/actions/populateIssuesTable.ts`
-- [ ] T023 [US1] Add "Issues" tab to tab system in `src/utils/tabs.ts` (or extend `initializeTabs` in `src/index.ts`)
-- [ ] T024 [US1] Wire up Issues tab to call `populateIssuesTable` when tab becomes visible in `src/index.ts`
-- [ ] T025 [US1] Call `detectIssues` when Event Teams data is loaded and pass to `populateIssuesTable` in `src/index.ts`
-- [ ] T026 [US1] Add CSS styles for Issues table in `public/style.css` (consistent with other tables)
+- [X] T017 [US1] Implement `detectIssues` function in `src/actions/detectIssues.ts` to scan eventTeams and identify missing events
+- [X] T018 [US1] Modify `extractEventTeamsTableData` in `src/models/EventTeamsTable.ts` to remove `console.error` calls
+- [X] T019 [US1] Add "Issues" tab button to tab navigation in `public/index.html`
+- [X] T020 [US1] Add Issues tab content panel HTML structure in `public/index.html` with table element
+- [X] T021 [US1] Implement `populateIssuesTable` function in `src/actions/populateIssuesTable.ts` to create table rows
+- [X] T022 [US1] Display event name, Event Ambassador, Regional Ambassador, issue type columns in Issues table in `src/actions/populateIssuesTable.ts`
+- [X] T023 [US1] Add "Issues" tab to tab system in `src/utils/tabs.ts` (or extend `initializeTabs` in `src/index.ts`)
+- [X] T024 [US1] Wire up Issues tab to call `populateIssuesTable` when tab becomes visible in `src/index.ts`
+- [X] T025 [US1] Call `detectIssues` when Event Teams data is loaded and pass to `populateIssuesTable` in `src/index.ts`
+- [X] T026 [US1] Add CSS styles for Issues table in `public/style.css` (consistent with other tables)
 
 **Checkpoint**: At this point, User Story 1 should be fully functional and testable independently. Users can see Issues tab with table of events without coordinates, and console errors are eliminated.
 
@@ -107,21 +107,21 @@
 
 ### Implementation for User Story 2
 
-- [ ] T039 [US2] Implement `normalizeEventName` function in `src/utils/fuzzyMatch.ts`
-- [ ] T040 [US2] Implement `levenshteinDistance` function in `src/utils/fuzzyMatch.ts`
-- [ ] T041 [US2] Implement `searchEvents` function in `src/actions/searchEvents.ts` with exact, normalized, and fuzzy matching
-- [ ] T042 [US2] Create search dialog HTML structure in `public/index.html` (or reuse existing dialog structure)
-- [ ] T043 [US2] Add "Search Events" button to Issues table row in `src/actions/populateIssuesTable.ts`
-- [ ] T044 [US2] Implement search dialog display function showing search input and results list in `src/actions/searchEvents.ts`
-- [ ] T045 [US2] Display search results with event name, location, and match type (exact/normalized/fuzzy) in `src/actions/searchEvents.ts`
-- [ ] T046 [US2] Implement result selection handler in `src/actions/searchEvents.ts` to call `resolveIssueWithEvent`
-- [ ] T047 [US2] Implement `resolveIssueWithEvent` function in `src/actions/resolveIssue.ts`
-- [ ] T048 [US2] Update eventDetailsMap with resolved event in `src/actions/resolveIssue.ts`
-- [ ] T049 [US2] Remove resolved issue from issues list and refresh Issues table in `src/actions/resolveIssue.ts`
-- [ ] T050 [US2] Refresh map and Event Teams table after resolution in `src/index.ts`
-- [ ] T051 [US2] Implement keyboard navigation in search dialog (Tab, Enter, Arrow keys) in `src/actions/searchEvents.ts`
-- [ ] T052 [US2] Add ARIA attributes for search dialog accessibility in `src/actions/searchEvents.ts`
-- [ ] T053 [US2] Handle "No matches found" case with clear message in `src/actions/searchEvents.ts`
+- [X] T039 [US2] Implement `normalizeEventName` function in `src/utils/fuzzyMatch.ts`
+- [X] T040 [US2] Implement `levenshteinDistance` function in `src/utils/fuzzyMatch.ts`
+- [X] T041 [US2] Implement `searchEvents` function in `src/actions/searchEvents.ts` with exact, normalized, and fuzzy matching
+- [X] T042 [US2] Create search dialog HTML structure in `public/index.html` (or reuse existing dialog structure)
+- [X] T043 [US2] Add "Search Events" button to Issues table row in `src/actions/populateIssuesTable.ts`
+- [X] T044 [US2] Implement search dialog display function showing search input and results list in `src/actions/searchEvents.ts`
+- [X] T045 [US2] Display search results with event name, location, and match type (exact/normalized/fuzzy) in `src/actions/searchEvents.ts`
+- [X] T046 [US2] Implement result selection handler in `src/actions/searchEvents.ts` to call `resolveIssueWithEvent`
+- [X] T047 [US2] Implement `resolveIssueWithEvent` function in `src/actions/resolveIssue.ts`
+- [X] T048 [US2] Update eventDetailsMap with resolved event in `src/actions/resolveIssue.ts`
+- [X] T049 [US2] Remove resolved issue from issues list and refresh Issues table in `src/actions/resolveIssue.ts`
+- [X] T050 [US2] Refresh map and Event Teams table after resolution in `src/index.ts`
+- [X] T051 [US2] Implement keyboard navigation in search dialog (Tab, Enter, Arrow keys) in `src/actions/searchEvents.ts`
+- [X] T052 [US2] Add ARIA attributes for search dialog accessibility in `src/actions/searchEvents.ts`
+- [X] T053 [US2] Handle "No matches found" case with clear message in `src/actions/searchEvents.ts`
 
 **Checkpoint**: At this point, User Story 2 should be fully functional. Users can search events.json, find matches with fuzzy matching, and resolve issues by selecting the correct event.
 
@@ -151,21 +151,21 @@
 
 ### Implementation for User Story 3
 
-- [ ] T065 [US3] Implement `geocodeAddress` function in `src/utils/geocoding.ts` using browser Geolocation API + Nominatim fallback
-- [ ] T066 [US3] Add address validation in `src/utils/geocoding.ts` (non-empty, reasonable length)
-- [ ] T067 [US3] Implement `showAddressDialog` function in `src/actions/showAddressDialog.ts` with input field and buttons
-- [ ] T068 [US3] Add "Enter Address" button to Issues table row in `src/actions/populateIssuesTable.ts`
-- [ ] T069 [US3] Wire up "Enter Address" button to show address dialog in `src/actions/populateIssuesTable.ts`
-- [ ] T070 [US3] Implement `resolveIssueWithAddress` function in `src/actions/resolveIssue.ts`
-- [ ] T071 [US3] Create EventDetails object with geocoded coordinates and minimal properties in `src/actions/resolveIssue.ts`
-- [ ] T072 [US3] Set `geocodedAddress: true` flag and `sourceAddress` field on EventDetails in `src/actions/resolveIssue.ts`
-- [ ] T073 [US3] Add resolved event to eventDetailsMap in `src/actions/resolveIssue.ts`
-- [ ] T074 [US3] Remove resolved issue from issues list and refresh Issues table in `src/actions/resolveIssue.ts`
-- [ ] T075 [US3] Refresh map and Event Teams table after resolution in `src/index.ts`
-- [ ] T076 [US3] Add loading indicator during geocoding in `src/actions/showAddressDialog.ts`
-- [ ] T077 [US3] Handle geocoding errors with clear user messages in `src/actions/showAddressDialog.ts`
-- [ ] T078 [US3] Add keyboard navigation (Enter to submit, Escape to cancel) in `src/actions/showAddressDialog.ts`
-- [ ] T079 [US3] Add ARIA attributes for address dialog accessibility in `src/actions/showAddressDialog.ts`
+- [X] T065 [US3] Implement `geocodeAddress` function in `src/utils/geocoding.ts` using browser Geolocation API + Nominatim fallback
+- [X] T066 [US3] Add address validation in `src/utils/geocoding.ts` (non-empty, reasonable length)
+- [X] T067 [US3] Implement `showAddressDialog` function in `src/actions/showAddressDialog.ts` with input field and buttons
+- [X] T068 [US3] Add "Enter Address" button to Issues table row in `src/actions/populateIssuesTable.ts`
+- [X] T069 [US3] Wire up "Enter Address" button to show address dialog in `src/actions/populateIssuesTable.ts`
+- [X] T070 [US3] Implement `resolveIssueWithAddress` function in `src/actions/resolveIssue.ts`
+- [X] T071 [US3] Create EventDetails object with geocoded coordinates and minimal properties in `src/actions/resolveIssue.ts`
+- [X] T072 [US3] Set `geocodedAddress: true` flag and `sourceAddress` field on EventDetails in `src/actions/resolveIssue.ts`
+- [X] T073 [US3] Add resolved event to eventDetailsMap in `src/actions/resolveIssue.ts`
+- [X] T074 [US3] Remove resolved issue from issues list and refresh Issues table in `src/actions/resolveIssue.ts`
+- [X] T075 [US3] Refresh map and Event Teams table after resolution in `src/index.ts`
+- [X] T076 [US3] Add loading indicator during geocoding in `src/actions/showAddressDialog.ts`
+- [X] T077 [US3] Handle geocoding errors with clear user messages in `src/actions/showAddressDialog.ts`
+- [X] T078 [US3] Add keyboard navigation (Enter to submit, Escape to cancel) in `src/actions/showAddressDialog.ts`
+- [X] T079 [US3] Add ARIA attributes for address dialog accessibility in `src/actions/showAddressDialog.ts`
 
 **Checkpoint**: At this point, User Story 3 should be fully functional. Users can enter street addresses that get geocoded to coordinates and resolve issues for closed/restricted events not in events.json.
 

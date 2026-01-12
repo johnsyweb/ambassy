@@ -44,7 +44,8 @@ import { populateIssuesTable } from "./actions/populateIssuesTable";
 import { IssuesState, createIssuesState, setSelectedIssue } from "./models/IssuesState";
 import { EventIssue } from "./models/EventIssue";
 import { showEventSearchDialog } from "./actions/showEventSearchDialog";
-import { resolveIssueWithEvent } from "./actions/resolveIssue";
+import { resolveIssueWithEvent, resolveIssueWithAddress } from "./actions/resolveIssue";
+import { showAddressDialog } from "./actions/showAddressDialog";
 
 function getRegionalAmbassadorsFromSession(): RegionalAmbassadorMap {
   const storedRegionalAmbassadors = loadFromStorage<Array<[string, RegionalAmbassador]>>("regionalAmbassadors");
@@ -660,7 +661,7 @@ function refreshIssuesTable(): void {
     issuesState,
     onIssueSelect,
     onSearchEvents,
-    onPlacePin
+    onEnterAddress
   );
 }
 
@@ -716,9 +717,25 @@ function onSearchEvents(issue: EventIssue): void {
   );
 }
 
-function onPlacePin(issue: EventIssue): void {
-  // TODO: Implement pin placement (Phase 5)
-  alert(`Place Pin for "${issue.eventShortName}" - Coming soon`);
+async function onEnterAddress(issue: EventIssue): Promise<void> {
+  if (!eventDetails) {
+    alert("Event details not loaded. Cannot geocode address.");
+    return;
+  }
+
+  showAddressDialog(
+    issue,
+    eventDetails,
+    log,
+    () => {
+      // Success callback - refresh UI
+      refreshIssuesTable();
+      refreshUI(eventDetails!, eventTeamsTableData!, log);
+    },
+    () => {
+      // Cancel callback - do nothing
+    }
+  );
 }
 
 function initializeIssuesTab(): void {

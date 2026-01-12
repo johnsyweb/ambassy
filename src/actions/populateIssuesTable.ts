@@ -6,7 +6,7 @@ export function populateIssuesTable(
   issuesState: IssuesState,
   onIssueSelect: (issue: EventIssue) => void,
   onSearchEvents: (issue: EventIssue) => void,
-  onPlacePin: (issue: EventIssue) => void
+  onEnterAddress: (issue: EventIssue) => void
 ): void {
   const tableBody = document.querySelector("#issuesTable tbody");
   if (!tableBody) {
@@ -77,21 +77,21 @@ export function populateIssuesTable(
     });
     actionsContainer.appendChild(searchButton);
 
-    const placePinButton = document.createElement("button");
-    placePinButton.textContent = "📍 Place Pin";
-    placePinButton.type = "button";
-    placePinButton.addEventListener("click", (e) => {
+    const enterAddressButton = document.createElement("button");
+    enterAddressButton.textContent = "📍 Enter Address";
+    enterAddressButton.type = "button";
+    enterAddressButton.addEventListener("click", (e) => {
       e.stopPropagation();
-      onPlacePin(issue);
+      onEnterAddress(issue);
     });
-    placePinButton.addEventListener("keydown", (e) => {
+    enterAddressButton.addEventListener("keydown", (e) => {
       if (e.key === "Enter" || e.key === " ") {
         e.preventDefault();
         e.stopPropagation();
-        onPlacePin(issue);
+        onEnterAddress(issue);
       }
     });
-    actionsContainer.appendChild(placePinButton);
+    actionsContainer.appendChild(enterAddressButton);
 
     actionsCell.appendChild(actionsContainer);
     row.appendChild(actionsCell);

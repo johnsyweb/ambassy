@@ -2,6 +2,7 @@ import { EventIssue } from "@models/EventIssue";
 import { EventDetails } from "@models/EventDetails";
 import { EventDetailsMap } from "@models/EventDetailsMap";
 import { LogEntry } from "@models/LogEntry";
+import { geocodeAddress } from "../utils/geocoding";
 
 export function resolveIssueWithEvent(
   issue: EventIssue,
@@ -95,4 +96,49 @@ export function resolveIssueWithPin(
   };
 
   log.push(logEntry);
+}
+
+export async function resolveIssueWithAddress(
+  issue: EventIssue,
+  address: string,
+  eventDetailsMap: EventDetailsMap,
+  log: LogEntry[]
+): Promise<void> {
+  try {
+    const { lat, lng } = await geocodeAddress(address);
+
+    const eventDetails: EventDetails & { geocodedAddress?: boolean; sourceAddress?: string } = {
+      id: `geocoded-${issue.eventShortName}`,
+      type: "Feature",
+      geometry: {
+        type: "Point",
+        coordinates: [lng, lat], // GeoJSON uses [longitude, latitude]
+      },
+      properties: {
+        eventname: issue.eventShortName,
+        EventLongName: issue.eventShortName,
+        EventShortName: issue.eventShortName,
+        LocalisedEventLongName: null,
+        countrycode: 0,
+        seriesid: 0,
+        EventLocation: "",
+      },
+      geocodedAddress: true,
+      sourceAddress: address,
+    };
+
+    eventDetailsMap.set(issue.eventShortName, eventDetails);
+
+    const logEntry: LogEntry = {
+      type: "Issue Resolved",
+      event: issue.eventShortName,
+      oldValue: "Missing coordinates",
+      newValue: `Geocoded address: "${address}" (${lat}, ${lng})`,
+      timestamp: Date.now(),
+    };
+
+    log.push(logEntry);
+  } catch (error) {
+    throw new Error(`Failed to geocode address "${address}": ${error instanceof Error ? error.message : 'Unknown error'}`);
+  }
 }
