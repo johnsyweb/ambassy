@@ -20,14 +20,22 @@ Implement a feature to import and manage "Prospective Events" (also called "Pros
    - Match EA names against existing ambassadors (handle names without spaces)
    - Validate and process status fields (Course Found, Landowner Permission, Funding Confirmed)
 
-3. **Issue Resolution**
+3. **Prospect Allocation & Management**
+   - Each prospect allocation must be reflected in the EA's allocation counts
+   - Prospects inherit REA from their assigned EA
+   - Allow reallocation of prospects between EAs using Event Team allocation workflow
+   - Handle cases where EA cannot be found through allocation process
+
+4. **Issue Resolution**
    - Identify prospective events that cannot be fully processed
    - Handle geocoding failures for location resolution
-   - If EA cannot be found, allow user to allocate using existing Event Team allocation method
    - Provide manual editing capabilities for prospect details
 
-4. **UI Integration**
+5. **UI Integration**
    - Add import button/functionality to the main interface
+   - Separate tab for displaying and managing prospective events
+   - Prospects appear in EA table alongside live events
+   - Prospects appear in all map layers with appropriate markers
    - Display prospective events in tabular format with status indicators
    - Show resolution status and allow user intervention
    - Provide editing capabilities for prospect details
@@ -65,12 +73,25 @@ City Park,Australia,NSW,Mary Johnson,John Smith,2024-02-01,false,true,false,
 Lake Reserve,Australia,QLD,Robert Brown,Sarah Wilson,2024-01-20,true,true,true,
 ```
 
+## Clarifications
+
+### Session 2026-01-13
+- Q: How should prospects be allocated to EAs/REAs and reflected in allocations? → A: Each prospect allocation must be reflected in the EA's allocations. Prospects inherit REA from their assigned EA.
+- Q: Can prospects be reallocated between EAs/REAs? → A: Yes, prospects can be reallocated to different EAs using similar workflow as live Event Teams.
+- Q: How should prospects appear in the UI? → A: Separate tab for prospects, plus prospects should appear in EA table and all map layers.
+
 ## Acceptance Criteria
 
 - [ ] Can import prospective events CSV file with correct column structure
 - [ ] Prospect event details parsed and stored correctly
 - [ ] Status fields (Course Found, Landowner Permission, Funding Confirmed) processed appropriately
 - [ ] EA names matched against existing ambassadors with fuzzy matching
+- [ ] Prospects inherit REA from their assigned EA
+- [ ] Prospects can be reallocated between EAs using Event Team allocation workflow
+- [ ] Prospects appear in dedicated Prospects tab with full management capabilities
+- [ ] Prospects appear in EA table alongside live events
+- [ ] Prospects appear in all map layers with appropriate markers
+- [ ] Prospect allocations are reflected in EA's allocation counts
 - [ ] Geocoding attempted using Country/State information
 - [ ] Unresolvable issues presented to user for manual resolution
 - [ ] Integration with existing Event Team allocation workflow

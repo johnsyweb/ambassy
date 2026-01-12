@@ -58,7 +58,7 @@ interface ImportResult {
 - Matches ambassadors against existing data
 - Returns comprehensive result with success/failure details
 
-### Ambassador Matching
+### Ambassador Matching & Allocation
 
 #### `matchProspectiveEventAmbassadors(events: ProspectiveEvent[], existingEAs: EventAmbassadorMap): MatchResult`
 **Purpose**: Match prospective event ambassador names against existing Event Ambassador data.
@@ -81,6 +81,7 @@ interface MatchResult {
 **Behavior**:
 - Attempts fuzzy matching for EA names without spaces
 - Validates EA existence in existing ambassador data
+- Automatically sets regionalAmbassador based on EA's REA relationship
 - Returns categorized results for user resolution
 
 **Matching Algorithm**:
@@ -88,6 +89,54 @@ interface MatchResult {
 2. Fuzzy match with Levenshtein distance ≤ 2
 3. Space normalization (remove spaces for comparison)
 4. Prefix/suffix matching for common name variations
+
+#### `allocateProspectToAmbassador(prospectId: string, ambassadorId: string): Promise<AllocationResult>`
+**Purpose**: Allocate or reallocate a prospect to a different Event Ambassador.
+
+**Input**:
+```typescript
+prospectId: string
+ambassadorId: string
+```
+
+**Output**:
+```typescript
+interface AllocationResult {
+  success: boolean;
+  prospect: ProspectiveEvent;
+  previousAmbassador?: string;
+  newAmbassador: string;
+  allocationImpact: {
+    previousEA: {id: string, allocationChange: number};
+    newEA: {id: string, allocationChange: number};
+  };
+}
+```
+
+**Behavior**:
+- Updates prospect's eventAmbassador field
+- Automatically updates regionalAmbassador based on new EA's REA
+- Adjusts allocation counts for both previous and new EAs
+- Validates allocation limits are not exceeded
+- Persists changes to storage
+
+#### `getProspectsByAmbassador(ambassadorId: string): ProspectiveEvent[]`
+**Purpose**: Get all prospects allocated to a specific ambassador.
+
+**Input**:
+```typescript
+ambassadorId: string // EA or REA identifier
+```
+
+**Output**:
+```typescript
+ProspectiveEvent[]
+```
+
+**Behavior**:
+- Returns prospects directly assigned to the EA
+- For REAs, returns prospects inherited through their EAs
+- Includes allocation counts in results
 
 ### Geocoding
 
@@ -168,6 +217,61 @@ Promise<ProspectiveEvent[]>
 - Displays progress during processing
 - Shows results with success/error breakdown
 - Provides options to review issues
+
+### Prospects Management Tab
+
+#### `renderProspectsTab(prospects: ProspectiveEvent[]): HTMLElement`
+**Purpose**: Render the dedicated prospects management tab.
+
+**Input**:
+```typescript
+prospects: ProspectiveEvent[]
+```
+
+**Output**:
+```typescript
+HTMLElement // Tab content element
+```
+
+**Behavior**:
+- Displays prospects in tabular format
+- Shows status indicators for all tracking fields
+- Provides action buttons for editing and reallocation
+- Integrates with allocation workflow for unmatched prospects
+
+### Map Integration
+
+#### `addProspectsToMapLayers(prospects: ProspectiveEvent[], mapLayers: MapLayers): void`
+**Purpose**: Add prospect markers to all relevant map layers.
+
+**Input**:
+```typescript
+prospects: ProspectiveEvent[]
+mapLayers: MapLayers // All available map layers
+```
+
+**Behavior**:
+- Adds prospect markers to Event Markers layer
+- Uses distinct styling for prospects vs live events
+- Shows prospect status in marker tooltips
+- Updates markers when prospects are reallocated
+
+### EA Table Integration
+
+#### `addProspectsToEATable(eaTable: EATable, prospects: ProspectiveEvent[]): void`
+**Purpose**: Add prospect information to the Event Ambassador table.
+
+**Input**:
+```typescript
+eaTable: EATable // Existing EA table structure
+prospects: ProspectiveEvent[] // Prospects to include
+```
+
+**Behavior**:
+- Adds prospect rows to EA table alongside live events
+- Shows prospect status indicators
+- Includes prospects in EA allocation counts
+- Provides prospect-specific actions (edit, reallocate)
 
 ### Resolution Dialog
 

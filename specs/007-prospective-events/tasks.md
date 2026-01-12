@@ -33,11 +33,15 @@ Implementation tasks for the Prospective Events feature, broken down by componen
 
 ## Ambassador Matching (Priority: High)
 
-### Name Matching Logic
+### Ambassador Matching & Allocation
 - [ ] Implement `matchProspectiveEventAmbassadors` in `src/actions/matchProspectiveEventAmbassadors.ts`
 - [ ] Add fuzzy string matching for EA names without spaces
 - [ ] Handle Event Ambassador name matching only
 - [ ] Validate EA existence in existing ambassador data
+- [ ] Implement `allocateProspectToAmbassador` for prospect reallocation
+- [ ] Implement `getProspectsByAmbassador` for allocation queries
+- [ ] Ensure prospects count towards EA allocation limits
+- [ ] Handle REA inheritance from assigned EA
 
 ### Resolution Workflow
 - [ ] Integrate with existing Event Team allocation for unmatched EAs
@@ -65,11 +69,25 @@ Implementation tasks for the Prospective Events feature, broken down by componen
 - [ ] Display import progress and results
 - [ ] Show warnings/errors with actionable feedback
 
-### Data Display
-- [ ] Add "Prospective Events" tab to main interface
-- [ ] Implement `populateProspectiveEventsTable` for data display
-- [ ] Show status indicators (geocoding, ambassador matching)
-- [ ] Add action buttons for issue resolution
+### Prospects Tab
+- [ ] Add dedicated "Prospective Events" tab to main interface
+- [ ] Implement `renderProspectsTab` for comprehensive prospect management
+- [ ] Show all status indicators and tracking fields
+- [ ] Add action buttons for editing and reallocation
+- [ ] Integrate with allocation workflow for unmatched prospects
+
+### Map Integration
+- [ ] Implement `addProspectsToMapLayers` for map marker display
+- [ ] Add prospect markers to all relevant map layers
+- [ ] Use distinct styling for prospects vs live events
+- [ ] Show prospect status in marker tooltips
+- [ ] Update map markers when prospects are reallocated
+
+### EA Table Integration
+- [ ] Implement `addProspectsToEATable` for EA table inclusion
+- [ ] Add prospect rows to EA table alongside live events
+- [ ] Include prospects in EA allocation counts display
+- [ ] Provide prospect-specific actions in EA table
 
 ### Resolution Dialogs
 - [ ] Create prospective event resolution dialog

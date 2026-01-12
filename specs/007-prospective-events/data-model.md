@@ -20,6 +20,7 @@ interface ProspectiveEvent {
   state: string; // State/region information
   prospectEDs: string; // Prospect Event Director(s) name
   eventAmbassador: string; // Assigned Event Ambassador
+  regionalAmbassador?: string; // Inherited from EA
 
   // Status Flags
   courseFound: boolean; // Whether suitable course has been found
@@ -61,18 +62,30 @@ interface ProspectiveEventList {
 ## Relationships
 
 ### Inheritance from Existing Models
-- **EventAmbassador**: Prospective events reference existing EA names
+- **EventAmbassador**: Prospective events reference existing EA names and count towards EA allocations
+- **RegionalAmbassador**: Prospects inherit REA from their assigned EA
 - **EventDetails**: May eventually become full EventDetails entries
 - **Country/State**: Reference existing geographic data structures
 
+### Allocation Impact
+- **EA Allocations**: Each prospect counts towards the assigned EA's allocation limit
+- **REA Inheritance**: Prospects automatically inherit the REA of their assigned EA
+- **Reallocation**: Prospects can be reallocated between EAs using Event Team allocation workflow
+
 ### Structure
 ```
+RegionalAmbassador (existing)
+├── supportsEAs: string[] (existing)
+└── inheritedProspects: string[] (via EAs)
+    ↓
 EventAmbassador (existing)
 ├── supportsEvents: string[] (existing)
-└── prospectiveEvents: string[] (new)
+├── prospectiveEvents: string[] (new)
+└── allocationCount: number (includes prospects)
     ↓
 ProspectiveEvent (new)
 ├── eventAmbassador: string
+├── regionalAmbassador: string (inherited)
 ├── country: string
 ├── state: string
 └── coordinates?: [number, number]
@@ -110,9 +123,12 @@ pending → matched (EA/RA found in existing data)
 ### Business Rules
 - `prospectEvent` should be unique within country/state
 - `eventAmbassador` must exist in existing ambassador data
+- `regionalAmbassador` is automatically set based on EA's REA relationship
+- Each prospect counts towards the assigned EA's allocation limit
 - Status flags should be boolean values (true/false)
 - Dates should be parseable and reasonable (not in far future/past)
 - Country/state combinations should be valid geographic locations
+- Prospects can be reallocated between EAs without changing core prospect data
 
 ## Storage & Persistence
 
