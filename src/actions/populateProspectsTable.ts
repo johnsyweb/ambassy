@@ -29,7 +29,7 @@ export function populateProspectsTable(
     // Show empty state
     const emptyRow = document.createElement('tr');
     const emptyCell = document.createElement('td');
-    emptyCell.colSpan = 12;
+    emptyCell.colSpan = 13;
     emptyCell.textContent = 'No prospective events. Import a Prospects CSV file to get started.';
     emptyCell.style.textAlign = 'center';
     emptyCell.style.padding = '2em';
@@ -113,6 +113,19 @@ function createProspectRow(
   geocodingCell.textContent = getStatusText(prospect.geocodingStatus);
   geocodingCell.style.textAlign = 'center';
   row.appendChild(geocodingCell);
+
+  // Coordinates
+  const coordinatesCell = document.createElement('td');
+  if (prospect.coordinates) {
+    const [lng, lat] = prospect.coordinates;
+    coordinatesCell.textContent = `${lat.toFixed(6)}, ${lng.toFixed(6)}`;
+    coordinatesCell.title = `Latitude: ${lat}, Longitude: ${lng}`;
+  } else {
+    coordinatesCell.textContent = '';
+  }
+  coordinatesCell.style.fontFamily = 'monospace';
+  coordinatesCell.style.fontSize = '0.9em';
+  row.appendChild(coordinatesCell);
 
   // Ambassador Match
   const matchCell = document.createElement('td');
