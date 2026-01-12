@@ -88,7 +88,7 @@ export function populateMap(
     const data = eventTeamsTableData.get(eventName);
     processedEvents++;
 
-    console.log(`Processing event ${eventName}: coords [${longitude}, ${latitude}], hasData: ${!!data}, country: ${event.properties.countrycode}`);
+    // console.log(`Processing event ${eventName}: coords [${longitude}, ${latitude}], hasData: ${!!data}, country: ${event.properties.countrycode}`);
 
     if (data) {
       eventsWithData++;
@@ -117,13 +117,11 @@ export function populateMap(
 
       // Check if coordinates are within reasonable bounds (if we have bounds to check)
       const isWithinBounds = !useBoundsFilter || (longitude >= minLng && longitude <= maxLng && latitude >= minLat && latitude <= maxLat);
-      console.log(`Event ${eventName} with ambassador data: coords [${longitude}, ${latitude}], within bounds: ${isWithinBounds}`);
 
       if (isWithinBounds) {
         voronoiPoints.push([longitude, latitude, JSON.stringify({ raColor, tooltip })]);
-        console.log(`Added to voronoiPoints: [${longitude}, ${latitude}] for ${eventName}`);
       } else {
-        console.warn(`Skipping ${eventName} from Voronoi calculation due to out-of-bounds coordinates`);
+        console.warn(`Skipping ${eventName} from Voronoi calculation due to out-of-bounds coordinates [${longitude}, ${latitude}]`);
       }
     } else {
       const marker = L.circleMarker([latitude, longitude], {
@@ -150,12 +148,8 @@ export function populateMap(
   // Add markersLayer to map
   markersLayer.addTo(map!);
 
-  console.log("Creating Voronoi polygons from points:", voronoiPoints.map(p => [p[0], p[1]]));
-
   const voronoi = d3GeoVoronoi.geoVoronoi(voronoiPoints.map((p) => [p[0], p[1]]));
   const polygons = voronoi.polygons();
-
-  console.log(`Generated ${polygons.features.length} Voronoi polygons`);
 
   polygons.features.forEach((feature, index) => {
     const { raColor, tooltip } = JSON.parse(voronoiPoints[index][2]);
