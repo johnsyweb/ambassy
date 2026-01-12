@@ -115,7 +115,10 @@ export function populateMap(
     }
   });
 
-  // Add nearby parkrun events as constraining points (don't create polygons)
+  // CRITICAL: Add nearby parkrun events as constraining points
+  // These prevent Voronoi polygons from extending infinitely by providing boundary points
+  // Events without ambassadors create "transparent" polygons that constrain boundaries
+  // DO NOT REMOVE: Essential for proper geographic territory visualization
   if (useBoundsFilter) {
     const expandedBounds = {
       minLng: minLng - 2, // Additional 2 degrees for constraining points
@@ -130,6 +133,7 @@ export function populateMap(
       const hasAmbassador = eventTeamsTableData.has(eventName);
 
       // Include as constraining point if it's near ambassador events but doesn't have an ambassador
+      // These points create boundaries without generating visible polygons
       if (!hasAmbassador &&
           lng >= expandedBounds.minLng && lng <= expandedBounds.maxLng &&
           lat >= expandedBounds.minLat && lat <= expandedBounds.maxLat) {
