@@ -7,8 +7,10 @@ import { EventAmbassadorMap } from '../models/EventAmbassadorMap';
 import { RegionalAmbassadorMap } from '../models/RegionalAmbassadorMap';
 import { showReallocationDialog } from './showReallocationDialog';
 import { reallocateProspect } from './reallocateProspect';
-import { getReallocationSuggestions } from './getReallocationSuggestions';
+import { loadCapacityLimits } from './checkCapacity';
 import { LogEntry } from '../models/LogEntry';
+import { CapacityStatus } from '../models/CapacityStatus';
+import { ReallocationSuggestion } from '../models/ReallocationSuggestion';
 
 // Forward declaration - will be set by index.ts
 let refreshUIAfterReallocation: (() => void) | null = null;
@@ -163,12 +165,11 @@ function createProspectRow(
       return;
     }
 
-    // Get reallocation suggestions
-    const suggestions = getReallocationSuggestions(
+    // Get reallocation suggestions based on EA capacity
+    const suggestions = generateProspectReallocationSuggestions(
       prospect.eventAmbassador || '',
-      eventAmbassadors,
-      regionalAmbassadors,
-      prospect.prospectEvent
+      prospect,
+      eventAmbassadors
     );
 
     // Show reallocation dialog
@@ -226,6 +227,56 @@ function createProspectRow(
 /**
  * Convert status enum to display text
  */
+function generateProspectReallocationSuggestions(
+  currentAmbassador: string,
+  prospect: any,
+  eventAmbassadors: EventAmbassadorMap
+): ReallocationSuggestion[] {
+  const limits = loadCapacityLimits();
+  const suggestions: ReallocationSuggestion[] = [];
+
+  // Calculate current allocation counts including prospective events
+  const ambassadorsWithCounts = Array.from(eventAmbassadors.entries()).map(([name, ambassador]) => {
+    const prospectiveCount = ambassador.prospectiveEvents?.length || 0;
+    const totalCount = ambassador.events.length + prospectiveCount;
+    return { name, ambassador, totalCount };
+  });
+
+  // Sort by available capacity (ascending - those with least allocation first)
+  ambassadorsWithCounts.sort((a, b) => a.totalCount - b.totalCount);
+
+  // Generate suggestions
+  for (const { name, ambassador, totalCount } of ambassadorsWithCounts) {
+    if (name === currentAmbassador) continue; // Skip current ambassador
+
+    const capacityStatus = ambassador.capacityStatus || CapacityStatus.WITHIN;
+    let score = 100 - totalCount * 5; // Higher score for lower allocation counts
+    let reasons = [`Currently has ${totalCount} total allocations`];
+
+    // Adjust score based on capacity status
+    if (capacityStatus === CapacityStatus.UNDER) {
+      score += 20;
+      reasons.push('Has available capacity');
+    } else if (capacityStatus === CapacityStatus.OVER) {
+      score -= 30;
+      reasons.push('Currently over capacity');
+    } else {
+      reasons.push('Within capacity limits');
+    }
+
+    suggestions.push({
+      fromAmbassador: currentAmbassador,
+      toAmbassador: name,
+      items: [prospect.prospectEvent],
+      score: Math.max(0, score),
+      reasons
+    });
+  }
+
+  // Sort by score (highest first)
+  return suggestions.sort((a, b) => b.score - a.score);
+}
+
 function getStatusText(status: string): string {
   switch (status) {
     case 'pending':

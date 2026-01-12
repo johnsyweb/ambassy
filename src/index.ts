@@ -669,7 +669,9 @@ async function ambassy() {
 
   // Set up prospect reallocation refresh callback
   setProspectReallocationRefreshCallback(() => {
-    refreshUI(eventDetails, eventTeamsTableData, log, eventAmbassadors, regionalAmbassadors);
+    if (eventDetails && eventTeamsTableData) {
+      refreshUI(eventDetails, eventTeamsTableData, log, eventAmbassadors, regionalAmbassadors);
+    }
   });
     
     refreshUI(eventDetails, eventTeamsTableData, log, eventAmbassadors, regionalAmbassadors);
