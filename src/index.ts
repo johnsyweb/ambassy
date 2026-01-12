@@ -72,6 +72,7 @@ const log: LogEntry[] = getLogFromSession();
 let eventTeamsTableData: Map<string, EventTeamsTableData> | null = null;
 let eventDetails: EventDetailsMap | null = null;
 const selectionState: SelectionState = createSelectionState();
+const issuesState = createIssuesState();
 
 function hasApplicationData(
   eventTeams: EventTeamMap,
