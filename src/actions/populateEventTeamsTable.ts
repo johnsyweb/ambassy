@@ -84,18 +84,18 @@ export function populateEventTeamsTable(
       reallocateButton.disabled = !isSelected;
       
       if (isSelected) {
-        reallocateButton.addEventListener('click', (e) => {
+        reallocateButton.onclick = (e) => {
           e.stopPropagation();
           _reallocateButtonHandler!(data.eventShortName);
-        });
+        };
         
-        reallocateButton.addEventListener('keydown', (e) => {
+        reallocateButton.onkeydown = (e) => {
           if (e.key === 'Enter' || e.key === ' ') {
             e.preventDefault();
             e.stopPropagation();
             _reallocateButtonHandler!(data.eventShortName);
           }
-        });
+        };
       }
     } else {
       reallocateButton.disabled = true;
