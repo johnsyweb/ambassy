@@ -7,10 +7,11 @@ Implementation tasks for the Prospective Events feature, broken down by componen
 ## Core Data Model (Priority: High)
 
 ### Models & Types
-- [ ] Create `ProspectiveEvent` interface in `src/models/ProspectiveEvent.ts`
-- [ ] Create `ProspectiveEventList` class in `src/models/ProspectiveEventList.ts`
-- [ ] Add TypeScript types in `src/types/ProspectiveEventTypes.ts`
-- [ ] Extend existing RA/EA models to reference prospective events
+- [ ] Create `ProspectiveEvent` interface in `src/models/ProspectiveEvent.ts` with allocation impact fields
+- [ ] Create `ProspectiveEventList` class in `src/models/ProspectiveEventList.ts` with allocation tracking
+- [ ] Add TypeScript types in `src/types/ProspectiveEventTypes.ts` including allocation contracts
+- [ ] Extend existing RA/EA models to reference prospective events and allocation counts
+- [ ] Add prospect validation utilities in `src/utils/prospectValidation.ts`
 
 ### Storage & Persistence
 - [ ] Add localStorage persistence functions (`saveProspectiveEvents`, `loadProspectiveEvents`)
@@ -43,10 +44,17 @@ Implementation tasks for the Prospective Events feature, broken down by componen
 - [ ] Ensure prospects count towards EA allocation limits
 - [ ] Handle REA inheritance from assigned EA
 
+### Allocation System Integration
+- [ ] Implement prospect allocation counting in EA capacity limits
+- [ ] Add prospect reallocation using existing Event Team allocation workflow
+- [ ] Update allocation displays to include prospect counts
+- [ ] Handle allocation conflicts when prospects exceed EA limits
+
 ### Resolution Workflow
 - [ ] Integrate with existing Event Team allocation for unmatched EAs
 - [ ] Create resolution dialog for ambassador assignment issues
 - [ ] Update prospective event status after successful matching
+- [ ] Implement REA inheritance tracking from EA assignments
 
 ## Geocoding Integration (Priority: Medium)
 
@@ -71,23 +79,25 @@ Implementation tasks for the Prospective Events feature, broken down by componen
 
 ### Prospects Tab
 - [ ] Add dedicated "Prospective Events" tab to main interface
-- [ ] Implement `renderProspectsTab` for comprehensive prospect management
-- [ ] Show all status indicators and tracking fields
-- [ ] Add action buttons for editing and reallocation
+- [ ] Implement `populateProspectsTab` for comprehensive prospect management
+- [ ] Show all status indicators and tracking fields (course found, permissions, funding)
+- [ ] Add action buttons for editing, reallocation, and issue resolution
 - [ ] Integrate with allocation workflow for unmatched prospects
+- [ ] Display prospect counts and allocation impact per EA
 
 ### Map Integration
-- [ ] Implement `addProspectsToMapLayers` for map marker display
-- [ ] Add prospect markers to all relevant map layers
-- [ ] Use distinct styling for prospects vs live events
-- [ ] Show prospect status in marker tooltips
-- [ ] Update map markers when prospects are reallocated
+- [ ] Implement `addProspectsToMapLayers` for multi-layer map marker display
+- [ ] Add prospect markers to all map layers with distinct styling
+- [ ] Show prospect status in marker tooltips (funding, permissions, course status)
+- [ ] Use different markers for prospects vs live events
+- [ ] Update map markers dynamically when prospects are reallocated
 
 ### EA Table Integration
-- [ ] Implement `addProspectsToEATable` for EA table inclusion
+- [ ] Implement `addProspectsToEATable` for seamless EA table inclusion
 - [ ] Add prospect rows to EA table alongside live events
-- [ ] Include prospects in EA allocation counts display
-- [ ] Provide prospect-specific actions in EA table
+- [ ] Include prospects in EA allocation counts and limit displays
+- [ ] Provide prospect-specific actions (view details, reallocate)
+- [ ] Show prospect status indicators in EA table rows
 
 ### Resolution Dialogs
 - [ ] Create prospective event resolution dialog
@@ -120,12 +130,21 @@ Implementation tasks for the Prospective Events feature, broken down by componen
 - [ ] Test interaction with existing Issues system
 - [ ] Test ambassador relationship validation
 - [ ] Test UI integration and user workflows
+- [ ] Test allocation impact on EA limits
+- [ ] Test prospect reallocation workflows
+
+### End-to-End Tests
+- [ ] Test complete prospect management lifecycle (import → allocate → reallocate → resolve)
+- [ ] Test multi-tab UI integration (Prospects tab + EA table + Map layers)
+- [ ] Test allocation limit enforcement with prospects
+- [ ] Test data persistence across browser sessions
 
 ### Edge Cases
 - [ ] Test malformed CSV handling
 - [ ] Test network failures during geocoding
 - [ ] Test concurrent imports and data consistency
 - [ ] Test large CSV files (performance)
+- [ ] Test prospect allocation conflicts and resolution
 
 ## Documentation (Priority: Low)
 
