@@ -2,7 +2,14 @@ jest.mock("./refreshUI");
 jest.mock("./updateEventAmbassador");
 jest.mock("./populateMap");
 
-import { populateEventTeamsTable, setReallocateButtonHandler } from "./populateEventTeamsTable";
+// Mock d3-geo-voronoi to avoid ES module issues
+jest.mock("d3-geo-voronoi", () => ({
+  geoVoronoi: jest.fn(() => ({
+    polygons: jest.fn(() => ({ features: [] })),
+  })),
+}));
+
+import { populateEventTeamsTable, setReallocateButtonHandler, updateReallocateButtonStates } from "./populateEventTeamsTable";
 import { EventTeamsTableDataMap } from "@models/EventTeamsTableData";
 import { EventDetailsMap } from "@models/EventDetailsMap";
 import { LogEntry } from "@models/LogEntry";
@@ -64,7 +71,7 @@ describe("populateEventTeamsTable - Reallocate Button", () => {
 
     const reallocateButton = actionsCell?.querySelector("button.reallocate-button");
     expect(reallocateButton).not.toBeNull();
-    expect(reallocateButton?.textContent).toBe("Reallocate");
+    expect(reallocateButton?.textContent).toBe("🤝🏼 Reallocate");
   });
 
   it("should disable Reallocate button when no row is selected", () => {
@@ -144,14 +151,16 @@ describe("populateEventTeamsTable - Reallocate Button", () => {
 
     populateEventTeamsTable(eventTeamsTableData, eventDetailsMap, changelog);
 
-    const row = tableBody.querySelector("tr[data-event-short-name='test-event']");
+    let row = tableBody.querySelector("tr[data-event-short-name='test-event']");
     let reallocateButton = row?.querySelector("button.reallocate-button") as HTMLButtonElement;
 
+    updateReallocateButtonStates();
     expect(reallocateButton.disabled).toBe(true);
 
     selectionState.selectedEventShortName = "test-event";
-    populateEventTeamsTable(eventTeamsTableData, eventDetailsMap, changelog);
+    updateReallocateButtonStates();
 
+    row = tableBody.querySelector("tr[data-event-short-name='test-event']");
     reallocateButton = row?.querySelector("button.reallocate-button") as HTMLButtonElement;
     expect(reallocateButton.disabled).toBe(false);
   });

@@ -7,7 +7,7 @@ describe("populateIssuesTable", () => {
   let issuesState: IssuesState;
   let onIssueSelect: jest.Mock;
   let onSearchEvents: jest.Mock;
-  let onPlacePin: jest.Mock;
+  let onEnterAddress: jest.Mock;
 
   beforeEach(() => {
     document.body.innerHTML = `
@@ -19,7 +19,7 @@ describe("populateIssuesTable", () => {
     issuesState = createIssuesState();
     onIssueSelect = jest.fn();
     onSearchEvents = jest.fn();
-    onPlacePin = jest.fn();
+    onEnterAddress = jest.fn();
   });
 
   afterEach(() => {
@@ -32,7 +32,7 @@ describe("populateIssuesTable", () => {
       issuesState,
       onIssueSelect,
       onSearchEvents,
-      onPlacePin
+      onEnterAddress
     );
 
     const row = tableBody.querySelector("tr");
@@ -65,7 +65,7 @@ describe("populateIssuesTable", () => {
       issuesState,
       onIssueSelect,
       onSearchEvents,
-      onPlacePin
+      onEnterAddress
     );
 
     const rows = tableBody.querySelectorAll("tr");
@@ -88,7 +88,7 @@ describe("populateIssuesTable", () => {
       issuesState,
       onIssueSelect,
       onSearchEvents,
-      onPlacePin
+      onEnterAddress
     );
 
     const row = tableBody.querySelector("tr");
@@ -115,7 +115,7 @@ describe("populateIssuesTable", () => {
       issuesState,
       onIssueSelect,
       onSearchEvents,
-      onPlacePin
+      onEnterAddress
     );
 
     const row = tableBody.querySelector("tr");
@@ -148,7 +148,7 @@ describe("populateIssuesTable", () => {
       issuesState,
       onIssueSelect,
       onSearchEvents,
-      onPlacePin
+      onEnterAddress
     );
 
     const rows = tableBody.querySelectorAll("tr");
@@ -172,7 +172,7 @@ describe("populateIssuesTable", () => {
       issuesState,
       onIssueSelect,
       onSearchEvents,
-      onPlacePin
+      onEnterAddress
     );
 
     const row = tableBody.querySelector("tr");
@@ -197,7 +197,7 @@ describe("populateIssuesTable", () => {
       issuesState,
       onIssueSelect,
       onSearchEvents,
-      onPlacePin
+      onEnterAddress
     );
 
     const buttons = Array.from(tableBody.querySelectorAll("button"));
@@ -208,7 +208,7 @@ describe("populateIssuesTable", () => {
     expect(onSearchEvents).toHaveBeenCalledWith(issues[0]);
   });
 
-  it("should call onPlacePin when Place Pin button is clicked", () => {
+  it("should call onEnterAddress when Enter Address button is clicked", () => {
     const issues: EventIssue[] = [
       {
         eventShortName: "event1",
@@ -224,15 +224,15 @@ describe("populateIssuesTable", () => {
       issuesState,
       onIssueSelect,
       onSearchEvents,
-      onPlacePin
+      onEnterAddress
     );
 
     const buttons = Array.from(tableBody.querySelectorAll("button"));
-    const pinBtn = buttons.find((btn) => btn.textContent?.includes("Pin"));
+    const addressBtn = buttons.find((btn) => btn.textContent?.includes("Enter Address"));
 
-    pinBtn?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+    addressBtn?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
 
-    expect(onPlacePin).toHaveBeenCalledWith(issues[0]);
+    expect(onEnterAddress).toHaveBeenCalledWith(issues[0]);
   });
 
   it("should add selected class to row when issue is selected", () => {
@@ -253,7 +253,7 @@ describe("populateIssuesTable", () => {
       issuesState,
       onIssueSelect,
       onSearchEvents,
-      onPlacePin
+      onEnterAddress
     );
 
     const row = tableBody.querySelector("tr");

@@ -11,6 +11,13 @@ import { EventTeamsTableDataMap } from "../models/EventTeamsTableData";
 import { EventDetailsMap } from "../models/EventDetailsMap";
 import L from "leaflet";
 
+// Mock d3-geo-voronoi to avoid ES module issues
+jest.mock("d3-geo-voronoi", () => ({
+  geoVoronoi: jest.fn(() => ({
+    polygons: jest.fn(() => ({ features: [] })),
+  })),
+}));
+
 describe("tableMapNavigation", () => {
   let selectionState: SelectionState;
   let eventTeamsTableData: EventTeamsTableDataMap;
