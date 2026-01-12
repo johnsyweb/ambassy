@@ -20,7 +20,8 @@ import { saveProspectiveEvents, loadProspectiveEvents } from './persistProspecti
 export async function importProspectiveEvents(
   csvContent: string,
   eventAmbassadors: EventAmbassadorMap,
-  regionalAmbassadors: RegionalAmbassadorMap
+  regionalAmbassadors: RegionalAmbassadorMap,
+  onProgress?: (progress: { current: number; total: number; currentEvent?: string; stage?: string }) => void
 ): Promise<{
   success: boolean;
   imported: number;
@@ -58,7 +59,19 @@ export async function importProspectiveEvents(
     const processingErrors: string[] = [];
     const processingWarnings: string[] = [];
 
+    let processedCount = 0;
+    const totalEvents = parseResult.events.length;
+
+    onProgress?.({ current: 0, total: totalEvents, stage: 'Processing events...' });
+
     for (const event of parseResult.events) {
+      onProgress?.({
+        current: processedCount,
+        total: totalEvents,
+        currentEvent: event.prospectEvent,
+        stage: 'Geocoding and validating...'
+      });
+
       try {
         const processed = await processProspectiveEvent(event, eventAmbassadors, regionalAmbassadors);
         processedEvents.push(processed.event);
@@ -70,7 +83,17 @@ export async function importProspectiveEvents(
         const errorMessage = error instanceof Error ? error.message : 'Unknown processing error';
         processingErrors.push(`Event "${event.prospectEvent}": ${errorMessage}`);
       }
+
+      processedCount++;
+      onProgress?.({
+        current: processedCount,
+        total: totalEvents,
+        currentEvent: event.prospectEvent,
+        stage: 'Processing events...'
+      });
     }
+
+    onProgress?.({ current: totalEvents, total: totalEvents, stage: 'Saving data...' });
 
       // Add processing errors and warnings (excluding deduplication warnings which come later)
     result.errors.push(...processingErrors);

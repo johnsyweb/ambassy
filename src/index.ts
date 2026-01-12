@@ -953,11 +953,40 @@ async function handleProspectsFileUpload(file: File): Promise<void> {
     const eventAmbassadors = getEventAmbassadorsFromSession();
     const regionalAmbassadors = getRegionalAmbassadorsFromSession();
 
+    // Show progress indicator
+    const progressDiv = document.getElementById('prospectsImportProgress') as HTMLDivElement;
+    const progressBar = document.getElementById('prospectsProgressBar') as HTMLProgressElement;
+    const progressText = document.getElementById('progressText') as HTMLSpanElement;
+    const progressStage = document.getElementById('progressStage') as HTMLDivElement;
+    const progressCurrentEvent = document.getElementById('progressCurrentEvent') as HTMLSpanElement;
+
+    progressDiv.style.display = 'block';
+    progressBar.value = 0;
+    progressText.textContent = '0/0';
+    progressStage.textContent = 'Starting import...';
+    progressCurrentEvent.textContent = '';
+
     const result = await importProspectiveEvents(
       csvContent,
       eventAmbassadors,
-      regionalAmbassadors
+      regionalAmbassadors,
+      (progress) => {
+        progressBar.value = progress.current;
+        progressBar.max = progress.total;
+        progressText.textContent = `${progress.current}/${progress.total}`;
+
+        if (progress.stage) {
+          progressStage.textContent = progress.stage;
+        }
+
+        if (progress.currentEvent) {
+          progressCurrentEvent.textContent = `Processing: ${progress.currentEvent}`;
+        }
+      }
     );
+
+    // Hide progress indicator
+    progressDiv.style.display = 'none';
 
     if (result.success) {
       alert(`Successfully imported ${result.imported} prospective events.\n\nWarnings:\n${result.warnings.join('\n')}`);
