@@ -84,19 +84,6 @@ function populateEventAmbassadorsTable(eventAmbassadors: EventAmbassadorMap, eve
     nameSpan.textContent = name;
     nameContainer.appendChild(nameSpan);
     
-    const offboardButton = document.createElement("button");
-    offboardButton.textContent = "Offboard";
-    offboardButton.type = "button";
-    offboardButton.title = `Offboard ${name}`;
-    offboardButton.setAttribute("aria-label", `Offboard Event Ambassador ${name}`);
-    offboardButton.style.padding = "2px 8px";
-    offboardButton.style.fontSize = "0.85em";
-    offboardButton.style.cursor = "pointer";
-    offboardButton.addEventListener("click", () => {
-      handleOffboardEventAmbassador(name);
-    });
-    nameContainer.appendChild(offboardButton);
-    
     nameCell.appendChild(nameContainer);
     row.appendChild(nameCell);
 
@@ -128,8 +115,13 @@ function populateEventAmbassadorsTable(eventAmbassadors: EventAmbassadorMap, eve
     row.appendChild(eventsCell);
 
     const actionsCell = document.createElement("td");
+    const actionsContainer = document.createElement("div");
+    actionsContainer.style.display = "flex";
+    actionsContainer.style.gap = "6px";
+    actionsContainer.style.alignItems = "center";
+    
     const reallocateButton = document.createElement("button");
-    reallocateButton.textContent = "Reallocate";
+    reallocateButton.innerHTML = "🤝🏼 Reallocate";
     reallocateButton.type = "button";
     reallocateButton.className = "reallocate-ea-button";
     reallocateButton.title = `Reallocate ${name} to a different Regional Ambassador`;
@@ -156,7 +148,30 @@ function populateEventAmbassadorsTable(eventAmbassadors: EventAmbassadorMap, eve
       }
     };
     
-    actionsCell.appendChild(reallocateButton);
+    const offboardButton = document.createElement("button");
+    offboardButton.innerHTML = "🚪 Offboard";
+    offboardButton.type = "button";
+    offboardButton.title = `Offboard ${name}`;
+    offboardButton.setAttribute("aria-label", `Offboard Event Ambassador ${name}`);
+    offboardButton.style.padding = "2px 8px";
+    offboardButton.style.fontSize = "0.85em";
+    offboardButton.style.cursor = "pointer";
+    offboardButton.addEventListener("click", (e) => {
+      e.stopPropagation();
+      handleOffboardEventAmbassador(name);
+    });
+    
+    offboardButton.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        e.stopPropagation();
+        handleOffboardEventAmbassador(name);
+      }
+    });
+    
+    actionsContainer.appendChild(reallocateButton);
+    actionsContainer.appendChild(offboardButton);
+    actionsCell.appendChild(actionsContainer);
     row.appendChild(actionsCell);
 
     tableBody.appendChild(row);
