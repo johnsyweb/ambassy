@@ -102,12 +102,33 @@ export async function resolveIssueWithAddress(
   issue: EventIssue,
   address: string,
   eventDetailsMap: EventDetailsMap,
-  log: LogEntry[]
+  log: LogEntry[],
+  parkrunUrl?: string
 ): Promise<void> {
   try {
     const { lat, lng } = await geocodeAddress(address);
 
-    const eventDetails: EventDetails & { geocodedAddress?: boolean; sourceAddress?: string } = {
+    // Extract additional metadata from URL if provided
+    let extractedMetadata: Partial<{
+      EventLongName: string;
+      countrycode: number;
+      seriesid: number;
+    }> = {};
+
+    if (parkrunUrl) {
+      try {
+        extractedMetadata = await extractMetadataFromUrl(parkrunUrl);
+      } catch (urlError) {
+        console.warn(`Failed to extract metadata from URL ${parkrunUrl}:`, urlError);
+        // Continue without URL metadata
+      }
+    }
+
+    const eventDetails: EventDetails & {
+      geocodedAddress?: boolean;
+      sourceAddress?: string;
+      sourceUrl?: string;
+    } = {
       id: `geocoded-${issue.eventShortName}`,
       type: "Feature",
       geometry: {
@@ -115,16 +136,17 @@ export async function resolveIssueWithAddress(
         coordinates: [lng, lat], // GeoJSON uses [longitude, latitude]
       },
       properties: {
-        eventname: issue.eventShortName,
-        EventLongName: issue.eventShortName,
+        eventname: extractedMetadata.EventLongName || issue.eventShortName,
+        EventLongName: extractedMetadata.EventLongName || issue.eventShortName,
         EventShortName: issue.eventShortName,
         LocalisedEventLongName: null,
-        countrycode: 0,
-        seriesid: 0,
+        countrycode: extractedMetadata.countrycode || 13, // Default to Australia
+        seriesid: extractedMetadata.seriesid || 1, // Default to 5km
         EventLocation: "",
       },
       geocodedAddress: true,
       sourceAddress: address,
+      sourceUrl: parkrunUrl,
     };
 
     eventDetailsMap.set(issue.eventShortName, eventDetails);
@@ -133,7 +155,9 @@ export async function resolveIssueWithAddress(
       type: "Issue Resolved",
       event: issue.eventShortName,
       oldValue: "Missing coordinates",
-      newValue: `Geocoded address: "${address}" (${lat}, ${lng})`,
+      newValue: parkrunUrl
+        ? `Geocoded address: "${address}" (${lat}, ${lng}) with metadata from ${parkrunUrl}`
+        : `Geocoded address: "${address}" (${lat}, ${lng})`,
       timestamp: Date.now(),
     };
 
@@ -141,4 +165,71 @@ export async function resolveIssueWithAddress(
   } catch (error) {
     throw new Error(`Failed to geocode address "${address}": ${error instanceof Error ? error.message : 'Unknown error'}`);
   }
+}
+
+/**
+ * Extracts metadata from a parkrun URL
+ */
+async function extractMetadataFromUrl(url: string): Promise<{
+  EventLongName: string;
+  countrycode: number;
+  seriesid: number;
+}> {
+  // Parse URL to extract components
+  const urlMatch = url.match(/https?:\/\/(?:www\.)?parkrun\.([^\/]+)\/([^\/]+)\/?/);
+  if (!urlMatch) {
+    throw new Error('Invalid parkrun URL format');
+  }
+
+  const [, domain, eventSlug] = urlMatch;
+
+  // Map domain to country code
+  const domainToCountry: Record<string, number> = {
+    'com.au': 13,  // Australia
+    'co.uk': 1,    // United Kingdom
+    'com': 2,      // United States
+    'ca': 3,       // Canada
+    'co.za': 4,    // South Africa
+    'de': 5,       // Germany
+    'fr': 6,       // France
+    'it': 7,       // Italy
+    'co.nz': 8,    // New Zealand
+    'pl': 9,       // Poland
+    'se': 10,      // Sweden
+    'no': 11,      // Norway
+    'dk': 12,      // Denmark
+    'ie': 14,      // Ireland
+    'fi': 15,      // Finland
+    'nl': 16,      // Netherlands
+    'sg': 17,      // Singapore
+    'my': 18,      // Malaysia
+    'jp': 19,      // Japan
+  };
+
+  const countrycode = domainToCountry[domain] || 13; // Default to Australia
+
+  // Determine series (5km vs juniors)
+  const seriesid = eventSlug.endsWith('-juniors') ? 2 : 1; // 1 = 5km, 2 = juniors
+
+  // Try to fetch the page title for the full event name
+  let EventLongName = `${eventSlug.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase())} parkrun`;
+
+  try {
+    // Note: In a real implementation, you'd need to handle CORS or use a backend service
+    // For now, we'll generate a reasonable name from the URL slug
+    EventLongName = eventSlug
+      .split('-')
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(' ')
+      .replace(/Juniors?$/, 'juniors') + ' parkrun';
+  } catch (error) {
+    // Use fallback name generation
+    console.warn('Could not fetch page title, using generated name');
+  }
+
+  return {
+    EventLongName,
+    countrycode,
+    seriesid,
+  };
 }

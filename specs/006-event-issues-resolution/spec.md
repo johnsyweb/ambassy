@@ -34,14 +34,15 @@ Replace console error messages for missing event details with an Issues tab that
 
 ### US3: Resolve Issue by Providing Address
 **As a** Regional Event Ambassador
-**I want to** enter a street address and parkrun URL to automatically set coordinates and complete event metadata
+**I want to** enter a street address to automatically set coordinates and suggest complete event metadata
 **So that** I can resolve issues for closed/restricted events that don't appear in events.json
 
 **Acceptance Criteria:**
 - User can enter a street address for the event location
-- User can optionally provide a parkrun URL to extract additional metadata
 - System geocodes the address to obtain coordinates
-- If URL provided, system extracts event name, series, country from URL and page title
+- System automatically suggests a parkrun URL based on cleaned event name
+- User can confirm or edit the suggested URL to extract additional metadata
+- If URL confirmed, system extracts event name, series, country from URL structure
 - Geocoded coordinates and extracted metadata are set for the event
 - Event is marked as resolved with complete metadata stored in eventDetailsMap
 - Clear error message if geocoding or URL parsing fails
@@ -157,7 +158,7 @@ Replace console error messages for missing event details with an Issues tab that
 ### Session 2026-01-12
 
 - Q: When geocoding an address for a closed/restricted event, do we have all the information needed for the event to be properly displayed in tables and maps? → A: Geocoded events have sufficient information for core functionality. EventShortName provides the display name, coordinates enable mapping, and ambassador assignments come from CSV data. Rich metadata like EventLocation is not critical for the primary use cases.
-- Q: Should geocoding collect additional event metadata beyond coordinates? → A: Yes, prompt for optional parkrun URL to extract EventLongName, series, country, and other metadata from URL structure and page title for complete event information.
+- Q: Should geocoding collect additional event metadata beyond coordinates? → A: Yes, auto-suggest parkrun URL from cleaned event name, allow user confirmation/edit, then extract EventLongName, series, country from URL structure for complete event information.
 
 ## Success Criteria
 
