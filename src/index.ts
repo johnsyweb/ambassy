@@ -680,7 +680,12 @@ function onSearchEvents(issue: EventIssue): void {
     eventDetails,
       (selectedEvent: EventDetails) => {
         try {
-          resolveIssueWithEvent(issue, selectedEvent, eventDetails!, log);
+          if (!eventDetails) {
+            alert("Event details not available");
+            return;
+          }
+          
+          resolveIssueWithEvent(issue, selectedEvent, eventDetails, log);
           
           const eventDetailsCache = localStorage.getItem("parkrun events");
           if (eventDetailsCache) {
