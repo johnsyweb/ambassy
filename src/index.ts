@@ -25,6 +25,7 @@ import { calculateAllCapacityStatuses, loadCapacityLimits } from "./actions/chec
 import { offboardEventAmbassador, offboardRegionalAmbassador } from "./actions/offboardAmbassador";
 import { suggestEventReallocation, suggestEventAmbassadorReallocation } from "./actions/suggestReallocation";
 import { setOffboardingHandlers, setEAReallocateHandler } from "./actions/populateAmbassadorsTable";
+import { setProspectReallocationRefreshCallback } from "./actions/populateProspectsTable";
 import { saveCapacityLimits, validateCapacityLimits } from "./actions/configureCapacityLimits";
 import { CapacityLimits } from "./models/CapacityLimits";
 import { SelectionState, createSelectionState } from "./models/SelectionState";
@@ -663,8 +664,13 @@ async function ambassy() {
     // Initialize Issues tab callback
     initializeIssuesTab();
 
-    // Initialize Prospects tab callback
-    initializeProspectsTab();
+  // Initialize Prospects tab callback
+  initializeProspectsTab();
+
+  // Set up prospect reallocation refresh callback
+  setProspectReallocationRefreshCallback(() => {
+    refreshUI(eventDetails, eventTeamsTableData, log, eventAmbassadors, regionalAmbassadors);
+  });
     
     refreshUI(eventDetails, eventTeamsTableData, log, eventAmbassadors, regionalAmbassadors);
   } else {
@@ -723,7 +729,7 @@ function refreshProspectsTable(): void {
   const prospects = loadProspectiveEvents();
   const prospectsList = new ProspectiveEventList(prospects);
 
-  populateProspectsTable(prospectsList, eventAmbassadors, regionalAmbassadors);
+  populateProspectsTable(prospectsList, eventAmbassadors, regionalAmbassadors, log);
 }
 
 function onIssueSelect(issue: EventIssue): void {

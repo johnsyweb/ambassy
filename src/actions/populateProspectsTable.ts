@@ -5,6 +5,17 @@
 import { ProspectiveEventList } from '../models/ProspectiveEventList';
 import { EventAmbassadorMap } from '../models/EventAmbassadorMap';
 import { RegionalAmbassadorMap } from '../models/RegionalAmbassadorMap';
+import { showReallocationDialog } from './showReallocationDialog';
+import { reallocateProspect } from './reallocateProspect';
+import { getReallocationSuggestions } from './getReallocationSuggestions';
+import { LogEntry } from '../models/LogEntry';
+
+// Forward declaration - will be set by index.ts
+let refreshUIAfterReallocation: (() => void) | null = null;
+
+export function setProspectReallocationRefreshCallback(callback: () => void): void {
+  refreshUIAfterReallocation = callback;
+}
 
 /**
  * Populate the Prospects table
@@ -12,7 +23,8 @@ import { RegionalAmbassadorMap } from '../models/RegionalAmbassadorMap';
 export function populateProspectsTable(
   prospects: ProspectiveEventList,
   eventAmbassadors: EventAmbassadorMap,
-  regionalAmbassadors: RegionalAmbassadorMap
+  regionalAmbassadors: RegionalAmbassadorMap,
+  log?: LogEntry[]
 ): void {
   const tableBody = document.querySelector<HTMLTableSectionElement>('#prospectsTable tbody');
   if (!tableBody) {
@@ -44,7 +56,7 @@ export function populateProspectsTable(
   prospectEvents.sort((a, b) => a.prospectEvent.localeCompare(b.prospectEvent));
 
   prospectEvents.forEach((prospect) => {
-    const row = createProspectRow(prospect, eventAmbassadors, regionalAmbassadors);
+    const row = createProspectRow(prospect, eventAmbassadors, regionalAmbassadors, prospects, log);
     tableBody.appendChild(row);
   });
 }
@@ -55,7 +67,9 @@ export function populateProspectsTable(
 function createProspectRow(
   prospect: any,
   eventAmbassadors: EventAmbassadorMap,
-  regionalAmbassadors: RegionalAmbassadorMap
+  regionalAmbassadors: RegionalAmbassadorMap,
+  prospects: ProspectiveEventList,
+  log?: LogEntry[]
 ): HTMLTableRowElement {
   const row = document.createElement('tr');
 
@@ -144,8 +158,52 @@ function createProspectRow(
   reallocateButton.textContent = '🤝 Reallocate';
   reallocateButton.style.marginRight = '0.5em';
   reallocateButton.addEventListener('click', () => {
-    // TODO: Implement prospect reallocation
-    console.log('Reallocate prospect:', prospect.prospectEvent);
+    if (!log) {
+      console.error('Cannot reallocate prospect: log not available');
+      return;
+    }
+
+    // Get reallocation suggestions
+    const suggestions = getReallocationSuggestions(
+      prospect.eventAmbassador || '',
+      eventAmbassadors,
+      regionalAmbassadors,
+      prospect.prospectEvent
+    );
+
+    // Show reallocation dialog
+    showReallocationDialog(
+      prospect.prospectEvent,
+      prospect.eventAmbassador || 'Unassigned',
+      suggestions,
+      eventAmbassadors,
+      regionalAmbassadors,
+      (newAmbassador: string) => {
+        // Perform the reallocation
+        try {
+          reallocateProspect(
+            prospect.id,
+            prospect.eventAmbassador || '',
+            newAmbassador,
+            prospects,
+            eventAmbassadors,
+            log,
+            regionalAmbassadors
+          );
+
+          // Refresh the UI after reallocation
+          if (refreshUIAfterReallocation) {
+            refreshUIAfterReallocation();
+          }
+        } catch (error) {
+          console.error('Failed to reallocate prospect:', error);
+          alert(`Failed to reallocate prospect: ${error instanceof Error ? error.message : 'Unknown error'}`);
+        }
+      },
+      () => {
+        // Cancel - do nothing
+      }
+    );
   });
   actionsCell.appendChild(reallocateButton);
 

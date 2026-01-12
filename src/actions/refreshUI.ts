@@ -47,6 +47,6 @@ export function refreshUI(
   populateEventTeamsTable(eventTeamsTableData, eventDetails, log, eventAmbassadorsToUse, regionalAmbassadorsToUse);
   populateMap(eventTeamsTableData, eventDetails, prospectiveEvents);
   populateAmbassadorsTable(eventAmbassadorsToUse, regionalAmbassadorsToUse, eventTeamsTableData);
-  populateProspectsTable(prospectsList, eventAmbassadorsToUse, regionalAmbassadorsToUse);
+  populateProspectsTable(prospectsList, eventAmbassadorsToUse, regionalAmbassadorsToUse, log);
   populateChangesLogTable(log);
 }
