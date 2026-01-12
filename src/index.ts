@@ -684,16 +684,9 @@ function onSearchEvents(issue: EventIssue): void {
             alert("Event details not available");
             return;
           }
-          
+
           resolveIssueWithEvent(issue, selectedEvent, eventDetails, log);
-          
-          const eventDetailsCache = localStorage.getItem("parkrun events");
-          if (eventDetailsCache) {
-            const parsedCache = JSON.parse(eventDetailsCache);
-            parsedCache.eventDetailsMap = Array.from(eventDetails.entries());
-            localStorage.setItem("parkrun events", JSON.stringify(parsedCache));
-          }
-          
+          persistEventDetails(eventDetails);
           persistChangesLog(log);
 
           const eventTeams = getEventTeamsFromSession();

@@ -142,9 +142,16 @@ Replace console error messages for missing event details with an Issues tab that
 - Events may have changed names
 - Search must help identify renamed events
 
+## Clarifications
+
+### Session 2026-01-08
+
+- Q: Should issue resolution be logged in the change log and persisted across reloads? → A: Yes, resolution must be logged in the changes log with event name, resolution method, timestamp, and source details. Resolution state persists via localStorage (eventDetailsMap and changes log).
+
 ## Success Criteria
 
 - Console errors for missing events are eliminated
 - Users can easily identify and resolve event coordinate issues
 - All events have coordinates and appear on the map
 - Resolution workflow is intuitive and efficient
+- Issue resolutions are logged in the changes log and persist across application reloads

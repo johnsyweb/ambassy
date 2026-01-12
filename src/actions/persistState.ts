@@ -3,6 +3,7 @@ import { EventTeamMap } from "@models/EventTeamMap";
 import { RegionalAmbassadorMap } from "@models/RegionalAmbassadorMap";
 import { LogEntry } from "@models/LogEntry";
 import { ApplicationState } from "@models/ApplicationState";
+import { EventDetailsMap } from "@models/EventDetailsMap";
 import { saveToStorage, loadFromStorage, migrateFromSessionStorage } from "@utils/storage";
 
 export function persistEventAmbassadors(eventAmbassadors: EventAmbassadorMap): void {
@@ -19,6 +20,32 @@ export function persistRegionalAmbassadors(regionalAmbassadors: RegionalAmbassad
 
 export function persistChangesLog(changesLog: LogEntry[]): void {
   saveToStorage("changesLog", changesLog);
+}
+
+export function persistEventDetails(eventDetailsMap: EventDetailsMap): void {
+  const CACHE_KEY = 'parkrun events';
+  const cache = localStorage.getItem(CACHE_KEY);
+
+  if (cache) {
+    try {
+      const parsedCache = JSON.parse(cache);
+      // Update the eventDetailsMap while preserving timestamp and other metadata
+      parsedCache.eventDetailsMap = Array.from(eventDetailsMap.entries());
+      localStorage.setItem(CACHE_KEY, JSON.stringify(parsedCache));
+    } catch (e) {
+      // If cache is corrupted, create new one
+      localStorage.setItem(CACHE_KEY, JSON.stringify({
+        timestamp: Date.now(),
+        eventDetailsMap: Array.from(eventDetailsMap.entries())
+      }));
+    }
+  } else {
+    // No existing cache, create new one
+    localStorage.setItem(CACHE_KEY, JSON.stringify({
+      timestamp: Date.now(),
+      eventDetailsMap: Array.from(eventDetailsMap.entries())
+    }));
+  }
 }
 
 export function restoreApplicationState(): ApplicationState | null {
