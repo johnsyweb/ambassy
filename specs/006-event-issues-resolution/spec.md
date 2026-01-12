@@ -32,16 +32,17 @@ Replace console error messages for missing event details with an Issues tab that
 - User can select a matching event to resolve the issue
 - Resolved events are added to eventDetailsMap with correct coordinates
 
-### US3: Resolve Issue by Placing Pin
-**As a** Regional Event Ambassador  
-**I want to** place a pin on the map to manually set coordinates  
-**So that** I can resolve issues for events that aren't in events.json (restricted, discontinued, etc.)
+### US3: Resolve Issue by Providing Address
+**As a** Regional Event Ambassador
+**I want to** enter a street address to automatically set coordinates
+**So that** I can resolve issues for closed/restricted events that don't appear in events.json
 
 **Acceptance Criteria:**
-- User can click on map to place a pin
-- Pin placement sets coordinates for the event
-- Event is marked as resolved
-- Manual coordinates are stored in eventDetailsMap
+- User can enter a street address for the event location
+- System geocodes the address to obtain coordinates
+- Geocoded coordinates are set for the event
+- Event is marked as resolved with geocoded coordinates stored in eventDetailsMap
+- Clear error message if geocoding fails
 
 ## Functional Requirements
 
@@ -69,20 +70,21 @@ Replace console error messages for missing event details with an Issues tab that
   - Restricted events
 - User can select a matching event to resolve the issue
 
-### FR-004: Map Pin Resolution
-- User can click on map to place a pin for an event
-- Pin placement must set coordinates for the selected event
-- Coordinates must be stored in eventDetailsMap
-- Event must be marked as resolved
+### FR-004: Address Geocoding Resolution
+- User can enter a street address for the event location
+- System must geocode the address to obtain latitude/longitude coordinates
+- Geocoded coordinates must be stored in eventDetailsMap
+- Event must be marked as resolved with geocoding method logged
+- System must handle geocoding failures gracefully with clear error messages
 
 ### FR-005: Issue Resolution Tracking
 - Resolved issues must be removed from the Issues table
-- Resolution method must be logged in the changes log (found in events.json vs. manual pin placement)
+- Resolution method must be logged in the changes log (found in events.json vs. address geocoding)
 - Resolution log entries must include:
   - Event name
-  - Resolution method (found_in_events_json or manual_pin)
+  - Resolution method (found_in_events_json or geocoded_address)
   - Timestamp
-  - Source event name (if found via search) or coordinates (if manual pin)
+  - Source event name (if found via search) or address (if geocoded)
 - Resolved events must appear in Event Teams table and map
 - Resolution state must persist across application reloads via localStorage
 
@@ -101,10 +103,11 @@ Replace console error messages for missing event details with an Issues tab that
 - Search algorithm must handle fuzzy matching for typos
 - Search must check all name fields in EventDetails
 
-### TR-003: Map Pin Placement
-- Map must support click-to-place-pin functionality
-- Pin coordinates must be captured and stored
-- Pin must be associated with the selected issue
+### TR-003: Address Geocoding
+- System must integrate with geocoding service (browser Geolocation API or external service)
+- Address input must be validated and formatted for geocoding
+- Geocoding results must be validated for accuracy and relevance
+- Failed geocoding attempts must be logged and reported to user
 
 ### TR-004: Data Persistence
 - Resolved events must be persisted to localStorage via eventDetailsMap
@@ -131,12 +134,12 @@ Replace console error messages for missing event details with an Issues tab that
 - UI must display all matches with distinguishing information
 
 ### EC-002: No Matches Found
-- If search finds no matches, user must be able to place pin manually
-- Clear indication that manual placement is required
+- If search finds no matches, user must be able to enter address manually
+- Clear indication that address entry is required
 
 ### EC-003: Restricted Events
-- Restricted events may not appear in events.json
-- System must allow manual pin placement for restricted events
+- Restricted/closed events may not appear in events.json
+- System must allow address-based geocoding for restricted events
 
 ### EC-004: Event Name Changes
 - Events may have changed names
@@ -147,6 +150,7 @@ Replace console error messages for missing event details with an Issues tab that
 ### Session 2026-01-08
 
 - Q: Should issue resolution be logged in the change log and persisted across reloads? → A: Yes, resolution must be logged in the changes log with event name, resolution method, timestamp, and source details. Resolution state persists via localStorage (eventDetailsMap and changes log).
+- Q: How should closed/restricted events be resolved? → A: Replace pin placement entirely with address geocoding (loses manual precision).
 
 ## Success Criteria
 
