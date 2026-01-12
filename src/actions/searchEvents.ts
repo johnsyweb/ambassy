@@ -50,21 +50,26 @@ export function searchEvents(query: string, events: EventDetailsMap): EventDetai
         matchType = "exact";
         break;
       } else if (field.normalized === normalizedQuery) {
-        bestScore = Math.min(bestScore, 1);
-        matchType = "normalized";
+        if (bestScore > 1) {
+          bestScore = 1;
+          matchType = "normalized";
+        }
       } else if (field.normalized.includes(normalizedQuery) || normalizedQuery.includes(field.normalized)) {
         const partialMatchScore = Math.abs(field.normalized.length - normalizedQuery.length) + 50;
-        bestScore = Math.min(bestScore, partialMatchScore);
-        if (matchType !== "exact" && matchType !== "normalized") {
-          matchType = "fuzzy";
+        if (bestScore > partialMatchScore) {
+          bestScore = partialMatchScore;
+          if (matchType === "fuzzy") {
+            matchType = "fuzzy";
+          }
         }
       } else {
         const threshold =
           field.normalized.length < 10 ? FUZZY_THRESHOLD_SHORT : FUZZY_THRESHOLD_LONG;
         const distance = levenshteinDistance(field.normalized, normalizedQuery);
         if (distance <= threshold) {
-          bestScore = Math.min(bestScore, 100 + distance);
-          if (matchType !== "exact" && matchType !== "normalized") {
+          const fuzzyScore = 100 + distance;
+          if (bestScore > fuzzyScore) {
+            bestScore = fuzzyScore;
             matchType = "fuzzy";
           }
         }
