@@ -235,7 +235,21 @@ export function populateMap(
   });
 
   // Add markers for prospective events
-  if (prospectiveEvents) {
+  if (prospectiveEvents && prospectiveEvents.length > 0) {
+    console.log(`Processing ${prospectiveEvents.length} prospective events for map markers`);
+    let prospectsWithCoordinates = 0;
+    let prospectsDisplayed = 0;
+
+    prospectiveEvents.forEach((prospect) => {
+      const hasCoordinates = !!(prospect.coordinates && prospect.geocodingStatus === 'success');
+      const hasAmbassador = !!prospect.eventAmbassador;
+
+      if (hasCoordinates) prospectsWithCoordinates++;
+      if (hasCoordinates && hasAmbassador) prospectsDisplayed++;
+    });
+
+    console.log(`Summary: ${prospectsWithCoordinates}/${prospectiveEvents.length} have coordinates, ${prospectsDisplayed} will be displayed on map`);
+
     prospectiveEvents.forEach((prospect) => {
       if (prospect.coordinates && prospect.geocodingStatus === 'success') {
         const [longitude, latitude] = prospect.coordinates;
@@ -267,15 +281,19 @@ export function populateMap(
         markersLayer.addLayer(marker);
       }
     });
+  } else {
+    console.log('No prospective events to process');
   }
 
   // Add markersLayer to map
   markersLayer.addTo(map!);
 
   // Add prospective events to voronoi calculation
-  if (prospectiveEvents) {
+  if (prospectiveEvents && prospectiveEvents.length > 0) {
+    let prospectsInVoronoi = 0;
     prospectiveEvents.forEach((prospect) => {
       if (prospect.coordinates && prospect.geocodingStatus === 'success' && prospect.eventAmbassador) {
+        prospectsInVoronoi++;
         const [lng, lat] = prospect.coordinates;
 
         // Get the RA color for the voronoi polygon
@@ -296,6 +314,7 @@ export function populateMap(
         voronoiPoints.push([lng, lat, JSON.stringify({ raColor, tooltip })]);
       }
     });
+    console.log(`${prospectsInVoronoi} prospective events added to Voronoi calculation`);
   }
 
   // Remove duplicate coordinates to prevent degenerate Voronoi polygons

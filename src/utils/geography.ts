@@ -133,6 +133,7 @@ export async function geocodeAddress(
  * Geocode a prospective event using country and state
  */
 export async function geocodeProspectiveEvent(
+  prospectEvent: string,
   country: string,
   state: string
 ): Promise<{
@@ -141,8 +142,8 @@ export async function geocodeProspectiveEvent(
   error?: string;
 }> {
   try {
-    // Create a search query from country and state
-    const query = `${state}, ${country}`;
+    // Create a search query from prospect event name, state and country
+    const query = `${prospectEvent}, ${state}, ${country}`;
     const encodedQuery = encodeURIComponent(query);
 
     // Use Nominatim API for geocoding
