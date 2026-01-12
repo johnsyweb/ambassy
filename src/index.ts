@@ -611,6 +611,9 @@ async function ambassy() {
     // Initialize navigation handlers BEFORE populating tables
     initializeTableMapNavigation();
     
+    // Initialize Issues tab callback
+    initializeIssuesTab();
+    
     refreshUI(eventDetails, eventTeamsTableData, log, eventAmbassadors, regionalAmbassadors);
   } else {
     introduction.style.display = "block";
@@ -630,6 +633,61 @@ async function ambassy() {
   }
 
   updateButtonVisibility(hasData, isMapViewDisplayed());
+}
+
+function refreshIssuesTable(): void {
+  if (!eventDetails || !eventTeamsTableData) {
+    return;
+  }
+
+  const eventTeams = getEventTeamsFromSession();
+  const eventAmbassadors = getEventAmbassadorsFromSession();
+  const regionalAmbassadors = getRegionalAmbassadorsFromSession();
+
+  if (!eventTeams || eventAmbassadors.size === 0 || regionalAmbassadors.size === 0) {
+    return;
+  }
+
+  const issues = detectIssues(eventTeams, eventDetails, eventAmbassadors, regionalAmbassadors);
+  issuesState.issues = issues;
+
+  populateIssuesTable(
+    issues,
+    issuesState,
+    (issue: EventIssue) => {
+      setSelectedIssue(issuesState, issue.eventShortName);
+      populateIssuesTable(issues, issuesState, onIssueSelect, onSearchEvents, onPlacePin);
+    },
+    (issue: EventIssue) => {
+      // TODO: Implement search events dialog (Phase 4)
+      alert(`Search Events for "${issue.eventShortName}" - Coming soon`);
+    },
+    (issue: EventIssue) => {
+      // TODO: Implement pin placement (Phase 5)
+      alert(`Place Pin for "${issue.eventShortName}" - Coming soon`);
+    }
+  );
+}
+
+function onIssueSelect(issue: EventIssue): void {
+  setSelectedIssue(issuesState, issue.eventShortName);
+  refreshIssuesTable();
+}
+
+function onSearchEvents(issue: EventIssue): void {
+  // TODO: Implement search events dialog (Phase 4)
+  alert(`Search Events for "${issue.eventShortName}" - Coming soon`);
+}
+
+function onPlacePin(issue: EventIssue): void {
+  // TODO: Implement pin placement (Phase 5)
+  alert(`Place Pin for "${issue.eventShortName}" - Coming soon`);
+}
+
+function initializeIssuesTab(): void {
+  setIssuesTabVisibleCallback(() => {
+    refreshIssuesTable();
+  });
 }
 
 function initializeTableMapNavigation(): void {
