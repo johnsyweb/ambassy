@@ -88,6 +88,34 @@ describe("reallocateEventTeam", () => {
     expect(updatedData?.eventAmbassador).toBe(newAmbassador);
   });
 
+  it("should update Regional Ambassador relationship when EA changes", () => {
+    // Set up: New EA is supported by a different REA
+    regionalAmbassadors.set("New REA", {
+      name: "New REA",
+      state: "VIC",
+      supportsEAs: ["New EA"],
+    });
+    regionalAmbassadors.set("Current REA", {
+      name: "Current REA",
+      state: "VIC",
+      supportsEAs: ["Current EA"],
+    });
+
+    reallocateEventTeam(
+      eventShortName,
+      oldAmbassador,
+      newAmbassador,
+      eventAmbassadors,
+      eventTeamsTableData,
+      log,
+      regionalAmbassadors
+    );
+
+    const updatedData = eventTeamsTableData.get(eventShortName);
+    expect(updatedData?.eventAmbassador).toBe(newAmbassador);
+    expect(updatedData?.regionalAmbassador).toBe("New REA");
+  });
+
   it("should persist changes via assignEventToAmbassador", () => {
     reallocateEventTeam(
       eventShortName,

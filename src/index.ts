@@ -780,6 +780,8 @@ function initializeTableMapNavigation(): void {
           }
 
           try {
+            const eventTeams = getEventTeamsFromSession();
+            
             reallocateEventTeam(
               eventShortName,
               eventData.eventAmbassador,
@@ -787,7 +789,9 @@ function initializeTableMapNavigation(): void {
               eventAmbassadors,
               eventTeamsTableData,
               log,
-              regionalAmbassadors
+              regionalAmbassadors,
+              eventTeams,
+              eventDetails ?? undefined
             );
 
             persistChangesLog(log);
