@@ -11,8 +11,8 @@ export function populateEventTeamsTable(
   eventTeamsTableData: EventTeamsTableDataMap,
   eventDetailsMap: EventDetailsMap,
   changelog: LogEntry[],
-  _eventAmbassadors?: EventAmbassadorMap,
-  _regionalAmbassadors?: RegionalAmbassadorMap
+  eventAmbassadors?: EventAmbassadorMap,
+  regionalAmbassadors?: RegionalAmbassadorMap
 ): void {
   const tableBody = document.querySelector('#eventTeamsTable tbody');
   if (!tableBody) {
