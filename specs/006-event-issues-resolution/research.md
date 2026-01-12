@@ -46,7 +46,7 @@
 **Implementation Notes**:
 - User selects issue from table
 - Address input field becomes available
-- User enters address (e.g., "Quentin Rd, Puckapunyal VIC 3662")
+- User enters address (e.g., "Unit 10, 82/86 Minnie St, Southport QLD 4215")
 - System geocodes address to coordinates
 - Clear error message if geocoding fails
 - Resolved event appears on map with standard marker

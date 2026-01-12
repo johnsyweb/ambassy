@@ -37,23 +37,45 @@ export async function geocodeAddress(address: string): Promise<{lat: number, lng
       throw new Error(`Geocoding service returned ${response.status}`);
     }
 
-    const data: GeocodingResult[] = await response.json();
+    const data: any[] = await response.json();
 
-    if (data.length === 0) {
+    if (!Array.isArray(data) || data.length === 0) {
       throw new Error('No geocoding results found for address');
     }
 
     const result = data[0];
-    const lat = typeof result.lat === 'string' ? parseFloat(result.lat) : result.lat;
-    const lng = typeof result.lng === 'string' ? parseFloat(result.lng) : result.lng;
+
+    // Handle different possible coordinate formats from Nominatim
+    let lat: number;
+    let lng: number;
+
+    if (typeof result.lat === 'string') {
+      lat = parseFloat(result.lat);
+    } else if (typeof result.lat === 'number') {
+      lat = result.lat;
+    } else {
+      throw new Error('Invalid latitude format in geocoding response');
+    }
+
+    if (typeof result.lon === 'string') {
+      lng = parseFloat(result.lon);
+    } else if (typeof result.lon === 'number') {
+      lng = result.lon;
+    } else if (typeof result.lng === 'string') {
+      lng = parseFloat(result.lng);
+    } else if (typeof result.lng === 'number') {
+      lng = result.lng;
+    } else {
+      throw new Error('Invalid longitude format in geocoding response');
+    }
 
     if (isNaN(lat) || isNaN(lng)) {
-      throw new Error('Invalid coordinates returned from geocoding service');
+      throw new Error(`Invalid coordinates: lat=${lat}, lng=${lng}`);
     }
 
     // Validate coordinate ranges
     if (lat < -90 || lat > 90 || lng < -180 || lng > 180) {
-      throw new Error('Coordinates out of valid range');
+      throw new Error(`Coordinates out of valid range: lat=${lat}, lng=${lng}`);
     }
 
     return { lat, lng };

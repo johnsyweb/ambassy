@@ -109,7 +109,7 @@ Resolves an issue by geocoding an address to obtain coordinates.
 
 **Parameters**:
 - `issue` (EventIssue): The issue to resolve
-- `address` (string): Street address to geocode (e.g., "Quentin Rd, Puckapunyal VIC 3662")
+- `address` (string): Street address to geocode (e.g., "Unit 10, 82/86 Minnie St, Southport QLD 4215")
 - `eventDetailsMap` (EventDetailsMap): Map to update (will be modified)
 
 **Returns**: `Promise<void>`

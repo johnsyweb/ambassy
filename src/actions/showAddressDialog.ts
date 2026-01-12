@@ -34,7 +34,7 @@ export function showAddressDialog(
 
   const input = document.createElement("input");
   input.type = "text";
-  input.placeholder = "e.g., Quentin Rd, Puckapunyal VIC 3662";
+  input.placeholder = "e.g., Unit 10, 82/86 Minnie St, Southport QLD 4215";
   input.style.width = "100%";
   input.style.padding = "0.5em";
   input.style.marginBottom = "1em";

@@ -131,7 +131,7 @@
 
 **Goal**: Enable users to enter a street address that gets automatically geocoded to coordinates for closed/restricted events not in events.json.
 
-**Independent Test**: Select an issue from Issues table, enter a street address (e.g., "Quentin Rd, Puckapunyal VIC 3662"), verify geocoding succeeds, verify issue is resolved, verify event appears on map with geocoded coordinates. This delivers value by enabling users to resolve issues for closed/restricted events using simple address entry.
+**Independent Test**: Select an issue from Issues table, enter a street address (e.g., "Unit 10, 82/86 Minnie St, Southport QLD 4215"), verify geocoding succeeds, verify issue is resolved, verify event appears on map with geocoded coordinates. This delivers value by enabling users to resolve issues for closed/restricted events using simple address entry.
 
 ### Tests for User Story 3
 

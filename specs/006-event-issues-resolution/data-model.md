@@ -108,7 +108,7 @@ Extended to support geocoded coordinates for events not in events.json.
 
 **Option B: Address Geocoding**
 1. User selects issue from table
-2. User enters street address (e.g., "Quentin Rd, Puckapunyal VIC 3662")
+2. User enters street address (e.g., "Unit 10, 82/86 Minnie St, Southport QLD 4215")
 3. System geocodes address to obtain coordinates
 4. `resolveIssueWithAddress()` creates EventDetails with geocoded coordinates
 5. Event added to `eventDetailsMap` with `geocodedAddress: true`
