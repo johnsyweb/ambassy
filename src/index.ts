@@ -42,6 +42,8 @@ import { detectIssues } from "./actions/detectIssues";
 import { populateIssuesTable } from "./actions/populateIssuesTable";
 import { IssuesState, createIssuesState, setSelectedIssue } from "./models/IssuesState";
 import { EventIssue } from "./models/EventIssue";
+import { IssuesState, createIssuesState, setSelectedIssue } from "./models/IssuesState";
+import { EventIssue } from "./models/EventIssue";
 
 function getRegionalAmbassadorsFromSession(): RegionalAmbassadorMap {
   const storedRegionalAmbassadors = loadFromStorage<Array<[string, RegionalAmbassador]>>("regionalAmbassadors");
