@@ -22,9 +22,9 @@ Represents an event that is missing coordinates or details from events.json.
   - `missing_coordinates`: Event not found in events.json, needs coordinates
   - `missing_details`: Event found but missing required details
 - `status: "unresolved" | "resolved"` (required) - Resolution status
-- `resolutionMethod?: "found_in_events_json" | "manual_pin"` (optional) - How issue was resolved
+- `resolutionMethod?: "found_in_events_json" | "geocoded_address"` (optional) - How issue was resolved
   - `found_in_events_json`: Event was found via search in events.json
-  - `manual_pin`: Coordinates were set manually via map pin placement
+  - `geocoded_address`: Coordinates were obtained via address geocoding
 - `resolvedAt?: number` (optional) - Timestamp when issue was resolved (Unix timestamp)
 
 **Relationships**:
@@ -40,7 +40,7 @@ Represents an event that is missing coordinates or details from events.json.
 - If `status === "resolved"`, `resolutionMethod` and `resolvedAt` must be present
 
 **State Transitions**:
-- `unresolved` → `resolved` (via `resolveIssueWithEvent` or `resolveIssueWithPin`)
+- `unresolved` → `resolved` (via `resolveIssueWithEvent` or `resolveIssueWithAddress`)
 - Once resolved, issue is removed from active issues list
 
 ### IssuesState
@@ -67,19 +67,20 @@ Tracks the current state of issues detection and resolution.
 
 ### EventDetails (Extended)
 
-Extended to support manual coordinates for events not in events.json.
+Extended to support geocoded coordinates for events not in events.json.
 
 **New Fields**:
-- `manualCoordinates?: boolean` (optional) - Flag indicating coordinates were set manually
-- `source?: "events_json" | "manual"` (optional) - Source of event details
+- `geocodedAddress?: boolean` (optional) - Flag indicating coordinates were obtained via geocoding
+- `sourceAddress?: string` (optional) - Original address used for geocoding
+- `source?: "events_json" | "geocoded"` (optional) - Source of event details
 
 **Existing Fields**: (unchanged)
 - `id`, `type`, `geometry`, `properties` - All existing fields preserved
 
 **Validation Rules**:
-- If `manualCoordinates === true`, `source` must be "manual"
-- If `source === "manual"`, `geometry.coordinates` must be present
-- Manual events may have minimal `properties` (only EventShortName required)
+- If `geocodedAddress === true`, `source` must be "geocoded" and `sourceAddress` must be present
+- If `source === "geocoded"`, `geometry.coordinates` must be present
+- Geocoded events may have minimal `properties` (only EventShortName required)
 
 **Relationships**: (unchanged)
 - Referenced by `EventTeam` via EventShortName
@@ -105,34 +106,33 @@ Extended to support manual coordinates for events not in events.json.
 5. Issue marked as resolved, removed from issues list
 6. Map and Event Teams table refreshed
 
-**Option B: Manual Pin Placement**
+**Option B: Address Geocoding**
 1. User selects issue from table
-2. User clicks "Place Pin" button
-3. Map enters pin placement mode
-4. User clicks map location
-5. `resolveIssueWithPin()` creates EventDetails with manual coordinates
-6. Event added to `eventDetailsMap` with `manualCoordinates: true`
-7. Issue marked as resolved, removed from issues list
-8. Map and Event Teams table refreshed
+2. User enters street address (e.g., "Quentin Rd, Puckapunyal VIC 3662")
+3. System geocodes address to obtain coordinates
+4. `resolveIssueWithAddress()` creates EventDetails with geocoded coordinates
+5. Event added to `eventDetailsMap` with `geocodedAddress: true`
+6. Issue marked as resolved, removed from issues list
+7. Map and Event Teams table refreshed
 
 ### Persistence Flow
 
-1. Resolved events (both found and manual) stored in `eventDetailsMap`
+1. Resolved events (both found and geocoded) stored in `eventDetailsMap`
 2. `eventDetailsMap` persisted to localStorage via existing persistence mechanism
-3. Manual coordinates persist alongside fetched events
-4. On reload, manual events loaded from localStorage
+3. Geocoded coordinates persist alongside fetched events
+4. On reload, geocoded events loaded from localStorage
 5. Issues recalculated from current `eventTeams` and `eventDetailsMap`
 
 ## Storage Strategy
 
 **Issues**: Not persisted (derived data, recalculated on load)
 **Resolved Events**: Persisted in `eventDetailsMap` (same storage as fetched events)
-**Manual Coordinates**: Stored in `EventDetails.geometry.coordinates` with `manualCoordinates: true` flag
+**Geocoded Coordinates**: Stored in `EventDetails.geometry.coordinates` with `geocodedAddress: true` flag and `sourceAddress` field
 
 ## Validation Rules Summary
 
 - Event names must be non-empty strings
 - Ambassadors must exist in respective Maps
 - Resolved issues must have resolution method and timestamp
-- Manual events must have valid coordinates
+- Geocoded events must have valid coordinates and source address
 - Issues are recalculated when eventDetailsMap changes

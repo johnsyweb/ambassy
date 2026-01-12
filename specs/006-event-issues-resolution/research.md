@@ -27,25 +27,29 @@
 - Use Levenshtein distance threshold (e.g., distance <= 2 for short names, <= 3 for longer names)
 - Sort results by match quality (exact > normalized > fuzzy)
 
-### 2. Map Pin Placement UX
+### 2. Address Geocoding UX
 
-**Decision**: Select issue → click map to place pin (issue-driven workflow)
+**Decision**: Select issue → enter street address → automatic geocoding (issue-driven workflow)
 
 **Rationale**:
-- User selects issue first, then places pin - clear workflow
-- Pin placement is contextual to the selected issue
+- User selects issue first, then enters address - clear workflow
+- Address entry is contextual to the selected issue
 - Prevents confusion about which issue is being resolved
-- Matches common map editing patterns
+- More user-friendly than manual map clicking
+- Automatic geocoding provides accurate coordinates
 
 **Alternatives Considered**:
 - Click map → select issue: Less intuitive, requires remembering which pin corresponds to which issue
-- Drag-and-drop pin: More complex, not necessary for single coordinate placement
+- Address entry → manual pin adjustment: More complex, not necessary if geocoding is accurate
+- Hybrid approach: Geocode first, then allow manual adjustment
 
 **Implementation Notes**:
 - User selects issue from table
-- "Place Pin" button becomes enabled
-- Clicking map places pin and resolves issue
-- Pin is visually distinct (different color/style) from regular event markers
+- Address input field becomes available
+- User enters address (e.g., "Quentin Rd, Puckapunyal VIC 3662")
+- System geocodes address to coordinates
+- Clear error message if geocoding fails
+- Resolved event appears on map with standard marker
 
 ### 3. Issues Data Structure
 
@@ -53,7 +57,7 @@
 
 **Rationale**:
 - Issues are derived data (can be regenerated from eventTeams and eventDetails)
-- Only resolved events need persistence (manual coordinates)
+- Only resolved events need persistence (geocoded coordinates)
 - Reduces storage complexity
 - Issues recalculated on each load ensures accuracy
 
@@ -64,7 +68,7 @@
 **Implementation Notes**:
 - Issues stored as `EventIssue[]` array
 - Resolved events stored in eventDetailsMap (same structure as fetched events)
-- Manual coordinates marked with special flag or stored separately
+- Geocoded coordinates marked with special flag or stored separately
 - Issues recalculated when eventDetailsMap changes
 
 ### 4. Events.json Search Performance
@@ -86,9 +90,31 @@
 - Normalize all event names once when events.json is loaded
 - Create lookup map by normalized name for fast exact matches
 - Use Levenshtein for fuzzy matches (can be optimized with early termination)
-- Limit results to top N matches (e.g., 10) for performance
+- Limit results to top N matches (e.g., 20) for performance
 
-### 5. Tab Navigation Integration
+### 5. Geocoding Service Selection
+
+**Decision**: Use browser Geolocation API with fallback to external geocoding service
+
+**Rationale**:
+- Browser Geolocation API provides free, privacy-respecting geocoding
+- No API keys required for basic usage
+- Fallback to external service (OpenStreetMap Nominatim) for better accuracy
+- Handles both forward geocoding (address → coordinates) and reverse geocoding if needed
+
+**Alternatives Considered**:
+- Google Maps Geocoding API: Requires API key, usage limits, not free for heavy usage
+- Mapbox Geocoding API: Similar limitations to Google Maps
+- Pure client-side solutions: Limited accuracy, no external data sources
+
+**Implementation Notes**:
+- Try browser Geolocation API first (navigator.geolocation)
+- Fallback to Nominatim API (https://nominatim.openstreetmap.org/)
+- Handle rate limiting and error cases
+- Validate geocoding results for accuracy
+- Cache geocoding results to avoid repeated API calls
+
+### 6. Tab Navigation Integration
 
 **Decision**: Add Issues tab to existing tab system using same pattern as other tabs
 
@@ -112,9 +138,9 @@
 ### Existing Systems
 
 - **Tab System**: `src/utils/tabs.ts` - Add Issues tab
-- **Event Details**: `src/models/EventDetails.ts` - Extend to support manual coordinates
+- **Event Details**: `src/models/EventDetails.ts` - Extend to support geocoded coordinates
 - **Event Fetching**: `src/actions/fetchEvents.ts` - Already fetches events.json
-- **Map System**: `src/actions/populateMap.ts` - Add pin placement handler
+- **Map System**: `src/actions/populateMap.ts` - Display geocoded events as markers
 - **Table Generation**: `src/models/EventTeamsTable.ts` - Modify to detect issues instead of logging errors
 
 ### New Components
@@ -122,5 +148,6 @@
 - **Issues Detection**: `src/actions/detectIssues.ts` - Identify events without coordinates
 - **Issues Table**: `src/actions/populateIssuesTable.ts` - Display issues in table
 - **Event Search**: `src/actions/searchEvents.ts` - Search events.json with fuzzy matching
-- **Issue Resolution**: `src/actions/resolveIssue.ts` - Resolve issues (found or manual)
-- **Map Pin Placement**: `src/actions/placeMapPin.ts` - Handle map click for pin placement
+- **Issue Resolution**: `src/actions/resolveIssue.ts` - Resolve issues (found or geocoded)
+- **Address Geocoding**: `src/actions/geocodeAddress.ts` - Convert addresses to coordinates
+- **Geocoding Service**: `src/utils/geocoding.ts` - Handle geocoding API calls

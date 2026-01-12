@@ -103,68 +103,99 @@ Resolves an issue by adding the found event from events.json to the eventDetails
 
 ## Resolve Issue with Pin
 
-### `resolveIssueWithPin(issue: EventIssue, coordinates: [number, number], eventDetailsMap: EventDetailsMap): void`
+### `resolveIssueWithAddress(issue: EventIssue, address: string, eventDetailsMap: EventDetailsMap): Promise<void>`
 
-Resolves an issue by creating EventDetails with manually placed pin coordinates.
+Resolves an issue by geocoding an address to obtain coordinates.
 
 **Parameters**:
 - `issue` (EventIssue): The issue to resolve
-- `coordinates` ([number, number]): [longitude, latitude] coordinates from map pin
+- `address` (string): Street address to geocode (e.g., "Quentin Rd, Puckapunyal VIC 3662")
 - `eventDetailsMap` (EventDetailsMap): Map to update (will be modified)
 
-**Returns**: `void`
+**Returns**: `Promise<void>`
 
 **Throws**:
-- `Error` if coordinates are invalid (not numbers, out of valid range)
+- `Error` if address is empty or geocoding fails
+- `Error` if geocoding returns invalid coordinates
 
 **Side Effects**:
-- Creates new `EventDetails` with manual coordinates
+- Calls geocoding service to convert address to coordinates
+- Creates new `EventDetails` with geocoded coordinates
 - Adds to `eventDetailsMap` with key `issue.eventShortName`
-- Sets `manualCoordinates: true` flag
+- Sets `geocodedAddress: true` flag and `sourceAddress` field
 - Updates issue status to "resolved"
 - Logs resolution to changes log
 
 **Preconditions**:
 - `issue.status` must be "unresolved"
-- `coordinates` must be valid [longitude, latitude] tuple
-- Longitude must be between -180 and 180
-- Latitude must be between -90 and 90
+- `address` must be non-empty string
+- Geocoding service must be available
 
 **Postconditions**:
-- EventDetails created with manual coordinates
+- EventDetails created with geocoded coordinates
 - Event added to `eventDetailsMap`
 - Issue marked as resolved
 - Resolution logged
 
 ---
 
-## Place Map Pin
+## Geocode Address
 
-### `placeMapPin(map: L.Map, onPinPlaced: (coordinates: [number, number]) => void): () => void`
+### `geocodeAddress(address: string): Promise<{lat: number, lng: number}>`
 
-Enables map pin placement mode. Returns cleanup function to disable pin placement.
+Converts a street address to geographic coordinates using geocoding service.
 
 **Parameters**:
-- `map` (L.Map): Leaflet map instance
-- `onPinPlaced` ((coordinates: [number, number]) => void): Callback when pin is placed
+- `address` (string): Street address to geocode
 
-**Returns**: `() => void` - Cleanup function to disable pin placement
+**Returns**: `Promise<{lat: number, lng: number}>` - Promise resolving to latitude/longitude coordinates
+
+**Throws**:
+- `Error` if address is empty
+- `Error` if geocoding service unavailable
+- `Error` if geocoding fails or returns no results
+
+**Side Effects**:
+- Makes HTTP request to geocoding service
+- May cache geocoding results
+
+**Preconditions**:
+- `address` must be non-empty string
+- Network connection available for geocoding service
+
+**Postconditions**:
+- Returns valid latitude/longitude coordinates
+- Results may be cached for performance
+
+---
+
+## Show Address Dialog
+
+### `showAddressDialog(issue: EventIssue, onAddressEntered: (address: string) => void, onCancel: () => void): void`
+
+Displays dialog for entering street address for geocoding.
+
+**Parameters**:
+- `issue` (EventIssue): The issue being resolved
+- `onAddressEntered` ((address: string) => void): Callback when address is entered and geocoding should proceed
+- `onCancel` (() => void): Callback when user cancels
+
+**Returns**: `void`
 
 **Throws**: None
 
 **Side Effects**:
-- Adds click event listener to map
-- Changes map cursor to indicate pin placement mode
-- Removes listener when cleanup function is called
+- Displays modal dialog
+- Focuses address input field
+- Handles keyboard navigation (Enter to submit, Escape to cancel)
 
 **Preconditions**:
-- `map` must be initialized Leaflet map
-- `onPinPlaced` must be valid function
+- `issue` must have valid event information
+- Dialog container must exist in DOM
 
 **Postconditions**:
-- Map click handler added
-- Cursor changed to indicate pin placement mode
-- Cleanup function returned to remove handler
+- Dialog displayed with address input focused
+- Callbacks attached for address entry and cancellation
 
 ---
 

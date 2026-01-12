@@ -5,19 +5,19 @@
 
 ## Summary
 
-Replace console error messages for missing event details with an Issues tab that displays a table of events without coordinates. Users can resolve issues by finding events from parkrun's events.json (handling name variations, typos, parentheses, restricted events) or by placing pins on the map to manually set coordinates.
+Replace console error messages for missing event details with an Issues tab that displays a table of events without coordinates. Users can resolve issues by finding events from parkrun's events.json (handling name variations, typos, parentheses, restricted events) or by entering street addresses for closed/restricted events that get automatically geocoded to coordinates.
 
 ## Technical Context
 
 **Language/Version**: TypeScript (strict mode)  
-**Primary Dependencies**: Leaflet (map), axios (events.json fetching), existing Ambassy modules  
-**Storage**: localStorage (for resolved events and manual coordinates)  
-**Testing**: Jest  
-**Target Platform**: Modern web browsers (ES6+)  
-**Project Type**: Single-page web application  
-**Performance Goals**: Issues detection <100ms, event search <500ms, map pin placement <50ms  
-**Constraints**: Must handle large events.json files efficiently, must not block UI during issue detection  
-**Scale/Scope**: Handle hundreds of events, support fuzzy search across thousands of events in events.json
+**Primary Dependencies**: Leaflet (map), axios (events.json fetching), browser Geolocation API or external geocoding service, existing Ambassy modules
+**Storage**: localStorage (for resolved events and geocoded coordinates)
+**Testing**: Jest
+**Target Platform**: Modern web browsers (ES6+)
+**Project Type**: Single-page web application
+**Performance Goals**: Issues detection <100ms, event search <500ms, address geocoding <1000ms
+**Constraints**: Must handle large events.json files efficiently, must not block UI during issue detection, geocoding may require network requests
+**Scale/Scope**: Handle hundreds of events, support fuzzy search across thousands of events in events.json, handle geocoding API rate limits
 
 ## Constitution Check
 
@@ -86,7 +86,7 @@ src/
 │   ├── detectIssues.ts        # New: Detect events without coordinates
 │   ├── populateIssuesTable.ts # New: Populate Issues tab table
 │   ├── searchEvents.ts        # New: Search events.json for matches
-│   ├── resolveIssue.ts        # New: Resolve issue (found or manual)
+│   ├── resolveIssue.ts        # New: Resolve issue (found or geocoded)
 │   └── placeMapPin.ts         # New: Handle map pin placement
 ├── utils/
 │   └── fuzzyMatch.ts          # New: Fuzzy matching for event names
