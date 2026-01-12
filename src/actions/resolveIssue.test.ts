@@ -124,7 +124,7 @@ describe("resolveIssueWithPin", () => {
     resolveIssueWithPin(issue, coordinates, eventDetailsMap, log);
 
     const createdEvent = eventDetailsMap.get(issue.eventShortName);
-    expect((createdEvent as any).manualCoordinates).toBe(true);
+    expect((createdEvent as EventDetails & { manualCoordinates?: boolean }).manualCoordinates).toBe(true);
   });
 
   it("should log resolution to changes log", () => {

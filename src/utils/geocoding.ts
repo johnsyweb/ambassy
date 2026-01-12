@@ -5,8 +5,9 @@
 const NOMINATIM_URL = 'https://nominatim.openstreetmap.org/search';
 
 export interface GeocodingResult {
-  lat: number;
-  lng: number;
+  lat: number | string;
+  lon: number | string;
+  lng?: number | string;
   display_name: string;
 }
 
@@ -37,7 +38,7 @@ export async function geocodeAddress(address: string): Promise<{lat: number, lng
       throw new Error(`Geocoding service returned ${response.status}`);
     }
 
-    const data: any[] = await response.json();
+    const data: GeocodingResult[] = await response.json();
 
     if (!Array.isArray(data) || data.length === 0) {
       throw new Error('No geocoding results found for address');

@@ -200,9 +200,6 @@ describe("populateIssuesTable", () => {
       onPlacePin
     );
 
-    const searchButton = tableBody.querySelector(
-      'button[textContent*="Search"]'
-    ) as HTMLButtonElement;
     const buttons = Array.from(tableBody.querySelectorAll("button"));
     const searchBtn = buttons.find((btn) => btn.textContent?.includes("Search"));
 

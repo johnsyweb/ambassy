@@ -30,7 +30,7 @@ async function fetchEvents(): Promise<void> {
             }
           });
         }
-      } catch (e) {
+      } catch {
         // Ignore parse errors, proceed with fresh data
       }
     }
@@ -46,21 +46,6 @@ async function fetchEvents(): Promise<void> {
   }
 }
 
-function getCachedEvents(): EventDetailsMap | null {
-  const cache = localStorage.getItem(CACHE_KEY);
-  if (cache) {
-    try {
-      const parsedCache = JSON.parse(cache);
-      if (parsedCache.eventDetailsMap) {
-        return new Map<string, EventDetails>(parsedCache.eventDetailsMap);
-      }
-    } catch (e) {
-      return null;
-    }
-  }
-  return null;
-}
-
 export async function getEvents(): Promise<EventDetailsMap> {
   const cache = localStorage.getItem(CACHE_KEY);
   if (cache) {
@@ -71,7 +56,7 @@ export async function getEvents(): Promise<EventDetailsMap> {
         console.log('Returning cached events.');
         return new Map<string, EventDetails>(parsedCache.eventDetailsMap);
       }
-    } catch (e) {
+    } catch {
       // Cache is corrupted, refetch
     }
   }
@@ -85,7 +70,7 @@ export async function getEvents(): Promise<EventDetailsMap> {
       if (parsedCache.eventDetailsMap) {
         return new Map<string, EventDetails>(parsedCache.eventDetailsMap);
       }
-    } catch (e) {
+    } catch {
       // Ignore
     }
   }

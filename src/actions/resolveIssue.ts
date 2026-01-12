@@ -176,7 +176,7 @@ async function extractMetadataFromUrl(url: string): Promise<{
   seriesid: number;
 }> {
   // Parse URL to extract components
-  const urlMatch = url.match(/https?:\/\/(?:www\.)?parkrun\.([^\/]+)\/([^\/]+)\/?/);
+  const urlMatch = url.match(/https?:\/\/(?:www\.)?parkrun\.([^/]+)\/([^/]+)\/?/);
   if (!urlMatch) {
     throw new Error('Invalid parkrun URL format');
   }
@@ -222,7 +222,7 @@ async function extractMetadataFromUrl(url: string): Promise<{
       .map(word => word.charAt(0).toUpperCase() + word.slice(1))
       .join(' ')
       .replace(/Juniors?$/, 'juniors') + ' parkrun';
-  } catch (error) {
+  } catch {
     // Use fallback name generation
     console.warn('Could not fetch page title, using generated name');
   }

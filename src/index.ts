@@ -41,10 +41,10 @@ import { reallocateEventAmbassador } from "./actions/reallocateEventAmbassador";
 import { getRegionalAmbassadorForEventAmbassador } from "./utils/regions";
 import { detectIssues } from "./actions/detectIssues";
 import { populateIssuesTable } from "./actions/populateIssuesTable";
-import { IssuesState, createIssuesState, setSelectedIssue } from "./models/IssuesState";
+import { createIssuesState, setSelectedIssue } from "./models/IssuesState";
 import { EventIssue } from "./models/EventIssue";
 import { showEventSearchDialog } from "./actions/showEventSearchDialog";
-import { resolveIssueWithEvent, resolveIssueWithAddress } from "./actions/resolveIssue";
+import { resolveIssueWithEvent } from "./actions/resolveIssue";
 import { showAddressDialog } from "./actions/showAddressDialog";
 
 function getRegionalAmbassadorsFromSession(): RegionalAmbassadorMap {

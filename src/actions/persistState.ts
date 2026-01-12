@@ -24,7 +24,6 @@ export function persistChangesLog(changesLog: LogEntry[]): void {
 
 export function persistEventDetails(eventDetailsMap: EventDetailsMap): void {
   const CACHE_KEY = 'parkrun events';
-  const cache = localStorage.getItem(CACHE_KEY);
 
   // Always update the cache with fresh timestamp and current eventDetailsMap
   localStorage.setItem(CACHE_KEY, JSON.stringify({

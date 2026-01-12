@@ -1,5 +1,4 @@
 import { EventIssue } from "@models/EventIssue";
-import { EventDetails } from "@models/EventDetails";
 import { resolveIssueWithAddress } from "./resolveIssue";
 import { EventDetailsMap } from "@models/EventDetailsMap";
 import { LogEntry } from "@models/LogEntry";

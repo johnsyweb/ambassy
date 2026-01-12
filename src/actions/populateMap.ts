@@ -48,13 +48,13 @@ export function populateMap(
 
   let processedEvents = 0;
   let eventsWithData = 0;
-  let eventsWithoutData = 0;
+  const eventsWithoutData = 0;
 
   // Will be populated after bounds calculation
   const constrainingEvents: Array<{coords: [number, number], isConstraining: boolean, raColor?: string, tooltip?: string}> = [];
 
   // Build Voronoi points from constraining events
-  constrainingEvents.forEach(({coords: [lng, lat], isConstraining}, index) => {
+  constrainingEvents.forEach(({coords: [lng, lat], isConstraining}) => {
     if (isConstraining) {
       // Constraining points don't create polygons, just help define boundaries
       voronoiPoints.push([lng, lat, JSON.stringify({ raColor: 'transparent', tooltip: '' })]);
