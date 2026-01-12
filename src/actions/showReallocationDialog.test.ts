@@ -105,7 +105,6 @@ describe("showReallocationDialog", () => {
   });
 
   it("should create Other dropdown with all ambassadors", () => {
-    const allAmbassadors = ["EA 1", "EA 2", "EA 3", "EA 4"];
     showReallocationDialog("test-event", "Current EA", suggestions, eventAmbassadors, onSelect, onCancel);
 
     const dropdown = content.querySelector("select#otherRecipientSelect") as HTMLSelectElement;
