@@ -32,6 +32,9 @@ import { setRowClickHandler, setReallocateButtonHandler } from "./actions/popula
 import { setEventTeamsTabVisibleCallback } from "./utils/tabs";
 import { getReallocationSuggestions } from "./actions/getReallocationSuggestions";
 import { showReallocationDialog as showEventTeamReallocationDialog } from "./actions/showReallocationDialog";
+import { reallocateEventTeam } from "./actions/reallocateEventTeam";
+import { validateReallocation } from "./actions/validateReallocation";
+import { clearSelection } from "./models/SelectionState";
 
 function getRegionalAmbassadorsFromSession(): RegionalAmbassadorMap {
   const storedRegionalAmbassadors = loadFromStorage<Array<[string, RegionalAmbassador]>>("regionalAmbassadors");
@@ -760,11 +763,48 @@ function initializeTableMapNavigation(): void {
         suggestions,
         eventAmbassadors,
         (selectedAmbassador: string) => {
-          // Handle selection (User Story 3)
-          console.log("Selected ambassador:", selectedAmbassador);
+          if (!eventTeamsTableData) {
+            return;
+          }
+
+          const validation = validateReallocation(
+            eventShortName,
+            selectedAmbassador,
+            eventAmbassadors,
+            eventTeamsTableData
+          );
+
+          if (!validation.valid) {
+            alert(`Cannot reallocate: ${validation.error}`);
+            return;
+          }
+
+          try {
+            reallocateEventTeam(
+              eventShortName,
+              eventData.eventAmbassador,
+              selectedAmbassador,
+              eventAmbassadors,
+              eventTeamsTableData,
+              log,
+              regionalAmbassadors
+            );
+
+            persistChangesLog(log);
+
+            if (eventDetails) {
+              clearSelection(selectionState);
+              refreshUI(eventDetails, eventTeamsTableData, log, eventAmbassadors, regionalAmbassadors);
+            }
+
+            const eventNameDisplay = eventShortName;
+            alert(`Event "${eventNameDisplay}" reallocated to "${selectedAmbassador}"`);
+          } catch (error) {
+            alert(`Failed to reallocate event: ${error instanceof Error ? error.message : "Unknown error"}`);
+          }
         },
         () => {
-          // Handle cancel
+          // Handle cancel - dialog already closed by showEventTeamReallocationDialog
         }
       );
     } catch (error) {
