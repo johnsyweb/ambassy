@@ -1,16 +1,10 @@
 import { EventDetailsMap } from '@models/EventDetailsMap';
 import { EventTeamsTableDataMap, EventTeamsTableData } from '@models/EventTeamsTableData';
 import { LogEntry } from '@models/LogEntry';
-import { updateEventAmbassador } from '@actions/updateEventAmbassador';
-import { persistChangesLog } from './persistState';
 import { countries } from '@models/country';
 import { refreshUI } from './refreshUI';
 import { EventAmbassadorMap } from '@models/EventAmbassadorMap';
 import { RegionalAmbassadorMap } from '@models/RegionalAmbassadorMap';
-import { EventAmbassador } from '@models/EventAmbassador';
-import { RegionalAmbassador } from '@models/RegionalAmbassador';
-import { assignEventToAmbassador } from './assignEventToAmbassador';
-import { loadFromStorage } from '@utils/storage';
 import { SelectionState } from '@models/SelectionState';
 
 export function populateEventTeamsTable(
@@ -37,9 +31,6 @@ export function populateEventTeamsTable(
 
     const eventAmbassadorCell = document.createElement('td');
     eventAmbassadorCell.textContent = data.eventAmbassador;
-    eventAmbassadorCell.addEventListener('click', () => {
-      handleEventAmbassadorCellClick(eventAmbassadorCell, data, eventTeamsTableData, changelog, eventDetailsMap, eventAmbassadors, regionalAmbassadors);
-    });
     row.appendChild(eventAmbassadorCell);
 
     const eventShortNameCell = document.createElement('td');
@@ -178,78 +169,6 @@ export function updateReallocateButtonStates(): void {
       reallocateButton.onkeydown = null;
     }
   });
-}
-
-function handleEventAmbassadorCellClick(
-  eventAmbassadorCell: HTMLElement,
-  data: EventTeamsTableData,
-  eventTeamsTableData: EventTeamsTableDataMap,
-  changelog: LogEntry[],
-  eventDetailsMap: EventDetailsMap,
-  eventAmbassadorsMap?: EventAmbassadorMap,
-  regionalAmbassadorsMap?: RegionalAmbassadorMap
-) {
-  const dropdown = document.createElement('select');
-  
-  // Load all Event Ambassadors from storage if not provided
-  const allEventAmbassadors = eventAmbassadorsMap ?? (() => {
-    const stored = loadFromStorage<Array<[string, EventAmbassador]>>("eventAmbassadors");
-    return stored ? new Map<string, EventAmbassador>(stored) : new Map<string, EventAmbassador>();
-  })();
-
-  // Get list of all Event Ambassador names, sorted alphabetically
-  const allEANames = Array.from(allEventAmbassadors.keys()).sort((a, b) => a.localeCompare(b));
-
-  allEANames.forEach((eaName) => {
-    const option = document.createElement('option');
-    option.value = eaName;
-    option.textContent = eaName;
-    dropdown.appendChild(option);
-  });
-
-  dropdown.value = data.eventAmbassador;
-
-  dropdown.addEventListener('change', async (event) => {
-    const newEventAmbassador = (event.target as HTMLSelectElement).value;
-    const oldEventAmbassador = data.eventAmbassador;
-    
-    // Update the Event Teams table data
-    updateEventAmbassador(eventTeamsTableData, data.eventShortName, newEventAmbassador, changelog);
-    
-    // Update the Event Ambassador's events array
-    try {
-      assignEventToAmbassador(
-        data.eventShortName,
-        oldEventAmbassador,
-        newEventAmbassador,
-        allEventAmbassadors,
-        changelog,
-        regionalAmbassadorsMap
-      );
-    } catch (error) {
-      alert(`Failed to assign event: ${error instanceof Error ? error.message : "Unknown error"}`);
-      // Revert dropdown to old value
-      dropdown.value = oldEventAmbassador;
-      return;
-    }
-    
-    persistChangesLog(changelog);
-
-    // Update the cell text and replace the dropdown with text
-    data.eventAmbassador = newEventAmbassador;
-    eventAmbassadorCell.innerHTML = '';
-    eventAmbassadorCell.textContent = newEventAmbassador;
-    
-    // Refresh UI to show updated ambassador assignments
-    const regionalAmbassadorsForRefresh = regionalAmbassadorsMap ?? (() => {
-      const stored = loadFromStorage<Array<[string, RegionalAmbassador]>>("regionalAmbassadors");
-      return stored ? new Map<string, RegionalAmbassador>(stored) : new Map<string, RegionalAmbassador>();
-    })();
-    refreshUI(eventDetailsMap, eventTeamsTableData, changelog, allEventAmbassadors, regionalAmbassadorsForRefresh);
-  });
-
-  eventAmbassadorCell.innerHTML = '';
-  eventAmbassadorCell.appendChild(dropdown);
 }
 
 function createEventShortNameDropdown(
