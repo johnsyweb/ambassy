@@ -84,6 +84,21 @@ export async function importProspectiveEvents(
         ...processedEvents
       ]);
 
+      // Update EventAmbassador prospectiveEvents arrays
+      processedEvents.forEach(event => {
+        if (event.eventAmbassador && event.ambassadorMatchStatus === 'matched') {
+          const ea = eventAmbassadors.get(event.eventAmbassador);
+          if (ea) {
+            if (!ea.prospectiveEvents) {
+              ea.prospectiveEvents = [];
+            }
+            if (!ea.prospectiveEvents.includes(event.id)) {
+              ea.prospectiveEvents.push(event.id);
+            }
+          }
+        }
+      });
+
       saveProspectiveEvents(updatedEvents.getAll());
       result.imported = processedEvents.length;
       result.success = true;

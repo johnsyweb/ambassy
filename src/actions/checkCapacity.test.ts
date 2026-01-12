@@ -197,6 +197,27 @@ describe("checkCapacity", () => {
       expect(eventAmbassadors.get("EA3")?.capacityStatus).toBe(CapacityStatus.OVER);
     });
 
+    it("should include prospective events in Event Ambassador capacity calculation", () => {
+      const limits: CapacityLimits = {
+        eventAmbassadorMin: 2,
+        eventAmbassadorMax: 9,
+        regionalAmbassadorMin: 3,
+        regionalAmbassadorMax: 10,
+      };
+
+      const eventAmbassadors: EventAmbassadorMap = new Map([
+        ["EA1", { name: "EA1", events: ["Event1"], prospectiveEvents: ["Prospect1"] }], // 1 regular + 1 prospective = 2 events - WITHIN
+        ["EA2", { name: "EA2", events: ["Event2"], prospectiveEvents: ["Prospect2", "Prospect3"] }], // 1 regular + 2 prospective = 3 events - WITHIN
+        ["EA3", { name: "EA3", events: ["Event3"], prospectiveEvents: [] }], // 1 regular + 0 prospective = 1 event - UNDER
+      ]);
+
+      calculateAllCapacityStatuses(eventAmbassadors, new Map(), limits);
+
+      expect(eventAmbassadors.get("EA1")?.capacityStatus).toBe(CapacityStatus.WITHIN);
+      expect(eventAmbassadors.get("EA2")?.capacityStatus).toBe(CapacityStatus.WITHIN);
+      expect(eventAmbassadors.get("EA3")?.capacityStatus).toBe(CapacityStatus.UNDER);
+    });
+
     it("should calculate capacity status for all Regional Ambassadors", () => {
       const limits: CapacityLimits = {
         eventAmbassadorMin: 2,

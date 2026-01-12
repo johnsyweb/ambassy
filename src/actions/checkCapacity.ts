@@ -42,8 +42,10 @@ export function calculateAllCapacityStatuses(
 ): void {
   // Calculate capacity status for all Event Ambassadors
   eventAmbassadors.forEach((ambassador) => {
-    const eventCount = ambassador.events.length;
-    ambassador.capacityStatus = checkEventAmbassadorCapacity(eventCount, limits);
+    const regularEventCount = ambassador.events.length;
+    const prospectiveEventCount = ambassador.prospectiveEvents?.length || 0;
+    const totalEventCount = regularEventCount + prospectiveEventCount;
+    ambassador.capacityStatus = checkEventAmbassadorCapacity(totalEventCount, limits);
   });
 
   // Calculate capacity status for all Regional Ambassadors
