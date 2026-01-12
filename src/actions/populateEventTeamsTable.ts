@@ -2,7 +2,6 @@ import { EventDetailsMap } from '@models/EventDetailsMap';
 import { EventTeamsTableDataMap, EventTeamsTableData } from '@models/EventTeamsTableData';
 import { LogEntry } from '@models/LogEntry';
 import { countries } from '@models/country';
-import { refreshUI } from './refreshUI';
 import { EventAmbassadorMap } from '@models/EventAmbassadorMap';
 import { RegionalAmbassadorMap } from '@models/RegionalAmbassadorMap';
 import { SelectionState } from '@models/SelectionState';
@@ -11,9 +10,9 @@ export function populateEventTeamsTable(
   eventTeamsTableData: EventTeamsTableDataMap,
   eventDetailsMap: EventDetailsMap,
   changelog: LogEntry[],
-  eventAmbassadors?: EventAmbassadorMap,
-  regionalAmbassadors?: RegionalAmbassadorMap
-) {
+  _eventAmbassadors?: EventAmbassadorMap,
+  _regionalAmbassadors?: RegionalAmbassadorMap
+): void {
   const tableBody = document.querySelector('#eventTeamsTable tbody');
   if (!tableBody) {
     console.error('Event Teams Table Body not found');
