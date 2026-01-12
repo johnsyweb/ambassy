@@ -77,8 +77,14 @@ Replace console error messages for missing event details with an Issues tab that
 
 ### FR-005: Issue Resolution Tracking
 - Resolved issues must be removed from the Issues table
-- Resolution method must be logged (found in events.json vs. manual pin placement)
+- Resolution method must be logged in the changes log (found in events.json vs. manual pin placement)
+- Resolution log entries must include:
+  - Event name
+  - Resolution method (found_in_events_json or manual_pin)
+  - Timestamp
+  - Source event name (if found via search) or coordinates (if manual pin)
 - Resolved events must appear in Event Teams table and map
+- Resolution state must persist across application reloads via localStorage
 
 ## Technical Requirements
 
@@ -101,9 +107,11 @@ Replace console error messages for missing event details with an Issues tab that
 - Pin must be associated with the selected issue
 
 ### TR-004: Data Persistence
-- Resolved events must be persisted to localStorage
-- Manual coordinates must be stored alongside fetched events
-- Resolution state must persist across sessions
+- Resolved events must be persisted to localStorage via eventDetailsMap
+- Manual coordinates must be stored alongside fetched events in eventDetailsMap
+- Resolution log entries must be persisted to localStorage via changes log
+- Resolution state must persist across application reloads
+- On reload, resolved events are loaded from localStorage and issues are recalculated (resolved events no longer appear as issues)
 
 ## Non-Functional Requirements
 
