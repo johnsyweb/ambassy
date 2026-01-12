@@ -72,6 +72,7 @@ Extended to support geocoded coordinates for events not in events.json.
 **New Fields**:
 - `geocodedAddress?: boolean` (optional) - Flag indicating coordinates were obtained via geocoding
 - `sourceAddress?: string` (optional) - Original address used for geocoding
+- `sourceUrl?: string` (optional) - parkrun URL used to extract additional metadata
 - `source?: "events_json" | "geocoded"` (optional) - Source of event details
 
 **Existing Fields**: (unchanged)
@@ -80,7 +81,8 @@ Extended to support geocoded coordinates for events not in events.json.
 **Validation Rules**:
 - If `geocodedAddress === true`, `source` must be "geocoded" and `sourceAddress` must be present
 - If `source === "geocoded"`, `geometry.coordinates` must be present
-- Geocoded events may have minimal `properties` (only EventShortName required)
+- If `sourceUrl` is provided, it should be a valid parkrun URL format
+- Geocoded events may have complete `properties` when URL metadata is extracted
 
 **Relationships**: (unchanged)
 - Referenced by `EventTeam` via EventShortName
