@@ -42,10 +42,21 @@ describe("resolveIssueWithEvent", () => {
   });
 
   it("should add event to eventDetailsMap", () => {
-    resolveIssueWithEvent(issue, eventDetails, eventDetailsMap);
+    resolveIssueWithEvent(issue, eventDetails, eventDetailsMap, log);
 
     expect(eventDetailsMap.has(issue.eventShortName)).toBe(true);
-    expect(eventDetailsMap.get(issue.eventShortName)).toEqual(eventDetails);
+    const addedEvent = eventDetailsMap.get(issue.eventShortName);
+    expect(addedEvent?.properties.EventShortName).toBe(issue.eventShortName);
+  });
+
+  it("should log resolution to changes log", () => {
+    resolveIssueWithEvent(issue, eventDetails, eventDetailsMap, log);
+
+    expect(log.length).toBe(1);
+    expect(log[0].type).toBe("Issue Resolved");
+    expect(log[0].event).toBe(issue.eventShortName);
+    expect(log[0].oldValue).toBe("Missing coordinates");
+    expect(log[0].newValue).toContain("Found in events.json");
   });
 
   it("should throw error if eventDetails is missing coordinates", () => {
