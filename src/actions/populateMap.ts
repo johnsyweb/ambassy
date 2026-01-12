@@ -86,6 +86,7 @@ export function populateMap(
     const latitude = event.geometry.coordinates[1];
     const longitude = event.geometry.coordinates[0];
     const data = eventTeamsTableData.get(eventName);
+    processedEvents++;
 
     console.log(`Processing event ${eventName}: coords [${longitude}, ${latitude}], hasData: ${!!data}, country: ${event.properties.countrycode}`);
 
@@ -138,14 +139,9 @@ export function populateMap(
           _markerClickHandler!(eventName);
         });
       }
-      
-      if (countryCode === event.properties.countrycode) {
-        voronoiPoints.push([
-          event.geometry.coordinates[0],
-          event.geometry.coordinates[1],
-          JSON.stringify({ raColor: DEFAULT_POLYGON_COLOUR, tooltip: eventName }),
-        ]);
-      }
+
+      // Note: Events without ambassador data are not included in Voronoi polygons
+      // Polygons should only represent territories based on events with ambassador assignments
     }
   });
 
