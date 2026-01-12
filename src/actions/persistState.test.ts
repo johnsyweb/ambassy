@@ -92,9 +92,14 @@ describe("persistState", () => {
       const result = restoreApplicationState();
 
       expect(result).toBeTruthy();
-      expect(result?.data.eventAmbassadors).toEqual(mockState.data.eventAmbassadors);
+      // Expect migrated data with new prospectiveEvents and regionalAmbassador fields
+      expect(result?.data.eventAmbassadors).toEqual([
+        ["EA1", { name: "Test EA", events: [], prospectiveEvents: [], regionalAmbassador: undefined }]
+      ]);
       expect(result?.data.eventTeams).toEqual(mockState.data.eventTeams);
-      expect(result?.data.regionalAmbassadors).toEqual(mockState.data.regionalAmbassadors);
+      expect(result?.data.regionalAmbassadors).toEqual([
+        ["REA1", { name: "Test REA", state: "VIC", supportsEAs: [], prospectiveEvents: [] }]
+      ]);
       expect(result?.data.changesLog).toEqual(mockState.data.changesLog);
     });
 

@@ -7,16 +7,16 @@ Implementation tasks for the Prospective Events feature, broken down by componen
 ## Core Data Model (Priority: High)
 
 ### Models & Types
-- [ ] Create `ProspectiveEvent` interface in `src/models/ProspectiveEvent.ts` with allocation impact fields
-- [ ] Create `ProspectiveEventList` class in `src/models/ProspectiveEventList.ts` with allocation tracking
-- [ ] Add TypeScript types in `src/types/ProspectiveEventTypes.ts` including allocation contracts
-- [ ] Extend existing RA/EA models to reference prospective events and allocation counts
-- [ ] Add prospect validation utilities in `src/utils/prospectValidation.ts`
+- [X] Create `ProspectiveEvent` interface in `src/models/ProspectiveEvent.ts` with allocation impact fields
+- [X] Create `ProspectiveEventList` class in `src/models/ProspectiveEventList.ts` with allocation tracking
+- [X] Add TypeScript types in `src/types/ProspectiveEventTypes.ts` including allocation contracts
+- [X] Extend existing RA/EA models to reference prospective events and allocation counts
+- [X] Add prospect validation utilities in `src/utils/prospectValidation.ts`
 
 ### Storage & Persistence
-- [ ] Add localStorage persistence functions (`saveProspectiveEvents`, `loadProspectiveEvents`)
-- [ ] Update existing ambassador storage to include prospective event references
-- [ ] Add migration support for backward compatibility
+- [X] Add localStorage persistence functions (`saveProspectiveEvents`, `loadProspectiveEvents`)
+- [X] Update existing ambassador storage to include prospective event references
+- [X] Add migration support for backward compatibility
 
 ## CSV Processing (Priority: High)
 
