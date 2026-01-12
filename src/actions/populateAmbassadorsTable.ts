@@ -4,6 +4,7 @@ import { CapacityStatus } from "@models/CapacityStatus";
 import { loadCapacityLimits, checkEventAmbassadorCapacity, checkRegionalAmbassadorCapacity } from "@actions/checkCapacity";
 import { colorPalette } from "@actions/colorPalette";
 import { EventTeamsTableDataMap, eventAmbassadorsFrom, regionalAmbassadorsFrom } from "@models/EventTeamsTableData";
+import { loadProspectiveEvents } from "@actions/persistProspectiveEvents";
 
 // Forward declaration - will be set by index.ts
 let handleOffboardEventAmbassador: (name: string) => void = () => {
@@ -62,12 +63,18 @@ function populateEventAmbassadorsTable(eventAmbassadors: EventAmbassadorMap, eve
     const row = document.createElement("tr");
     row.setAttribute("data-ea-name", name);
 
+    // Load prospective events for this ambassador once
+    const prospectiveEvents = loadProspectiveEvents().filter(event =>
+      event.eventAmbassador === name && event.ambassadorMatchStatus === 'matched'
+    );
+    const prospectiveEventNames = prospectiveEvents.map(event => event.prospectEvent);
+
     const nameCell = document.createElement("td");
     const nameContainer = document.createElement("div");
     nameContainer.style.display = "flex";
     nameContainer.style.alignItems = "center";
     nameContainer.style.gap = "8px";
-    
+
     const colorIndicator = document.createElement("span");
     const color = assignColorToName(name, allEANames);
     colorIndicator.style.display = "inline-block";
@@ -79,19 +86,22 @@ function populateEventAmbassadorsTable(eventAmbassadors: EventAmbassadorMap, eve
     colorIndicator.style.flexShrink = "0";
     colorIndicator.title = `Map color: ${color}`;
     nameContainer.appendChild(colorIndicator);
-    
+
     const nameSpan = document.createElement("span");
     nameSpan.textContent = name;
     nameContainer.appendChild(nameSpan);
-    
+
     nameCell.appendChild(nameContainer);
     row.appendChild(nameCell);
 
     const allocationsCell = document.createElement("td");
     const eventCount = ambassador.events.length;
+    const prospectiveCount = prospectiveEvents.length;
+    const totalCount = eventCount + prospectiveCount;
+
     const limits = loadCapacityLimits();
-    const status = ambassador.capacityStatus ?? checkEventAmbassadorCapacity(eventCount, limits);
-    
+    const status = ambassador.capacityStatus ?? checkEventAmbassadorCapacity(totalCount, limits);
+
     let emoji = "";
     if (status === CapacityStatus.UNDER) {
       emoji = "⬇️";
@@ -100,17 +110,33 @@ function populateEventAmbassadorsTable(eventAmbassadors: EventAmbassadorMap, eve
     } else if (status === CapacityStatus.OVER) {
       emoji = "⚠️";
     }
-    
-    allocationsCell.textContent = `${eventCount} ${emoji}`;
+
+    if (prospectiveCount > 0) {
+      allocationsCell.textContent = `${totalCount} (${eventCount} live + ${prospectiveCount} prospects) ${emoji}`;
+    } else {
+      allocationsCell.textContent = `${totalCount} ${emoji}`;
+    }
     row.appendChild(allocationsCell);
 
     const eventsCell = document.createElement("td");
-    if (ambassador.events.length === 0) {
+    const allEvents = [...ambassador.events];
+
+    if (allEvents.length === 0 && prospectiveEventNames.length === 0) {
       eventsCell.textContent = "No events assigned";
       eventsCell.style.fontStyle = "italic";
       eventsCell.style.color = "#666";
     } else {
-      eventsCell.textContent = ambassador.events.join(", ");
+      const eventParts = [];
+
+      if (allEvents.length > 0) {
+        eventParts.push(allEvents.join(", "));
+      }
+
+      if (prospectiveEventNames.length > 0) {
+        eventParts.push(`Prospects: ${prospectiveEventNames.join(", ")}`);
+      }
+
+      eventsCell.textContent = eventParts.join("; ");
     }
     row.appendChild(eventsCell);
 
