@@ -22,7 +22,7 @@ import { initializeTabs } from "./utils/tabs";
 import { calculateAllCapacityStatuses, loadCapacityLimits } from "./actions/checkCapacity";
 import { offboardEventAmbassador, offboardRegionalAmbassador } from "./actions/offboardAmbassador";
 import { suggestEventReallocation, suggestEventAmbassadorReallocation } from "./actions/suggestReallocation";
-import { setOffboardingHandlers } from "./actions/populateAmbassadorsTable";
+import { setOffboardingHandlers, setEAReallocateHandler } from "./actions/populateAmbassadorsTable";
 import { saveCapacityLimits, validateCapacityLimits } from "./actions/configureCapacityLimits";
 import { CapacityLimits } from "./models/CapacityLimits";
 import { SelectionState, createSelectionState } from "./models/SelectionState";
@@ -35,6 +35,9 @@ import { showReallocationDialog as showEventTeamReallocationDialog } from "./act
 import { reallocateEventTeam } from "./actions/reallocateEventTeam";
 import { validateReallocation } from "./actions/validateReallocation";
 import { clearSelection } from "./models/SelectionState";
+import { getEAReallocationSuggestions } from "./actions/getEAReallocationSuggestions";
+import { reallocateEventAmbassador } from "./actions/reallocateEventAmbassador";
+import { getRegionalAmbassadorForEventAmbassador } from "./utils/regions";
 
 function getRegionalAmbassadorsFromSession(): RegionalAmbassadorMap {
   const storedRegionalAmbassadors = loadFromStorage<Array<[string, RegionalAmbassador]>>("regionalAmbassadors");
@@ -441,6 +444,75 @@ function setupOffboardingButtons(): void {
   };
 
   setOffboardingHandlers(handleOffboardEA, handleOffboardRA);
+
+  setEAReallocateHandler((eaName: string) => {
+    const eventAmbassadors = getEventAmbassadorsFromSession();
+    const regionalAmbassadors = getRegionalAmbassadorsFromSession();
+
+    if (!eventAmbassadors.has(eaName)) {
+      alert(`Event Ambassador "${eaName}" not found.`);
+      return;
+    }
+
+    const currentREA = getRegionalAmbassadorForEventAmbassador(eaName, regionalAmbassadors);
+
+    try {
+      const suggestions = getEAReallocationSuggestions(
+        eaName,
+        eventAmbassadors,
+        regionalAmbassadors,
+        loadCapacityLimits()
+      );
+
+      showEventTeamReallocationDialog(
+        eaName,
+        currentREA || "",
+        suggestions,
+        undefined,
+        regionalAmbassadors,
+        (selectedREA: string) => {
+          if (!selectedREA || selectedREA.trim() === "") {
+            alert("Please select a Regional Ambassador.");
+            return;
+          }
+
+          if (selectedREA === currentREA) {
+            alert("Event Ambassador is already assigned to this Regional Ambassador.");
+            return;
+          }
+
+          if (!regionalAmbassadors.has(selectedREA)) {
+            alert(`Regional Ambassador "${selectedREA}" not found.`);
+            return;
+          }
+
+          try {
+            reallocateEventAmbassador(
+              eaName,
+              currentREA,
+              selectedREA,
+              eventAmbassadors,
+              regionalAmbassadors,
+              log
+            );
+
+            persistChangesLog(log);
+
+            refreshUI(eventDetails!, eventTeamsTableData!, log, eventAmbassadors, regionalAmbassadors);
+
+            alert(`Event Ambassador "${eaName}" reallocated to "${selectedREA}"`);
+          } catch (error) {
+            alert(`Failed to reallocate Event Ambassador: ${error instanceof Error ? error.message : "Unknown error"}`);
+          }
+        },
+        () => {
+          // Handle cancel - dialog already closed by showEventTeamReallocationDialog
+        }
+      );
+    } catch (error) {
+      alert(`Failed to get reallocation suggestions: ${error instanceof Error ? error.message : "Unknown error"}`);
+    }
+  });
 }
 
 setupOffboardingButtons();

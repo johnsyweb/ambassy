@@ -35,6 +35,13 @@ export function populateAmbassadorsTable(
   populateRegionalAmbassadorsTable(regionalAmbassadors, eventTeamsTableData);
 }
 
+// Forward declaration - will be set by index.ts
+let handleReallocateEA: ((eaName: string) => void) | null = null;
+
+export function setEAReallocateHandler(handler: (eaName: string) => void): void {
+  handleReallocateEA = handler;
+}
+
 function populateEventAmbassadorsTable(eventAmbassadors: EventAmbassadorMap, eventTeamsTableData?: EventTeamsTableDataMap): void {
   const tableBody = document.querySelector("#eventAmbassadorsTable tbody");
   if (!tableBody) {
@@ -53,6 +60,7 @@ function populateEventAmbassadorsTable(eventAmbassadors: EventAmbassadorMap, eve
 
   sortedAmbassadors.forEach(([name, ambassador]) => {
     const row = document.createElement("tr");
+    row.setAttribute("data-ea-name", name);
 
     const nameCell = document.createElement("td");
     const nameContainer = document.createElement("div");
@@ -118,6 +126,38 @@ function populateEventAmbassadorsTable(eventAmbassadors: EventAmbassadorMap, eve
       eventsCell.textContent = ambassador.events.join(", ");
     }
     row.appendChild(eventsCell);
+
+    const actionsCell = document.createElement("td");
+    const reallocateButton = document.createElement("button");
+    reallocateButton.textContent = "Reallocate";
+    reallocateButton.type = "button";
+    reallocateButton.className = "reallocate-ea-button";
+    reallocateButton.title = `Reallocate ${name} to a different Regional Ambassador`;
+    reallocateButton.setAttribute("aria-label", `Reallocate Event Ambassador ${name}`);
+    reallocateButton.style.padding = "2px 8px";
+    reallocateButton.style.fontSize = "0.85em";
+    reallocateButton.style.cursor = "pointer";
+    reallocateButton.disabled = !handleReallocateEA;
+    
+    reallocateButton.onclick = (e) => {
+      e.stopPropagation();
+      if (handleReallocateEA) {
+        handleReallocateEA(name);
+      }
+    };
+    
+    reallocateButton.onkeydown = (e) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        e.stopPropagation();
+        if (handleReallocateEA) {
+          handleReallocateEA(name);
+        }
+      }
+    };
+    
+    actionsCell.appendChild(reallocateButton);
+    row.appendChild(actionsCell);
 
     tableBody.appendChild(row);
   });
