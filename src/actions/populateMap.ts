@@ -88,10 +88,7 @@ export function populateMap(
     minLat -= padding;
     maxLat += padding;
     useBoundsFilter = true;
-    console.log(`Ambassador events bounds: [${minLng}, ${minLat}] to [${maxLng}, ${maxLat}]`);
-    console.log(`Bounds check enabled: ${useBoundsFilter}`);
   } else {
-    console.log(`No valid bounds calculated - disabling bounds filter`);
   }
 
   // Build constraining events for Voronoi calculation
@@ -107,8 +104,6 @@ export function populateMap(
         <strong>Event Ambassador(s):</strong> ${data.eventAmbassador}<br>
         <strong>Regional Ambassador(s):</strong> ${data.regionalAmbassador}<br>
       `;
-
-      console.log(`Adding ambassador event ${eventName} with RA ${data.regionalAmbassador}, color: ${raColor}`);
 
       constrainingEvents.push({
         coords: [event.geometry.coordinates[0], event.geometry.coordinates[1]],
@@ -168,7 +163,6 @@ export function populateMap(
           <strong>Regional Ambassador(s):</strong> ${data.regionalAmbassador}<br>
         `;
         voronoiPoints.push([event.geometry.coordinates[0], event.geometry.coordinates[1], JSON.stringify({ raColor, tooltip })]);
-        console.log(`Added ambassador point (no bounds) at [${event.geometry.coordinates[0]}, ${event.geometry.coordinates[1]}] with color ${raColor}`);
       }
     });
   }
@@ -224,24 +218,17 @@ export function populateMap(
     }
   });
 
-  console.log(`Map population summary: ${processedEvents} total events processed, ${eventsWithData} with ambassador data, ${eventsWithoutData} without data, ${voronoiPoints.length} voronoi points created`);
-
   // Add markersLayer to map
   markersLayer.addTo(map!);
 
   const voronoi = d3GeoVoronoi.geoVoronoi(voronoiPoints.map((p) => [p[0], p[1]]));
   const polygons = voronoi.polygons();
 
-  console.log(`Processing ${polygons.features.length} Voronoi polygons from ${voronoiPoints.length} points`);
-
   polygons.features.forEach((feature, index) => {
     const { raColor, tooltip } = JSON.parse(voronoiPoints[index][2]);
 
-    console.log(`Polygon ${index}: raColor=${raColor}, tooltip length=${tooltip.length}`);
-
     // Skip polygons for constraining points (they have transparent color)
     if (raColor === 'transparent') {
-      console.log(`Skipping constraining point polygon ${index}`);
       return;
     }
 
