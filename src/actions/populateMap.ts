@@ -124,21 +124,7 @@ export function populateMap(
       maxLat: maxLat + 2
     };
 
-    eventDetails.forEach((event, eventName) => {
-      const lng = event.geometry.coordinates[0];
-      const lat = event.geometry.coordinates[1];
-      const hasAmbassador = eventTeamsTableData.has(eventName);
-
-      // Include as constraining point if it's near ambassador events but doesn't have an ambassador
-      if (!hasAmbassador &&
-          lng >= expandedBounds.minLng && lng <= expandedBounds.maxLng &&
-          lat >= expandedBounds.minLat && lat <= expandedBounds.maxLat) {
-        constrainingEvents.push({
-          coords: [lng, lat],
-          isConstraining: true
-        });
-      }
-    });
+    // Skip constraining points for cleaner REA territory visualization
 
     // Build Voronoi points from constraining events
     constrainingEvents.forEach((event) => {
@@ -249,7 +235,7 @@ export function populateMap(
   const voronoi = d3GeoVoronoi.geoVoronoi(voronoiPoints.map((p) => [p[0], p[1]]));
   const polygons = voronoi.polygons();
 
-  polygons.features.forEach((feature, index) => {
+  polygons.features.forEach((feature: any, index: number) => {
     const { raColor, tooltip } = JSON.parse(voronoiPoints[index][2]);
 
     // Skip polygons for constraining points (they have transparent color)
@@ -261,11 +247,11 @@ export function populateMap(
       feature.geometry.coordinates[0] as [number, number][]
     ).map((coord) => [coord[1], coord[0]] as L.LatLngTuple);
 
-    // Clip polygons to bounds to prevent them from extending to infinity
+    // Use more generous clipping bounds for cleaner REA territory polygons
     const clippedCoordinates = coordinates.filter(coord => {
       const [lat, lng] = coord;
-      return lng >= minLng - 10 && lng <= maxLng + 10 &&
-             lat >= minLat - 10 && lat <= maxLat + 10;
+      return lng >= minLng - 20 && lng <= maxLng + 20 &&
+             lat >= minLat - 20 && lat <= maxLat + 20;
     });
 
     if (clippedCoordinates.length >= 3) { // Need at least 3 points for a polygon
