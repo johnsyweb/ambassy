@@ -44,17 +44,26 @@ export function searchEvents(query: string, events: EventDetailsMap): EventDetai
       });
     }
 
+    let foundExact = false;
+    let foundNormalized = false;
+
     for (const field of fields) {
       if (field.name.toLowerCase() === query.toLowerCase()) {
         bestScore = 0;
         matchType = "exact";
+        foundExact = true;
         break;
       } else if (field.normalized === normalizedQuery) {
-        if (bestScore > 1) {
+        if (!foundExact) {
           bestScore = 1;
           matchType = "normalized";
+          foundNormalized = true;
         }
-      } else {
+      }
+    }
+
+    if (!foundExact && !foundNormalized) {
+      for (const field of fields) {
         const threshold =
           field.normalized.length < 10 ? FUZZY_THRESHOLD_SHORT : FUZZY_THRESHOLD_LONG;
         const distance = levenshteinDistance(field.normalized, normalizedQuery);
@@ -62,15 +71,6 @@ export function searchEvents(query: string, events: EventDetailsMap): EventDetai
           const fuzzyScore = 100 + distance;
           if (bestScore > fuzzyScore) {
             bestScore = fuzzyScore;
-            matchType = "fuzzy";
-          }
-        } else if (
-          normalizedQuery.length >= 3 &&
-          (field.normalized.includes(normalizedQuery) || normalizedQuery.includes(field.normalized))
-        ) {
-          const partialMatchScore = Math.abs(field.normalized.length - normalizedQuery.length) + 200;
-          if (bestScore > partialMatchScore) {
-            bestScore = partialMatchScore;
             matchType = "fuzzy";
           }
         }
