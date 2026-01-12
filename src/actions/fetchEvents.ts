@@ -30,11 +30,13 @@ async function fetchEvents(): Promise<void> {
 function getCachedEvents(): EventDetailsMap | null {
   const cache = localStorage.getItem(CACHE_KEY);
   if (cache) {
-    const parsedCache = JSON.parse(cache);
-    const age = Date.now() - parsedCache.timestamp;
-
-    if (age < CACHE_DURATION) {
-      return new Map<string, EventDetails>(parsedCache.eventDetailsMap);
+    try {
+      const parsedCache = JSON.parse(cache);
+      if (parsedCache.eventDetailsMap) {
+        return new Map<string, EventDetails>(parsedCache.eventDetailsMap);
+      }
+    } catch (e) {
+      return null;
     }
   }
   return null;

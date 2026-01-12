@@ -681,6 +681,14 @@ function onSearchEvents(issue: EventIssue): void {
       (selectedEvent: EventDetails) => {
         try {
           resolveIssueWithEvent(issue, selectedEvent, eventDetails!, log);
+          
+          const eventDetailsCache = localStorage.getItem("parkrun events");
+          if (eventDetailsCache) {
+            const parsedCache = JSON.parse(eventDetailsCache);
+            parsedCache.eventDetailsMap = Array.from(eventDetails.entries());
+            localStorage.setItem("parkrun events", JSON.stringify(parsedCache));
+          }
+          
           persistChangesLog(log);
 
           const eventTeams = getEventTeamsFromSession();
