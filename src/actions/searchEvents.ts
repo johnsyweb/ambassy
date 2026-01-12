@@ -1,0 +1,92 @@
+import { EventDetails } from "@models/EventDetails";
+import { EventDetailsMap } from "@models/EventDetailsMap";
+import { normalizeEventName, levenshteinDistance } from "../utils/fuzzyMatch";
+
+interface MatchResult {
+  event: EventDetails;
+  score: number;
+  matchType: "exact" | "normalized" | "fuzzy";
+}
+
+const MAX_RESULTS = 10;
+const FUZZY_THRESHOLD_SHORT = 2;
+const FUZZY_THRESHOLD_LONG = 3;
+
+export function searchEvents(query: string, events: EventDetailsMap): EventDetails[] {
+  if (!query || query.trim() === "") {
+    return [];
+  }
+
+  const normalizedQuery = normalizeEventName(query);
+  const matches: MatchResult[] = [];
+
+  events.forEach((event) => {
+    const shortName = normalizeEventName(event.properties.EventShortName);
+    const longName = normalizeEventName(event.properties.EventLongName);
+    const eventName = normalizeEventName(event.properties.eventname);
+    const localisedName = event.properties.LocalisedEventLongName
+      ? normalizeEventName(event.properties.LocalisedEventLongName)
+      : null;
+
+    let bestScore = Infinity;
+    let matchType: "exact" | "normalized" | "fuzzy" = "fuzzy";
+
+    const fields = [
+      { name: event.properties.EventShortName, normalized: shortName },
+      { name: event.properties.EventLongName, normalized: longName },
+      { name: event.properties.eventname, normalized: eventName },
+    ];
+
+    if (localisedName) {
+      fields.push({
+        name: event.properties.LocalisedEventLongName!,
+        normalized: localisedName,
+      });
+    }
+
+    for (const field of fields) {
+      if (field.name.toLowerCase() === query.toLowerCase()) {
+        bestScore = 0;
+        matchType = "exact";
+        break;
+      } else if (field.normalized === normalizedQuery) {
+        bestScore = Math.min(bestScore, 1);
+        matchType = "normalized";
+      } else if (field.normalized.includes(normalizedQuery) || normalizedQuery.includes(field.normalized)) {
+        const partialMatchScore = Math.abs(field.normalized.length - normalizedQuery.length) + 50;
+        bestScore = Math.min(bestScore, partialMatchScore);
+        if (matchType !== "exact" && matchType !== "normalized") {
+          matchType = "fuzzy";
+        }
+      } else {
+        const threshold =
+          field.normalized.length < 10 ? FUZZY_THRESHOLD_SHORT : FUZZY_THRESHOLD_LONG;
+        const distance = levenshteinDistance(field.normalized, normalizedQuery);
+        if (distance <= threshold) {
+          bestScore = Math.min(bestScore, 100 + distance);
+          if (matchType !== "exact" && matchType !== "normalized") {
+            matchType = "fuzzy";
+          }
+        }
+      }
+    }
+
+    if (bestScore < Infinity) {
+      matches.push({
+        event,
+        score: bestScore,
+        matchType,
+      });
+    }
+  });
+
+  matches.sort((a, b) => {
+    if (a.matchType !== b.matchType) {
+      const typeOrder = { exact: 0, normalized: 1, fuzzy: 2 };
+      return typeOrder[a.matchType] - typeOrder[b.matchType];
+    }
+    return a.score - b.score;
+  });
+
+  return matches.slice(0, MAX_RESULTS).map((match) => match.event);
+}
