@@ -549,11 +549,10 @@ function initializeTableMapNavigation(): void {
     return;
   }
 
-  const markerMap = getMarkerMap();
-  const highlightLayer = getHighlightLayer();
-  const map = getMap();
-
   setMarkerClickHandler((eventShortName: string) => {
+    const markerMap = getMarkerMap();
+    const highlightLayer = getHighlightLayer();
+    const map = getMap();
     selectMapEvent(
       selectionState,
       eventShortName,
@@ -565,6 +564,9 @@ function initializeTableMapNavigation(): void {
   });
 
   setRowClickHandler((eventShortName: string) => {
+    const markerMap = getMarkerMap();
+    const highlightLayer = getHighlightLayer();
+    const map = getMap();
     selectEventTeamRow(
       selectionState,
       eventShortName,
