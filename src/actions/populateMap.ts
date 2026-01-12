@@ -124,7 +124,21 @@ export function populateMap(
       maxLat: maxLat + 2
     };
 
-    // Skip constraining points for cleaner REA territory visualization
+    eventDetails.forEach((event, eventName) => {
+      const lng = event.geometry.coordinates[0];
+      const lat = event.geometry.coordinates[1];
+      const hasAmbassador = eventTeamsTableData.has(eventName);
+
+      // Include as constraining point if it's near ambassador events but doesn't have an ambassador
+      if (!hasAmbassador &&
+          lng >= expandedBounds.minLng && lng <= expandedBounds.maxLng &&
+          lat >= expandedBounds.minLat && lat <= expandedBounds.maxLat) {
+        constrainingEvents.push({
+          coords: [lng, lat],
+          isConstraining: true
+        });
+      }
+    });
 
     // Build Voronoi points from constraining events
     constrainingEvents.forEach((event) => {
