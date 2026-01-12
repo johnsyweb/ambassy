@@ -224,6 +224,14 @@ export function calculateReallocationScore(
     }
   }
 
+  // State factor for RA-to-RA reallocations
+  if (options?.fromRegionalAmbassador && itemType === "eventAmbassadors" && "state" in recipient) {
+    const fromRA = regionalAmbassadors.get(options.fromRegionalAmbassador);
+    if (fromRA && recipient.state === fromRA.state) {
+      score += 100 * REGION_WEIGHT; // High bonus for same state
+    }
+  }
+
   // Proximity factor (only for events)
   if (itemType === "events" && "events" in recipient) {
     const proximityScore = calculateGeographicProximityScore(
@@ -376,7 +384,7 @@ export function suggestEventAmbassadorReallocation(
 
     const dummyEventDetails: EventDetailsMap = new Map();
 
-    const score = calculateReallocationScore(
+    let score = calculateReallocationScore(
       recipient,
       recipientName,
       eventAmbassadorNames,
@@ -406,6 +414,17 @@ export function suggestEventAmbassadorReallocation(
       warnings.push(`Would exceed maximum capacity (${limits.regionalAmbassadorMax})`);
     }
 
+    const allocationCount = recipient.supportsEAs.length;
+
+    // Apply prioritization bonuses for RA-to-RA reallocation
+    // 1. Zero allocations get highest priority
+    if (allocationCount === 0) {
+      score += ZERO_ALLOCATIONS_BONUS;
+    }
+
+    // 2. Within each group, prioritize by fewer allocations (subtract allocation count)
+    score -= allocationCount;
+
     suggestions.push({
       fromAmbassador,
       toAmbassador: recipientName,
@@ -413,6 +432,7 @@ export function suggestEventAmbassadorReallocation(
       score,
       reasons: reasons.length > 0 ? reasons : undefined,
       warnings: warnings.length > 0 ? warnings : undefined,
+      allocationCount,
     });
   });
 
