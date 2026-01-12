@@ -44,7 +44,11 @@ describe("getReallocationSuggestions", () => {
       geometry: {
         coordinates: [144.9, -37.8],
       },
-    } as any);
+      properties: {
+        seriesid: 1,
+        countrycode: 3,
+      },
+    } as import("@models/EventDetails").EventDetails);
 
     limits = {
       eventAmbassadorMin: 2,

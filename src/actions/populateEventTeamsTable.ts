@@ -11,6 +11,7 @@ import { EventAmbassador } from '@models/EventAmbassador';
 import { RegionalAmbassador } from '@models/RegionalAmbassador';
 import { assignEventToAmbassador } from './assignEventToAmbassador';
 import { loadFromStorage } from '@utils/storage';
+import { SelectionState } from '@models/SelectionState';
 
 export function populateEventTeamsTable(
   eventTeamsTableData: EventTeamsTableDataMap,
@@ -71,6 +72,38 @@ export function populateEventTeamsTable(
     eventCountryCell.textContent = data.eventCountry;
     row.appendChild(eventCountryCell);
 
+    const actionsCell = document.createElement('td');
+    const reallocateButton = document.createElement('button');
+    reallocateButton.className = 'reallocate-button';
+    reallocateButton.textContent = 'Reallocate';
+    reallocateButton.type = 'button';
+    reallocateButton.setAttribute('aria-label', `Reallocate ${data.eventShortName}`);
+    
+    if (_reallocateButtonHandler && _selectionState) {
+      const isSelected = _selectionState.selectedEventShortName === data.eventShortName;
+      reallocateButton.disabled = !isSelected;
+      
+      if (isSelected) {
+        reallocateButton.addEventListener('click', (e) => {
+          e.stopPropagation();
+          _reallocateButtonHandler!(data.eventShortName);
+        });
+        
+        reallocateButton.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            e.stopPropagation();
+            _reallocateButtonHandler!(data.eventShortName);
+          }
+        });
+      }
+    } else {
+      reallocateButton.disabled = true;
+    }
+    
+    actionsCell.appendChild(reallocateButton);
+    row.appendChild(actionsCell);
+
     if (_rowClickHandler) {
       row.addEventListener('click', () => {
         _rowClickHandler!(data.eventShortName);
@@ -83,9 +116,19 @@ export function populateEventTeamsTable(
 }
 
 let _rowClickHandler: ((eventShortName: string) => void) | null = null;
+let _reallocateButtonHandler: ((eventShortName: string) => void) | null = null;
+let _selectionState: SelectionState | null = null;
 
 export function setRowClickHandler(handler: (eventShortName: string) => void): void {
   _rowClickHandler = handler;
+}
+
+export function setReallocateButtonHandler(
+  selectionState: SelectionState,
+  handler: (eventShortName: string) => void
+): void {
+  _selectionState = selectionState;
+  _reallocateButtonHandler = handler;
 }
 
 function handleEventAmbassadorCellClick(

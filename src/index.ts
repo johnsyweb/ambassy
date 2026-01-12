@@ -28,7 +28,7 @@ import { CapacityLimits } from "./models/CapacityLimits";
 import { SelectionState, createSelectionState } from "./models/SelectionState";
 import { selectEventTeamRow, selectMapEvent, applyDeferredTableSelection } from "./actions/tableMapNavigation";
 import { getMarkerMap, getHighlightLayer, getMap, setMarkerClickHandler } from "./actions/populateMap";
-import { setRowClickHandler } from "./actions/populateEventTeamsTable";
+import { setRowClickHandler, setReallocateButtonHandler } from "./actions/populateEventTeamsTable";
 import { setEventTeamsTabVisibleCallback } from "./utils/tabs";
 
 function getRegionalAmbassadorsFromSession(): RegionalAmbassadorMap {
@@ -726,6 +726,11 @@ function initializeTableMapNavigation(): void {
       selectionState,
       eventTeamsTableData!
     );
+  });
+
+  setReallocateButtonHandler(selectionState, (eventShortName: string) => {
+    // TODO: Open reallocation dialog (User Story 2)
+    console.log("Reallocate clicked for:", eventShortName);
   });
 }
 
