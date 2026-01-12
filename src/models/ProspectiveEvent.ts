@@ -15,7 +15,6 @@ export interface ProspectiveEvent {
   state: string; // State/region information
   prospectEDs: string; // Prospect Event Director(s) name
   eventAmbassador: string; // Assigned Event Ambassador
-  regionalAmbassador?: string; // Inherited from EA
 
   // Status Flags
   courseFound: boolean; // Whether suitable course has been found

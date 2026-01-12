@@ -82,6 +82,27 @@ export class ProspectiveEventList {
   }
 
   /**
+   * Get the Regional Ambassador for a prospect (inferred from EA)
+   */
+  getRegionalAmbassador(prospectId: string, eventAmbassadors: Map<string, any>): string | undefined {
+    const prospect = this.findById(prospectId);
+    if (!prospect) return undefined;
+
+    const ea = eventAmbassadors.get(prospect.eventAmbassador);
+    return ea?.regionalAmbassador;
+  }
+
+  /**
+   * Get prospects by Regional Ambassador (inferred relationship)
+   */
+  getByRegionalAmbassador(raId: string, eventAmbassadors: Map<string, any>): ProspectiveEvent[] {
+    return this.getAll().filter(prospect => {
+      const ea = eventAmbassadors.get(prospect.eventAmbassador);
+      return ea?.regionalAmbassador === raId;
+    });
+  }
+
+  /**
    * Update an existing prospective event
    */
   update(event: ProspectiveEvent): void {

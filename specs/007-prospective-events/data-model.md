@@ -20,7 +20,6 @@ interface ProspectiveEvent {
   state: string; // State/region information
   prospectEDs: string; // Prospect Event Director(s) name
   eventAmbassador: string; // Assigned Event Ambassador
-  regionalAmbassador?: string; // Inherited from EA
 
   // Status Flags
   courseFound: boolean; // Whether suitable course has been found
@@ -69,24 +68,24 @@ interface ProspectiveEventList {
 
 ### Allocation Impact
 - **EA Allocations**: Each prospect counts towards the assigned EA's allocation limit
-- **REA Inheritance**: Prospects automatically inherit the REA of their assigned EA
+- **REA Inheritance**: Prospects automatically inherit the REA of their assigned EA (inferred, not stored)
 - **Reallocation**: Prospects can be reallocated between EAs using Event Team allocation workflow
 
 ### Structure
 ```
 RegionalAmbassador (existing)
 ├── supportsEAs: string[] (existing)
-└── inheritedProspects: string[] (via EAs)
+└── inheritedProspects: string[] (via EAs - inferred)
     ↓
 EventAmbassador (existing)
 ├── supportsEvents: string[] (existing)
 ├── prospectiveEvents: string[] (new)
+├── regionalAmbassador: string (existing)
 └── allocationCount: number (includes prospects)
     ↓
 ProspectiveEvent (new)
 ├── eventAmbassador: string
-├── regionalAmbassador: string (inherited)
-├── country: string
+├── country: string (inferred REA via EA)
 ├── state: string
 └── coordinates?: [number, number]
 ```
