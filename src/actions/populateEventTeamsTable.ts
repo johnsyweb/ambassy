@@ -131,6 +131,55 @@ export function setReallocateButtonHandler(
   _reallocateButtonHandler = handler;
 }
 
+/**
+ * Update reallocate button states based on current selection.
+ * Should be called when selection changes to enable/disable buttons accordingly.
+ */
+export function updateReallocateButtonStates(): void {
+  if (!_selectionState) {
+    return;
+  }
+
+  const tableBody = document.querySelector('#eventTeamsTable tbody');
+  if (!tableBody) {
+    return;
+  }
+
+  const rows = tableBody.querySelectorAll('tr[data-event-short-name]');
+  rows.forEach((row) => {
+    const eventShortName = row.getAttribute('data-event-short-name');
+    if (!eventShortName) {
+      return;
+    }
+
+    const reallocateButton = row.querySelector('button.reallocate-button') as HTMLButtonElement;
+    if (!reallocateButton) {
+      return;
+    }
+
+    const isSelected = _selectionState!.selectedEventShortName === eventShortName;
+    reallocateButton.disabled = !isSelected;
+
+    if (isSelected && _reallocateButtonHandler) {
+      reallocateButton.onclick = (e) => {
+        e.stopPropagation();
+        _reallocateButtonHandler!(eventShortName);
+      };
+
+      reallocateButton.onkeydown = (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          e.stopPropagation();
+          _reallocateButtonHandler!(eventShortName);
+        }
+      };
+    } else {
+      reallocateButton.onclick = null;
+      reallocateButton.onkeydown = null;
+    }
+  });
+}
+
 function handleEventAmbassadorCellClick(
   eventAmbassadorCell: HTMLElement,
   data: EventTeamsTableData,

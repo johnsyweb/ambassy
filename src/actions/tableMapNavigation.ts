@@ -2,6 +2,7 @@ import { SelectionState } from "../models/SelectionState";
 import { EventTeamsTableDataMap } from "../models/EventTeamsTableData";
 import { highlightEventsOnMap, centerMapOnEvents } from "../utils/mapNavigation";
 import { EventDetailsMap } from "../models/EventDetailsMap";
+import { updateReallocateButtonStates } from "./populateEventTeamsTable";
 import L from "leaflet";
 
 export function selectEventTeamRow(
@@ -30,6 +31,7 @@ export function selectEventTeamRow(
 
   highlightTableRow("eventTeamsTable", eventShortName, true);
   scrollToTableRow("eventTeamsTable", eventShortName);
+  updateReallocateButtonStates();
 }
 
 export function selectMapEvent(
@@ -54,6 +56,7 @@ export function selectMapEvent(
   if (isEventTeamsTabVisible()) {
     highlightTableRow("eventTeamsTable", eventShortName, true);
     scrollToTableRow("eventTeamsTable", eventShortName);
+    updateReallocateButtonStates();
   }
 }
 
@@ -125,6 +128,7 @@ export function applyDeferredTableSelection(
   if (state.selectedEventShortName && eventTeamsTableData.has(state.selectedEventShortName)) {
     highlightTableRow("eventTeamsTable", state.selectedEventShortName, true);
     scrollToTableRow("eventTeamsTable", state.selectedEventShortName);
+    updateReallocateButtonStates();
   }
 }
 
