@@ -322,7 +322,7 @@ function setupOffboardingButtons(): void {
             name,
             suggestions,
             eventAmbassadors,
-            undefined,
+            regionalAmbassadors,
             (selectedAmbassador: string) => {
               resolve(selectedAmbassador);
             },
@@ -816,7 +816,7 @@ function initializeTableMapNavigation(): void {
         eventData.eventAmbassador,
         suggestions,
         eventAmbassadors,
-        undefined,
+        regionalAmbassadors,
         (selectedAmbassador: string) => {
           if (!eventTeamsTableData) {
             return;

@@ -68,22 +68,22 @@ export function showReallocationDialog(
         allocationSpan.style.color = "#666";
         allocationSpan.style.fontWeight = "normal";
 
-        // Get the REA for this EA
-        let reaName = "?";
-        if (eventAmbassadors && regionalAmbassadors) {
-          const ea = eventAmbassadors.get(suggestion.toAmbassador);
-          if (ea) {
-            // Find which RA supports this EA
-            for (const [raName, ra] of regionalAmbassadors) {
-              if (ra.supportsEAs.includes(suggestion.toAmbassador)) {
-                reaName = raName;
-                break;
-              }
+        let displayText = `(${suggestion.allocationCount} allocation${suggestion.allocationCount !== 1 ? "s" : ""})`;
+
+        // For event reallocation (EA suggestions), show the supporting REA
+        if (isEventReallocation && regionalAmbassadors) {
+          let reaName = "?";
+          // Find which RA supports this EA
+          for (const [raName, ra] of regionalAmbassadors) {
+            if (ra.supportsEAs.includes(suggestion.toAmbassador)) {
+              reaName = raName;
+              break;
             }
           }
+          displayText += ` [${reaName}]`;
         }
 
-        allocationSpan.textContent = `(${suggestion.allocationCount} allocation${suggestion.allocationCount !== 1 ? "s" : ""}) [${reaName}]`;
+        allocationSpan.textContent = displayText;
         buttonText.appendChild(allocationSpan);
       }
       
