@@ -1,5 +1,6 @@
 import { EventAmbassador } from "./models/EventAmbassador";
 import { EventAmbassadorMap } from "./models/EventAmbassadorMap";
+import { EventDetails } from "./models/EventDetails";
 import { EventDetailsMap } from "./models/EventDetailsMap";
 import { EventTeamMap } from "./models/EventTeamMap";
 import { RegionalAmbassador } from "./models/RegionalAmbassador";
