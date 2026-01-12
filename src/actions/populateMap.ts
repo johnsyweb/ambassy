@@ -145,14 +145,8 @@ export function populateMap(
     });
 
     // Build Voronoi points from constraining events
-    constrainingEvents.forEach((event, index) => {
-      let [lng, lat] = event.coords;
-
-      // Add deterministic tiny offset to avoid exact duplicate coordinates
-      // Use index-based offset to ensure consistent positioning
-      const offset = 0.000001 * (index % 100); // Very small deterministic offset
-      lng += offset * 0.0001; // ~10cm offset
-      lat += offset * 0.0001;
+    constrainingEvents.forEach((event) => {
+      const [lng, lat] = event.coords;
 
       if (event.isConstraining) {
         // Constraining points don't create polygons, just help define boundaries
@@ -170,12 +164,6 @@ export function populateMap(
         let lng = event.geometry.coordinates[0];
         let lat = event.geometry.coordinates[1];
 
-        // Add deterministic tiny offset to avoid exact duplicate coordinates
-        // Use event name hash for consistent positioning
-        const nameHash = eventName.split('').reduce((a, b) => a + b.charCodeAt(0), 0);
-        const offset = 0.000001 * (nameHash % 100);
-        lng += offset * 0.0001; // ~10cm offset
-        lat += offset * 0.0001;
 
         const raColor = raColorMap.get(data.regionalAmbassador) ?? DEFAULT_POLYGON_COLOUR;
         const tooltip = `
@@ -252,7 +240,6 @@ export function populateMap(
     });
   });
 
-  console.log(`Voronoi: ${voronoiPoints.length} total points, ${uniquePoints.length} unique points`);
 
   // Create Voronoi polygons from the unique points
   const voronoi = d3GeoVoronoi.geoVoronoi(uniquePoints.map((p) => [p[0], p[1]]));
