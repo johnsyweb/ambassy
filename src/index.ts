@@ -676,8 +676,47 @@ function onIssueSelect(issue: EventIssue): void {
 }
 
 function onSearchEvents(issue: EventIssue): void {
-  // TODO: Implement search events dialog (Phase 4)
-  alert(`Search Events for "${issue.eventShortName}" - Coming soon`);
+  if (!eventDetails) {
+    alert("Event details not loaded. Please wait and try again.");
+    return;
+  }
+
+  import("./actions/showEventSearchDialog").then(({ showEventSearchDialog }) => {
+    showEventSearchDialog(
+      issue.eventShortName,
+      eventDetails!,
+      (selectedEvent: EventDetails) => {
+        try {
+          import("./actions/resolveIssue").then(({ resolveIssueWithEvent }) => {
+            resolveIssueWithEvent(issue, selectedEvent, eventDetails!);
+
+            const eventTeams = getEventTeamsFromSession();
+            const eventAmbassadors = getEventAmbassadorsFromSession();
+            const regionalAmbassadors = getRegionalAmbassadorsFromSession();
+
+            if (eventTeams && eventDetails) {
+              eventTeamsTableData = extractEventTeamsTableData(
+                regionalAmbassadors,
+                eventAmbassadors,
+                eventTeams,
+                eventDetails
+              );
+            }
+
+            refreshUI(eventDetails!, eventTeamsTableData!, log, eventAmbassadors, regionalAmbassadors);
+            refreshIssuesTable();
+
+            alert(`Event "${issue.eventShortName}" resolved successfully!`);
+          });
+        } catch (error) {
+          alert(`Failed to resolve issue: ${error instanceof Error ? error.message : "Unknown error"}`);
+        }
+      },
+      () => {
+        // Cancel - dialog already closed
+      }
+    );
+  });
 }
 
 function onPlacePin(issue: EventIssue): void {
