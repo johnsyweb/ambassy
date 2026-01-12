@@ -62,13 +62,32 @@ function getCachedEvents(): EventDetailsMap | null {
 }
 
 export async function getEvents(): Promise<EventDetailsMap> {
-  const cachedEvents = getCachedEvents();
-
-  if (cachedEvents) {
-    console.log('Returning cached events.');
-    return cachedEvents;
-  } else {
-    await fetchEvents();
-    return getCachedEvents() || new Map<string, EventDetails>();
+  const cache = localStorage.getItem(CACHE_KEY);
+  if (cache) {
+    try {
+      const parsedCache = JSON.parse(cache);
+      const cacheAge = Date.now() - (parsedCache.timestamp || 0);
+      if (cacheAge < CACHE_DURATION && parsedCache.eventDetailsMap) {
+        console.log('Returning cached events.');
+        return new Map<string, EventDetails>(parsedCache.eventDetailsMap);
+      }
+    } catch (e) {
+      // Cache is corrupted, refetch
+    }
   }
+
+  // Cache doesn't exist or is expired/corrupted
+  await fetchEvents();
+  const freshCache = localStorage.getItem(CACHE_KEY);
+  if (freshCache) {
+    try {
+      const parsedCache = JSON.parse(freshCache);
+      if (parsedCache.eventDetailsMap) {
+        return new Map<string, EventDetails>(parsedCache.eventDetailsMap);
+      }
+    } catch (e) {
+      // Ignore
+    }
+  }
+  return new Map<string, EventDetails>();
 }

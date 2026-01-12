@@ -26,26 +26,11 @@ export function persistEventDetails(eventDetailsMap: EventDetailsMap): void {
   const CACHE_KEY = 'parkrun events';
   const cache = localStorage.getItem(CACHE_KEY);
 
-  if (cache) {
-    try {
-      const parsedCache = JSON.parse(cache);
-      // Update the eventDetailsMap while preserving timestamp and other metadata
-      parsedCache.eventDetailsMap = Array.from(eventDetailsMap.entries());
-      localStorage.setItem(CACHE_KEY, JSON.stringify(parsedCache));
-    } catch (e) {
-      // If cache is corrupted, create new one
-      localStorage.setItem(CACHE_KEY, JSON.stringify({
-        timestamp: Date.now(),
-        eventDetailsMap: Array.from(eventDetailsMap.entries())
-      }));
-    }
-  } else {
-    // No existing cache, create new one
-    localStorage.setItem(CACHE_KEY, JSON.stringify({
-      timestamp: Date.now(),
-      eventDetailsMap: Array.from(eventDetailsMap.entries())
-    }));
-  }
+  // Always update the cache with fresh timestamp and current eventDetailsMap
+  localStorage.setItem(CACHE_KEY, JSON.stringify({
+    timestamp: Date.now(),
+    eventDetailsMap: Array.from(eventDetailsMap.entries())
+  }));
 }
 
 export function restoreApplicationState(): ApplicationState | null {
