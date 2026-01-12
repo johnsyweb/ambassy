@@ -10,7 +10,7 @@ Implement a feature to import and manage "Prospective Events" (also called "Pros
 
 1. **Import CSV File**
    - Allow users to import a CSV file containing prospective events
-   - CSV format: `Prospect Event,Country,State,Prospect ED/s,EA,Date Made Contact,Course Found,Landowner Permission,Funding Confirmed,Edit`
+   - CSV format: `Prospect Event,Country,State,Prospect ED/s,EA,Date Made Contact,Course Found,Landowner Permission,Funding Confirmed`
    - Parse prospect event details including status flags and contact information
    - Handle various data types (dates, booleans, text)
 
@@ -67,10 +67,10 @@ Implement a feature to import and manage "Prospective Events" (also called "Pros
 ## Sample Data
 
 ```
-Prospect Event,Country,State,Prospect ED/s,EA,Date Made Contact,Course Found,Landowner Permission,Funding Confirmed,Edit
-Botanical Gardens,Australia,VIC,John Smith,Jane Doe,2024-01-15,true,false,true,
-City Park,Australia,NSW,Mary Johnson,John Smith,2024-02-01,false,true,false,
-Lake Reserve,Australia,QLD,Robert Brown,Sarah Wilson,2024-01-20,true,true,true,
+Prospect Event,Country,State,Prospect ED/s,EA,Date Made Contact,Course Found,Landowner Permission,Funding Confirmed
+Botanical Gardens,Australia,VIC,John Smith,Jane Doe,2024-01-15,true,false,true
+City Park,Australia,NSW,Mary Johnson,John Smith,2024-02-01,false,true,false
+Lake Reserve,Australia,QLD,Robert Brown,Sarah Wilson,2024-01-20,true,true,true
 ```
 
 ## Clarifications

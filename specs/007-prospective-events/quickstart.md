@@ -9,10 +9,10 @@ This guide provides a quick way to understand and implement the Prospective Even
 ### 1. CSV Format
 Your CSV file should have this structure:
 ```csv
-Prospect Event,Country,State,Prospect ED/s,EA,Date Made Contact,Course Found,Landowner Permission,Funding Confirmed,Edit
-Botanical Gardens,Australia,VIC,John Smith,Jane Doe,2024-01-15,true,false,true,
-City Park,Australia,NSW,Mary Johnson,John Smith,2024-02-01,false,true,false,
-Lake Reserve,Australia,QLD,Robert Brown,Sarah Wilson,2024-01-20,true,true,true,
+Prospect Event,Country,State,Prospect ED/s,EA,Date Made Contact,Course Found,Landowner Permission,Funding Confirmed
+Botanical Gardens,Australia,VIC,John Smith,Jane Doe,2024-01-15,true,false,true
+City Park,Australia,NSW,Mary Johnson,John Smith,2024-02-01,false,true,false
+Lake Reserve,Australia,QLD,Robert Brown,Sarah Wilson,2024-01-20,true,true,true
 ```
 
 **Required columns**:
@@ -25,7 +25,6 @@ Lake Reserve,Australia,QLD,Robert Brown,Sarah Wilson,2024-01-20,true,true,true,
 - `Course Found`: Boolean indicating if suitable course found
 - `Landowner Permission`: Boolean indicating landowner permission obtained
 - `Funding Confirmed`: Boolean indicating funding secured
-- `Edit`: Optional notes or edit information
 
 ### 2. Basic Import Flow
 ```typescript

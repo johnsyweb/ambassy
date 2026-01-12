@@ -34,7 +34,6 @@ export interface ProspectiveEvent {
   // Metadata
   importTimestamp: number;
   sourceRow: number; // Original CSV row for reference
-  edit?: string; // Edit notes or additional information
   notes?: string; // User-added notes or issues
 }
 

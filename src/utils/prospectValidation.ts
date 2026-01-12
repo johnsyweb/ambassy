@@ -190,7 +190,7 @@ export function validateCSVHeaders(headers: string[]): { isValid: boolean; error
     'Funding Confirmed'
   ];
 
-  const optionalHeaders = ['Edit'];
+  const optionalHeaders: string[] = [];
 
   const errors: string[] = [];
 
