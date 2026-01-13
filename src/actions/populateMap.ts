@@ -54,7 +54,7 @@ export function populateMap(
 
   // Tracking variables reserved for future debugging/analytics
   let processedEvents = 0;
-  // let eventsWithData = 0;
+  let eventsWithData = 0;
   // const eventsWithoutData = 0;
 
   // Will be populated after bounds calculation
