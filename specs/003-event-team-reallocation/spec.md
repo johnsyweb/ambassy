@@ -27,11 +27,16 @@ Enable users to select an Event Team from the Event Teams table and reallocate i
 
 **Acceptance Criteria:**
 - Application calculates a score for each potential recipient based on:
-  - Available capacity (ambassadors with more available capacity score higher)
-  - Geographic proximity (ambassadors with events closer to the reallocating event score higher)
+  - Total allocation count (live events + prospect events) - ambassadors with fewer total allocations score higher (0 allocations = highest priority)
+  - Geographic proximity (distance to nearest supported event) - used as tiebreaker when allocation counts are equal
 - Suggestions are displayed in descending order of score
 - Each suggestion shows:
   - Ambassador name
+  - Number of live events allocated
+  - Number of prospect events allocated
+  - Total allocation count (sum of live + prospect events)
+  - Name of supporting Regional Ambassador (REA)
+  - Distance from subject event to nearest event they support and its name
   - Score
   - Reasons for the suggestion (e.g., "Has available capacity", "Geographic proximity", "Same region")
   - Warnings if applicable (e.g., "Would exceed capacity limit")
