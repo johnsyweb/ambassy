@@ -61,7 +61,7 @@ describe("populateEventTeamsTable - Reallocate Button", () => {
   });
 
   it("should add Reallocate button to each row", () => {
-    populateEventTeamsTable(eventTeamsTableData, eventDetailsMap, changelog);
+    populateEventTeamsTable(eventTeamsTableData);
 
     const row = tableBody.querySelector("tr[data-event-short-name='test-event']");
     expect(row).not.toBeNull();
@@ -78,7 +78,7 @@ describe("populateEventTeamsTable - Reallocate Button", () => {
     selectionState.selectedEventShortName = null;
     setReallocateButtonHandler(selectionState, () => {});
 
-    populateEventTeamsTable(eventTeamsTableData, eventDetailsMap, changelog);
+    populateEventTeamsTable(eventTeamsTableData);
 
     const row = tableBody.querySelector("tr[data-event-short-name='test-event']");
     const reallocateButton = row?.querySelector("button.reallocate-button") as HTMLButtonElement;
@@ -90,7 +90,7 @@ describe("populateEventTeamsTable - Reallocate Button", () => {
     selectionState.selectedEventShortName = "test-event";
     setReallocateButtonHandler(selectionState, () => {});
 
-    populateEventTeamsTable(eventTeamsTableData, eventDetailsMap, changelog);
+    populateEventTeamsTable(eventTeamsTableData);
 
     const row = tableBody.querySelector("tr[data-event-short-name='test-event']");
     const reallocateButton = row?.querySelector("button.reallocate-button") as HTMLButtonElement;
@@ -103,7 +103,7 @@ describe("populateEventTeamsTable - Reallocate Button", () => {
     selectionState.selectedEventShortName = "test-event";
     setReallocateButtonHandler(selectionState, handler);
 
-    populateEventTeamsTable(eventTeamsTableData, eventDetailsMap, changelog);
+    populateEventTeamsTable(eventTeamsTableData);
 
     const row = tableBody.querySelector("tr[data-event-short-name='test-event']");
     const reallocateButton = row?.querySelector("button.reallocate-button") as HTMLButtonElement;
@@ -118,7 +118,7 @@ describe("populateEventTeamsTable - Reallocate Button", () => {
     selectionState.selectedEventShortName = "test-event";
     setReallocateButtonHandler(selectionState, handler);
 
-    populateEventTeamsTable(eventTeamsTableData, eventDetailsMap, changelog);
+    populateEventTeamsTable(eventTeamsTableData);
 
     const row = tableBody.querySelector("tr[data-event-short-name='test-event']");
     const reallocateButton = row?.querySelector("button.reallocate-button") as HTMLButtonElement;
@@ -134,7 +134,7 @@ describe("populateEventTeamsTable - Reallocate Button", () => {
     selectionState.selectedEventShortName = "test-event";
     setReallocateButtonHandler(selectionState, handler);
 
-    populateEventTeamsTable(eventTeamsTableData, eventDetailsMap, changelog);
+    populateEventTeamsTable(eventTeamsTableData);
 
     const row = tableBody.querySelector("tr[data-event-short-name='test-event']");
     const reallocateButton = row?.querySelector("button.reallocate-button") as HTMLButtonElement;
@@ -149,7 +149,7 @@ describe("populateEventTeamsTable - Reallocate Button", () => {
     selectionState.selectedEventShortName = null;
     setReallocateButtonHandler(selectionState, () => {});
 
-    populateEventTeamsTable(eventTeamsTableData, eventDetailsMap, changelog);
+    populateEventTeamsTable(eventTeamsTableData);
 
     let row = tableBody.querySelector("tr[data-event-short-name='test-event']");
     let reallocateButton = row?.querySelector("button.reallocate-button") as HTMLButtonElement;

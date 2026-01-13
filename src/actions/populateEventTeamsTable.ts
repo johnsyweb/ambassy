@@ -1,8 +1,4 @@
 import { EventTeamsTableDataMap, eventAmbassadorsFrom, regionalAmbassadorsFrom } from '@models/EventTeamsTableData';
-import { EventDetailsMap } from '@models/EventDetailsMap';
-import { LogEntry } from '@models/LogEntry';
-import { EventAmbassadorMap } from '@models/EventAmbassadorMap';
-import { RegionalAmbassadorMap } from '@models/RegionalAmbassadorMap';
 import { SelectionState } from '@models/SelectionState';
 import { colorPalette } from './colorPalette';
 

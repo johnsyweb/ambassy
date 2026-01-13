@@ -44,7 +44,7 @@ export function refreshUI(
   const prospectiveEvents = loadProspectiveEvents();
   const prospectsList = new ProspectiveEventList(prospectiveEvents);
 
-  populateEventTeamsTable(eventTeamsTableData, eventDetails, log, eventAmbassadorsToUse, regionalAmbassadorsToUse);
+  populateEventTeamsTable(eventTeamsTableData);
   populateMap(eventTeamsTableData, eventDetails, eventAmbassadorsToUse, regionalAmbassadorsToUse, prospectiveEvents);
   populateAmbassadorsTable(eventAmbassadorsToUse, regionalAmbassadorsToUse, eventTeamsTableData);
   populateProspectsTable(prospectsList, eventAmbassadorsToUse, regionalAmbassadorsToUse, log, eventDetails);
