@@ -102,7 +102,6 @@ export function validateProspectiveEvent(event: ProspectiveEvent): ValidationRes
   // Business rule validations
   if (event.prospectEvent && event.country && event.state) {
     // Could add uniqueness check here if needed
-    // const key = `${event.prospectEvent}-${event.country}-${event.state}`.toLowerCase();
   }
 
   // Warnings for potential issues

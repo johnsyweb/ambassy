@@ -20,7 +20,6 @@ const REGION_WEIGHT = 0.3;
 const PROXIMITY_WEIGHT = 0.3;
 const CONFLICT_PENALTY = -100;
 const ZERO_ALLOCATIONS_BONUS = 1000; // Very high bonus for 0 allocations
-// const NEIGHBORING_EVENTS_BONUS = 500; // Reserved for future use
 
 /**
  * Calculate geographic proximity score based on average distance.
