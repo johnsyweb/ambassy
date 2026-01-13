@@ -1,7 +1,6 @@
 import { reallocateProspect } from "./reallocateProspect";
 import { ProspectiveEventList } from "../models/ProspectiveEventList";
 import { EventAmbassadorMap } from "../models/EventAmbassadorMap";
-import { RegionalAmbassadorMap } from "../models/RegionalAmbassadorMap";
 import { LogEntry } from "../models/LogEntry";
 import { CapacityStatus } from "../models/CapacityStatus";
 
@@ -17,7 +16,6 @@ const mockCalculateAllCapacityStatuses = jest.requireMock("./checkCapacity").cal
 describe("reallocateProspect", () => {
   let prospects: ProspectiveEventList;
   let eventAmbassadors: EventAmbassadorMap;
-  let regionalAmbassadors: RegionalAmbassadorMap;
   let log: LogEntry[];
 
   beforeEach(() => {
@@ -64,8 +62,6 @@ describe("reallocateProspect", () => {
         capacityStatus: CapacityStatus.WITHIN
       }]
     ]);
-
-    regionalAmbassadors = new Map();
 
     log = [];
   });

@@ -17,6 +17,16 @@ import { formatCoordinate, Coordinate, createCoordinate } from '../models/Coordi
 import { persistEventAmbassadors, persistChangesLog } from './persistState';
 import { EventDetailsMap } from '../models/EventDetailsMap';
 import { calculateDistance } from '../utils/geography';
+import { ProspectiveEvent } from '../models/ProspectiveEvent';
+import { EventAmbassador } from '../models/EventAmbassador';
+
+type AmbassadorWithCounts = {
+  name: string;
+  ambassador: EventAmbassador;
+  liveCount: number;
+  prospectCount: number;
+  totalCount: number;
+};
 
 // Forward declaration - will be set by index.ts
 let refreshUIAfterReallocation: (() => void) | null = null;
@@ -74,7 +84,7 @@ export function populateProspectsTable(
  * Create a table row for a prospective event
  */
 function createProspectRow(
-  prospect: any,
+  prospect: ProspectiveEvent,
   eventAmbassadors: EventAmbassadorMap,
   regionalAmbassadors: RegionalAmbassadorMap,
   prospects: ProspectiveEventList,
@@ -142,7 +152,6 @@ function createProspectRow(
   // Coordinates
   const coordinatesCell = document.createElement('td');
   if (prospect.coordinates) {
-    const { formatCoordinate } = require('../models/Coordinate');
     coordinatesCell.textContent = formatCoordinate(prospect.coordinates);
     coordinatesCell.title = formatCoordinate(prospect.coordinates);
   } else {
@@ -185,8 +194,7 @@ function createProspectRow(
       prospect,
       eventAmbassadors,
       eventDetails,
-      prospects,
-      regionalAmbassadors
+      prospects
     );
 
     // Show reallocation dialog
@@ -314,13 +322,11 @@ function createProspectRow(
  */
 function generateProspectReallocationSuggestions(
   currentAmbassador: string,
-  prospect: any,
+  prospect: ProspectiveEvent,
   eventAmbassadors: EventAmbassadorMap,
   eventDetails?: EventDetailsMap,
-  prospects?: ProspectiveEventList,
-  regionalAmbassadors?: RegionalAmbassadorMap
+  prospects?: ProspectiveEventList
 ): ReallocationSuggestion[] {
-  const limits = loadCapacityLimits();
   const suggestions: ReallocationSuggestion[] = [];
 
   // Get prospect coordinates for distance calculation
@@ -329,7 +335,7 @@ function generateProspectReallocationSuggestions(
     : null;
 
   // Calculate current allocation counts including prospective events
-  const ambassadorsWithCounts = Array.from(eventAmbassadors.entries()).map(([name, ambassador]) => {
+  const ambassadorsWithCounts: AmbassadorWithCounts[] = Array.from(eventAmbassadors.entries()).map(([name, ambassador]) => {
     const liveCount = ambassador.events.length;
     const prospectCount = ambassador.prospectiveEvents?.length ?? 0;
     const totalCount = liveCount + prospectCount;
@@ -337,10 +343,11 @@ function generateProspectReallocationSuggestions(
   });
 
   // Sort by available capacity (ascending - those with least allocation first)
-  ambassadorsWithCounts.sort((a, b) => a.totalCount - b.totalCount);
+  ambassadorsWithCounts.sort((a: AmbassadorWithCounts, b: AmbassadorWithCounts) => a.totalCount - b.totalCount);
 
   // Generate suggestions
-  for (const { name, ambassador, liveCount, prospectCount, totalCount } of ambassadorsWithCounts) {
+  for (const item of ambassadorsWithCounts) {
+    const { name, ambassador, liveCount, prospectCount, totalCount } = item;
     if (name === currentAmbassador) continue; // Skip current ambassador
 
     const capacityStatus = ambassador.capacityStatus || CapacityStatus.WITHIN;
@@ -419,17 +426,6 @@ function generateProspectReallocationSuggestions(
       reasons.push(`Nearby events: ${eventList}`);
     }
 
-    // Get REA name
-    let reaName: string | null = null;
-    if (regionalAmbassadors) {
-      for (const [raName, ra] of regionalAmbassadors) {
-        if (ra.supportsEAs.includes(name)) {
-          reaName = raName;
-          break;
-        }
-      }
-    }
-
     suggestions.push({
       fromAmbassador: currentAmbassador,
       toAmbassador: name,
@@ -447,7 +443,7 @@ function generateProspectReallocationSuggestions(
   return suggestions.sort((a, b) => b.score - a.score);
 }
 
-function showProspectLocationDialog(prospect: any, prospects: ProspectiveEventList): void {
+function showProspectLocationDialog(prospect: ProspectiveEvent, prospects: ProspectiveEventList): void {
   const dialog = document.createElement('div');
   dialog.style.position = 'fixed';
   dialog.style.top = '0';
@@ -628,7 +624,7 @@ function showProspectLocationDialog(prospect: any, prospects: ProspectiveEventLi
 }
 
 function updateProspectLocation(
-  prospect: any,
+  prospect: ProspectiveEvent,
   prospects: ProspectiveEventList,
   coordinates: Coordinate,
   source: string

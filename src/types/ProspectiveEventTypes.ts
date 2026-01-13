@@ -106,7 +106,7 @@ export interface ValidationResult {
 export interface ValidationError {
   field: keyof ProspectiveEvent;
   message: string;
-  value?: any;
+  value?: unknown;
 }
 
 // Error Types

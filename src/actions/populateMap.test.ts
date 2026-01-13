@@ -1,11 +1,4 @@
-import { EventDetailsMap } from "@models/EventDetailsMap";
-import { EventTeamsTableDataMap } from "@models/EventTeamsTableData";
-
 describe("populateMap duplicate filtering", () => {
-  // Mock the dependencies
-  const mockMap = {} as any;
-  const mockMarkersLayer = {} as any;
-  const mockPolygonsLayer = {} as any;
 
   beforeEach(() => {
     // Reset global state between tests

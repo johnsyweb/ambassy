@@ -101,7 +101,6 @@ export function validateProspectiveEvent(event: ProspectiveEvent): ValidationRes
 
   // Business rule validations
   if (event.prospectEvent && event.country && event.state) {
-    const key = `${event.prospectEvent}-${event.country}-${event.state}`.toLowerCase();
     // Could add uniqueness check here if needed
   }
 
@@ -172,8 +171,6 @@ export function validateCSVHeaders(headers: string[]): { isValid: boolean; error
     'Landowner Permission',
     'Funding Confirmed'
   ];
-
-  const optionalHeaders: string[] = [];
 
   const errors: string[] = [];
 

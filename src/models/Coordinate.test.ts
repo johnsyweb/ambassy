@@ -93,7 +93,9 @@ describe('Coordinate', () => {
     });
 
     it('should return false for non-number values', () => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       expect(isValidCoordinate({ latitude: 'invalid' as any, longitude: 0 })).toBe(false);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       expect(isValidCoordinate({ latitude: 0, longitude: 'invalid' as any })).toBe(false);
     });
   });
@@ -339,8 +341,11 @@ describe('Coordinate', () => {
     });
 
     it('should reject objects missing required properties', () => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       expect(isValidCoordinate({ latitude: -37.8136 } as any)).toBe(false);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       expect(isValidCoordinate({ longitude: 144.9631 } as any)).toBe(false);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       expect(isValidCoordinate({} as any)).toBe(false);
     });
   });

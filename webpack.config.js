@@ -28,11 +28,17 @@ module.exports = {
     rules: [
       {
         test: /\.ts$/,
-        use: 'ts-loader',
+        use: {
+          loader: 'ts-loader',
+          options: {
+            transpileOnly: false,
+          },
+        },
         exclude: /node_modules/,
       },
     ],
   },
+  cache: false,
   plugins: [
     new CopyWebpackPlugin({
       patterns: [

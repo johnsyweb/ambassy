@@ -90,7 +90,6 @@ export async function importProspectiveEvents(
         const processed = await processProspectiveEvent(
           event,
           eventAmbassadors,
-          regionalAmbassadors,
         );
         processedEvents.push(processed.event);
 
@@ -132,7 +131,7 @@ export async function importProspectiveEvents(
       const existingEvents = loadProspectiveEvents();
 
       // Deduplicate prospects based on prospectEvent, country, and state
-      const existingMap = new Map<string, any>();
+      const existingMap = new Map<string, ProspectiveEvent>();
       existingEvents.forEach((event) => {
         const key = `${event.prospectEvent}|${event.country}|${event.state}`;
         existingMap.set(key, event);
@@ -204,7 +203,6 @@ export async function importProspectiveEvents(
 async function processProspectiveEvent(
   event: ProspectiveEvent,
   eventAmbassadors: EventAmbassadorMap,
-  regionalAmbassadors: RegionalAmbassadorMap,
 ): Promise<{
   event: ProspectiveEvent;
   warnings: string[];

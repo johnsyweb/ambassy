@@ -13,6 +13,7 @@ import { EventAmbassador } from "@models/EventAmbassador";
 import { RegionalAmbassador } from "@models/RegionalAmbassador";
 import { LogEntry } from "@models/LogEntry";
 import { loadFromStorage } from "@utils/storage";
+import { getCountriesSync } from "@models/country";
 
 export function refreshUI(
   eventDetails: EventDetailsMap,
@@ -44,9 +45,13 @@ export function refreshUI(
   const prospectiveEvents = loadProspectiveEvents();
   const prospectsList = new ProspectiveEventList(prospectiveEvents);
 
-  populateEventTeamsTable(eventTeamsTableData, eventDetails, log, eventAmbassadorsToUse, regionalAmbassadorsToUse);
+  populateEventTeamsTable(eventTeamsTableData);
   populateMap(eventTeamsTableData, eventDetails, eventAmbassadorsToUse, regionalAmbassadorsToUse, prospectiveEvents);
-  populateAmbassadorsTable(eventAmbassadorsToUse, regionalAmbassadorsToUse, eventTeamsTableData);
+  
+  // Get countries synchronously (should already be cached)
+  const countries = getCountriesSync();
+  
+  populateAmbassadorsTable(eventAmbassadorsToUse, regionalAmbassadorsToUse, eventTeamsTableData, eventDetails, countries);
   populateProspectsTable(prospectsList, eventAmbassadorsToUse, regionalAmbassadorsToUse, log, eventDetails);
-  populateChangesLogTable(log);
+  populateChangesLogTable(log, eventDetails, countries);
 }

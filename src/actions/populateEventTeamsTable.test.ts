@@ -11,14 +11,10 @@ jest.mock("d3-geo-voronoi", () => ({
 
 import { populateEventTeamsTable, setReallocateButtonHandler, updateReallocateButtonStates } from "./populateEventTeamsTable";
 import { EventTeamsTableDataMap } from "@models/EventTeamsTableData";
-import { EventDetailsMap } from "@models/EventDetailsMap";
-import { LogEntry } from "@models/LogEntry";
 import { SelectionState, createSelectionState } from "@models/SelectionState";
 
 describe("populateEventTeamsTable - Reallocate Button", () => {
   let eventTeamsTableData: EventTeamsTableDataMap;
-  let eventDetailsMap: EventDetailsMap;
-  let changelog: LogEntry[];
   let selectionState: SelectionState;
   let tableBody: HTMLTableSectionElement;
 
@@ -55,13 +51,11 @@ describe("populateEventTeamsTable - Reallocate Button", () => {
       eventCountry: "Australia",
     });
 
-    eventDetailsMap = new Map();
-    changelog = [];
     selectionState = createSelectionState();
   });
 
   it("should add Reallocate button to each row", () => {
-    populateEventTeamsTable(eventTeamsTableData, eventDetailsMap, changelog);
+    populateEventTeamsTable(eventTeamsTableData);
 
     const row = tableBody.querySelector("tr[data-event-short-name='test-event']");
     expect(row).not.toBeNull();
@@ -78,7 +72,7 @@ describe("populateEventTeamsTable - Reallocate Button", () => {
     selectionState.selectedEventShortName = null;
     setReallocateButtonHandler(selectionState, () => {});
 
-    populateEventTeamsTable(eventTeamsTableData, eventDetailsMap, changelog);
+    populateEventTeamsTable(eventTeamsTableData);
 
     const row = tableBody.querySelector("tr[data-event-short-name='test-event']");
     const reallocateButton = row?.querySelector("button.reallocate-button") as HTMLButtonElement;
@@ -90,7 +84,7 @@ describe("populateEventTeamsTable - Reallocate Button", () => {
     selectionState.selectedEventShortName = "test-event";
     setReallocateButtonHandler(selectionState, () => {});
 
-    populateEventTeamsTable(eventTeamsTableData, eventDetailsMap, changelog);
+    populateEventTeamsTable(eventTeamsTableData);
 
     const row = tableBody.querySelector("tr[data-event-short-name='test-event']");
     const reallocateButton = row?.querySelector("button.reallocate-button") as HTMLButtonElement;
@@ -103,7 +97,7 @@ describe("populateEventTeamsTable - Reallocate Button", () => {
     selectionState.selectedEventShortName = "test-event";
     setReallocateButtonHandler(selectionState, handler);
 
-    populateEventTeamsTable(eventTeamsTableData, eventDetailsMap, changelog);
+    populateEventTeamsTable(eventTeamsTableData);
 
     const row = tableBody.querySelector("tr[data-event-short-name='test-event']");
     const reallocateButton = row?.querySelector("button.reallocate-button") as HTMLButtonElement;
@@ -118,7 +112,7 @@ describe("populateEventTeamsTable - Reallocate Button", () => {
     selectionState.selectedEventShortName = "test-event";
     setReallocateButtonHandler(selectionState, handler);
 
-    populateEventTeamsTable(eventTeamsTableData, eventDetailsMap, changelog);
+    populateEventTeamsTable(eventTeamsTableData);
 
     const row = tableBody.querySelector("tr[data-event-short-name='test-event']");
     const reallocateButton = row?.querySelector("button.reallocate-button") as HTMLButtonElement;
@@ -134,7 +128,7 @@ describe("populateEventTeamsTable - Reallocate Button", () => {
     selectionState.selectedEventShortName = "test-event";
     setReallocateButtonHandler(selectionState, handler);
 
-    populateEventTeamsTable(eventTeamsTableData, eventDetailsMap, changelog);
+    populateEventTeamsTable(eventTeamsTableData);
 
     const row = tableBody.querySelector("tr[data-event-short-name='test-event']");
     const reallocateButton = row?.querySelector("button.reallocate-button") as HTMLButtonElement;
@@ -149,7 +143,7 @@ describe("populateEventTeamsTable - Reallocate Button", () => {
     selectionState.selectedEventShortName = null;
     setReallocateButtonHandler(selectionState, () => {});
 
-    populateEventTeamsTable(eventTeamsTableData, eventDetailsMap, changelog);
+    populateEventTeamsTable(eventTeamsTableData);
 
     let row = tableBody.querySelector("tr[data-event-short-name='test-event']");
     let reallocateButton = row?.querySelector("button.reallocate-button") as HTMLButtonElement;
