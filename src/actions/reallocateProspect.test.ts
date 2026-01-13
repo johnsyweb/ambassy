@@ -17,8 +17,6 @@ const mockCalculateAllCapacityStatuses = jest.requireMock("./checkCapacity").cal
 describe("reallocateProspect", () => {
   let prospects: ProspectiveEventList;
   let eventAmbassadors: EventAmbassadorMap;
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  let regionalAmbassadors: RegionalAmbassadorMap; // Reserved for future use
   let log: LogEntry[];
 
   beforeEach(() => {

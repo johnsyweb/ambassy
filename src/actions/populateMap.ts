@@ -52,11 +52,6 @@ export function populateMap(
 
   const voronoiPoints: [number, number, string][] = [];
 
-  // Tracking variables for debugging/analytics
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  let processedEvents = 0;
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  let eventsWithData = 0;
 
   // Will be populated after bounds calculation
   const constrainingEvents: Array<{coords: [number, number], isConstraining: boolean, raColor?: string, tooltip?: string}> = [];
@@ -192,12 +187,10 @@ export function populateMap(
     const latitude = getLatitude(coord);
     const longitude = getLongitude(coord);
     const data = eventTeamsTableData.get(eventName);
-    processedEvents++;
 
     // Skip events without ambassador data for processing
 
     if (data) {
-      eventsWithData++;
       const eaColor = eaColorMap.get(data.eventAmbassador) ?? DEFAULT_EVENT_COLOUR;
       const tooltip = `
         <strong>Event:</strong> ${eventName}<br>
