@@ -1,10 +1,15 @@
 <!--
 Sync Impact Report:
-Version change: 1.1.1 → 1.2.0 (added explicit prohibition on pushing with build failures)
+Version change: 1.2.0 → 1.3.0 (added explicit linting error prevention and CI enforcement)
 Modified principles: 
-  - I. Quality Gates - Added explicit requirement that code MUST NOT be pushed if build fails
+  - I. Quality Gates - Added explicit linting requirements (zero errors, fix errors in modified files, CI enforcement)
+  - Pre-Commit Checklist - Made mandatory, added requirement to fix all lint errors in modified files
+  - Pre-Push Checklist - Added CI verification requirement
+  - Code Review Requirements - Added CI passing requirement and lint error fixing requirement
 Added sections: 
-  - Pre-Push Checklist (in Development Workflow)
+  - Linting Requirements (in Quality Gates)
+  - CI Enforcement (in Quality Gates)
+  - Automated Enforcement (in Quality Gates)
 Removed sections: N/A
 Templates requiring updates:
   ✅ plan-template.md - Constitution Check section exists and aligns
@@ -21,14 +26,31 @@ Follow-up TODOs: None
 
 All code MUST pass quality gates before commit:
 - Code MUST be formatted with Prettier
-- Code MUST pass ESLint linting
+- Code MUST pass ESLint linting (zero errors, zero warnings)
 - Code MUST pass TypeScript type checking
 - All tests MUST pass
 - Disused code MUST be removed immediately
 
-Code MUST NOT be pushed to any remote repository if there are build failures. All quality gates MUST pass before pushing commits to shared branches (including main, feature branches, or any remote repository).
+**Linting Requirements**:
+- When modifying a file, ALL linting errors in that file MUST be fixed, even if they existed before your changes
+- New code MUST NOT introduce any linting errors or warnings
+- Linting errors MUST be fixed before committing, not deferred
+- The codebase MUST maintain zero linting errors at all times
 
-**Rationale**: Prevents technical debt accumulation and ensures consistent code quality across the codebase. These gates are automated and non-negotiable to maintain project health. Prohibiting pushes with build failures prevents broken code from entering shared repositories, protecting the entire team from build breakage and ensuring the main branch always remains in a deployable state.
+**CI Enforcement**:
+- CI MUST run linting, type checking, tests, and build on every push and pull request
+- CI MUST fail (block merge) if any quality gate fails
+- Pull requests MUST NOT be merged if CI fails
+- The main branch MUST always pass all quality gates
+
+Code MUST NOT be pushed to any remote repository if there are build failures or linting errors. All quality gates MUST pass before pushing commits to shared branches (including main, feature branches, or any remote repository).
+
+**Automated Enforcement** (Recommended):
+- Pre-commit hooks SHOULD be configured to run linting and type checking before allowing commits
+- If pre-commit hooks are not configured, developers MUST manually run the Pre-Commit Checklist before every commit
+- The Pre-Commit Checklist is NOT optional - it is the minimum requirement for every commit
+
+**Rationale**: Prevents technical debt accumulation and ensures consistent code quality across the codebase. These gates are automated and non-negotiable to maintain project health. Prohibiting pushes with build failures prevents broken code from entering shared repositories, protecting the entire team from build breakage and ensuring the main branch always remains in a deployable state. Requiring fixes to existing lint errors in modified files prevents technical debt from accumulating and ensures the codebase quality improves over time rather than degrading.
 
 ### II. Test-Driven Development
 
@@ -107,29 +129,39 @@ The application MUST follow the Twelve-Factor App methodology (<https://12factor
 Before every commit, developers MUST:
 
 1. Run `pnpm run lint:fix` to format and fix linting issues
-2. Run `pnpm run lint` to verify all linting passes
-3. Run `tsc --noEmit` to verify TypeScript type checking passes
-4. Run `pnpm test` to verify all tests pass
-5. Verify README is updated if changes affect setup or usage
-6. Remove any disused code
-7. Ensure commit message follows Conventional Commits format
+2. Run `pnpm run lint` to verify all linting passes (zero errors, zero warnings)
+3. Fix ALL linting errors in any files you modified, even if the errors existed before your changes
+4. Run `tsc --noEmit` to verify TypeScript type checking passes
+5. Run `pnpm test` to verify all tests pass
+6. Verify README is updated if changes affect setup or usage
+7. Remove any disused code
+8. Ensure commit message follows Conventional Commits format
+
+**This checklist is MANDATORY, not optional.** If pre-commit hooks are not configured, developers MUST manually verify each step before committing. Skipping this checklist violates the constitution and risks introducing technical debt.
 
 ### Pre-Push Checklist
 
 Before every push to a remote repository, developers MUST:
 
-1. Verify all quality gates pass (linting, type checking, tests)
+1. Verify all quality gates pass (linting with zero errors/warnings, type checking, tests)
 2. Verify the build completes successfully (`pnpm run build` or equivalent)
-3. Ensure no build failures exist in the current branch
+3. Ensure no build failures or linting errors exist in the current branch
 4. Confirm all commits in the push follow Conventional Commits format
+5. Verify that CI will pass by running the same checks locally that CI runs
 
-**Enforcement**: If any build failure is detected, the push MUST be aborted until all issues are resolved. Broken builds MUST NOT enter shared repositories.
+**Enforcement**: 
+- If any build failure or linting error is detected, the push MUST be aborted until all issues are resolved
+- Broken builds or linting errors MUST NOT enter shared repositories
+- If CI fails after pushing, the issues MUST be fixed immediately and pushed in a new commit
+- Pull requests with failing CI MUST NOT be merged until CI passes
 
 ### Code Review Requirements
 
 All changes MUST:
 
-- Pass all quality gates
+- Pass all quality gates (linting with zero errors/warnings, type checking, tests, build)
+- Have passing CI before merge (CI failure blocks merge)
+- Fix ALL linting errors in files modified, even if errors existed before
 - Follow single responsibility principle
 - Include appropriate tests
 - Maintain or improve test coverage
@@ -138,6 +170,8 @@ All changes MUST:
 - Behave identically in production and test environments
 - Be keyboard accessible (for UI changes)
 - Use Australian English (for user-facing text)
+
+**CI Status**: Pull requests MUST NOT be merged if CI is failing. All CI checks (linting, type checking, tests, build) MUST pass before merge approval.
 
 ### Feature Development Process
 
@@ -168,4 +202,4 @@ This constitution supersedes all other development practices. All code changes M
 
 **Runtime Guidance**: See `README.md` for project setup, development workflow, and usage instructions.
 
-**Version**: 1.2.0 | **Ratified**: 2026-01-07 | **Last Amended**: 2026-01-13
+**Version**: 1.3.0 | **Ratified**: 2026-01-07 | **Last Amended**: 2026-01-13
