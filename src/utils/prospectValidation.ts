@@ -172,8 +172,6 @@ export function validateCSVHeaders(headers: string[]): { isValid: boolean; error
     'Funding Confirmed'
   ];
 
-  // const optionalHeaders: string[] = []; // Reserved for future use
-
   const errors: string[] = [];
 
   // Check required headers
