@@ -53,7 +53,9 @@ export function populateMap(
   const voronoiPoints: [number, number, string][] = [];
 
   // Tracking variables for debugging/analytics
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   let processedEvents = 0;
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   let eventsWithData = 0;
 
   // Will be populated after bounds calculation
