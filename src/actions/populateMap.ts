@@ -52,10 +52,9 @@ export function populateMap(
 
   const voronoiPoints: [number, number, string][] = [];
 
-  // Tracking variables reserved for future debugging/analytics
+  // Tracking variables for debugging/analytics
   let processedEvents = 0;
   let eventsWithData = 0;
-  // const eventsWithoutData = 0;
 
   // Will be populated after bounds calculation
   const constrainingEvents: Array<{coords: [number, number], isConstraining: boolean, raColor?: string, tooltip?: string}> = [];
