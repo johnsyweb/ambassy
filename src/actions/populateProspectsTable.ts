@@ -15,6 +15,8 @@ import { geocodeAddress } from '../utils/geography';
 import { saveProspectiveEvents } from './persistProspectiveEvents';
 import { formatCoordinate, Coordinate, createCoordinate } from '../models/Coordinate';
 import { persistEventAmbassadors, persistChangesLog } from './persistState';
+import { EventDetailsMap } from '../models/EventDetailsMap';
+import { calculateDistance } from '../utils/geography';
 
 // Forward declaration - will be set by index.ts
 let refreshUIAfterReallocation: (() => void) | null = null;
@@ -30,7 +32,8 @@ export function populateProspectsTable(
   prospects: ProspectiveEventList,
   eventAmbassadors: EventAmbassadorMap,
   regionalAmbassadors: RegionalAmbassadorMap,
-  log?: LogEntry[]
+  log?: LogEntry[],
+  eventDetails?: EventDetailsMap
 ): void {
   const tableBody = document.querySelector<HTMLTableSectionElement>('#prospectsTable tbody');
   if (!tableBody) {
@@ -62,7 +65,7 @@ export function populateProspectsTable(
   prospectEvents.sort((a, b) => a.prospectEvent.localeCompare(b.prospectEvent));
 
   prospectEvents.forEach((prospect) => {
-    const row = createProspectRow(prospect, eventAmbassadors, regionalAmbassadors, prospects, log);
+    const row = createProspectRow(prospect, eventAmbassadors, regionalAmbassadors, prospects, log, eventDetails);
     tableBody.appendChild(row);
   });
 }
@@ -75,7 +78,8 @@ function createProspectRow(
   eventAmbassadors: EventAmbassadorMap,
   regionalAmbassadors: RegionalAmbassadorMap,
   prospects: ProspectiveEventList,
-  log?: LogEntry[]
+  log?: LogEntry[],
+  eventDetails?: EventDetailsMap
 ): HTMLTableRowElement {
   const row = document.createElement('tr');
   row.setAttribute('data-prospect-id', prospect.id);
@@ -179,7 +183,10 @@ function createProspectRow(
     const suggestions = generateProspectReallocationSuggestions(
       prospect.eventAmbassador || '',
       prospect,
-      eventAmbassadors
+      eventAmbassadors,
+      eventDetails,
+      prospects,
+      regionalAmbassadors
     );
 
     // Show reallocation dialog
@@ -213,7 +220,9 @@ function createProspectRow(
       },
       () => {
         // Cancel - do nothing
-      }
+      },
+      eventDetails,
+      prospects
     );
   });
   buttonContainer.appendChild(reallocateButton);
@@ -301,43 +310,123 @@ function createProspectRow(
 }
 
 /**
- * Convert status enum to display text
+ * Generate reallocation suggestions for prospects
  */
 function generateProspectReallocationSuggestions(
   currentAmbassador: string,
   prospect: any,
-  eventAmbassadors: EventAmbassadorMap
+  eventAmbassadors: EventAmbassadorMap,
+  eventDetails?: EventDetailsMap,
+  prospects?: ProspectiveEventList,
+  regionalAmbassadors?: RegionalAmbassadorMap
 ): ReallocationSuggestion[] {
   const limits = loadCapacityLimits();
   const suggestions: ReallocationSuggestion[] = [];
 
+  // Get prospect coordinates for distance calculation
+  const prospectCoords = prospect.coordinates && prospect.geocodingStatus === 'success'
+    ? { lat: prospect.coordinates.latitude, lon: prospect.coordinates.longitude }
+    : null;
+
   // Calculate current allocation counts including prospective events
   const ambassadorsWithCounts = Array.from(eventAmbassadors.entries()).map(([name, ambassador]) => {
-    const prospectiveCount = ambassador.prospectiveEvents?.length || 0;
-    const totalCount = ambassador.events.length + prospectiveCount;
-    return { name, ambassador, totalCount };
+    const liveCount = ambassador.events.length;
+    const prospectCount = ambassador.prospectiveEvents?.length ?? 0;
+    const totalCount = liveCount + prospectCount;
+    return { name, ambassador, liveCount, prospectCount, totalCount };
   });
 
   // Sort by available capacity (ascending - those with least allocation first)
   ambassadorsWithCounts.sort((a, b) => a.totalCount - b.totalCount);
 
   // Generate suggestions
-  for (const { name, ambassador, totalCount } of ambassadorsWithCounts) {
+  for (const { name, ambassador, liveCount, prospectCount, totalCount } of ambassadorsWithCounts) {
     if (name === currentAmbassador) continue; // Skip current ambassador
 
     const capacityStatus = ambassador.capacityStatus || CapacityStatus.WITHIN;
-    let score = 100 - totalCount * 5; // Higher score for lower allocation counts
-    const reasons = [`Currently has ${totalCount} total allocations`];
-
-    // Adjust score based on capacity status
+    
+    // Primary ordering: total allocation count (fewer = higher priority, 0 = highest)
+    const baseScore = Math.max(0, 1000 - (totalCount * 10));
+    
+    // Calculate distance to nearest event (live or prospect)
+    let distanceBonus = 0;
+    let neighboringEvents: Array<{ name: string; distanceKm: number }> = [];
+    
+    if (prospectCoords && (ambassador.events.length > 0 || (ambassador.prospectiveEvents && ambassador.prospectiveEvents.length > 0))) {
+      const allEvents: Array<{ name: string; lat: number; lon: number }> = [];
+      
+      // Add live events
+      if (eventDetails) {
+        for (const eventName of ambassador.events) {
+          const eventDetail = eventDetails.get(eventName);
+          if (eventDetail?.geometry?.coordinates) {
+            const [lon, lat] = eventDetail.geometry.coordinates;
+            allEvents.push({ name: eventName, lat, lon });
+          }
+        }
+      }
+      
+      // Add prospect events
+      if (prospects && ambassador.prospectiveEvents) {
+        for (const prospectId of ambassador.prospectiveEvents) {
+          const prospectEvent = prospects.findById(prospectId);
+          if (prospectEvent?.coordinates && prospectEvent.geocodingStatus === 'success') {
+            allEvents.push({
+              name: prospectEvent.prospectEvent,
+              lat: prospectEvent.coordinates.latitude,
+              lon: prospectEvent.coordinates.longitude
+            });
+          }
+        }
+      }
+      
+      // Find nearest event
+      if (allEvents.length > 0) {
+        let nearestDistance = Infinity;
+        let nearestEvent: { name: string; distanceKm: number } | null = null;
+        
+        for (const event of allEvents) {
+          const distance = calculateDistance(prospectCoords.lat, prospectCoords.lon, event.lat, event.lon);
+          if (distance < nearestDistance) {
+            nearestDistance = distance;
+            nearestEvent = { name: event.name, distanceKm: distance };
+          }
+        }
+        
+        if (nearestEvent && nearestDistance <= 50) {
+          neighboringEvents = [nearestEvent];
+          distanceBonus = Math.max(0, 100 - nearestDistance);
+        }
+      }
+    }
+    
+    const score = baseScore + distanceBonus;
+    
+    const reasons: string[] = [`Currently has ${totalCount} total allocations`];
+    
+    // Adjust reasons based on capacity status
     if (capacityStatus === CapacityStatus.UNDER) {
-      score += 20;
       reasons.push('Has available capacity');
     } else if (capacityStatus === CapacityStatus.OVER) {
-      score -= 30;
       reasons.push('Currently over capacity');
     } else {
       reasons.push('Within capacity limits');
+    }
+    
+    if (neighboringEvents.length > 0) {
+      const eventList = neighboringEvents.map(e => `${e.name} (${e.distanceKm.toFixed(1)}km)`).join(', ');
+      reasons.push(`Nearby events: ${eventList}`);
+    }
+
+    // Get REA name
+    let reaName: string | null = null;
+    if (regionalAmbassadors) {
+      for (const [raName, ra] of regionalAmbassadors) {
+        if (ra.supportsEAs.includes(name)) {
+          reaName = raName;
+          break;
+        }
+      }
     }
 
     suggestions.push({
@@ -345,7 +434,11 @@ function generateProspectReallocationSuggestions(
       toAmbassador: name,
       items: [prospect.prospectEvent],
       score: Math.max(0, score),
-      reasons
+      reasons: reasons.length > 0 ? reasons : undefined,
+      allocationCount: totalCount,
+      liveEventsCount: liveCount,
+      prospectEventsCount: prospectCount,
+      neighboringEvents: neighboringEvents.length > 0 ? neighboringEvents : undefined
     });
   }
 

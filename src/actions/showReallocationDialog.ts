@@ -3,6 +3,7 @@ import { EventAmbassadorMap } from "@models/EventAmbassadorMap";
 import { RegionalAmbassadorMap } from "@models/RegionalAmbassadorMap";
 import { EventDetailsMap } from "@models/EventDetailsMap";
 import { calculateDistance } from "../utils/geography";
+import { ProspectiveEventList } from "@models/ProspectiveEventList";
 
 /**
  * Display a modal dialog with prioritised ambassador suggestions for reallocating an event or event ambassador.
@@ -16,7 +17,8 @@ export function showReallocationDialog(
   regionalAmbassadors?: RegionalAmbassadorMap,
   onSelect?: (ambassadorName: string) => void,
   onCancel?: () => void,
-  eventDetails?: EventDetailsMap
+  eventDetails?: EventDetailsMap,
+  prospects?: ProspectiveEventList
 ): void {
   const dialog = document.getElementById("reallocationDialog") as HTMLElement;
   const title = document.getElementById("reallocationDialogTitle") as HTMLElement;
@@ -281,26 +283,65 @@ export function showReallocationDialog(
         const allocationText = `(${liveCount}+${prospectCount}=${totalCount} allocation${totalCount !== 1 ? "s" : ""})`;
         
         let distanceText = "";
-        if (eventDetails && ea.events.length > 0) {
+        // Get coordinates for the reallocating item (event or prospect)
+        let reallocCoords: { lat: number; lon: number } | null = null;
+        
+        if (eventDetails) {
           const reallocatingEvent = eventDetails.get(reallocatingEventName);
           if (reallocatingEvent?.geometry?.coordinates) {
             const [reallocLon, reallocLat] = reallocatingEvent.geometry.coordinates;
-            
-            let nearestEvent: { name: string; distanceKm: number } | null = null;
+            reallocCoords = { lat: reallocLat, lon: reallocLon };
+          }
+        }
+        
+        // If not found in eventDetails, check if it's a prospect
+        if (!reallocCoords && prospects) {
+          const prospect = prospects.getAll().find(p => p.prospectEvent === reallocatingEventName);
+          if (prospect?.coordinates && prospect.geocodingStatus === 'success') {
+            reallocCoords = {
+              lat: prospect.coordinates.latitude,
+              lon: prospect.coordinates.longitude
+            };
+          }
+        }
+        
+        if (reallocCoords && (ea.events.length > 0 || (ea.prospectiveEvents && ea.prospectiveEvents.length > 0))) {
+          let nearestEvent: { name: string; distanceKm: number } | null = null;
+          
+          // Check live events
+          if (eventDetails) {
             for (const eventName of ea.events) {
               const eventDetail = eventDetails.get(eventName);
               if (eventDetail?.geometry?.coordinates) {
                 const [eventLon, eventLat] = eventDetail.geometry.coordinates;
-                const distance = calculateDistance(reallocLat, reallocLon, eventLat, eventLon);
+                const distance = calculateDistance(reallocCoords.lat, reallocCoords.lon, eventLat, eventLon);
                 if (!nearestEvent || distance < nearestEvent.distanceKm) {
                   nearestEvent = { name: eventName, distanceKm: distance };
                 }
               }
             }
-            
-            if (nearestEvent) {
-              distanceText = ` - ${nearestEvent.distanceKm.toFixed(1)} km to ${nearestEvent.name}`;
+          }
+          
+          // Check prospect events
+          if (prospects && ea.prospectiveEvents) {
+            for (const prospectId of ea.prospectiveEvents) {
+              const prospectEvent = prospects.findById(prospectId);
+              if (prospectEvent?.coordinates && prospectEvent.geocodingStatus === 'success') {
+                const distance = calculateDistance(
+                  reallocCoords.lat,
+                  reallocCoords.lon,
+                  prospectEvent.coordinates.latitude,
+                  prospectEvent.coordinates.longitude
+                );
+                if (!nearestEvent || distance < nearestEvent.distanceKm) {
+                  nearestEvent = { name: prospectEvent.prospectEvent, distanceKm: distance };
+                }
+              }
             }
+          }
+          
+          if (nearestEvent) {
+            distanceText = ` - ${nearestEvent.distanceKm.toFixed(1)} km to ${nearestEvent.name}`;
           }
         }
         

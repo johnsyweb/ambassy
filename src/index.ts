@@ -735,7 +735,7 @@ function refreshProspectsTable(): void {
   const prospects = loadProspectiveEvents();
   const prospectsList = new ProspectiveEventList(prospects);
 
-  populateProspectsTable(prospectsList, eventAmbassadors, regionalAmbassadors, log);
+  populateProspectsTable(prospectsList, eventAmbassadors, regionalAmbassadors, log, eventDetails ?? undefined);
 
   // Also refresh the map to show updated prospects
   if (eventDetails && eventTeamsTableData) {
