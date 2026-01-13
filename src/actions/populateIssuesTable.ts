@@ -5,8 +5,7 @@ export function populateIssuesTable(
   issues: EventIssue[],
   issuesState: IssuesState,
   onIssueSelect: (issue: EventIssue) => void,
-  onSearchEvents: (issue: EventIssue) => void,
-  onEnterAddress: (issue: EventIssue) => void
+  onResolve: (issue: EventIssue) => void
 ): void {
   const tableBody = document.querySelector("#issuesTable tbody");
   if (!tableBody) {
@@ -57,43 +56,26 @@ export function populateIssuesTable(
     row.appendChild(issueTypeCell);
 
     const actionsCell = document.createElement("td");
-    const actionsContainer = document.createElement("div");
-    actionsContainer.style.display = "flex";
-    actionsContainer.style.gap = "6px";
-
-    const searchButton = document.createElement("button");
-    searchButton.textContent = "🔍 Search Events";
-    searchButton.type = "button";
-    searchButton.addEventListener("click", (e) => {
+    const resolveButton = document.createElement("button");
+    resolveButton.textContent = "🔧 Resolve";
+    resolveButton.type = "button";
+    resolveButton.title = "Resolve this issue by searching events or entering an address";
+    resolveButton.setAttribute("aria-label", `Resolve issue for ${issue.eventShortName}`);
+    resolveButton.style.padding = "2px 8px";
+    resolveButton.style.fontSize = "0.85em";
+    resolveButton.style.cursor = "pointer";
+    resolveButton.addEventListener("click", (e) => {
       e.stopPropagation();
-      onSearchEvents(issue);
+      onResolve(issue);
     });
-    searchButton.addEventListener("keydown", (e) => {
+    resolveButton.addEventListener("keydown", (e) => {
       if (e.key === "Enter" || e.key === " ") {
         e.preventDefault();
         e.stopPropagation();
-        onSearchEvents(issue);
+        onResolve(issue);
       }
     });
-    actionsContainer.appendChild(searchButton);
-
-    const enterAddressButton = document.createElement("button");
-    enterAddressButton.textContent = "📍 Enter Address";
-    enterAddressButton.type = "button";
-    enterAddressButton.addEventListener("click", (e) => {
-      e.stopPropagation();
-      onEnterAddress(issue);
-    });
-    enterAddressButton.addEventListener("keydown", (e) => {
-      if (e.key === "Enter" || e.key === " ") {
-        e.preventDefault();
-        e.stopPropagation();
-        onEnterAddress(issue);
-      }
-    });
-    actionsContainer.appendChild(enterAddressButton);
-
-    actionsCell.appendChild(actionsContainer);
+    actionsCell.appendChild(resolveButton);
     row.appendChild(actionsCell);
 
     row.addEventListener("click", () => {

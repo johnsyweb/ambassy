@@ -720,8 +720,7 @@ function refreshIssuesTable(): void {
     issues,
     issuesState,
     onIssueSelect,
-    onSearchEvents,
-    onEnterAddress
+    onResolve
   );
 }
 
@@ -749,49 +748,54 @@ function onIssueSelect(issue: EventIssue): void {
   refreshIssuesTable();
 }
 
-function onSearchEvents(issue: EventIssue): void {
+function onResolve(issue: EventIssue): void {
   if (!eventDetails) {
     alert("Event details not loaded. Please wait and try again.");
     return;
   }
 
+  // First, try searching events.json
   showEventSearchDialog(
     issue.eventShortName,
     eventDetails,
-      (selectedEvent: EventDetails) => {
-        try {
-          if (!eventDetails) {
-            alert("Event details not available");
-            return;
-          }
-
-          resolveIssueWithEvent(issue, selectedEvent, eventDetails, log);
-          persistEventDetails(eventDetails);
-          persistChangesLog(log);
-
-          const eventTeams = getEventTeamsFromSession();
-          const eventAmbassadors = getEventAmbassadorsFromSession();
-          const regionalAmbassadors = getRegionalAmbassadorsFromSession();
-
-          if (eventTeams && eventDetails) {
-            eventTeamsTableData = extractEventTeamsTableData(
-              regionalAmbassadors,
-              eventAmbassadors,
-              eventTeams,
-              eventDetails
-            );
-          }
-
-          refreshUI(eventDetails!, eventTeamsTableData!, log, eventAmbassadors, regionalAmbassadors);
-          refreshIssuesTable();
-
-          alert(`Event "${issue.eventShortName}" resolved successfully!`);
-        } catch (error) {
-          alert(`Failed to resolve issue: ${error instanceof Error ? error.message : "Unknown error"}`);
+    (selectedEvent: EventDetails) => {
+      // Search succeeded - resolve with found event
+      try {
+        if (!eventDetails) {
+          alert("Event details not available");
+          return;
         }
-      },
+
+        resolveIssueWithEvent(issue, selectedEvent, eventDetails, log);
+        persistEventDetails(eventDetails);
+        persistChangesLog(log);
+
+        const eventTeams = getEventTeamsFromSession();
+        const eventAmbassadors = getEventAmbassadorsFromSession();
+        const regionalAmbassadors = getRegionalAmbassadorsFromSession();
+
+        if (eventTeams && eventDetails) {
+          eventTeamsTableData = extractEventTeamsTableData(
+            regionalAmbassadors,
+            eventAmbassadors,
+            eventTeams,
+            eventDetails
+          );
+        }
+
+        refreshUI(eventDetails!, eventTeamsTableData!, log, eventAmbassadors, regionalAmbassadors);
+        refreshIssuesTable();
+
+        alert(`Event "${issue.eventShortName}" resolved successfully!`);
+      } catch (error) {
+        alert(`Failed to resolve issue: ${error instanceof Error ? error.message : "Unknown error"}`);
+      }
+    },
     () => {
-      // Cancel - dialog already closed
+      // Search cancelled or no match found - offer address entry as fallback
+      if (confirm(`No match found for "${issue.eventShortName}". Would you like to enter an address to geocode coordinates instead?`)) {
+        onEnterAddress(issue);
+      }
     }
   );
 }

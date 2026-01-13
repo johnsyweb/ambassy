@@ -6,8 +6,7 @@ describe("populateIssuesTable", () => {
   let tableBody: HTMLTableSectionElement;
   let issuesState: IssuesState;
   let onIssueSelect: jest.Mock;
-  let onSearchEvents: jest.Mock;
-  let onEnterAddress: jest.Mock;
+  let onResolve: jest.Mock;
 
   beforeEach(() => {
     document.body.innerHTML = `
@@ -18,8 +17,7 @@ describe("populateIssuesTable", () => {
     tableBody = document.querySelector("#issuesTable tbody")!;
     issuesState = createIssuesState();
     onIssueSelect = jest.fn();
-    onSearchEvents = jest.fn();
-    onEnterAddress = jest.fn();
+    onResolve = jest.fn();
   });
 
   afterEach(() => {
@@ -31,8 +29,7 @@ describe("populateIssuesTable", () => {
       [],
       issuesState,
       onIssueSelect,
-      onSearchEvents,
-      onEnterAddress
+      onResolve
     );
 
     const row = tableBody.querySelector("tr");
@@ -64,8 +61,7 @@ describe("populateIssuesTable", () => {
       issues,
       issuesState,
       onIssueSelect,
-      onSearchEvents,
-      onEnterAddress
+      onResolve
     );
 
     const rows = tableBody.querySelectorAll("tr");
@@ -87,8 +83,7 @@ describe("populateIssuesTable", () => {
       issues,
       issuesState,
       onIssueSelect,
-      onSearchEvents,
-      onEnterAddress
+      onResolve
     );
 
     const row = tableBody.querySelector("tr");
@@ -114,8 +109,7 @@ describe("populateIssuesTable", () => {
       issues,
       issuesState,
       onIssueSelect,
-      onSearchEvents,
-      onEnterAddress
+      onResolve
     );
 
     const row = tableBody.querySelector("tr");
@@ -147,8 +141,7 @@ describe("populateIssuesTable", () => {
       issues,
       issuesState,
       onIssueSelect,
-      onSearchEvents,
-      onEnterAddress
+      onResolve
     );
 
     const rows = tableBody.querySelectorAll("tr");
@@ -171,8 +164,7 @@ describe("populateIssuesTable", () => {
       issues,
       issuesState,
       onIssueSelect,
-      onSearchEvents,
-      onEnterAddress
+      onResolve
     );
 
     const row = tableBody.querySelector("tr");
@@ -181,7 +173,7 @@ describe("populateIssuesTable", () => {
     expect(onIssueSelect).toHaveBeenCalledWith(issues[0]);
   });
 
-  it("should call onSearchEvents when Search Events button is clicked", () => {
+  it("should call onResolve when Resolve button is clicked", () => {
     const issues: EventIssue[] = [
       {
         eventShortName: "event1",
@@ -196,19 +188,18 @@ describe("populateIssuesTable", () => {
       issues,
       issuesState,
       onIssueSelect,
-      onSearchEvents,
-      onEnterAddress
+      onResolve
     );
 
     const buttons = Array.from(tableBody.querySelectorAll("button"));
-    const searchBtn = buttons.find((btn) => btn.textContent?.includes("Search"));
+    const resolveBtn = buttons.find((btn) => btn.textContent?.includes("Resolve"));
 
-    searchBtn?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+    resolveBtn?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
 
-    expect(onSearchEvents).toHaveBeenCalledWith(issues[0]);
+    expect(onResolve).toHaveBeenCalledWith(issues[0]);
   });
 
-  it("should call onEnterAddress when Enter Address button is clicked", () => {
+  it("should display single Resolve button with correct icon and text", () => {
     const issues: EventIssue[] = [
       {
         eventShortName: "event1",
@@ -223,16 +214,13 @@ describe("populateIssuesTable", () => {
       issues,
       issuesState,
       onIssueSelect,
-      onSearchEvents,
-      onEnterAddress
+      onResolve
     );
 
     const buttons = Array.from(tableBody.querySelectorAll("button"));
-    const addressBtn = buttons.find((btn) => btn.textContent?.includes("Enter Address"));
-
-    addressBtn?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
-
-    expect(onEnterAddress).toHaveBeenCalledWith(issues[0]);
+    expect(buttons.length).toBe(1);
+    expect(buttons[0].textContent).toBe("🔧 Resolve");
+    expect(buttons[0].getAttribute("aria-label")).toContain("Resolve issue for event1");
   });
 
   it("should add selected class to row when issue is selected", () => {
@@ -252,8 +240,7 @@ describe("populateIssuesTable", () => {
       issues,
       issuesState,
       onIssueSelect,
-      onSearchEvents,
-      onEnterAddress
+      onResolve
     );
 
     const row = tableBody.querySelector("tr");
