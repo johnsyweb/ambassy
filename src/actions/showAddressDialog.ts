@@ -79,7 +79,7 @@ export function showAddressDialog(
   buttonContainer.style.justifyContent = "flex-end";
 
   const geocodeButton = document.createElement("button");
-  geocodeButton.textContent = "Geocode Address";
+  geocodeButton.innerHTML = "✅ Geocode Address";
   geocodeButton.style.padding = "0.5em 1em";
   geocodeButton.style.backgroundColor = "#007bff";
   geocodeButton.style.color = "white";
