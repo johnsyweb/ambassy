@@ -3,9 +3,10 @@
 import puppeteer, { Browser } from 'puppeteer';
 import * as fs from 'fs';
 import * as path from 'path';
-import { spawn, ChildProcess } from 'child_process';
+import { spawn, ChildProcess, execSync } from 'child_process';
 import { promisify } from 'util';
 import Papa from 'papaparse';
+import * as net from 'net';
 import { parseEventTeams, EventTeamRow } from '../src/parsers/parseEventTeams';
 import { parseEventAmbassadors, EventAmbassadorRow } from '../src/parsers/parseEventAmbassadors';
 import { parseRegionalAmbassadors, RegionalAmbassadorRow } from '../src/parsers/parseRegionalAmbassadors';
@@ -20,20 +21,60 @@ interface ScreenshotConfig {
   viewport?: { width: number; height: number };
 }
 
-const screenshotConfigs: ScreenshotConfig[] = [
-  {
-    name: 'screenshot',
-    url: 'http://localhost:8081/',
-    waitForTimeout: 3000,
-    viewport: { width: 1200, height: 800 },
-  },
-  {
-    name: 'ambassy-social-preview',
-    url: 'http://localhost:8081/',
-    waitForTimeout: 3000,
-    viewport: { width: 1200, height: 630 },
-  },
-];
+/**
+ * Find an available port starting from a base port
+ */
+function findAvailablePort(startPort: number): Promise<number> {
+  return new Promise((resolve, reject) => {
+    const server = net.createServer();
+    server.listen(startPort, () => {
+      const port = (server.address() as net.AddressInfo).port;
+      server.close(() => resolve(port));
+    });
+    server.on('error', (err: NodeJS.ErrnoException) => {
+      if (err.code === 'EADDRINUSE') {
+        // Try next port
+        findAvailablePort(startPort + 1).then(resolve).catch(reject);
+      } else {
+        reject(err);
+      }
+    });
+  });
+}
+
+/**
+ * Install puppeteer browsers if needed
+ */
+async function ensurePuppeteerBrowsers(): Promise<void> {
+  try {
+    console.log('🔍 Checking for Puppeteer browsers...');
+    // Try to launch to see if browser is available
+    const testBrowser = await puppeteer.launch({
+      headless: true,
+      args: ['--no-sandbox', '--disable-setuid-sandbox'],
+    }).catch(() => null);
+    
+    if (testBrowser) {
+      await testBrowser.close();
+      console.log('✅ Puppeteer browsers already installed');
+      return;
+    }
+  } catch {
+    // Browser not found, need to install
+  }
+  
+  console.log('📦 Installing Puppeteer browsers...');
+  try {
+    execSync('npx puppeteer browsers install chrome', {
+      stdio: 'inherit',
+      cwd: process.cwd(),
+    });
+    console.log('✅ Puppeteer browsers installed successfully');
+  } catch (error) {
+    console.error('❌ Failed to install Puppeteer browsers:', error);
+    throw error;
+  }
+}
 
 async function generateScreenshots(): Promise<void> {
   let browser: Browser | null = null;
@@ -51,9 +92,17 @@ async function generateScreenshots(): Promise<void> {
       );
     }
 
-    // Start the dev server
+    // Ensure Puppeteer browsers are installed
+    await ensurePuppeteerBrowsers();
+
+    // Find an available port
+    console.log('🔍 Finding available port...');
+    const port = await findAvailablePort(8082); // Start from 8082 to avoid conflicts
+    console.log(`✅ Using port ${port}`);
+
+    // Start the dev server with custom port
     console.log('🚀 Starting dev server...');
-    devServer = spawn('pnpm', ['start'], {
+    devServer = spawn('pnpm', ['webpack', 'serve', '--port', port.toString()], {
       detached: false,
       stdio: 'inherit',
       env: {
@@ -124,6 +173,22 @@ async function generateScreenshots(): Promise<void> {
     const eventAmbassadorsArray = Array.from(eventAmbassadors.entries());
     const eventTeamsArray = Array.from(eventTeams.entries());
     const regionalAmbassadorsArray = Array.from(regionalAmbassadors.entries());
+
+    // Create screenshot configs with dynamic port
+    const screenshotConfigs: ScreenshotConfig[] = [
+      {
+        name: 'screenshot',
+        url: `http://localhost:${port}/`,
+        waitForTimeout: 3000,
+        viewport: { width: 1200, height: 800 },
+      },
+      {
+        name: 'ambassy-social-preview',
+        url: `http://localhost:${port}/`,
+        waitForTimeout: 3000,
+        viewport: { width: 1200, height: 630 },
+      },
+    ];
 
     for (const config of screenshotConfigs) {
       console.log(`📸 Capturing screenshot: ${config.name}`);
