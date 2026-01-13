@@ -1,104 +1,123 @@
-# Implementation Plan: [FEATURE]
+# Implementation Plan: Table-Map Navigation Integration
 
-**Branch**: `[###-feature-name]` | **Date**: [DATE] | **Spec**: [link]
-**Input**: Feature specification from `/specs/[###-feature-name]/spec.md`
+**Branch**: `002-table-map-navigation` | **Date**: 2026-01-08 | **Spec**: [spec.md](./spec.md)
+**Input**: Feature specification from `/specs/002-table-map-navigation/spec.md`
 
 **Note**: This template is filled in by the `/speckit.plan` command. See `.specify/templates/commands/plan.md` for the execution workflow.
 
 ## Summary
 
-[Extract from feature spec: primary requirement + technical approach from research]
+Enable bidirectional navigation between tables and map view. Users can select rows in tables to highlight and center events on the map, and click map markers to highlight corresponding table rows. Implementation uses centralized selection state management with event-driven updates, separate Leaflet highlight layer for map markers, and CSS class-based highlighting for table rows.
 
 ## Technical Context
 
-<!--
-  ACTION REQUIRED: Replace the content in this section with the technical details
-  for the project. The structure here is presented in advisory capacity to guide
-  the iteration process.
--->
-
-**Language/Version**: [e.g., Python 3.11, Swift 5.9, Rust 1.75 or NEEDS CLARIFICATION]  
-**Primary Dependencies**: [e.g., FastAPI, UIKit, LLVM or NEEDS CLARIFICATION]  
-**Storage**: [if applicable, e.g., PostgreSQL, CoreData, files or N/A]  
-**Testing**: [e.g., pytest, XCTest, cargo test or NEEDS CLARIFICATION]  
-**Target Platform**: [e.g., Linux server, iOS 15+, WASM or NEEDS CLARIFICATION]
-**Project Type**: [single/web/mobile - determines source structure]  
-**Performance Goals**: [domain-specific, e.g., 1000 req/s, 10k lines/sec, 60 fps or NEEDS CLARIFICATION]  
-**Constraints**: [domain-specific, e.g., <200ms p95, <100MB memory, offline-capable or NEEDS CLARIFICATION]  
-**Scale/Scope**: [domain-specific, e.g., 10k users, 1M LOC, 50 screens or NEEDS CLARIFICATION]
+**Language/Version**: TypeScript 5.9.3 (strict mode enabled)  
+**Primary Dependencies**: Leaflet 1.9.4 (map library), DOM APIs (table/map interactions)  
+**Storage**: N/A (ephemeral UI state, no persistence)  
+**Testing**: Jest 30.2.0 with ts-jest, jest-environment-jsdom  
+**Target Platform**: Modern web browsers (ES6+, Chrome, Firefox, Safari, Edge)  
+**Project Type**: Single-page web application  
+**Performance Goals**: Selection changes update UI within 100ms, smooth animations, handle up to 200 events  
+**Constraints**: <100ms UI update latency, keyboard accessible, screen reader compatible, smooth animations  
+**Scale/Scope**: Up to 200 events for performance testing, 3 table types (Event Teams, Event Ambassadors, Regional Ambassadors)
 
 ## Constitution Check
 
 *GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
 
-[Gates determined based on constitution file]
+### Quality Gates ✅
+- **Code Formatting**: Prettier configured, will be applied before commit
+- **Linting**: ESLint configured with TypeScript support, will pass before commit
+- **Type Checking**: TypeScript strict mode enabled, will pass before commit
+- **Tests**: Jest configured, tests will be written following TDD principles
+- **Disused Code**: Will be removed immediately
+
+### Test-Driven Development ✅
+- Tests will be written for all production code
+- Tests will test production code directly (no test environment checks)
+- Functions will have low cyclomatic complexity
+- Tests will not pollute console
+
+### Atomic Commits ✅
+- Each change will be committed atomically with semantic commit messages
+- Commits will follow Conventional Commits specification
+
+### Single Responsibility & Clean Architecture ✅
+- Each component has single responsibility:
+  - `SelectionState` model: State management only
+  - `tableMapNavigation.ts`: Navigation coordination logic
+  - `mapNavigation.ts`: Map-specific utilities
+  - Table population functions: Extended with selection handlers
+- Code follows existing structure: models/, actions/, utils/
+- Comments avoided in favor of self-documenting code
+
+### Accessibility & User Experience ✅
+- All interactions keyboard accessible (arrow keys, Enter, Tab)
+- Screen reader announcements via aria-live regions
+- ARIA attributes: `aria-selected`, `role="button"`, `aria-label`
+- Visual highlighting: Background color + border for clear feedback
+- Australian English for user-facing text
+
+### Open Source Preference ✅
+- Using Leaflet (open source map library)
+- No custom map implementation needed
+
+### Documentation Currency ✅
+- README will be updated if setup/usage changes
+- Feature documentation in quickstart.md
+
+### Production/Test Parity ✅
+- Code behaves identically in production and test
+- No environment-specific branches
+- Tests exercise same code paths as production
+
+### Twelve-Factor App Principles ✅
+- Configuration via environment variables (if needed)
+- Stateless UI state (ephemeral selection state)
+- Development/production parity maintained
+
+**Status**: ✅ All gates pass. No violations.
 
 ## Project Structure
 
 ### Documentation (this feature)
 
 ```text
-specs/[###-feature]/
+specs/002-table-map-navigation/
 ├── plan.md              # This file (/speckit.plan command output)
-├── research.md          # Phase 0 output (/speckit.plan command)
-├── data-model.md        # Phase 1 output (/speckit.plan command)
-├── quickstart.md        # Phase 1 output (/speckit.plan command)
-├── contracts/           # Phase 1 output (/speckit.plan command)
-└── tasks.md             # Phase 2 output (/speckit.tasks command - NOT created by /speckit.plan)
+├── research.md          # Phase 0 output (/speckit.plan command) - COMPLETE
+├── data-model.md        # Phase 1 output (/speckit.plan command) - COMPLETE
+├── quickstart.md        # Phase 1 output (/speckit.plan command) - COMPLETE
+├── contracts/           # Phase 1 output (/speckit.plan command) - COMPLETE
+│   └── navigation-contracts.md
+└── tasks.md             # Phase 2 output (/speckit.tasks command - NOT created by /speckit.plan) - COMPLETE
 ```
 
 ### Source Code (repository root)
-<!--
-  ACTION REQUIRED: Replace the placeholder tree below with the concrete layout
-  for this feature. Delete unused options and expand the chosen structure with
-  real paths (e.g., apps/admin, packages/something). The delivered plan must
-  not include Option labels.
--->
 
 ```text
-# [REMOVE IF UNUSED] Option 1: Single project (DEFAULT)
 src/
 ├── models/
-├── services/
-├── cli/
-└── lib/
+│   └── SelectionState.ts          # Selection state model
+├── actions/
+│   ├── tableMapNavigation.ts      # Navigation coordination logic
+│   ├── populateMap.ts             # Extended with marker storage
+│   ├── populateEventTeamsTable.ts # Extended with row selection
+│   └── populateAmbassadorsTable.ts # Extended with row selection
+├── utils/
+│   └── mapNavigation.ts           # Map centering/zooming utilities
+└── index.ts                        # Integration and initialization
 
 tests/
-├── contract/
-├── integration/
-└── unit/
-
-# [REMOVE IF UNUSED] Option 2: Web application (when "frontend" + "backend" detected)
-backend/
-├── src/
-│   ├── models/
-│   ├── services/
-│   └── api/
-└── tests/
-
-frontend/
-├── src/
-│   ├── components/
-│   ├── pages/
-│   └── services/
-└── tests/
-
-# [REMOVE IF UNUSED] Option 3: Mobile + API (when "iOS/Android" detected)
-api/
-└── [same as backend above]
-
-ios/ or android/
-└── [platform-specific structure: feature modules, UI flows, platform tests]
+└── (tests co-located with source files)
+    └── actions/
+        └── tableMapNavigation.test.ts
 ```
 
-**Structure Decision**: [Document the selected structure and reference the real
-directories captured above]
+**Structure Decision**: Single project structure following existing codebase layout. Models in `src/models/`, action logic in `src/actions/`, utilities in `src/utils/`. Tests co-located with source files using `.test.ts` suffix.
 
 ## Complexity Tracking
 
 > **Fill ONLY if Constitution Check has violations that must be justified**
 
-| Violation | Why Needed | Simpler Alternative Rejected Because |
-|-----------|------------|-------------------------------------|
-| [e.g., 4th project] | [current need] | [why 3 projects insufficient] |
-| [e.g., Repository pattern] | [specific problem] | [why direct DB access insufficient] |
+No violations - all constitution gates pass.

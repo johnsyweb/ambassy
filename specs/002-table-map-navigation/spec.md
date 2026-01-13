@@ -4,6 +4,18 @@
 
 Enable bidirectional navigation between tables and map view. When a user selects a row in any table, the corresponding events should be highlighted and centered on the map. When a user selects an event on the map, the corresponding table row should be highlighted if that tab is visible.
 
+**Scope**: This feature applies only to live events from the Event Teams table. Prospective events are handled separately in other features.
+
+## Clarifications
+
+### Session 2026-01-08
+
+- Q: Should "events" in table-map navigation include prospective events, or only live events from Event Teams table? → A: Only live events from Event Teams table (current scope)
+- Q: What visual treatment should be used for highlighted rows/markers? → A: Background color change + border (e.g., light blue background, darker border)
+- Q: What should happen when selecting a different row while one is already selected? → A: Automatically deselect previous row, select new row (standard behavior)
+- Q: What threshold should be used for "large datasets" in performance testing? → A: 200 events
+- Q: What text should be announced for screen reader announcements? → A: "Selected [event/ambassador name], [X] events highlighted on map"
+
 ## User Stories
 
 ### US1: Event Teams Table → Map Navigation
@@ -55,13 +67,14 @@ Enable bidirectional navigation between tables and map view. When a user selects
 ### FR-001: Table Row Selection
 - Tables must support row selection via mouse click
 - Tables must support row selection via keyboard (arrow keys + Enter)
-- Selected row must be visually distinct (highlighted)
+- Selected row must be visually distinct using background color change and border (e.g., light blue background with darker border)
 - Only one row can be selected at a time per table
+- When a new row is selected, the previously selected row is automatically deselected
 
 ### FR-002: Map Event Highlighting
 - Map must support highlighting individual event markers
 - Map must support highlighting multiple event markers simultaneously
-- Highlighted markers must be visually distinct from normal markers
+- Highlighted markers must be visually distinct from normal markers using background color change and border (e.g., light blue background with darker border)
 - Map must support centering viewport on a single event
 - Map must support centering/zooming viewport to show multiple events
 
@@ -86,6 +99,7 @@ Enable bidirectional navigation between tables and map view. When a user selects
 ### TR-001: Event Identification
 - Events must have unique identifiers that link table rows to map markers
 - Event short name must be used as the primary identifier
+- Only live events from the Event Teams table are included in navigation (prospective events are excluded)
 
 ### TR-002: Performance
 - Selection changes must update UI within 100ms
@@ -94,7 +108,7 @@ Enable bidirectional navigation between tables and map view. When a user selects
 
 ### TR-003: Accessibility
 - All selection interactions must be keyboard accessible
-- Screen reader announcements for selection changes
+- Screen reader announcements for selection changes must announce: "Selected [event/ambassador name], [X] events highlighted on map"
 - Focus management when switching between table and map
 
 ## Non-Functional Requirements
@@ -133,5 +147,5 @@ Enable bidirectional navigation between tables and map view. When a user selects
 - Users can navigate from the map to the Event Teams table
 - Visual feedback is clear and immediate
 - All interactions are keyboard accessible
-- Performance is smooth with large datasets
+- Performance is smooth with datasets up to 200 events
 
