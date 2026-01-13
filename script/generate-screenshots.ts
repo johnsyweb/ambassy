@@ -138,26 +138,46 @@ async function generateScreenshots(): Promise<void> {
       await page.goto(config.url, { waitUntil: 'networkidle2' });
 
       // Inject data into localStorage with correct prefix
-      await page.evaluate((eaData, etData, raData) => {
+      // Serialize data as JSON strings first to ensure proper serialization
+      const eaDataJson = JSON.stringify(eventAmbassadorsArray);
+      const etDataJson = JSON.stringify(eventTeamsArray);
+      const raDataJson = JSON.stringify(regionalAmbassadorsArray);
+      
+      await page.evaluate((eaJson, etJson, raJson) => {
         const prefix = 'ambassy:';
-        localStorage.setItem(`${prefix}eventAmbassadors`, JSON.stringify(eaData));
-        localStorage.setItem(`${prefix}eventTeams`, JSON.stringify(etData));
-        localStorage.setItem(`${prefix}regionalAmbassadors`, JSON.stringify(raData));
-      }, eventAmbassadorsArray, eventTeamsArray, regionalAmbassadorsArray);
+        localStorage.setItem(`${prefix}eventAmbassadors`, eaJson);
+        localStorage.setItem(`${prefix}eventTeams`, etJson);
+        localStorage.setItem(`${prefix}regionalAmbassadors`, raJson);
+        // Also set in sessionStorage as fallback
+        sessionStorage.setItem(`${prefix}eventAmbassadors`, eaJson);
+        sessionStorage.setItem(`${prefix}eventTeams`, etJson);
+        sessionStorage.setItem(`${prefix}regionalAmbassadors`, raJson);
+      }, eaDataJson, etDataJson, raDataJson);
 
       // Reload the page so it picks up the localStorage data
       await page.reload({ waitUntil: 'networkidle2' });
 
-      // Wait for the page to fully load and render
-      await new Promise((resolve) => setTimeout(resolve, 3000));
+      // Wait for the introduction screen to disappear (data loaded)
+      await page.waitForFunction(
+        () => {
+          const intro = document.getElementById('introduction');
+          const ambassy = document.getElementById('ambassy');
+          return intro && ambassy && 
+                 (intro.style.display === 'none' || getComputedStyle(intro).display === 'none') &&
+                 (ambassy.style.display !== 'none' && getComputedStyle(ambassy).display !== 'none');
+        },
+        { timeout: 15000 }
+      ).catch(() => {
+        console.log('⚠️  Data may not have loaded, continuing anyway...');
+      });
 
       // Wait for map to be ready (check for map container)
       await page.waitForSelector('#mapContainer', { timeout: 10000 }).catch(() => {
         console.log('⚠️  Map container not found, continuing anyway...');
       });
 
-      // Additional wait for map tiles and UI to render
-      await new Promise((resolve) => setTimeout(resolve, 2000));
+      // Wait for map tiles and UI to render
+      await new Promise((resolve) => setTimeout(resolve, 3000));
 
       // Additional wait if specified
       if (config.waitForTimeout) {
