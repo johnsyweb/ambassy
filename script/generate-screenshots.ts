@@ -1,8 +1,5 @@
 #!/usr/bin/env ts-node
 
-// Register TypeScript path aliases
-import 'tsconfig-paths/register';
-
 import puppeteer, { Browser } from 'puppeteer';
 import * as fs from 'fs';
 import * as path from 'path';
