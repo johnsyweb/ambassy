@@ -3,8 +3,16 @@
 import puppeteer, { Browser } from 'puppeteer';
 import * as fs from 'fs';
 import * as path from 'path';
-import { spawn, ChildProcess } from 'child_process';
+import { spawn, ChildProcess, execSync } from 'child_process';
 import { promisify } from 'util';
+import Papa from 'papaparse';
+import * as net from 'net';
+import { parseEventTeams, EventTeamRow } from '../src/parsers/parseEventTeams';
+import { parseEventAmbassadors, EventAmbassadorRow } from '../src/parsers/parseEventAmbassadors';
+import { parseRegionalAmbassadors, RegionalAmbassadorRow } from '../src/parsers/parseRegionalAmbassadors';
+import { EventAmbassadorMap } from '../src/models/EventAmbassadorMap';
+import { EventTeamMap } from '../src/models/EventTeamMap';
+import { RegionalAmbassadorMap } from '../src/models/RegionalAmbassadorMap';
 
 interface ScreenshotConfig {
   name: string;
@@ -13,20 +21,60 @@ interface ScreenshotConfig {
   viewport?: { width: number; height: number };
 }
 
-const screenshotConfigs: ScreenshotConfig[] = [
-  {
-    name: 'screenshot',
-    url: 'http://localhost:8081/',
-    waitForTimeout: 3000,
-    viewport: { width: 1200, height: 800 },
-  },
-  {
-    name: 'ambassy-social-preview',
-    url: 'http://localhost:8081/',
-    waitForTimeout: 3000,
-    viewport: { width: 1200, height: 630 },
-  },
-];
+/**
+ * Find an available port starting from a base port
+ */
+function findAvailablePort(startPort: number): Promise<number> {
+  return new Promise((resolve, reject) => {
+    const server = net.createServer();
+    server.listen(startPort, () => {
+      const port = (server.address() as net.AddressInfo).port;
+      server.close(() => resolve(port));
+    });
+    server.on('error', (err: NodeJS.ErrnoException) => {
+      if (err.code === 'EADDRINUSE') {
+        // Try next port
+        findAvailablePort(startPort + 1).then(resolve).catch(reject);
+      } else {
+        reject(err);
+      }
+    });
+  });
+}
+
+/**
+ * Install puppeteer browsers if needed
+ */
+async function ensurePuppeteerBrowsers(): Promise<void> {
+  try {
+    console.log('🔍 Checking for Puppeteer browsers...');
+    // Try to launch to see if browser is available
+    const testBrowser = await puppeteer.launch({
+      headless: true,
+      args: ['--no-sandbox', '--disable-setuid-sandbox'],
+    }).catch(() => null);
+    
+    if (testBrowser) {
+      await testBrowser.close();
+      console.log('✅ Puppeteer browsers already installed');
+      return;
+    }
+  } catch {
+    // Browser not found, need to install
+  }
+  
+  console.log('📦 Installing Puppeteer browsers...');
+  try {
+    execSync('npx puppeteer browsers install chrome', {
+      stdio: 'inherit',
+      cwd: process.cwd(),
+    });
+    console.log('✅ Puppeteer browsers installed successfully');
+  } catch (error) {
+    console.error('❌ Failed to install Puppeteer browsers:', error);
+    throw error;
+  }
+}
 
 async function generateScreenshots(): Promise<void> {
   let browser: Browser | null = null;
@@ -44,9 +92,17 @@ async function generateScreenshots(): Promise<void> {
       );
     }
 
-    // Start the dev server
+    // Ensure Puppeteer browsers are installed
+    await ensurePuppeteerBrowsers();
+
+    // Find an available port
+    console.log('🔍 Finding available port...');
+    const port = await findAvailablePort(8082); // Start from 8082 to avoid conflicts
+    console.log(`✅ Using port ${port}`);
+
+    // Start the dev server with custom port
     console.log('🚀 Starting dev server...');
-    devServer = spawn('pnpm', ['start'], {
+    devServer = spawn('pnpm', ['webpack', 'serve', '--port', port.toString()], {
       detached: false,
       stdio: 'inherit',
       env: {
@@ -80,6 +136,60 @@ async function generateScreenshots(): Promise<void> {
 
     const page = await browser.newPage();
 
+    // Load CSV files and populate data before taking screenshots
+    console.log('📂 Loading CSV files from public directory...');
+    const publicDir = path.join(process.cwd(), 'public');
+    
+    const csvFiles = {
+      eventAmbassadors: path.join(publicDir, 'Ambassadors - Event Ambassadors.csv'),
+      eventTeams: path.join(publicDir, 'Ambassadors - Event Teams.csv'),
+      regionalAmbassadors: path.join(publicDir, 'Ambassadors - Regional Ambassadors.csv'),
+    };
+
+    // Read and parse CSV files
+    const eventAmbassadorsData = fs.readFileSync(csvFiles.eventAmbassadors, 'utf-8');
+    const eventTeamsData = fs.readFileSync(csvFiles.eventTeams, 'utf-8');
+    const regionalAmbassadorsData = fs.readFileSync(csvFiles.regionalAmbassadors, 'utf-8');
+
+    const eventAmbassadorsParsed = Papa.parse<EventAmbassadorRow>(eventAmbassadorsData, {
+      header: true,
+      skipEmptyLines: true,
+    });
+    const eventTeamsParsed = Papa.parse<EventTeamRow>(eventTeamsData, {
+      header: true,
+      skipEmptyLines: true,
+    });
+    const regionalAmbassadorsParsed = Papa.parse<RegionalAmbassadorRow>(regionalAmbassadorsData, {
+      header: true,
+      skipEmptyLines: true,
+    });
+
+    // Parse the data
+    const eventAmbassadors = parseEventAmbassadors(eventAmbassadorsParsed.data);
+    const eventTeams = parseEventTeams(eventTeamsParsed.data);
+    const regionalAmbassadors = parseRegionalAmbassadors(regionalAmbassadorsParsed.data);
+
+    // Convert to arrays for localStorage
+    const eventAmbassadorsArray = Array.from(eventAmbassadors.entries());
+    const eventTeamsArray = Array.from(eventTeams.entries());
+    const regionalAmbassadorsArray = Array.from(regionalAmbassadors.entries());
+
+    // Create screenshot configs with dynamic port
+    const screenshotConfigs: ScreenshotConfig[] = [
+      {
+        name: 'screenshot',
+        url: `http://localhost:${port}/`,
+        waitForTimeout: 3000,
+        viewport: { width: 1200, height: 800 },
+      },
+      {
+        name: 'ambassy-social-preview',
+        url: `http://localhost:${port}/`,
+        waitForTimeout: 3000,
+        viewport: { width: 1200, height: 630 },
+      },
+    ];
+
     for (const config of screenshotConfigs) {
       console.log(`📸 Capturing screenshot: ${config.name}`);
 
@@ -92,8 +202,47 @@ async function generateScreenshots(): Promise<void> {
       console.log(`🌐 Navigating to ${config.url}...`);
       await page.goto(config.url, { waitUntil: 'networkidle2' });
 
-      // Wait for the page to fully load
-      await new Promise((resolve) => setTimeout(resolve, 2000));
+      // Inject data into localStorage with correct prefix
+      // Serialize data as JSON strings first to ensure proper serialization
+      const eaDataJson = JSON.stringify(eventAmbassadorsArray);
+      const etDataJson = JSON.stringify(eventTeamsArray);
+      const raDataJson = JSON.stringify(regionalAmbassadorsArray);
+      
+      await page.evaluate((eaJson, etJson, raJson) => {
+        const prefix = 'ambassy:';
+        localStorage.setItem(`${prefix}eventAmbassadors`, eaJson);
+        localStorage.setItem(`${prefix}eventTeams`, etJson);
+        localStorage.setItem(`${prefix}regionalAmbassadors`, raJson);
+        // Also set in sessionStorage as fallback
+        sessionStorage.setItem(`${prefix}eventAmbassadors`, eaJson);
+        sessionStorage.setItem(`${prefix}eventTeams`, etJson);
+        sessionStorage.setItem(`${prefix}regionalAmbassadors`, raJson);
+      }, eaDataJson, etDataJson, raDataJson);
+
+      // Reload the page so it picks up the localStorage data
+      await page.reload({ waitUntil: 'networkidle2' });
+
+      // Wait for the introduction screen to disappear (data loaded)
+      await page.waitForFunction(
+        () => {
+          const intro = document.getElementById('introduction');
+          const ambassy = document.getElementById('ambassy');
+          return intro && ambassy && 
+                 (intro.style.display === 'none' || getComputedStyle(intro).display === 'none') &&
+                 (ambassy.style.display !== 'none' && getComputedStyle(ambassy).display !== 'none');
+        },
+        { timeout: 15000 }
+      ).catch(() => {
+        console.log('⚠️  Data may not have loaded, continuing anyway...');
+      });
+
+      // Wait for map to be ready (check for map container)
+      await page.waitForSelector('#mapContainer', { timeout: 10000 }).catch(() => {
+        console.log('⚠️  Map container not found, continuing anyway...');
+      });
+
+      // Wait for map tiles and UI to render
+      await new Promise((resolve) => setTimeout(resolve, 3000));
 
       // Additional wait if specified
       if (config.waitForTimeout) {

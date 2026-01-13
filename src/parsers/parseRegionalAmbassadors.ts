@@ -32,8 +32,10 @@ export function parseRegionalAmbassadors(data: RegionalAmbassadorRow[]): Regiona
     }
   });
 
-  if (currentRA) {
-    regionalAmbassadorsMap.set(currentRA['name'], currentRA);
+  // Save the last RA if it exists
+  if (currentRA !== null) {
+    const finalRA: RegionalAmbassador = currentRA;
+    regionalAmbassadorsMap.set(finalRA.name, finalRA);
   }
 
   return regionalAmbassadorsMap;

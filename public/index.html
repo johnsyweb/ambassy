@@ -138,7 +138,7 @@
     <link
       rel="icon"
       type="image/png"
-      href="https://johnsy.com/icons/favicon-128.png"
+      href="https://johnsy.com/icons/favicon-128x128.png"
       sizes="128x128"
     />
     <link
@@ -237,6 +237,7 @@
         <div id="upload">
           <h2>Upload CSV Files</h2>
           <h3 id="uploadPrompt">Please upload your files here.</h3>
+          <div id="storageWarning" style="display: none; color: #d32f2f; margin-top: 1em; padding: 0.5em; background-color: #ffebee; border-radius: 4px;"></div>
           <p>
             Sample CSV files are provided for you to download, inspect and populate:
             <ul>
@@ -251,6 +252,14 @@
             accept=".csv"
             multiple
           />
+          <button type="button" id="importButton" title="Import state">📥 Import State</button>
+          <input
+            type="file"
+            title="import state"
+            id="importFileInput"
+            accept=".json"
+            style="display: none;"
+          />
         </div>
       </div>
     </div>
@@ -258,44 +267,198 @@
     <div id="ambassy">
       <div id="mapContainer"></div>
 
-      <button type="button" id="purgeButton">Purge Data</button>
-
-      <div id="eventTeamsTableContainer">
-        <h2>Event Teams</h2>
-        <table id="eventTeamsTable" border="1">
-          <thead>
-            <tr>
-              <th>Regional Event Ambassador (REA)</th>
-              <th>Event Ambassador (EA)</th>
-              <th>Event Name</th>
-              <th>Event Director(s)</th>
-              <th>Coordinates</th>
-              <th title="E.g. 1 is 5km, open">Event Series</th>
-              <th>Country</th>
-            </tr>
-          </thead>
-          <tbody>
-            <!-- Event team rows will be populated here -->
-          </tbody>
-        </table>
+      <div style="margin: 1em 0;">
+        <button type="button" id="exportButtonMap" title="Export state">📤 Export State</button>
+        <button type="button" id="importButtonMap" title="Import state">📥 Import State</button>
+        <button type="button" id="addEventAmbassadorButton" title="Add Event Ambassador">👤 Add Event Ambassador</button>
+        <button type="button" id="addRegionalAmbassadorButton" title="Add Regional Ambassador">👥 Add Regional Ambassador</button>
+        <button type="button" id="configureCapacityLimitsButton" title="Configure Capacity Limits">🔧 Configure Capacity Limits</button>
+        <button type="button" id="purgeButton">🗑️ Purge Data</button>
       </div>
 
-      <div id="changesTableContainer">
-        <h2>Changes Log</h2>
-        <table id="changesTable" border="1">
-          <thead>
-            <tr>
-              <th>Change Type</th>
-              <th>Event Name</th>
-              <th>Original Value</th>
-              <th>New Value</th>
-              <th>Timestamp</th>
-            </tr>
-          </thead>
-          <tbody>
-            <!-- Changes log rows will be populated here -->
-          </tbody>
-        </table>
+      <div id="reallocationDialog" role="dialog" aria-labelledby="reallocationDialogTitle" aria-modal="true" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 2em; border: 2px solid #333; border-radius: 8px; z-index: 1000; box-shadow: 0 4px 6px rgba(0,0,0,0.3); max-width: 600px; width: 90%;">
+        <h2 id="reallocationDialogTitle">Select Recipient</h2>
+        <div id="reallocationDialogContent"></div>
+        <div style="margin-top: 1em; display: flex; gap: 0.5em; justify-content: flex-end;">
+          <button type="button" id="reallocationDialogCancel" style="padding: 0.5em 1em;">❌ Cancel</button>
+        </div>
+      </div>
+      <div id="capacityLimitsDialog" role="dialog" aria-labelledby="capacityLimitsDialogTitle" aria-modal="true" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 2em; border: 2px solid #333; border-radius: 8px; z-index: 1000; box-shadow: 0 4px 6px rgba(0,0,0,0.3);">
+        <h2 id="capacityLimitsDialogTitle">Configure Capacity Limits</h2>
+        <form id="capacityLimitsForm">
+          <fieldset>
+            <legend>Event Ambassador Limits</legend>
+            <label>
+              Minimum events:
+              <input type="number" id="eventAmbassadorMin" min="0" required aria-required="true" />
+            </label>
+            <label>
+              Maximum events:
+              <input type="number" id="eventAmbassadorMax" min="0" required aria-required="true" />
+            </label>
+          </fieldset>
+          <fieldset>
+            <legend>Regional Ambassador Limits</legend>
+            <label>
+              Minimum Event Ambassadors:
+              <input type="number" id="regionalAmbassadorMin" min="0" required aria-required="true" />
+            </label>
+            <label>
+              Maximum Event Ambassadors:
+              <input type="number" id="regionalAmbassadorMax" min="0" required aria-required="true" />
+            </label>
+          </fieldset>
+          <div id="capacityLimitsError" role="alert" style="color: #d32f2f; margin: 1em 0; display: none;"></div>
+          <div style="margin-top: 1em;">
+            <button type="submit" id="saveCapacityLimitsButton">✅ Save</button>
+            <button type="button" id="cancelCapacityLimitsButton">❌ Cancel</button>
+          </div>
+        </form>
+      </div>
+
+      <div id="tabsContainer">
+        <div class="tabs" role="tablist">
+          <button class="tab-button active" role="tab" aria-selected="true" aria-controls="eventTeamsTab" id="eventTeamsTabButton" tabindex="0">Event Teams</button>
+          <button class="tab-button" role="tab" aria-selected="false" aria-controls="eventAmbassadorsTab" id="eventAmbassadorsTabButton" tabindex="-1">Event Ambassadors</button>
+          <button class="tab-button" role="tab" aria-selected="false" aria-controls="regionalAmbassadorsTab" id="regionalAmbassadorsTabButton" tabindex="-1">Regional Ambassadors</button>
+          <button class="tab-button" role="tab" aria-selected="false" aria-controls="prospectsTab" id="prospectsTabButton" tabindex="-1">Prospects</button>
+          <button class="tab-button" role="tab" aria-selected="false" aria-controls="changesLogTab" id="changesLogTabButton" tabindex="-1">Changes Log</button>
+          <button class="tab-button" role="tab" aria-selected="false" aria-controls="issuesTab" id="issuesTabButton" tabindex="-1">Issues</button>
+        </div>
+
+        <div id="eventTeamsTab" class="tab-content active" role="tabpanel" aria-labelledby="eventTeamsTabButton">
+          <table id="eventTeamsTable" border="1">
+            <thead>
+              <tr>
+                <th>Regional Event Ambassador (REA)</th>
+                <th>Event Ambassador (EA)</th>
+                <th>Event Name</th>
+                <th>Event Director(s)</th>
+                <th>Coordinates</th>
+                <th title="E.g. 1 is 5km, open">Event Series</th>
+                <th>Country</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <!-- Event team rows will be populated here -->
+            </tbody>
+          </table>
+        </div>
+
+        <div id="eventAmbassadorsTab" class="tab-content" role="tabpanel" aria-labelledby="eventAmbassadorsTabButton" hidden>
+          <table id="eventAmbassadorsTable" border="1">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Number of Allocations</th>
+                <th>Events Assigned</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <!-- Event Ambassador rows will be populated here -->
+            </tbody>
+          </table>
+        </div>
+
+        <div id="regionalAmbassadorsTab" class="tab-content" role="tabpanel" aria-labelledby="regionalAmbassadorsTabButton" hidden>
+          <table id="regionalAmbassadorsTable" border="1">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>State</th>
+                <th>Number of Allocations</th>
+                <th>Event Ambassadors Supported</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <!-- Regional Ambassador rows will be populated here -->
+            </tbody>
+          </table>
+        </div>
+
+        <div id="prospectsTab" class="tab-content" role="tabpanel" aria-labelledby="prospectsTabButton" hidden>
+          <div style="margin-bottom: 1em;">
+            <button type="button" id="importProspectsButton" title="Import Prospects CSV">📥 Import Prospects</button>
+            <input
+              type="file"
+              title="upload prospects CSV"
+              id="prospectsCsvFileInput"
+              accept=".csv"
+              style="display: none;"
+            />
+          </div>
+          <div id="prospectsImportProgress" style="display: none; margin-bottom: 1em; padding: 1em; border: 1px solid #ccc; border-radius: 4px; background-color: #f9f9f9;">
+            <div style="margin-bottom: 0.5em;">
+              <strong id="progressStage">Importing prospects...</strong>
+            </div>
+            <div style="margin-bottom: 0.5em;">
+              <span id="progressCurrentEvent"></span>
+            </div>
+            <div style="display: flex; align-items: center;">
+              <progress id="prospectsProgressBar" value="0" max="100" style="flex: 1; margin-right: 1em;"></progress>
+              <span id="progressText">0/0</span>
+            </div>
+          </div>
+          <table id="prospectsTable" border="1">
+            <thead>
+              <tr>
+                <th>Prospect Event</th>
+                <th>Country</th>
+                <th>State</th>
+                <th>Prospect ED/s</th>
+                <th>Event Ambassador</th>
+                <th>Date Made Contact</th>
+                <th>Course Found</th>
+                <th>Landowner Permission</th>
+                <th>Funding Confirmed</th>
+                <th>Geocoding Status</th>
+                <th>Coordinates</th>
+                <th>Ambassador Match</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <!-- Prospects rows will be populated here -->
+            </tbody>
+          </table>
+        </div>
+
+        <div id="changesLogTab" class="tab-content" role="tabpanel" aria-labelledby="changesLogTabButton" hidden>
+          <table id="changesTable" border="1">
+            <thead>
+              <tr>
+                <th>Change Type</th>
+                <th>Event Name</th>
+                <th>Original Value</th>
+                <th>New Value</th>
+                <th>Timestamp</th>
+              </tr>
+            </thead>
+            <tbody>
+              <!-- Changes log rows will be populated here -->
+            </tbody>
+          </table>
+        </div>
+
+        <div id="issuesTab" class="tab-content" role="tabpanel" aria-labelledby="issuesTabButton" hidden>
+          <table id="issuesTable" border="1">
+            <thead>
+              <tr>
+                <th>Event Name</th>
+                <th>Event Ambassador</th>
+                <th>Regional Ambassador</th>
+                <th>Issue Type</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <!-- Issues rows will be populated here -->
+            </tbody>
+          </table>
+        </div>
       </div>
 
     </div>

@@ -57,6 +57,126 @@ tr:hover {
   margin: auto;
 }
 
-#changesTableContainer {
+/* Tabs */
+.tabs {
+  display: flex;
+  border-bottom: 2px solid #ddd;
+  margin: 20px auto;
+  width: 80%;
+}
+
+.tab-button {
+  background-color: #f2f2f2;
+  border: none;
+  border-bottom: 2px solid transparent;
+  padding: 12px 24px;
+  cursor: pointer;
+  font-size: 16px;
+  font-family: "Atkinson Hyperlegible", Verdana, serif;
+  transition: background-color 0.2s;
+  margin-right: 4px;
+}
+
+.tab-button:hover {
+  background-color: #e0e0e0;
+}
+
+.tab-button:focus {
+  outline: 2px solid #4a90e2;
+  outline-offset: -2px;
+}
+
+.tab-button.active {
+  background-color: #fff;
+  border-bottom-color: #4a90e2;
+  font-weight: bold;
+}
+
+.tab-content {
   display: none;
+  width: 80%;
+  margin: 20px auto;
+}
+
+.tab-content.active {
+  display: block;
+}
+
+.tab-content h2 {
+  margin-top: 0;
+}
+
+#eventAmbassadorsTable th,
+#regionalAmbassadorsTable th {
+  background-color: #f2f2f2;
+  font-weight: bold;
+}
+
+#reallocationDialog button {
+  transition: background-color 0.2s;
+}
+
+#reallocationDialog button:hover {
+  background-color: #f5f5f5 !important;
+}
+
+#reallocationDialog button:focus {
+  outline: 2px solid #2196f3;
+  outline-offset: 2px;
+}
+
+#reallocationDialog select:focus {
+  outline: 2px solid #2196f3;
+  outline-offset: 2px;
+}
+
+/* Table row selection highlighting */
+tr.selected {
+  background-color: #4a90e2 !important;
+  color: white;
+}
+
+tr.selected:hover {
+  background-color: #357abd !important;
+}
+
+/* Reallocate button styles */
+.reallocate-button {
+  padding: 4px 12px;
+  font-size: 14px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  background-color: #f8f9fa;
+  color: #333;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.reallocate-button:hover:not(:disabled) {
+  background-color: #e9ecef;
+}
+
+.reallocate-button:focus {
+  outline: 2px solid #4a90e2;
+  outline-offset: 2px;
+}
+
+.reallocate-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background-color: #f8f9fa;
+}
+
+/* Map marker highlighting */
+.leaflet-marker-highlight {
+  filter: drop-shadow(0 0 8px rgba(255, 0, 0, 0.8));
+}
+/* Prospective Event Markers */
+.prospective-event-marker {
+  /* Color is set dynamically via inline styles based on EA assignment */
+  font-size: 16px;
+  font-weight: bold;
+  text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.5);
+  background: transparent;
+  border: none;
 }

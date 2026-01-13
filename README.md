@@ -56,3 +56,91 @@ graph TD
 ## How it will work
 
 This project is written in TypeScript, has unit tests, and the map will be displayed in any modern web browser.
+
+## State Persistence and Sharing
+
+Ambassy automatically persists your uploaded CSV data to browser local storage, so you don't need to re-upload files every time you visit the application. Your data persists across browser sessions.
+
+### Exporting State
+
+Click the "Export State" button to download your current application state as a JSON file. This file contains all your uploaded data (Event Ambassadors, Event Teams, Regional Ambassadors, and changes log) and can be shared with other ambassadors or parkrun staff.
+
+### Importing State
+
+Click the "Import State" button to load a previously exported state file. This allows you to:
+- Share your data with other users
+- Restore your data on a different device or browser
+- Load data shared by other ambassadors
+
+**Note**: Importing will replace your current data. You'll be asked to confirm before importing if you have existing data.
+
+## Ambassador Capacity Management
+
+Ambassy provides tools for managing ambassador capacity and lifecycle:
+
+### Onboarding Ambassadors
+
+- **Add Event Ambassador**: Click "Add Event Ambassador" to add a new Event Ambassador to the system
+- **Add Regional Ambassador**: Click "Add Regional Ambassador" to add a new Regional Ambassador to the system
+- New ambassadors start with no assigned events/EAs and can be assigned as needed
+
+### Capacity Checking
+
+The system automatically checks ambassador capacity against configurable limits:
+- **Event Ambassadors**: Preferred range is 2-9 events (configurable)
+- **Regional Ambassadors**: Preferred range is 3-10 Event Ambassadors (configurable)
+- Capacity status is displayed with emoji indicators:
+  - ⬇️ Under capacity (below minimum)
+  - ✅ Within capacity (within preferred range)
+  - ⚠️ Over capacity (above maximum)
+
+### Offboarding Ambassadors
+
+When an ambassador leaves or changes roles:
+- Click the "Offboard" button next to their name in the ambassador tables
+- The system suggests reallocation recipients based on:
+  - Available capacity
+  - Regional alignment (same Regional Ambassador)
+  - Geographic proximity
+  - Conflict avoidance
+- You can reallocate events/EAs to different recipients individually
+- All changes are automatically logged and the UI updates immediately
+
+### Configuring Capacity Limits
+
+- Click "Configure Capacity Limits" to adjust preferred capacity ranges
+- Limits persist across sessions and are included in exported state
+- Changes immediately update all ambassador capacity statuses
+
+## Development with Speckit
+
+This project uses [Speckit](https://speckit.org/) (Spec Kit) for specification-driven development. Speckit helps ensure that features are well-specified before implementation, reducing errors and improving code quality.
+
+### Getting Started with Speckit
+
+Speckit is already installed and configured for this project. The Specify CLI tool is available via `uv`.
+
+### Using Speckit Commands
+
+Speckit provides several slash commands that you can use in your AI assistant (Cursor):
+
+- `/speckit.constitution` - Establish project principles
+- `/speckit.specify` - Create baseline specification for a new feature
+- `/speckit.clarify` - Ask structured questions to clarify ambiguous requirements
+- `/speckit.plan` - Create implementation plan from specification
+- `/speckit.checklist` - Generate quality checklists
+- `/speckit.tasks` - Generate actionable tasks from plan
+- `/speckit.analyze` - Cross-artifact consistency & alignment report
+- `/speckit.implement` - Execute implementation tasks
+
+### Workflow
+
+The typical Speckit workflow follows these phases:
+
+1. **Foundation**: Establish project principles and create specifications
+2. **Clarification**: Resolve ambiguities in requirements
+3. **Planning**: Choose tech stack and architecture
+4. **Tasks**: Break down into actionable items
+5. **Implementation**: Generate working code
+
+For more information, see the [Speckit documentation](https://speckit.org/).
