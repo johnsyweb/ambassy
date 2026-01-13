@@ -12,7 +12,7 @@
     "resolve": "tsc --traceResolution",
     "start": "webpack serve --open",
     "test": "jest",
-    "screenshots": "ts-node script/generate-screenshots.ts"
+    "screenshots": "ts-node -r tsconfig-paths/register script/generate-screenshots.ts"
   },
   "keywords": [
     "parkrun",
