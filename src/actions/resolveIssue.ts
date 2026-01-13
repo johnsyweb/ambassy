@@ -28,11 +28,14 @@ export function resolveIssueWithEvent(
     throw new Error("Event details must have valid coordinates");
   }
 
+  // Preserve all name variations from the found event, but ensure EventShortName matches the issue key
   const eventToAdd: EventDetails = {
     ...eventDetails,
     properties: {
       ...eventDetails.properties,
-      EventShortName: issue.eventShortName,
+      // Keep the original eventname from the found event (it's the URL-friendly identifier)
+      // Keep the original EventLongName from the found event
+      EventShortName: issue.eventShortName, // Use issue key as EventShortName for lookup consistency
     },
   };
 
@@ -107,7 +110,9 @@ export async function resolveIssueWithAddress(
 
     // Extract additional metadata from URL if provided
     let extractedMetadata: Partial<{
+      eventname: string;
       EventLongName: string;
+      EventShortName: string;
       countrycode: number;
       seriesid: number;
     }> = {};
@@ -133,9 +138,9 @@ export async function resolveIssueWithAddress(
         coordinates: [lng, lat], // GeoJSON uses [longitude, latitude]
       },
       properties: {
-        eventname: extractedMetadata.EventLongName || issue.eventShortName,
+        eventname: extractedMetadata.eventname || issue.eventShortName.toLowerCase().replace(/\s+/g, ''),
         EventLongName: extractedMetadata.EventLongName || issue.eventShortName,
-        EventShortName: issue.eventShortName,
+        EventShortName: extractedMetadata.EventShortName || issue.eventShortName,
         LocalisedEventLongName: null,
         countrycode: extractedMetadata.countrycode || await getCountryCodeFromCoordinate(createCoordinate(lat, lng)) || 0,
         seriesid: extractedMetadata.seriesid || 1, // Default to 5km
@@ -168,7 +173,9 @@ export async function resolveIssueWithAddress(
  * Extracts metadata from a parkrun URL
  */
 async function extractMetadataFromUrl(url: string): Promise<{
+  eventname: string;
   EventLongName: string;
+  EventShortName: string;
   countrycode: number;
   seriesid: number;
 }> {
@@ -180,30 +187,33 @@ async function extractMetadataFromUrl(url: string): Promise<{
 
   const [, domain, eventSlug] = urlMatch;
 
+  // The eventSlug IS the eventname (e.g., "albertonascot")
+  const eventname = eventSlug;
+
   // Look up country code from domain dynamically
   const countrycode = await getCountryCodeFromDomain(domain) || 0;
 
   // Determine series (5km vs juniors)
   const seriesid = eventSlug.endsWith('-juniors') ? 2 : 1; // 1 = 5km, 2 = juniors
 
-  // Try to fetch the page title for the full event name
-  let EventLongName = `${eventSlug.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase())} parkrun`;
+  // Generate EventLongName from eventSlug (e.g., "albertonascot" -> "Alberton Ascot parkrun")
+  const EventLongName = eventSlug
+    .split('-')
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ')
+    .replace(/Juniors?$/, 'juniors') + ' parkrun';
 
-  try {
-    // Note: In a real implementation, you'd need to handle CORS or use a backend service
-    // For now, we'll generate a reasonable name from the URL slug
-    EventLongName = eventSlug
-      .split('-')
-      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-      .join(' ')
-      .replace(/Juniors?$/, 'juniors') + ' parkrun';
-  } catch {
-    // Use fallback name generation
-    console.warn('Could not fetch page title, using generated name');
-  }
+  // Generate EventShortName (same as EventLongName without "parkrun" suffix, or use eventSlug)
+  const EventShortName = eventSlug
+    .split('-')
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ')
+    .replace(/Juniors?$/, 'juniors');
 
   return {
+    eventname,
     EventLongName,
+    EventShortName,
     countrycode,
     seriesid,
   };

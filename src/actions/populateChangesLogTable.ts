@@ -1,6 +1,13 @@
 import { LogEntry } from "@models/LogEntry";
+import { EventDetailsMap } from "@models/EventDetailsMap";
+import { CountryMap } from "@models/country";
+import { buildEventHistoryUrl } from "@utils/eventHistoryUrl";
 
-export function populateChangesLogTable(log: LogEntry[]) {
+export function populateChangesLogTable(
+  log: LogEntry[],
+  eventDetails?: EventDetailsMap,
+  countries?: CountryMap
+) {
   const changesTableBody = document.querySelector('#changesTable tbody');
   if (!changesTableBody) {
     console.error('Table body not found for changes log');
@@ -16,7 +23,35 @@ export function populateChangesLogTable(log: LogEntry[]) {
     row.appendChild(changeTypeCell);
 
     const eventNameCell = document.createElement('td');
-    eventNameCell.textContent = entry.event;
+    
+    // For "Issue Resolved" entries, try to create an event history link
+    if (entry.type === "Issue Resolved" && eventDetails && countries) {
+      const eventDetail = eventDetails.get(entry.event);
+      if (eventDetail && eventDetail.properties.eventname) {
+        const url = buildEventHistoryUrl(
+          eventDetail.properties.eventname,
+          eventDetail.properties.countrycode,
+          countries
+        );
+        
+        if (url) {
+          const link = document.createElement("a");
+          link.href = url;
+          link.target = "_blank";
+          link.rel = "noopener noreferrer";
+          link.textContent = entry.event;
+          link.className = "event-history-link";
+          eventNameCell.appendChild(link);
+        } else {
+          eventNameCell.textContent = entry.event;
+        }
+      } else {
+        eventNameCell.textContent = entry.event;
+      }
+    } else {
+      eventNameCell.textContent = entry.event;
+    }
+    
     row.appendChild(eventNameCell);
 
     const originalValueCell = document.createElement('td');
