@@ -1,9 +1,10 @@
-import { CountryMap } from '../models/country';
+import { CountryMap } from "../models/country";
 
 /**
  * Builds the event history URL for a parkrun event
  * 
- * @param eventname - The event's eventname property (e.g., "kirkdalereserve", "albertmelbourne")
+ * @param eventname - The event's eventname property or any human-readable variant
+ *                    (e.g., "kirkdalereserve", "Albertonascot parkrun")
  * @param countrycode - The event's country code (e.g., 3 for Australia)
  * @param countries - Map of country codes to Country objects
  * @returns The constructed URL or null if construction is not possible
@@ -36,6 +37,17 @@ export function buildEventHistoryUrl(
     return null;
   }
 
-  // Construct URL: https://${country.url}/${eventname}/results/eventhistory/
-  return `https://${country.url}/${eventname}/results/eventhistory/`;
+  // Normalise eventname to a URL-safe slug:
+  // - Trim whitespace
+  // - Remove trailing " parkrun" suffix (case-insensitive)
+  // - Lowercase
+  // - Collapse all internal whitespace
+  const slug = eventname
+    .trim()
+    .replace(/\s+parkrun$/i, "")
+    .toLowerCase()
+    .replace(/\s+/g, "");
+
+  // Construct URL: https://${country.url}/${slug}/results/eventhistory/
+  return `https://${country.url}/${slug}/results/eventhistory/`;
 }
