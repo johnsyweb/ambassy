@@ -1,15 +1,14 @@
 <!--
 Sync Impact Report:
-Version change: 1.2.0 → 1.3.0 (added explicit linting error prevention and CI enforcement)
+Version change: 1.3.0 → 1.4.0 (prohibited commented-out code)
 Modified principles: 
-  - I. Quality Gates - Added explicit linting requirements (zero errors, fix errors in modified files, CI enforcement)
-  - Pre-Commit Checklist - Made mandatory, added requirement to fix all lint errors in modified files
-  - Pre-Push Checklist - Added CI verification requirement
-  - Code Review Requirements - Added CI passing requirement and lint error fixing requirement
+  - I. Quality Gates - Added prohibition on commented-out code
+  - IV. Single Responsibility & Clean Architecture - Added explicit prohibition and rationale for commented-out code
+  - Pre-Commit Checklist - Added step to remove commented-out code
+  - Code Review Requirements - Added requirement to remove commented-out code
 Added sections: 
-  - Linting Requirements (in Quality Gates)
-  - CI Enforcement (in Quality Gates)
-  - Automated Enforcement (in Quality Gates)
+  - Code Cleanliness Requirements (in Quality Gates)
+  - Commented-Out Code is Prohibited (in Single Responsibility section)
 Removed sections: N/A
 Templates requiring updates:
   ✅ plan-template.md - Constitution Check section exists and aligns
@@ -30,12 +29,19 @@ All code MUST pass quality gates before commit:
 - Code MUST pass TypeScript type checking
 - All tests MUST pass
 - Disused code MUST be removed immediately
+- Commented-out code MUST NOT exist in the codebase
 
 **Linting Requirements**:
 - When modifying a file, ALL linting errors in that file MUST be fixed, even if they existed before your changes
 - New code MUST NOT introduce any linting errors or warnings
 - Linting errors MUST be fixed before committing, not deferred
 - The codebase MUST maintain zero linting errors at all times
+
+**Code Cleanliness Requirements**:
+- Commented-out code MUST be removed immediately - it is a liability that becomes outdated and misleading
+- If code needs to be preserved for reference, use version control (git) to view history, not comments
+- Commented-out code MUST NOT be committed, even temporarily
+- If you find commented-out code, remove it immediately as part of your changes
 
 **CI Enforcement**:
 - CI MUST run linting, type checking, tests, and build on every push and pull request
@@ -68,7 +74,9 @@ Each change MUST be committed atomically with a meaningful, semantic commit mess
 
 Each component MUST have a single responsibility. Code layout MUST follow current structure with clear separation: models, actions, parsers, types, and utils. Comments MUST be avoided where code can be made self-documenting through clear naming, dedicated functions, or named variables. Comments are a failure to express intent clearly in code and often become outdated or misleading.
 
-**Rationale**: Maintains code clarity and makes the codebase easier to understand, test, and modify. Single responsibility reduces coupling and increases cohesion. Self-documenting code eliminates the need for comments that can become lies when code evolves but comments don't. See <https://johnsy.com/blog/2012/10/31/comments-are-lies/> for rationale.
+**Commented-Out Code is Prohibited**: Commented-out code MUST NOT exist in the codebase. It is a liability that becomes outdated, misleading, and clutters the codebase. If code needs to be preserved for reference, use version control (git) to view history. Commented-out code suggests uncertainty about what should exist and violates the principle of clean, maintainable code.
+
+**Rationale**: Maintains code clarity and makes the codebase easier to understand, test, and modify. Single responsibility reduces coupling and increases cohesion. Self-documenting code eliminates the need for comments that can become lies when code evolves but comments don't. Commented-out code is worse than no code - it suggests the codebase is uncertain and creates maintenance burden. See <https://johnsy.com/blog/2012/10/31/comments-are-lies/> for rationale on comments.
 
 ### V. Accessibility & User Experience
 
@@ -131,11 +139,12 @@ Before every commit, developers MUST:
 1. Run `pnpm run lint:fix` to format and fix linting issues
 2. Run `pnpm run lint` to verify all linting passes (zero errors, zero warnings)
 3. Fix ALL linting errors in any files you modified, even if the errors existed before your changes
-4. Run `tsc --noEmit` to verify TypeScript type checking passes
-5. Run `pnpm test` to verify all tests pass
-6. Verify README is updated if changes affect setup or usage
-7. Remove any disused code
-8. Ensure commit message follows Conventional Commits format
+4. Remove ALL commented-out code (it is prohibited)
+5. Run `tsc --noEmit` to verify TypeScript type checking passes
+6. Run `pnpm test` to verify all tests pass
+7. Verify README is updated if changes affect setup or usage
+8. Remove any disused code
+9. Ensure commit message follows Conventional Commits format
 
 **This checklist is MANDATORY, not optional.** If pre-commit hooks are not configured, developers MUST manually verify each step before committing. Skipping this checklist violates the constitution and risks introducing technical debt.
 
@@ -162,6 +171,7 @@ All changes MUST:
 - Pass all quality gates (linting with zero errors/warnings, type checking, tests, build)
 - Have passing CI before merge (CI failure blocks merge)
 - Fix ALL linting errors in files modified, even if errors existed before
+- Remove ALL commented-out code (it is prohibited)
 - Follow single responsibility principle
 - Include appropriate tests
 - Maintain or improve test coverage
@@ -202,4 +212,4 @@ This constitution supersedes all other development practices. All code changes M
 
 **Runtime Guidance**: See `README.md` for project setup, development workflow, and usage instructions.
 
-**Version**: 1.3.0 | **Ratified**: 2026-01-07 | **Last Amended**: 2026-01-13
+**Version**: 1.4.0 | **Ratified**: 2026-01-07 | **Last Amended**: 2026-01-13
