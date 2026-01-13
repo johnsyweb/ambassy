@@ -182,12 +182,12 @@ function parseProspectiveEventRow(
   // Note: EA field can be empty - it will be marked as unmatched during import
 
   // Parse date
-  const dateMadeContact = parseDate(getField('Date Made Contact'), rowNumber);
+  const dateMadeContact = parseDate(getField('Date Made Contact'));
 
   // Parse boolean fields
-  const courseFound = parseBoolean(getField('Course Found'), 'Course Found', rowNumber);
-  const landownerPermission = parseBoolean(getField('Landowner Permission'), 'Landowner Permission', rowNumber);
-  const fundingConfirmed = parseBoolean(getField('Funding Confirmed'), 'Funding Confirmed', rowNumber);
+  const courseFound = parseBoolean(getField('Course Found'));
+  const landownerPermission = parseBoolean(getField('Landowner Permission'));
+  const fundingConfirmed = parseBoolean(getField('Funding Confirmed'));
 
   // Create the prospective event
   const event: ProspectiveEvent = {
@@ -221,8 +221,7 @@ function parseProspectiveEventRow(
 /**
  * Parse a date string
  */
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-function parseDate(dateStr: string, _rowNumber: number): Date | null {
+function parseDate(dateStr: string): Date | null {
   const trimmed = dateStr.trim();
   if (!trimmed) {
     return null;
@@ -261,8 +260,7 @@ function parseDate(dateStr: string, _rowNumber: number): Date | null {
 /**
  * Parse a boolean value from string
  */
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-function parseBoolean(value: string, _fieldName: string, _rowNumber: number): boolean {
+function parseBoolean(value: string): boolean {
   const trimmed = value.trim().toLowerCase();
 
   // Accept various boolean representations for true
