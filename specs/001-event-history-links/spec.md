@@ -5,6 +5,12 @@
 **Status**: Draft  
 **Input**: User description: "I'd like to specify a new feature… I want to be able to go from an ambassador's live event allocations on the Event Ambassador tab and open browser tabs on that event's evvent history page. E.g. https://www.parkrun.com.au/albertmelbourne/results/eventhistory/"
 
+## Clarifications
+
+### Session 2026-01-14
+
+- Q: Which EventDetails property should be used for the URL path segment? → A: Use `eventname` property (e.g., "kirkdalereserve"), not `EventShortName` (e.g., "Kirkdale Reserve"). The `eventname` is the URL-friendly identifier used in parkrun URLs.
+
 ## User Scenarios & Testing *(mandatory)*
 
 ### User Story 1 - Open event history from Event Ambassador tab (Priority: P1)
@@ -13,7 +19,7 @@ As an Event Ambassador reviewing my live event allocations, I want each allocate
 
 **Why this priority**: Direct access to history is the core value of the feature.
 
-**Independent Test**: With an Event Ambassador who has at least one live event allocation, clicking the event name opens the correct event history page in a new tab using the per-country domain and event short name from data.
+**Independent Test**: With an Event Ambassador who has at least one live event allocation, clicking the event name opens the correct event history page in a new tab using the per-country domain and event's `eventname` property (e.g., "kirkdalereserve") from EventDetails data.
 
 **Acceptance Scenarios**:
 
@@ -40,7 +46,7 @@ As an Event Ambassador, if domain data for an event is missing or invalid, I wan
 ### Edge Cases
 
 - Missing or null country/domain data for an event.
-- Malformed event short name that would create an invalid URL.
+- Missing or malformed `eventname` property that would create an invalid URL.
 - User opens multiple event history links rapidly (multiple tabs).
 - Event Ambassador has zero live event allocations (no links rendered).
 - Accessibility: keyboard activation of links and visible focus states.
@@ -58,7 +64,7 @@ As an Event Ambassador, if domain data for an event is missing or invalid, I wan
 
 ### Key Entities *(include if feature involves data)*
 
-- **Event**: short name, country code/domain (from `events.json`), live allocation status.
+- **Event**: `eventname` property (e.g., "kirkdalereserve"), country code/domain (from `events.json`), live allocation status.
 - **Event Ambassador Allocation**: mapping between an Event Ambassador and their live events displayed on the Event Ambassador tab.
 - **Country Domain Mapping**: lookup from `events.json` providing per-country base URLs for event history links.
 

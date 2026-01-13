@@ -57,7 +57,7 @@ describe("populateAmbassadorsTable", () => {
         type: "Feature",
         geometry: { type: "Point", coordinates: [144.9631, -37.8136] },
         properties: {
-          eventname: "Event 1",
+          eventname: "event1",
           EventLongName: "Event 1",
           EventShortName: "Event1",
           LocalisedEventLongName: null,
@@ -71,7 +71,7 @@ describe("populateAmbassadorsTable", () => {
         type: "Feature",
         geometry: { type: "Point", coordinates: [151.2093, -33.8688] },
         properties: {
-          eventname: "Event 2",
+          eventname: "event2",
           EventLongName: "Event 2",
           EventShortName: "Event2",
           LocalisedEventLongName: null,
@@ -85,7 +85,7 @@ describe("populateAmbassadorsTable", () => {
         type: "Feature",
         geometry: { type: "Point", coordinates: [-0.1276, 51.5074] },
         properties: {
-          eventname: "Event 3",
+          eventname: "event3",
           EventLongName: "Event 3",
           EventShortName: "Event3",
           LocalisedEventLongName: null,

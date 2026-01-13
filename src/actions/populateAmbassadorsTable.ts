@@ -149,7 +149,7 @@ function populateEventAmbassadorsTable(
             const eventDetail = eventDetails.get(eventName);
             if (eventDetail) {
               const url = buildEventHistoryUrl(
-                eventName,
+                eventDetail.properties.eventname,
                 eventDetail.properties.countrycode,
                 countries
               );
