@@ -7,13 +7,14 @@ import { EventAmbassadorMap } from '../models/EventAmbassadorMap';
 import { RegionalAmbassadorMap } from '../models/RegionalAmbassadorMap';
 import { showReallocationDialog } from './showReallocationDialog';
 import { reallocateProspect } from './reallocateProspect';
-import { loadCapacityLimits } from './checkCapacity';
+import { loadCapacityLimits, calculateAllCapacityStatuses } from './checkCapacity';
 import { LogEntry } from '../models/LogEntry';
 import { CapacityStatus } from '../models/CapacityStatus';
 import { ReallocationSuggestion } from '../models/ReallocationSuggestion';
 import { geocodeAddress } from '../utils/geography';
 import { saveProspectiveEvents } from './persistProspectiveEvents';
 import { formatCoordinate, Coordinate, createCoordinate } from '../models/Coordinate';
+import { persistEventAmbassadors, persistChangesLog } from './persistState';
 
 // Forward declaration - will be set by index.ts
 let refreshUIAfterReallocation: (() => void) | null = null;
@@ -232,9 +233,54 @@ function createProspectRow(
   removeButton.type = 'button';
   removeButton.title = 'Remove this prospect';
   removeButton.textContent = '🗑️ Remove';
-  removeButton.addEventListener('click', () => {
-    // TODO: Implement prospect removal
-    console.log('Remove prospect:', prospect.prospectEvent);
+  removeButton.setAttribute('aria-label', `Remove prospect ${prospect.prospectEvent}`);
+  removeButton.addEventListener('click', (e) => {
+    e.stopPropagation();
+    if (!confirm(`Are you sure you want to remove prospect "${prospect.prospectEvent}"? This action cannot be undone.`)) {
+      return;
+    }
+
+    try {
+      // Remove prospect from list
+      prospects.remove(prospect.id);
+
+      // Remove from EA's prospectiveEvents array if assigned
+      if (prospect.eventAmbassador) {
+        const ea = eventAmbassadors.get(prospect.eventAmbassador);
+        if (ea?.prospectiveEvents) {
+          ea.prospectiveEvents = ea.prospectiveEvents.filter(id => id !== prospect.id);
+        }
+      }
+
+      // Recalculate capacity statuses
+      const capacityLimits = loadCapacityLimits();
+      calculateAllCapacityStatuses(eventAmbassadors, regionalAmbassadors, capacityLimits);
+
+      // Save the updated prospects and event ambassadors
+      saveProspectiveEvents(prospects.getAll());
+      persistEventAmbassadors(eventAmbassadors);
+
+      // Log the change if log is available
+      if (log) {
+        const changeEntry: LogEntry = {
+          timestamp: Date.now(),
+          type: 'Prospect Removed',
+          event: `Prospect "${prospect.prospectEvent}" (${prospect.country}, ${prospect.state}) removed`,
+          oldValue: prospect.eventAmbassador || 'Unassigned',
+          newValue: 'Removed'
+        };
+        log.unshift(changeEntry);
+        persistChangesLog(log);
+      }
+
+      // Refresh the UI
+      if (refreshUIAfterReallocation) {
+        refreshUIAfterReallocation();
+      }
+    } catch (error) {
+      console.error('Failed to remove prospect:', error);
+      alert(`Failed to remove prospect: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
   });
   buttonContainer.appendChild(removeButton);
 
