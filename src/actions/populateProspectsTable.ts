@@ -326,12 +326,8 @@ function generateProspectReallocationSuggestions(
   prospect: ProspectiveEvent,
   eventAmbassadors: EventAmbassadorMap,
   eventDetails?: EventDetailsMap,
-  prospects?: ProspectiveEventList,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  _regionalAmbassadors?: RegionalAmbassadorMap // Reserved for future use
+  prospects?: ProspectiveEventList
 ): ReallocationSuggestion[] {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const _limits = loadCapacityLimits(); // Reserved for future use
   const suggestions: ReallocationSuggestion[] = [];
 
   // Get prospect coordinates for distance calculation
