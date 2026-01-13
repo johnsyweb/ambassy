@@ -64,8 +64,6 @@ describe("reallocateProspect", () => {
       }]
     ]);
 
-    // regionalAmbassadors = new Map(); // Reserved for future use
-
     log = [];
   });
 
