@@ -1,9 +1,10 @@
 <!--
 Sync Impact Report:
-Version change: 1.1.0 → 1.1.1 (strengthened comment avoidance principle)
+Version change: 1.1.1 → 1.2.0 (added explicit prohibition on pushing with build failures)
 Modified principles: 
-  - IV. Single Responsibility & Clean Architecture - Strengthened guidance on avoiding comments, preferring self-documenting code
-Added sections: N/A
+  - I. Quality Gates - Added explicit requirement that code MUST NOT be pushed if build fails
+Added sections: 
+  - Pre-Push Checklist (in Development Workflow)
 Removed sections: N/A
 Templates requiring updates:
   ✅ plan-template.md - Constitution Check section exists and aligns
@@ -25,7 +26,9 @@ All code MUST pass quality gates before commit:
 - All tests MUST pass
 - Disused code MUST be removed immediately
 
-**Rationale**: Prevents technical debt accumulation and ensures consistent code quality across the codebase. These gates are automated and non-negotiable to maintain project health.
+Code MUST NOT be pushed to any remote repository if there are build failures. All quality gates MUST pass before pushing commits to shared branches (including main, feature branches, or any remote repository).
+
+**Rationale**: Prevents technical debt accumulation and ensures consistent code quality across the codebase. These gates are automated and non-negotiable to maintain project health. Prohibiting pushes with build failures prevents broken code from entering shared repositories, protecting the entire team from build breakage and ensuring the main branch always remains in a deployable state.
 
 ### II. Test-Driven Development
 
@@ -111,6 +114,17 @@ Before every commit, developers MUST:
 6. Remove any disused code
 7. Ensure commit message follows Conventional Commits format
 
+### Pre-Push Checklist
+
+Before every push to a remote repository, developers MUST:
+
+1. Verify all quality gates pass (linting, type checking, tests)
+2. Verify the build completes successfully (`pnpm run build` or equivalent)
+3. Ensure no build failures exist in the current branch
+4. Confirm all commits in the push follow Conventional Commits format
+
+**Enforcement**: If any build failure is detected, the push MUST be aborted until all issues are resolved. Broken builds MUST NOT enter shared repositories.
+
 ### Code Review Requirements
 
 All changes MUST:
@@ -154,4 +168,4 @@ This constitution supersedes all other development practices. All code changes M
 
 **Runtime Guidance**: See `README.md` for project setup, development workflow, and usage instructions.
 
-**Version**: 1.1.1 | **Ratified**: 2026-01-07 | **Last Amended**: 2026-01-08
+**Version**: 1.2.0 | **Ratified**: 2026-01-07 | **Last Amended**: 2026-01-13
