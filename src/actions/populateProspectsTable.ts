@@ -194,8 +194,7 @@ function createProspectRow(
       prospect,
       eventAmbassadors,
       eventDetails,
-      prospects,
-      regionalAmbassadors
+      prospects
     );
 
     // Show reallocation dialog
