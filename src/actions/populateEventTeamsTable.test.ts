@@ -11,14 +11,10 @@ jest.mock("d3-geo-voronoi", () => ({
 
 import { populateEventTeamsTable, setReallocateButtonHandler, updateReallocateButtonStates } from "./populateEventTeamsTable";
 import { EventTeamsTableDataMap } from "@models/EventTeamsTableData";
-import { EventDetailsMap } from "@models/EventDetailsMap";
-import { LogEntry } from "@models/LogEntry";
 import { SelectionState, createSelectionState } from "@models/SelectionState";
 
 describe("populateEventTeamsTable - Reallocate Button", () => {
   let eventTeamsTableData: EventTeamsTableDataMap;
-  let eventDetailsMap: EventDetailsMap;
-  let changelog: LogEntry[];
   let selectionState: SelectionState;
   let tableBody: HTMLTableSectionElement;
 
@@ -55,8 +51,6 @@ describe("populateEventTeamsTable - Reallocate Button", () => {
       eventCountry: "Australia",
     });
 
-    eventDetailsMap = new Map();
-    changelog = [];
     selectionState = createSelectionState();
   });
 
