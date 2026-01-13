@@ -792,10 +792,11 @@ function onResolve(issue: EventIssue): void {
       }
     },
     () => {
-      // Search cancelled or no match found - offer address entry as fallback
-      if (confirm(`No match found for "${issue.eventShortName}". Would you like to enter an address to geocode coordinates instead?`)) {
-        onEnterAddress(issue);
-      }
+      // Search cancelled - dialog already closed
+    },
+    () => {
+      // Switch to address entry
+      onEnterAddress(issue);
     }
   );
 }

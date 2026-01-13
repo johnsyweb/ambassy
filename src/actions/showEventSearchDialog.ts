@@ -6,7 +6,8 @@ export function showEventSearchDialog(
   issueEventName: string,
   events: EventDetailsMap,
   onSelect: (event: EventDetails) => void,
-  onCancel: () => void
+  onCancel: () => void,
+  onSwitchToAddress?: () => void
 ): void {
   const dialog = document.getElementById("reallocationDialog") as HTMLElement;
   const title = document.getElementById("reallocationDialogTitle") as HTMLElement;
@@ -69,12 +70,37 @@ export function showEventSearchDialog(
     const results = searchEvents(query, events);
 
     if (results.length === 0) {
+      const noResultsContainer = document.createElement("div");
+      noResultsContainer.style.textAlign = "center";
+      noResultsContainer.style.padding = "1em";
+      
       const noResults = document.createElement("p");
       noResults.textContent = "No events found. Try a different search term.";
       noResults.style.color = "#666";
-      noResults.style.textAlign = "center";
-      noResults.style.padding = "1em";
-      resultsContainer.appendChild(noResults);
+      noResults.style.marginBottom = "0.5em";
+      noResultsContainer.appendChild(noResults);
+      
+      if (onSwitchToAddress) {
+        const switchButton = document.createElement("button");
+        switchButton.type = "button";
+        switchButton.textContent = "📍 Enter Address Instead";
+        switchButton.style.padding = "0.5em 1em";
+        switchButton.style.marginTop = "0.5em";
+        switchButton.style.backgroundColor = "#007bff";
+        switchButton.style.color = "white";
+        switchButton.style.border = "none";
+        switchButton.style.borderRadius = "4px";
+        switchButton.style.cursor = "pointer";
+        switchButton.setAttribute("aria-label", "Switch to address entry");
+        switchButton.addEventListener("click", () => {
+          dialog.style.display = "none";
+          dialog.setAttribute("aria-hidden", "true");
+          onSwitchToAddress();
+        });
+        noResultsContainer.appendChild(switchButton);
+      }
+      
+      resultsContainer.appendChild(noResultsContainer);
       return;
     }
 
@@ -152,6 +178,41 @@ export function showEventSearchDialog(
     dialog.style.display = "none";
     dialog.setAttribute("aria-hidden", "true");
   };
+
+  // Add switch to address entry option in the dialog footer
+  if (onSwitchToAddress) {
+    const switchContainer = document.createElement("div");
+    switchContainer.style.marginTop = "1em";
+    switchContainer.style.paddingTop = "1em";
+    switchContainer.style.borderTop = "1px solid #ccc";
+    switchContainer.style.textAlign = "center";
+    
+    const switchText = document.createElement("span");
+    switchText.textContent = "Can't find the event? ";
+    switchText.style.color = "#666";
+    switchText.style.marginRight = "0.5em";
+    switchContainer.appendChild(switchText);
+    
+    const switchLink = document.createElement("button");
+    switchLink.type = "button";
+    switchLink.textContent = "📍 Enter Address Instead";
+    switchLink.style.background = "none";
+    switchLink.style.border = "none";
+    switchLink.style.color = "#007bff";
+    switchLink.style.textDecoration = "underline";
+    switchLink.style.cursor = "pointer";
+    switchLink.style.padding = "0";
+    switchLink.style.fontSize = "inherit";
+    switchLink.setAttribute("aria-label", "Switch to address entry");
+    switchLink.addEventListener("click", () => {
+      dialog.style.display = "none";
+      dialog.setAttribute("aria-hidden", "true");
+      onSwitchToAddress();
+    });
+    switchContainer.appendChild(switchLink);
+    
+    content.appendChild(switchContainer);
+  }
 
   dialog.style.display = "block";
   dialog.setAttribute("aria-hidden", "false");
