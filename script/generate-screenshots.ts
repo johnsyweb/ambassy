@@ -5,6 +5,13 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { spawn, ChildProcess } from 'child_process';
 import { promisify } from 'util';
+import Papa from 'papaparse';
+import { parseEventTeams, EventTeamRow } from '../src/parsers/parseEventTeams';
+import { parseEventAmbassadors, EventAmbassadorRow } from '../src/parsers/parseEventAmbassadors';
+import { parseRegionalAmbassadors, RegionalAmbassadorRow } from '../src/parsers/parseRegionalAmbassadors';
+import { EventAmbassadorMap } from '../src/models/EventAmbassadorMap';
+import { EventTeamMap } from '../src/models/EventTeamMap';
+import { RegionalAmbassadorMap } from '../src/models/RegionalAmbassadorMap';
 
 interface ScreenshotConfig {
   name: string;
@@ -80,6 +87,44 @@ async function generateScreenshots(): Promise<void> {
 
     const page = await browser.newPage();
 
+    // Load CSV files and populate data before taking screenshots
+    console.log('📂 Loading CSV files from public directory...');
+    const publicDir = path.join(process.cwd(), 'public');
+    
+    const csvFiles = {
+      eventAmbassadors: path.join(publicDir, 'Ambassadors - Event Ambassadors.csv'),
+      eventTeams: path.join(publicDir, 'Ambassadors - Event Teams.csv'),
+      regionalAmbassadors: path.join(publicDir, 'Ambassadors - Regional Ambassadors.csv'),
+    };
+
+    // Read and parse CSV files
+    const eventAmbassadorsData = fs.readFileSync(csvFiles.eventAmbassadors, 'utf-8');
+    const eventTeamsData = fs.readFileSync(csvFiles.eventTeams, 'utf-8');
+    const regionalAmbassadorsData = fs.readFileSync(csvFiles.regionalAmbassadors, 'utf-8');
+
+    const eventAmbassadorsParsed = Papa.parse<EventAmbassadorRow>(eventAmbassadorsData, {
+      header: true,
+      skipEmptyLines: true,
+    });
+    const eventTeamsParsed = Papa.parse<EventTeamRow>(eventTeamsData, {
+      header: true,
+      skipEmptyLines: true,
+    });
+    const regionalAmbassadorsParsed = Papa.parse<RegionalAmbassadorRow>(regionalAmbassadorsData, {
+      header: true,
+      skipEmptyLines: true,
+    });
+
+    // Parse the data
+    const eventAmbassadors = parseEventAmbassadors(eventAmbassadorsParsed.data);
+    const eventTeams = parseEventTeams(eventTeamsParsed.data);
+    const regionalAmbassadors = parseRegionalAmbassadors(regionalAmbassadorsParsed.data);
+
+    // Convert to arrays for localStorage
+    const eventAmbassadorsArray = Array.from(eventAmbassadors.entries());
+    const eventTeamsArray = Array.from(eventTeams.entries());
+    const regionalAmbassadorsArray = Array.from(regionalAmbassadors.entries());
+
     for (const config of screenshotConfigs) {
       console.log(`📸 Capturing screenshot: ${config.name}`);
 
@@ -92,7 +137,26 @@ async function generateScreenshots(): Promise<void> {
       console.log(`🌐 Navigating to ${config.url}...`);
       await page.goto(config.url, { waitUntil: 'networkidle2' });
 
-      // Wait for the page to fully load
+      // Inject data into localStorage with correct prefix
+      await page.evaluate((eaData, etData, raData) => {
+        const prefix = 'ambassy:';
+        localStorage.setItem(`${prefix}eventAmbassadors`, JSON.stringify(eaData));
+        localStorage.setItem(`${prefix}eventTeams`, JSON.stringify(etData));
+        localStorage.setItem(`${prefix}regionalAmbassadors`, JSON.stringify(raData));
+      }, eventAmbassadorsArray, eventTeamsArray, regionalAmbassadorsArray);
+
+      // Reload the page so it picks up the localStorage data
+      await page.reload({ waitUntil: 'networkidle2' });
+
+      // Wait for the page to fully load and render
+      await new Promise((resolve) => setTimeout(resolve, 3000));
+
+      // Wait for map to be ready (check for map container)
+      await page.waitForSelector('#mapContainer', { timeout: 10000 }).catch(() => {
+        console.log('⚠️  Map container not found, continuing anyway...');
+      });
+
+      // Additional wait for map tiles and UI to render
       await new Promise((resolve) => setTimeout(resolve, 2000));
 
       // Additional wait if specified
