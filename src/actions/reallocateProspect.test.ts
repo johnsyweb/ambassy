@@ -1,7 +1,6 @@
 import { reallocateProspect } from "./reallocateProspect";
 import { ProspectiveEventList } from "../models/ProspectiveEventList";
 import { EventAmbassadorMap } from "../models/EventAmbassadorMap";
-import { RegionalAmbassadorMap } from "../models/RegionalAmbassadorMap";
 import { LogEntry } from "../models/LogEntry";
 import { CapacityStatus } from "../models/CapacityStatus";
 
