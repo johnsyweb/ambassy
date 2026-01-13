@@ -8,7 +8,7 @@ export function detectIssues(
   eventTeams: EventTeamMap,
   eventDetails: EventDetailsMap,
   eventAmbassadors: EventAmbassadorMap,
-  regionalAmbassadors: RegionalAmbassadorMap
+  regionalAmbassadors: RegionalAmbassadorMap,
 ): EventIssue[] {
   const issues: EventIssue[] = [];
 
@@ -45,5 +45,7 @@ export function detectIssues(
     });
   });
 
-  return issues.sort((a, b) => a.eventShortName.localeCompare(b.eventShortName));
+  return issues.sort((a, b) =>
+    a.eventShortName.localeCompare(b.eventShortName),
+  );
 }

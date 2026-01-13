@@ -49,7 +49,7 @@ describe("populateEventTeamsTable - Reallocate Button", () => {
       eventDirectors: "Director 1",
       eventAmbassador: "Test EA",
       regionalAmbassador: "Test REA",
-      eventCoordinates: "(-37.8, 144.9)",
+      eventCoordinates: "37.80000° S 144.90000° E",
       eventSeries: 1,
       eventCountryCode: 3,
       eventCountry: "Australia",

@@ -5,7 +5,10 @@ import {
   calculateAllCapacityStatuses,
 } from "./checkCapacity";
 import { CapacityStatus } from "../models/CapacityStatus";
-import { CapacityLimits, defaultCapacityLimits } from "../models/CapacityLimits";
+import {
+  CapacityLimits,
+  defaultCapacityLimits,
+} from "../models/CapacityLimits";
 import { EventAmbassadorMap } from "../models/EventAmbassadorMap";
 import { RegionalAmbassadorMap } from "../models/RegionalAmbassadorMap";
 import { loadFromStorage } from "../utils/storage";
@@ -187,14 +190,28 @@ describe("checkCapacity", () => {
       const eventAmbassadors: EventAmbassadorMap = new Map([
         ["EA1", { name: "EA1", events: ["Event1", "Event2", "Event3"] }], // 3 events - WITHIN
         ["EA2", { name: "EA2", events: ["Event4"] }], // 1 event - UNDER
-        ["EA3", { name: "EA3", events: Array(10).fill("Event").map((_, i) => `Event${i}`) }], // 10 events - OVER
+        [
+          "EA3",
+          {
+            name: "EA3",
+            events: Array(10)
+              .fill("Event")
+              .map((_, i) => `Event${i}`),
+          },
+        ], // 10 events - OVER
       ]);
 
       calculateAllCapacityStatuses(eventAmbassadors, new Map(), limits);
 
-      expect(eventAmbassadors.get("EA1")?.capacityStatus).toBe(CapacityStatus.WITHIN);
-      expect(eventAmbassadors.get("EA2")?.capacityStatus).toBe(CapacityStatus.UNDER);
-      expect(eventAmbassadors.get("EA3")?.capacityStatus).toBe(CapacityStatus.OVER);
+      expect(eventAmbassadors.get("EA1")?.capacityStatus).toBe(
+        CapacityStatus.WITHIN,
+      );
+      expect(eventAmbassadors.get("EA2")?.capacityStatus).toBe(
+        CapacityStatus.UNDER,
+      );
+      expect(eventAmbassadors.get("EA3")?.capacityStatus).toBe(
+        CapacityStatus.OVER,
+      );
     });
 
     it("should include prospective events in Event Ambassador capacity calculation", () => {
@@ -206,16 +223,32 @@ describe("checkCapacity", () => {
       };
 
       const eventAmbassadors: EventAmbassadorMap = new Map([
-        ["EA1", { name: "EA1", events: ["Event1"], prospectiveEvents: ["Prospect1"] }], // 1 regular + 1 prospective = 2 events - WITHIN
-        ["EA2", { name: "EA2", events: ["Event2"], prospectiveEvents: ["Prospect2", "Prospect3"] }], // 1 regular + 2 prospective = 3 events - WITHIN
+        [
+          "EA1",
+          { name: "EA1", events: ["Event1"], prospectiveEvents: ["Prospect1"] },
+        ], // 1 regular + 1 prospective = 2 events - WITHIN
+        [
+          "EA2",
+          {
+            name: "EA2",
+            events: ["Event2"],
+            prospectiveEvents: ["Prospect2", "Prospect3"],
+          },
+        ], // 1 regular + 2 prospective = 3 events - WITHIN
         ["EA3", { name: "EA3", events: ["Event3"], prospectiveEvents: [] }], // 1 regular + 0 prospective = 1 event - UNDER
       ]);
 
       calculateAllCapacityStatuses(eventAmbassadors, new Map(), limits);
 
-      expect(eventAmbassadors.get("EA1")?.capacityStatus).toBe(CapacityStatus.WITHIN);
-      expect(eventAmbassadors.get("EA2")?.capacityStatus).toBe(CapacityStatus.WITHIN);
-      expect(eventAmbassadors.get("EA3")?.capacityStatus).toBe(CapacityStatus.UNDER);
+      expect(eventAmbassadors.get("EA1")?.capacityStatus).toBe(
+        CapacityStatus.WITHIN,
+      );
+      expect(eventAmbassadors.get("EA2")?.capacityStatus).toBe(
+        CapacityStatus.WITHIN,
+      );
+      expect(eventAmbassadors.get("EA3")?.capacityStatus).toBe(
+        CapacityStatus.UNDER,
+      );
     });
 
     it("should calculate capacity status for all Regional Ambassadors", () => {
@@ -227,16 +260,38 @@ describe("checkCapacity", () => {
       };
 
       const regionalAmbassadors: RegionalAmbassadorMap = new Map([
-        ["REA1", { name: "REA1", state: "VIC", supportsEAs: ["EA1", "EA2", "EA3", "EA4", "EA5"] }], // 5 EAs - WITHIN
+        [
+          "REA1",
+          {
+            name: "REA1",
+            state: "VIC",
+            supportsEAs: ["EA1", "EA2", "EA3", "EA4", "EA5"],
+          },
+        ], // 5 EAs - WITHIN
         ["REA2", { name: "REA2", state: "VIC", supportsEAs: ["EA6", "EA7"] }], // 2 EAs - UNDER
-        ["REA3", { name: "REA3", state: "VIC", supportsEAs: Array(12).fill("EA").map((_, i) => `EA${i}`) }], // 12 EAs - OVER
+        [
+          "REA3",
+          {
+            name: "REA3",
+            state: "VIC",
+            supportsEAs: Array(12)
+              .fill("EA")
+              .map((_, i) => `EA${i}`),
+          },
+        ], // 12 EAs - OVER
       ]);
 
       calculateAllCapacityStatuses(new Map(), regionalAmbassadors, limits);
 
-      expect(regionalAmbassadors.get("REA1")?.capacityStatus).toBe(CapacityStatus.WITHIN);
-      expect(regionalAmbassadors.get("REA2")?.capacityStatus).toBe(CapacityStatus.UNDER);
-      expect(regionalAmbassadors.get("REA3")?.capacityStatus).toBe(CapacityStatus.OVER);
+      expect(regionalAmbassadors.get("REA1")?.capacityStatus).toBe(
+        CapacityStatus.WITHIN,
+      );
+      expect(regionalAmbassadors.get("REA2")?.capacityStatus).toBe(
+        CapacityStatus.UNDER,
+      );
+      expect(regionalAmbassadors.get("REA3")?.capacityStatus).toBe(
+        CapacityStatus.OVER,
+      );
     });
 
     it("should handle empty ambassador maps", () => {
@@ -246,9 +301,12 @@ describe("checkCapacity", () => {
       const regionalAmbassadors: RegionalAmbassadorMap = new Map();
 
       expect(() => {
-        calculateAllCapacityStatuses(eventAmbassadors, regionalAmbassadors, limits);
+        calculateAllCapacityStatuses(
+          eventAmbassadors,
+          regionalAmbassadors,
+          limits,
+        );
       }).not.toThrow();
     });
   });
 });
-

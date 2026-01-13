@@ -116,10 +116,9 @@ describe("configureCapacityLimits", () => {
       saveCapacityLimits(newLimits);
 
       expect(saveToStorage).toHaveBeenCalledWith("capacityLimits", newLimits);
-      
+
       const loaded = loadFromStorage<CapacityLimits>("capacityLimits");
       expect(loaded).toEqual(newLimits);
     });
   });
 });
-

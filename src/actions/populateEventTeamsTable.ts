@@ -1,7 +1,6 @@
 import { EventDetailsMap } from '@models/EventDetailsMap';
 import { EventTeamsTableDataMap, EventTeamsTableData, eventAmbassadorsFrom, regionalAmbassadorsFrom } from '@models/EventTeamsTableData';
 import { LogEntry } from '@models/LogEntry';
-import { countries } from '@models/country';
 import { EventAmbassadorMap } from '@models/EventAmbassadorMap';
 import { RegionalAmbassadorMap } from '@models/RegionalAmbassadorMap';
 import { SelectionState } from '@models/SelectionState';

@@ -52,8 +52,13 @@ export function showAddressDialog(
   const urlInput = document.createElement("input");
   urlInput.type = "url";
   urlInput.placeholder = "https://www.parkrun.com.au/example/";
-  const suggestedUrl = suggestParkrunUrl(issue.eventShortName);
-  urlInput.value = suggestedUrl;
+  // Load suggested URL asynchronously
+  suggestParkrunUrl(issue.eventShortName).then(url => {
+    urlInput.value = url;
+  }).catch(() => {
+    // Fallback if countries aren't loaded yet
+    urlInput.value = `https://www.parkrun.com.au/${issue.eventShortName.toLowerCase().replace(/\s+/g, '')}/`;
+  });
   urlInput.style.width = "100%";
   urlInput.style.padding = "0.5em";
   urlInput.style.marginBottom = "1em";

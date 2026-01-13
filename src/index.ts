@@ -7,6 +7,7 @@ import { RegionalAmbassador } from "./models/RegionalAmbassador";
 import { RegionalAmbassadorMap } from "./models/RegionalAmbassadorMap";
 
 import { getEvents } from "./actions/fetchEvents";
+import { getCountries } from "./models/country";
 import { handleFileUpload } from "./actions/uploadCSV";
 import { importProspectiveEvents } from "./actions/importProspectiveEvents";
 import { extractEventTeamsTableData } from "./models/EventTeamsTable";
@@ -30,7 +31,7 @@ import { saveCapacityLimits, validateCapacityLimits } from "./actions/configureC
 import { CapacityLimits } from "./models/CapacityLimits";
 import { SelectionState, createSelectionState } from "./models/SelectionState";
 import { selectEventTeamRow, selectMapEvent, selectProspectRow, applyDeferredTableSelection, highlightProspectTableRow, scrollToProspectTableRow } from "./actions/tableMapNavigation";
-import { getMarkerMap, getHighlightLayer, getMap, setMarkerClickHandler } from "./actions/populateMap";
+import { getMarkerMap, getHighlightLayer, getMap, setMarkerClickHandler, populateMap } from "./actions/populateMap";
 import { setRowClickHandler, setReallocateButtonHandler } from "./actions/populateEventTeamsTable";
 import { setProspectRowClickHandler } from "./actions/populateProspectsTable";
 import { setEventTeamsTabVisibleCallback, setIssuesTabVisibleCallback, setProspectsTabVisibleCallback } from "./utils/tabs";
@@ -630,6 +631,8 @@ async function ambassy() {
   const csvFileInput = document.getElementById("csvFileInput");
   const mapContainer = document.getElementById("mapContainer");
   eventDetails = await getEvents();
+  // Preload countries to populate cache
+  await getCountries();
   if (!introduction || !ambassy || !uploadPrompt || !csvFileInput || !mapContainer) {
     console.error("Required elements not found");
     return;
@@ -733,6 +736,11 @@ function refreshProspectsTable(): void {
   const prospectsList = new ProspectiveEventList(prospects);
 
   populateProspectsTable(prospectsList, eventAmbassadors, regionalAmbassadors, log);
+
+  // Also refresh the map to show updated prospects
+  if (eventDetails && eventTeamsTableData) {
+    populateMap(eventTeamsTableData, eventDetails, eventAmbassadors, regionalAmbassadors, prospects);
+  }
 }
 
 function onIssueSelect(issue: EventIssue): void {

@@ -1,3 +1,5 @@
+import { getCountries } from "../models/country";
+
 export function normalizeEventName(name: string): string {
   return name
     .toLowerCase()
@@ -56,58 +58,24 @@ export function generateUrlFriendlyName(eventName: string): string {
 /**
  * Suggests a parkrun URL based on event name and country
  */
-export function suggestParkrunUrl(eventName: string, countryCode: number = 13): string {
+export async function suggestParkrunUrl(eventName: string, countryCode: number = 0): Promise<string> {
   const urlName = generateUrlFriendlyName(eventName);
+  const countries = await getCountries();
 
-  // Map country codes to domains (based on parkrun country codes)
-  const countryDomains: Record<number, string> = {
-    13: 'com.au',    // Australia
-    1: 'co.uk',      // United Kingdom
-    2: 'com',        // United States
-    3: 'ca',         // Canada
-    4: 'co.za',      // South Africa
-    5: 'de',         // Germany
-    6: 'fr',         // France
-    7: 'it',         // Italy
-    8: 'co.nz',      // New Zealand
-    9: 'pl',         // Poland
-    10: 'se',        // Sweden
-    11: 'no',        // Norway
-    12: 'dk',        // Denmark
-    14: 'ie',        // Ireland
-    15: 'fi',        // Finland
-    16: 'nl',        // Netherlands
-    17: 'sg',        // Singapore
-    18: 'my',        // Malaysia
-    19: 'jp',        // Japan
-    20: 'at',        // Austria
-    21: 'be',        // Belgium
-    22: 'lu',        // Luxembourg
-    23: 'ru',        // Russia
-    24: 'cz',        // Czech Republic
-    25: 'sk',        // Slovakia
-    26: 'si',        // Slovenia
-    27: 'ee',        // Estonia
-    28: 'lv',        // Latvia
-    29: 'lt',        // Lithuania
-    30: 'hu',        // Hungary
-    31: 'ro',        // Romania
-    32: 'bg',        // Bulgaria
-    33: 'hr',        // Croatia
-    34: 'ba',        // Bosnia and Herzegovina
-    35: 'me',        // Montenegro
-    36: 'mk',        // North Macedonia
-    37: 'al',        // Albania
-    38: 'gr',        // Greece
-    39: 'tr',        // Turkey
-    40: 'pt',        // Portugal
-    41: 'es',        // Spain
-    42: 'mt',        // Malta
-    43: 'is',        // Iceland
-    44: 'ch',        // Switzerland
-    45: 'li',        // Liechtenstein
-  };
+  // Look up domain from country code dynamically
+  const country = countries[countryCode.toString()];
+  let domain = 'com.au'; // Default to Australia
+  
+  if (country && country.url) {
+    // Extract domain from URL (e.g., "www.parkrun.com.au" -> "com.au")
+    domain = country.url.replace(/^www\.parkrun\./, '');
+  } else if (countryCode === 0) {
+    // If no country code provided, default to Australia (code 3)
+    const australia = countries["3"];
+    if (australia && australia.url) {
+      domain = australia.url.replace(/^www\.parkrun\./, '');
+    }
+  }
 
-  const domain = countryDomains[countryCode] || 'com.au'; // Default to Australia
   return `https://www.parkrun.${domain}/${urlName}/`;
 }

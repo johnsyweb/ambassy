@@ -14,8 +14,19 @@ describe("exportState", () => {
     it("should create ApplicationState blob from localStorage data", () => {
       const mockData = {
         eventAmbassadors: [["EA1", { name: "Test EA", events: [] }]],
-        eventTeams: [["Event1", { eventShortName: "Event1", eventAmbassador: "EA1", eventDirectors: [] }]],
-        regionalAmbassadors: [["REA1", { name: "Test REA", state: "VIC", supportsEAs: [] }]],
+        eventTeams: [
+          [
+            "Event1",
+            {
+              eventShortName: "Event1",
+              eventAmbassador: "EA1",
+              eventDirectors: [],
+            },
+          ],
+        ],
+        regionalAmbassadors: [
+          ["REA1", { name: "Test REA", state: "VIC", supportsEAs: [] }],
+        ],
         changesLog: [],
       };
 
@@ -35,7 +46,9 @@ describe("exportState", () => {
       (loadFromStorage as jest.Mock)
         .mockReturnValueOnce([["EA1", { name: "Test EA", events: [] }]])
         .mockReturnValueOnce(null)
-        .mockReturnValueOnce([["REA1", { name: "Test REA", state: "VIC", supportsEAs: [] }]])
+        .mockReturnValueOnce([
+          ["REA1", { name: "Test REA", state: "VIC", supportsEAs: [] }],
+        ])
         .mockReturnValueOnce([]);
 
       expect(() => exportApplicationState()).toThrow();
@@ -63,4 +76,3 @@ describe("exportState", () => {
     });
   });
 });
-

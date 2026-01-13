@@ -13,6 +13,7 @@ import { CapacityStatus } from '../models/CapacityStatus';
 import { ReallocationSuggestion } from '../models/ReallocationSuggestion';
 import { geocodeAddress } from '../utils/geography';
 import { saveProspectiveEvents } from './persistProspectiveEvents';
+import { formatCoordinate, Coordinate, createCoordinate } from '../models/Coordinate';
 
 // Forward declaration - will be set by index.ts
 let refreshUIAfterReallocation: (() => void) | null = null;
@@ -136,9 +137,9 @@ function createProspectRow(
   // Coordinates
   const coordinatesCell = document.createElement('td');
   if (prospect.coordinates) {
-    const [lng, lat] = prospect.coordinates;
-    coordinatesCell.textContent = `${lat.toFixed(6)}, ${lng.toFixed(6)}`;
-    coordinatesCell.title = `Latitude: ${lat}, Longitude: ${lng}`;
+    const { formatCoordinate } = require('../models/Coordinate');
+    coordinatesCell.textContent = formatCoordinate(prospect.coordinates);
+    coordinatesCell.title = formatCoordinate(prospect.coordinates);
   } else {
     coordinatesCell.textContent = '';
   }
@@ -280,7 +281,7 @@ function generateProspectReallocationSuggestions(
 
     const capacityStatus = ambassador.capacityStatus || CapacityStatus.WITHIN;
     let score = 100 - totalCount * 5; // Higher score for lower allocation counts
-    let reasons = [`Currently has ${totalCount} total allocations`];
+    const reasons = [`Currently has ${totalCount} total allocations`];
 
     // Adjust score based on capacity status
     if (capacityStatus === CapacityStatus.UNDER) {
@@ -334,7 +335,7 @@ function showProspectLocationDialog(prospect: any, prospects: ProspectiveEventLi
 
   const currentLocation = document.createElement('p');
   currentLocation.textContent = prospect.coordinates
-    ? `Current coordinates: ${prospect.coordinates[1].toFixed(6)}, ${prospect.coordinates[0].toFixed(6)}`
+    ? `Current coordinates: ${formatCoordinate(prospect.coordinates)}`
     : 'No coordinates set';
   currentLocation.style.fontSize = '0.9em';
   currentLocation.style.color = '#666';
@@ -456,7 +457,7 @@ function showProspectLocationDialog(prospect: any, prospects: ProspectiveEventLi
 
     navigator.geolocation.getCurrentPosition(
       (position) => {
-        const coordinates: [number, number] = [position.coords.longitude, position.coords.latitude];
+        const coordinates = createCoordinate(position.coords.latitude, position.coords.longitude);
         updateProspectLocation(prospect, prospects, coordinates, 'Set from browser geolocation');
         document.body.removeChild(dialog);
       },
@@ -489,7 +490,7 @@ function showProspectLocationDialog(prospect: any, prospects: ProspectiveEventLi
 function updateProspectLocation(
   prospect: any,
   prospects: ProspectiveEventList,
-  coordinates: [number, number],
+  coordinates: Coordinate,
   source: string
 ): void {
   prospects.update({

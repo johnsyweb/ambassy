@@ -3,6 +3,8 @@ import { EventDetails } from "@models/EventDetails";
 import { EventDetailsMap } from "@models/EventDetailsMap";
 import { LogEntry } from "@models/LogEntry";
 import { geocodeAddress } from "../utils/geocoding";
+import { fromGeoJSONArray, formatCoordinate, toGeoJSONArray, createCoordinate } from "../models/Coordinate";
+import { getCountryCodeFromCoordinate, getCountryCodeFromDomain } from "../models/country";
 
 export function resolveIssueWithEvent(
   issue: EventIssue,
@@ -19,10 +21,10 @@ export function resolveIssueWithEvent(
     throw new Error("Event details must have valid coordinates");
   }
 
-  const longitude = eventDetails.geometry.coordinates[0];
-  const latitude = eventDetails.geometry.coordinates[1];
-
-  if (longitude < -180 || longitude > 180 || latitude < -90 || latitude > 90) {
+  // Validation handled by fromGeoJSONArray (ONLY place for coordinate validation)
+  try {
+    fromGeoJSONArray(eventDetails.geometry.coordinates);
+  } catch {
     throw new Error("Event details must have valid coordinates");
   }
 
@@ -53,16 +55,11 @@ export function resolveIssueWithPin(
   eventDetailsMap: EventDetailsMap,
   log: LogEntry[]
 ): void {
-  const [longitude, latitude] = coordinates;
-
-  if (
-    typeof longitude !== "number" ||
-    typeof latitude !== "number" ||
-    longitude < -180 ||
-    longitude > 180 ||
-    latitude < -90 ||
-    latitude > 90
-  ) {
+  // Validation handled by fromGeoJSONArray (ONLY place for coordinate validation)
+  let coord;
+  try {
+    coord = fromGeoJSONArray(coordinates);
+  } catch {
     throw new Error("Invalid coordinates");
   }
 
@@ -71,7 +68,7 @@ export function resolveIssueWithPin(
     type: "Feature",
     geometry: {
       type: "Point",
-      coordinates: [longitude, latitude],
+      coordinates: toGeoJSONArray(coord),
     },
     properties: {
       eventname: issue.eventShortName,
@@ -91,7 +88,7 @@ export function resolveIssueWithPin(
     type: "Issue Resolved",
     event: issue.eventShortName,
     oldValue: "Missing coordinates",
-    newValue: `Manual pin placement: (${latitude}, ${longitude})`,
+    newValue: `Manual pin placement: ${formatCoordinate(coord)}`,
     timestamp: Date.now(),
   };
 
@@ -140,7 +137,7 @@ export async function resolveIssueWithAddress(
         EventLongName: extractedMetadata.EventLongName || issue.eventShortName,
         EventShortName: issue.eventShortName,
         LocalisedEventLongName: null,
-        countrycode: extractedMetadata.countrycode || 13, // Default to Australia
+        countrycode: extractedMetadata.countrycode || await getCountryCodeFromCoordinate(createCoordinate(lat, lng)) || 0,
         seriesid: extractedMetadata.seriesid || 1, // Default to 5km
         EventLocation: "",
       },
@@ -183,30 +180,8 @@ async function extractMetadataFromUrl(url: string): Promise<{
 
   const [, domain, eventSlug] = urlMatch;
 
-  // Map domain to country code
-  const domainToCountry: Record<string, number> = {
-    'com.au': 13,  // Australia
-    'co.uk': 1,    // United Kingdom
-    'com': 2,      // United States
-    'ca': 3,       // Canada
-    'co.za': 4,    // South Africa
-    'de': 5,       // Germany
-    'fr': 6,       // France
-    'it': 7,       // Italy
-    'co.nz': 8,    // New Zealand
-    'pl': 9,       // Poland
-    'se': 10,      // Sweden
-    'no': 11,      // Norway
-    'dk': 12,      // Denmark
-    'ie': 14,      // Ireland
-    'fi': 15,      // Finland
-    'nl': 16,      // Netherlands
-    'sg': 17,      // Singapore
-    'my': 18,      // Malaysia
-    'jp': 19,      // Japan
-  };
-
-  const countrycode = domainToCountry[domain] || 13; // Default to Australia
+  // Look up country code from domain dynamically
+  const countrycode = await getCountryCodeFromDomain(domain) || 0;
 
   // Determine series (5km vs juniors)
   const seriesid = eventSlug.endsWith('-juniors') ? 2 : 1; // 1 = 5km, 2 = juniors

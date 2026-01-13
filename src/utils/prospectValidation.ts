@@ -7,6 +7,7 @@
 
 import { ProspectiveEvent } from '../models/ProspectiveEvent';
 import { ValidationResult, ValidationError } from '../types/ProspectiveEventTypes';
+import { isValidCoordinate, formatCoordinate } from '../models/Coordinate';
 
 /**
  * Validate a prospective event
@@ -68,26 +69,13 @@ export function validateProspectiveEvent(event: ProspectiveEvent): ValidationRes
     });
   }
 
-  // Coordinates validation
+  // Coordinates validation - delegate to Coordinate module (ONLY place for validation)
   if (event.coordinates) {
-    const [lng, lat] = event.coordinates;
-    if (typeof lng !== 'number' || typeof lat !== 'number') {
+    if (!isValidCoordinate(event.coordinates)) {
       errors.push({
         field: 'coordinates',
-        message: 'Coordinates must be numeric values',
-        value: event.coordinates
-      });
-    } else if (lng < -180 || lng > 180) {
-      errors.push({
-        field: 'coordinates',
-        message: 'Longitude must be between -180 and 180',
-        value: lng
-      });
-    } else if (lat < -90 || lat > 90) {
-      errors.push({
-        field: 'coordinates',
-        message: 'Latitude must be between -90 and 90',
-        value: lat
+        message: 'Invalid coordinate values',
+        value: formatCoordinate(event.coordinates)
       });
     }
   }

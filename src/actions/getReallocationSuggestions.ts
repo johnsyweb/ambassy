@@ -16,18 +16,20 @@ export function getReallocationSuggestions(
   eventAmbassadors: EventAmbassadorMap,
   eventDetails: EventDetailsMap,
   limits: CapacityLimits,
-  regionalAmbassadors: RegionalAmbassadorMap
+  regionalAmbassadors: RegionalAmbassadorMap,
 ): ReallocationSuggestion[] {
   const eventData = eventTeamsTableData.get(eventShortName);
-  
+
   if (!eventData) {
     throw new Error(`Event '${eventShortName}' not found in table data`);
   }
 
   const currentAmbassador = eventData.eventAmbassador;
-  
+
   if (!currentAmbassador || currentAmbassador.trim() === "") {
-    throw new Error(`Event '${eventShortName}' is not currently assigned to any ambassador`);
+    throw new Error(
+      `Event '${eventShortName}' is not currently assigned to any ambassador`,
+    );
   }
 
   if (!eventAmbassadors.has(currentAmbassador)) {
@@ -40,6 +42,6 @@ export function getReallocationSuggestions(
     eventAmbassadors,
     eventDetails,
     limits,
-    regionalAmbassadors
+    regionalAmbassadors,
   );
 }

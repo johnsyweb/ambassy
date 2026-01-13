@@ -4,15 +4,18 @@
  * Handles the import pipeline for prospective events CSV files.
  */
 
-import { parseProspectiveEventsCSV } from '../parsers/parseProspectiveEvents';
-import { ProspectiveEvent } from '../models/ProspectiveEvent';
-import { ProspectiveEventList } from '../models/ProspectiveEventList';
-import { CSVParseResult } from '../types/ProspectiveEventTypes';
-import { EventAmbassadorMap } from '../models/EventAmbassadorMap';
-import { RegionalAmbassadorMap } from '../models/RegionalAmbassadorMap';
-import { geocodeProspectiveEvent } from '../utils/geography';
-import { levenshteinDistance } from '../utils/fuzzyMatch';
-import { saveProspectiveEvents, loadProspectiveEvents } from './persistProspectiveEvents';
+import { parseProspectiveEventsCSV } from "../parsers/parseProspectiveEvents";
+import { ProspectiveEvent } from "../models/ProspectiveEvent";
+import { ProspectiveEventList } from "../models/ProspectiveEventList";
+import { CSVParseResult } from "../types/ProspectiveEventTypes";
+import { EventAmbassadorMap } from "../models/EventAmbassadorMap";
+import { RegionalAmbassadorMap } from "../models/RegionalAmbassadorMap";
+import { geocodeProspectiveEvent } from "../utils/geography";
+import { levenshteinDistance } from "../utils/fuzzyMatch";
+import {
+  saveProspectiveEvents,
+  loadProspectiveEvents,
+} from "./persistProspectiveEvents";
 
 /**
  * Import prospective events from a CSV file
@@ -21,7 +24,12 @@ export async function importProspectiveEvents(
   csvContent: string,
   eventAmbassadors: EventAmbassadorMap,
   regionalAmbassadors: RegionalAmbassadorMap,
-  onProgress?: (progress: { current: number; total: number; currentEvent?: string; stage?: string }) => void
+  onProgress?: (progress: {
+    current: number;
+    total: number;
+    currentEvent?: string;
+    stage?: string;
+  }) => void,
 ): Promise<{
   success: boolean;
   imported: number;
@@ -37,7 +45,7 @@ export async function importProspectiveEvents(
     success: false,
     imported: 0,
     errors: [],
-    warnings: []
+    warnings: [],
   };
 
   try {
@@ -45,7 +53,9 @@ export async function importProspectiveEvents(
     const parseResult: CSVParseResult = parseProspectiveEventsCSV(csvContent);
 
     // Add parse errors to result
-    result.errors.push(...parseResult.errors.map(err => `Row ${err.row}: ${err.message}`));
+    result.errors.push(
+      ...parseResult.errors.map((err) => `Row ${err.row}: ${err.message}`),
+    );
     result.warnings.push(...parseResult.warnings);
 
     // If there are parse errors, don't proceed with import
@@ -62,26 +72,41 @@ export async function importProspectiveEvents(
     let processedCount = 0;
     const totalEvents = parseResult.events.length;
 
-    onProgress?.({ current: 0, total: totalEvents, stage: 'Processing events...' });
+    onProgress?.({
+      current: 0,
+      total: totalEvents,
+      stage: "Processing events...",
+    });
 
     for (const event of parseResult.events) {
       onProgress?.({
         current: processedCount,
         total: totalEvents,
         currentEvent: event.prospectEvent,
-        stage: 'Geocoding and validating...'
+        stage: "Geocoding and validating...",
       });
 
       try {
-        const processed = await processProspectiveEvent(event, eventAmbassadors, regionalAmbassadors);
+        const processed = await processProspectiveEvent(
+          event,
+          eventAmbassadors,
+          regionalAmbassadors,
+        );
         processedEvents.push(processed.event);
 
         if (processed.warnings.length > 0) {
-          processingWarnings.push(...processed.warnings.map(w => `Event "${event.prospectEvent}": ${w}`));
+          processingWarnings.push(
+            ...processed.warnings.map(
+              (w) => `Event "${event.prospectEvent}": ${w}`,
+            ),
+          );
         }
       } catch (error) {
-        const errorMessage = error instanceof Error ? error.message : 'Unknown processing error';
-        processingErrors.push(`Event "${event.prospectEvent}": ${errorMessage}`);
+        const errorMessage =
+          error instanceof Error ? error.message : "Unknown processing error";
+        processingErrors.push(
+          `Event "${event.prospectEvent}": ${errorMessage}`,
+        );
       }
 
       processedCount++;
@@ -89,13 +114,17 @@ export async function importProspectiveEvents(
         current: processedCount,
         total: totalEvents,
         currentEvent: event.prospectEvent,
-        stage: 'Processing events...'
+        stage: "Processing events...",
       });
     }
 
-    onProgress?.({ current: totalEvents, total: totalEvents, stage: 'Saving data...' });
+    onProgress?.({
+      current: totalEvents,
+      total: totalEvents,
+      stage: "Saving data...",
+    });
 
-      // Add processing errors and warnings (excluding deduplication warnings which come later)
+    // Add processing errors and warnings (excluding deduplication warnings which come later)
     result.errors.push(...processingErrors);
 
     // If we have processed events and no critical errors, save them
@@ -104,16 +133,18 @@ export async function importProspectiveEvents(
 
       // Deduplicate prospects based on prospectEvent, country, and state
       const existingMap = new Map<string, any>();
-      existingEvents.forEach(event => {
+      existingEvents.forEach((event) => {
         const key = `${event.prospectEvent}|${event.country}|${event.state}`;
         existingMap.set(key, event);
       });
 
       // Filter out duplicates from processed events
-      const newEvents = processedEvents.filter(event => {
+      const newEvents = processedEvents.filter((event) => {
         const key = `${event.prospectEvent}|${event.country}|${event.state}`;
         if (existingMap.has(key)) {
-          processingWarnings.push(`Duplicate prospect skipped: "${event.prospectEvent}" (${event.country}, ${event.state})`);
+          processingWarnings.push(
+            `Duplicate prospect skipped: "${event.prospectEvent}" (${event.country}, ${event.state})`,
+          );
           return false;
         }
         return true;
@@ -121,15 +152,18 @@ export async function importProspectiveEvents(
 
       const updatedEvents = new ProspectiveEventList([
         ...existingEvents,
-        ...newEvents
+        ...newEvents,
       ]);
 
       // Only count newly added events
       result.imported = newEvents.length;
 
       // Update EventAmbassador prospectiveEvents arrays
-      newEvents.forEach(event => {
-        if (event.eventAmbassador && event.ambassadorMatchStatus === 'matched') {
+      newEvents.forEach((event) => {
+        if (
+          event.eventAmbassador &&
+          event.ambassadorMatchStatus === "matched"
+        ) {
           const ea = eventAmbassadors.get(event.eventAmbassador);
           if (ea) {
             if (!ea.prospectiveEvents) {
@@ -154,9 +188,10 @@ export async function importProspectiveEvents(
       result.success = true;
       result.imported = 0;
     }
-
   } catch (error) {
-    result.errors.push(`Import failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    result.errors.push(
+      `Import failed: ${error instanceof Error ? error.message : "Unknown error"}`,
+    );
     result.success = false;
   }
 
@@ -169,35 +204,46 @@ export async function importProspectiveEvents(
 async function processProspectiveEvent(
   event: ProspectiveEvent,
   eventAmbassadors: EventAmbassadorMap,
-  regionalAmbassadors: RegionalAmbassadorMap
+  regionalAmbassadors: RegionalAmbassadorMap,
 ): Promise<{
   event: ProspectiveEvent;
   warnings: string[];
 }> {
   const warnings: string[] = [];
-  let processedEvent = { ...event };
+  const processedEvent = { ...event };
 
   // Attempt geocoding
   try {
-    const geocodingResult = await geocodeProspectiveEvent(event.prospectEvent, event.country, event.state);
+    const geocodingResult = await geocodeProspectiveEvent(
+      event.prospectEvent,
+      event.country,
+      event.state,
+    );
     if (geocodingResult.success && geocodingResult.coordinates) {
       processedEvent.coordinates = geocodingResult.coordinates;
-      processedEvent.geocodingStatus = 'success';
+      processedEvent.geocodingStatus = "success";
     } else {
-      processedEvent.geocodingStatus = 'failed';
-      warnings.push(`Geocoding failed: ${geocodingResult.error || 'Unknown error'}`);
+      processedEvent.geocodingStatus = "failed";
+      warnings.push(
+        `Geocoding failed: ${geocodingResult.error || "Unknown error"}`,
+      );
     }
   } catch (error) {
-    processedEvent.geocodingStatus = 'failed';
-    warnings.push(`Geocoding error: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    processedEvent.geocodingStatus = "failed";
+    warnings.push(
+      `Geocoding error: ${error instanceof Error ? error.message : "Unknown error"}`,
+    );
   }
 
   // Match ambassador
   try {
-    const matchResult = matchEventAmbassador(event.eventAmbassador, eventAmbassadors);
+    const matchResult = matchEventAmbassador(
+      event.eventAmbassador,
+      eventAmbassadors,
+    );
     if (matchResult.matched) {
       processedEvent.eventAmbassador = matchResult.matchedAmbassador!;
-      processedEvent.ambassadorMatchStatus = 'matched';
+      processedEvent.ambassadorMatchStatus = "matched";
 
       // Set regional ambassador from the matched EA
       const matchedEA = eventAmbassadors.get(matchResult.matchedAmbassador!);
@@ -206,21 +252,25 @@ async function processProspectiveEvent(
         // It's inferred from the EA relationship
       }
     } else {
-      processedEvent.ambassadorMatchStatus = 'unmatched';
-      if (event.eventAmbassador.trim() === '') {
-        warnings.push('Event Ambassador not specified - can be assigned later');
+      processedEvent.ambassadorMatchStatus = "unmatched";
+      if (event.eventAmbassador.trim() === "") {
+        warnings.push("Event Ambassador not specified - can be assigned later");
       } else {
-        warnings.push(`Ambassador not found: "${event.eventAmbassador}". Closest matches: ${matchResult.suggestions.join(', ')}`);
+        warnings.push(
+          `Ambassador not found: "${event.eventAmbassador}". Closest matches: ${matchResult.suggestions.join(", ")}`,
+        );
       }
     }
   } catch (error) {
-    processedEvent.ambassadorMatchStatus = 'unmatched';
-    warnings.push(`Ambassador matching error: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    processedEvent.ambassadorMatchStatus = "unmatched";
+    warnings.push(
+      `Ambassador matching error: ${error instanceof Error ? error.message : "Unknown error"}`,
+    );
   }
 
   return {
     event: processedEvent,
-    warnings
+    warnings,
   };
 }
 
@@ -229,39 +279,47 @@ async function processProspectiveEvent(
  */
 function matchEventAmbassador(
   ambassadorName: string,
-  eventAmbassadors: EventAmbassadorMap
+  eventAmbassadors: EventAmbassadorMap,
 ): {
   matched: boolean;
   matchedAmbassador?: string;
   suggestions: string[];
 } {
-  const normalizedInput = ambassadorName.replace(/\s+/g, '').toLowerCase();
+  const normalizedInput = ambassadorName.replace(/\s+/g, "").toLowerCase();
   const ambassadors = Array.from(eventAmbassadors.keys());
 
   // First try exact match (case insensitive, spaces removed)
-  const exactMatch = ambassadors.find(name =>
-    name.replace(/\s+/g, '').toLowerCase() === normalizedInput
+  const exactMatch = ambassadors.find(
+    (name) => name.replace(/\s+/g, "").toLowerCase() === normalizedInput,
   );
   if (exactMatch) {
     return {
       matched: true,
       matchedAmbassador: exactMatch,
-      suggestions: []
+      suggestions: [],
     };
   }
 
   // Try fuzzy matching
-  const fuzzyResults = ambassadors.map(name => ({
-    name,
-    score: 1 - (levenshteinDistance(normalizedInput, name.replace(/\s+/g, '').toLowerCase()) / Math.max(normalizedInput.length, name.length))
-  })).filter(result => result.score > 0.6) // Minimum similarity threshold
+  const fuzzyResults = ambassadors
+    .map((name) => ({
+      name,
+      score:
+        1 -
+        levenshteinDistance(
+          normalizedInput,
+          name.replace(/\s+/g, "").toLowerCase(),
+        ) /
+          Math.max(normalizedInput.length, name.length),
+    }))
+    .filter((result) => result.score > 0.6) // Minimum similarity threshold
     .sort((a, b) => b.score - a.score);
 
   if (fuzzyResults.length > 0) {
     return {
       matched: true,
       matchedAmbassador: fuzzyResults[0].name,
-      suggestions: fuzzyResults.slice(1, 4).map(r => r.name) // Top 3 additional suggestions
+      suggestions: fuzzyResults.slice(1, 4).map((r) => r.name), // Top 3 additional suggestions
     };
   }
 
@@ -269,6 +327,6 @@ function matchEventAmbassador(
   const suggestions = ambassadors.slice(0, 5); // First 5 as suggestions
   return {
     matched: false,
-    suggestions
+    suggestions,
   };
 }

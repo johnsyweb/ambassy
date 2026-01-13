@@ -4,6 +4,7 @@ import { highlightEventsOnMap, centerMapOnEvents } from "../utils/mapNavigation"
 import { EventDetailsMap } from "../models/EventDetailsMap";
 import { updateReallocateButtonStates } from "./populateEventTeamsTable";
 import { ProspectiveEventList } from "../models/ProspectiveEventList";
+import { toLeafletArray } from "../models/Coordinate";
 import L from "leaflet";
 
 export function selectEventTeamRow(
@@ -143,10 +144,9 @@ export function selectProspectRow(
   // Since SelectionState doesn't have a prospectId field, we'll use a special marker
   state.selectedEventShortName = `prospect:${prospectId}`;
 
-  if (map) {
+  if (map && prospect.coordinates) {
     // Center the map on the prospect coordinates
-    const [lng, lat] = prospect.coordinates;
-    map.setView([lat, lng], 13); // Zoom level 13 for good detail
+    map.setView(toLeafletArray(prospect.coordinates), 13); // Zoom level 13 for good detail
   }
 
   // Highlight the table row

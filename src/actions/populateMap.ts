@@ -1,5 +1,4 @@
-import { countries } from "@models/country";
-import { EventDetailsMap } from "@models/EventDetailsMap";
+import { EventDetailsMap, eventDetailsToCoordinate } from "@models/EventDetailsMap";
 import {
   regionalAmbassadorsFrom,
   eventAmbassadorsFrom,
@@ -8,6 +7,7 @@ import {
 import { ProspectiveEvent } from "@models/ProspectiveEvent";
 import { EventAmbassadorMap } from "@models/EventAmbassadorMap";
 import { RegionalAmbassadorMap } from "@models/RegionalAmbassadorMap";
+import { Coordinate, toLeafletArray, toGeoJSONArray, getLatitude, getLongitude } from "@models/Coordinate";
 
 import * as d3GeoVoronoi from "d3-geo-voronoi";
 import L from "leaflet";
@@ -34,17 +34,17 @@ export function populateMap(
   const eaNames = eventAmbassadorsFrom(eventTeamsTableData);
   const raColorMap = assignColorsToNames(raNames);
   const eaColorMap = assignColorsToNames(eaNames);
-  const countryCode = country(eventTeamsTableData);
 
   console.log("Map setup:", {
     raNames,
     eaNames,
-    countryCode,
     raColorMap: Object.fromEntries(raColorMap),
     eaColorMap: Object.fromEntries(eaColorMap)
   });
 
-  const {map, markersLayer, polygonsLayer} = setupMapView(countryCode);
+  // Calculate event bounds for map centering
+  const eventBounds = calculateEventBounds(eventTeamsTableData, eventDetails);
+  const {map, markersLayer, polygonsLayer} = setupMapView(eventBounds);
 
   markersLayer.clearLayers();
   polygonsLayer.clearLayers();
@@ -72,13 +72,15 @@ export function populateMap(
   eventDetails.forEach((event, eventName) => {
     const data = eventTeamsTableData.get(eventName);
     if (data) {
-      ambassadorEventCoords.push([event.geometry.coordinates[0], event.geometry.coordinates[1]]);
+      const coord = eventDetailsToCoordinate(event);
+      ambassadorEventCoords.push(toLeafletArray(coord));
     }
   });
 
   // Calculate bounding box with some padding
+  // Note: toLeafletArray returns [lat, lng]
   let minLng = Infinity, maxLng = -Infinity, minLat = Infinity, maxLat = -Infinity;
-  ambassadorEventCoords.forEach(([lng, lat]) => {
+  ambassadorEventCoords.forEach(([lat, lng]) => {
     minLng = Math.min(minLng, lng);
     maxLng = Math.max(maxLng, lng);
     minLat = Math.min(minLat, lat);
@@ -112,8 +114,9 @@ export function populateMap(
         <strong>Regional Ambassador(s):</strong> ${data.regionalAmbassador}<br>
       `;
 
+      const coord = eventDetailsToCoordinate(event);
       constrainingEvents.push({
-        coords: [event.geometry.coordinates[0], event.geometry.coordinates[1]],
+        coords: toGeoJSONArray(coord), // Voronoi uses GeoJSON format [lng, lat]
         isConstraining: false,
         raColor,
         tooltip
@@ -134,8 +137,9 @@ export function populateMap(
     };
 
     eventDetails.forEach((event, eventName) => {
-      const lng = event.geometry.coordinates[0];
-      const lat = event.geometry.coordinates[1];
+      const coord = eventDetailsToCoordinate(event);
+      const lat = getLatitude(coord);
+      const lng = getLongitude(coord);
       const hasAmbassador = eventTeamsTableData.has(eventName);
 
       // Include as constraining point if it's near ambassador events but doesn't have an ambassador
@@ -144,7 +148,7 @@ export function populateMap(
           lng >= expandedBounds.minLng && lng <= expandedBounds.maxLng &&
           lat >= expandedBounds.minLat && lat <= expandedBounds.maxLat) {
         constrainingEvents.push({
-          coords: [lng, lat],
+          coords: toGeoJSONArray(coord), // Voronoi uses GeoJSON format [lng, lat]
           isConstraining: true
         });
       }
@@ -167,9 +171,8 @@ export function populateMap(
     eventDetails.forEach((event, eventName) => {
       const data = eventTeamsTableData.get(eventName);
       if (data) {
-        let lng = event.geometry.coordinates[0];
-        let lat = event.geometry.coordinates[1];
-
+        const coord = eventDetailsToCoordinate(event);
+        const [lng, lat] = toGeoJSONArray(coord); // Voronoi uses GeoJSON format [lng, lat]
 
         const raColor = raColorMap.get(data.regionalAmbassador) ?? DEFAULT_POLYGON_COLOUR;
         const tooltip = `
@@ -184,8 +187,9 @@ export function populateMap(
   }
 
   eventDetails.forEach((event, eventName) => {
-    const latitude = event.geometry.coordinates[1];
-    const longitude = event.geometry.coordinates[0];
+    const coord = eventDetailsToCoordinate(event);
+    const latitude = getLatitude(coord);
+    const longitude = getLongitude(coord);
     const data = eventTeamsTableData.get(eventName);
     processedEvents++;
 
@@ -252,7 +256,6 @@ export function populateMap(
 
     prospectiveEvents.forEach((prospect) => {
       if (prospect.coordinates && prospect.geocodingStatus === 'success') {
-        const [longitude, latitude] = prospect.coordinates;
 
         // Get the EA's color for the prospective event marker
         const eaColor = prospect.eventAmbassador
@@ -260,7 +263,7 @@ export function populateMap(
           : DEFAULT_EVENT_COLOUR; // Default color for unassigned prospects
 
         // Use diamond shape with EA's color
-        const marker = L.marker([latitude, longitude], {
+        const marker = L.marker(toLeafletArray(prospect.coordinates), {
           icon: L.divIcon({
             className: 'prospective-event-marker',
             html: `<span style="color: ${eaColor}; font-size: 16px;">◆</span>`,
@@ -294,7 +297,8 @@ export function populateMap(
     prospectiveEvents.forEach((prospect) => {
       if (prospect.coordinates && prospect.geocodingStatus === 'success' && prospect.eventAmbassador) {
         prospectsInVoronoi++;
-        const [lng, lat] = prospect.coordinates;
+        const coord = prospect.coordinates;
+        const [lng, lat] = toGeoJSONArray(coord); // Voronoi uses GeoJSON format [lng, lat]
 
         // Get the RA color for the voronoi polygon
         const ea = eventAmbassadors.get(prospect.eventAmbassador);
@@ -369,29 +373,51 @@ export function populateMap(
   _layersControl.addTo(map!);
 }
 
-function setupMapView(countryCode: number) {
+/**
+ * Calculate bounds from events allocated to Event Ambassadors
+ */
+function calculateEventBounds(
+  eventTeamsTableData: EventTeamsTableDataMap,
+  eventDetails: EventDetailsMap
+): L.LatLngBounds | null {
+  const bounds = new L.LatLngBounds([]);
+  let hasBounds = false;
+
+  eventDetails.forEach((event, eventName) => {
+    const data = eventTeamsTableData.get(eventName);
+    if (data) {
+      const coord = eventDetailsToCoordinate(event);
+      const [lat, lng] = toLeafletArray(coord);
+      bounds.extend([lat, lng]);
+      hasBounds = true;
+    }
+  });
+
+  return hasBounds ? bounds : null;
+}
+
+function setupMapView(eventBounds: L.LatLngBounds | null) {
   if (!_map) {
-    _map = L.map("mapContainer").setView([0, 0], 2);
+    _map = L.map("mapContainer");
     L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
       attribution: "&copy; OpenStreetMap contributors",
     }).addTo(_map);
-    setMapCenterToCountry(_map, countryCode);
+    
+    if (eventBounds) {
+      _map.fitBounds(eventBounds);
+    } else {
+      _map.setView([0, 0], 2); // Default view if no bounds
+    }
+    
     _markersLayer = L.layerGroup();
     _polygonsLayer = L.layerGroup();
     _highlightLayer = L.layerGroup();
     _highlightLayer.addTo(_map);
+  } else if (eventBounds) {
+    // Update bounds if map already exists
+    _map.fitBounds(eventBounds);
   }
   return {map: _map, markersLayer: _markersLayer, polygonsLayer: _polygonsLayer};
-}
-
-
-
-function setMapCenterToCountry(map: L.Map, countryCode: number) {
-  const bounds = countries[countryCode.toString()].bounds;
-  map?.fitBounds([
-    [bounds[1], bounds[0]],
-    [bounds[3], bounds[2]],
-  ]);
 }
 
 function assignColorsToNames(names: string[]): Map<string, string> {
@@ -400,12 +426,6 @@ function assignColorsToNames(names: string[]): Map<string, string> {
     nameColorMap.set(name, colorPalette[index % colorPalette.length]);
   });
   return nameColorMap;
-}
-
-function country(eventTeamsTableData: EventTeamsTableDataMap): number {
-return Math.max(...Array.from(eventTeamsTableData.values())
-  .map((data) => data.eventCountryCode)
-) ?? 1;
 }
 
 // Global variables

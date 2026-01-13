@@ -93,7 +93,7 @@ describe("detectIssues", () => {
       eventTeams,
       eventDetails,
       eventAmbassadors,
-      regionalAmbassadors
+      regionalAmbassadors,
     );
 
     expect(issues).toHaveLength(0);
@@ -104,7 +104,7 @@ describe("detectIssues", () => {
       eventTeams,
       eventDetails,
       eventAmbassadors,
-      regionalAmbassadors
+      regionalAmbassadors,
     );
 
     expect(issues).toHaveLength(2);
@@ -140,12 +140,12 @@ describe("detectIssues", () => {
       eventTeams,
       eventDetails,
       eventAmbassadors,
-      regionalAmbassadors
+      regionalAmbassadors,
     );
 
     expect(issues).toHaveLength(2);
     expect(issues.find((i) => i.eventShortName === "event2")?.issueType).toBe(
-      "missing_details"
+      "missing_details",
     );
   });
 
@@ -156,7 +156,7 @@ describe("detectIssues", () => {
       eventTeams,
       eventDetails,
       eventAmbassadors,
-      regionalAmbassadors
+      regionalAmbassadors,
     );
 
     expect(issues).toHaveLength(0);
@@ -178,12 +178,14 @@ describe("detectIssues", () => {
       eventTeams,
       eventDetails,
       eventAmbassadors,
-      regionalAmbassadors
+      regionalAmbassadors,
     );
 
     expect(issues.length).toBeGreaterThan(1);
     for (let i = 1; i < issues.length; i++) {
-      expect(issues[i].eventShortName >= issues[i - 1].eventShortName).toBe(true);
+      expect(issues[i].eventShortName >= issues[i - 1].eventShortName).toBe(
+        true,
+      );
     }
   });
 });

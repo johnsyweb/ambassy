@@ -1,9 +1,10 @@
-import { countries } from "@models/country";
+import { getCountriesSync } from "@models/country";
 import { EventAmbassadorMap } from "@models/EventAmbassadorMap";
-import { EventDetailsMap } from "@models/EventDetailsMap";
+import { EventDetailsMap, eventDetailsToCoordinate } from "@models/EventDetailsMap";
 import { EventTeamMap } from "@models/EventTeamMap";
 import { RegionalAmbassadorMap } from "@models/RegionalAmbassadorMap";
 import { EventTeamsTableData, EventTeamsTableDataMap } from "./EventTeamsTableData";
+import { formatCoordinate } from "./Coordinate";
 
 export function extractEventTeamsTableData(
   regionalAmbassadors: RegionalAmbassadorMap,
@@ -20,17 +21,19 @@ export function extractEventTeamsTableData(
         const eventTeam = eventTeams.get(eventName);
         const countryCode =
           eventDetails?.properties.countrycode ?? 0;
+        const eventCoordinates = eventDetails 
+          ? formatCoordinate(eventDetailsToCoordinate(eventDetails))
+          : "N/A";
+        
         data.set(eventName, {
           eventShortName: eventName,
           eventDirectors: eventTeam?.eventDirectors.join(", ") ?? "N/A",
           eventAmbassador: ea,
           regionalAmbassador: raName,
-          eventCoordinates:
-            eventDetails?.geometry?.coordinates?.join(", ") ??
-            "N/A",
+          eventCoordinates,
           eventSeries: eventDetails?.properties.seriesid ?? 0,
           eventCountryCode: countryCode,
-          eventCountry: countries[countryCode.toString()]?.url?.split('.').slice(-1)[0] ?? "N/A",
+          eventCountry: getCountriesSync()[countryCode.toString()]?.url?.split('.').slice(-1)[0] ?? "N/A",
         });
       });
     });

@@ -1,3 +1,5 @@
+import { Coordinate, fromNominatimFormat, createCoordinate } from "@models/Coordinate";
+
 /**
  * Calculate the distance between two points on Earth using the Haversine formula.
  * @param lat1 Latitude of first point in degrees
@@ -65,7 +67,7 @@ export async function geocodeAddress(
   address: string
 ): Promise<{
   success: boolean;
-  coordinates?: [number, number];
+  coordinates?: Coordinate;
   error?: string;
 }> {
   try {
@@ -108,18 +110,19 @@ export async function geocodeAddress(
       };
     }
 
-    // Validate coordinate ranges
-    if (lat < -90 || lat > 90 || lon < -180 || lon > 180) {
+    // Validation handled by createCoordinate (ONLY place for coordinate validation)
+    try {
+      const coord = createCoordinate(lat, lon);
+      return {
+        success: true,
+        coordinates: coord
+      };
+    } catch (error) {
       return {
         success: false,
-        error: 'Coordinates out of valid range'
+        error: error instanceof Error ? error.message : 'Coordinates out of valid range'
       };
     }
-
-    return {
-      success: true,
-      coordinates: [lat, lon]
-    };
 
   } catch (error) {
     return {
@@ -138,7 +141,7 @@ export async function geocodeProspectiveEvent(
   state: string
 ): Promise<{
   success: boolean;
-  coordinates?: [number, number];
+  coordinates?: Coordinate;
   error?: string;
 }> {
   try {
@@ -173,28 +176,19 @@ export async function geocodeProspectiveEvent(
     }
 
     const result = results[0];
-    const lat = parseFloat(result.lat);
-    const lon = parseFloat(result.lon);
-
-    if (isNaN(lat) || isNaN(lon)) {
+    
+    try {
+      const coord = fromNominatimFormat({ lat: parseFloat(result.lat), lon: parseFloat(result.lon) });
+      return {
+        success: true,
+        coordinates: coord
+      };
+    } catch (error) {
       return {
         success: false,
-        error: 'Invalid coordinates returned from geocoding service'
+        error: error instanceof Error ? error.message : 'Invalid coordinates returned from geocoding service'
       };
     }
-
-    // Validate coordinate ranges
-    if (lat < -90 || lat > 90 || lon < -180 || lon > 180) {
-      return {
-        success: false,
-        error: 'Coordinates out of valid range'
-      };
-    }
-
-    return {
-      success: true,
-      coordinates: [lat, lon]
-    };
 
   } catch (error) {
     return {

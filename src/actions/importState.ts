@@ -1,6 +1,9 @@
 import { ApplicationState } from "@models/ApplicationState";
 import { saveToStorage } from "@utils/storage";
-import { saveCapacityLimits, validateCapacityLimits } from "./configureCapacityLimits";
+import {
+  saveCapacityLimits,
+  validateCapacityLimits,
+} from "./configureCapacityLimits";
 
 export class InvalidFileFormatError extends Error {
   constructor(message: string) {
@@ -40,33 +43,43 @@ export async function validateStateFile(file: File): Promise<ApplicationState> {
         const parsed = JSON.parse(text);
 
         if (!parsed.version) {
-          reject(new MissingFieldError("File is missing required 'version' field"));
+          reject(
+            new MissingFieldError("File is missing required 'version' field"),
+          );
           return;
         }
 
         if (parsed.version !== "1.0.0") {
           reject(
             new VersionMismatchError(
-              `File version ${parsed.version} is incompatible. Expected version 1.0.0`
-            )
+              `File version ${parsed.version} is incompatible. Expected version 1.0.0`,
+            ),
           );
           return;
         }
 
         if (!parsed.exportedAt) {
-          reject(new MissingFieldError("File is missing required 'exportedAt' field"));
+          reject(
+            new MissingFieldError(
+              "File is missing required 'exportedAt' field",
+            ),
+          );
           return;
         }
 
         if (!parsed.data) {
-          reject(new MissingFieldError("File is missing required 'data' field"));
+          reject(
+            new MissingFieldError("File is missing required 'data' field"),
+          );
           return;
         }
 
         const { data } = parsed;
 
         if (!Array.isArray(data.eventAmbassadors)) {
-          reject(new InvalidDataError("File data.eventAmbassadors must be an array"));
+          reject(
+            new InvalidDataError("File data.eventAmbassadors must be an array"),
+          );
           return;
         }
 
@@ -76,7 +89,11 @@ export async function validateStateFile(file: File): Promise<ApplicationState> {
         }
 
         if (!Array.isArray(data.regionalAmbassadors)) {
-          reject(new InvalidDataError("File data.regionalAmbassadors must be an array"));
+          reject(
+            new InvalidDataError(
+              "File data.regionalAmbassadors must be an array",
+            ),
+          );
           return;
         }
 
@@ -108,9 +125,11 @@ export function importApplicationState(state: ApplicationState): void {
   saveToStorage("eventTeams", state.data.eventTeams);
   saveToStorage("regionalAmbassadors", state.data.regionalAmbassadors);
   saveToStorage("changesLog", state.data.changesLog);
-  
-  if (state.data.capacityLimits && validateCapacityLimits(state.data.capacityLimits)) {
+
+  if (
+    state.data.capacityLimits &&
+    validateCapacityLimits(state.data.capacityLimits)
+  ) {
     saveCapacityLimits(state.data.capacityLimits);
   }
 }
-

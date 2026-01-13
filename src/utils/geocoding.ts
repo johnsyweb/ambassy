@@ -2,6 +2,8 @@
  * Geocoding utilities for converting addresses to coordinates
  */
 
+import { createCoordinate, getLatitude, getLongitude } from '../models/Coordinate';
+
 const NOMINATIM_URL = 'https://nominatim.openstreetmap.org/search';
 
 export interface GeocodingResult {
@@ -74,12 +76,9 @@ export async function geocodeAddress(address: string): Promise<{lat: number, lng
       throw new Error(`Invalid coordinates: lat=${lat}, lng=${lng}`);
     }
 
-    // Validate coordinate ranges
-    if (lat < -90 || lat > 90 || lng < -180 || lng > 180) {
-      throw new Error(`Coordinates out of valid range: lat=${lat}, lng=${lng}`);
-    }
-
-    return { lat, lng };
+    // Validation handled by createCoordinate
+    const coord = createCoordinate(lat, lng);
+    return { lat: getLatitude(coord), lng: getLongitude(coord) };
   } catch (error) {
     if (error instanceof Error) {
       throw new Error(`Geocoding failed: ${error.message}`);
@@ -108,10 +107,11 @@ function parseCoordinates(input: string): {lat: number, lng: number} | null {
 
   const [lat, lng] = parts;
 
-  // Validate ranges
-  if (lat < -90 || lat > 90 || lng < -180 || lng > 180) {
+  // Validation handled by createCoordinate (ONLY place for coordinate validation)
+  try {
+    const coord = createCoordinate(lat, lng);
+    return { lat: getLatitude(coord), lng: getLongitude(coord) };
+  } catch {
     return null;
   }
-
-  return { lat, lng };
 }

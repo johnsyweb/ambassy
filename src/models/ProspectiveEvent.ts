@@ -5,6 +5,8 @@
  * of prospect status, ambassador assignments, and allocation impact.
  */
 
+import { Coordinate } from './Coordinate';
+
 export interface ProspectiveEvent {
   // Identity
   id: string; // Auto-generated unique identifier
@@ -24,8 +26,8 @@ export interface ProspectiveEvent {
   // Timeline
   dateMadeContact: Date | null; // When contact was first made
 
-  // Location (may be incomplete)
-  coordinates?: [number, number]; // Lat/lng if geocoded
+  // Location (may be incomplete) - uses Coordinate type per CONSTITUTION.md
+  coordinates?: Coordinate;
 
   // Processing Status
   geocodingStatus: 'pending' | 'success' | 'failed' | 'manual';

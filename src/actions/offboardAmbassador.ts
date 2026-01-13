@@ -5,7 +5,11 @@ import { EventAmbassador } from "../models/EventAmbassador";
 import { RegionalAmbassador } from "../models/RegionalAmbassador";
 import { CapacityLimits } from "../models/CapacityLimits";
 import { LogEntry } from "../models/LogEntry";
-import { persistEventAmbassadors, persistRegionalAmbassadors, persistChangesLog } from "./persistState";
+import {
+  persistEventAmbassadors,
+  persistRegionalAmbassadors,
+  persistChangesLog,
+} from "./persistState";
 import { assignEventToAmbassador } from "./assignEventToAmbassador";
 
 /**
@@ -15,7 +19,7 @@ export function checkReallocationCapacityWarning(
   recipient: EventAmbassador | RegionalAmbassador,
   itemsToReallocate: string[],
   itemType: "events" | "eventAmbassadors",
-  limits: CapacityLimits
+  limits: CapacityLimits,
 ): string | null {
   if (itemType === "events" && "events" in recipient) {
     const newCount = recipient.events.length + itemsToReallocate.length;
@@ -41,7 +45,7 @@ export function offboardEventAmbassador(
   eventAmbassadors: EventAmbassadorMap,
   regionalAmbassadors: RegionalAmbassadorMap,
   eventTeams: EventTeamMap,
-  log: LogEntry[]
+  log: LogEntry[],
 ): void {
   const ambassador = eventAmbassadors.get(ambassadorName);
   if (!ambassador) {
@@ -57,7 +61,9 @@ export function offboardEventAmbassador(
     if (recipientName && recipientName.trim() !== "") {
       const recipient = eventAmbassadors.get(recipientName);
       if (!recipient) {
-        throw new Error(`Recipient Event Ambassador "${recipientName}" not found`);
+        throw new Error(
+          `Recipient Event Ambassador "${recipientName}" not found`,
+        );
       }
 
       // assignEventToAmbassador logs each reassignment separately
@@ -67,7 +73,7 @@ export function offboardEventAmbassador(
         recipientName,
         eventAmbassadors,
         log,
-        regionalAmbassadors
+        regionalAmbassadors,
       );
 
       // Update Event Team mapping
@@ -120,7 +126,7 @@ export function offboardRegionalAmbassador(
   eaRecipients: Map<string, string>,
   regionalAmbassadors: RegionalAmbassadorMap,
   eventAmbassadors: EventAmbassadorMap,
-  log: LogEntry[]
+  log: LogEntry[],
 ): void {
   const ambassador = regionalAmbassadors.get(ambassadorName);
   if (!ambassador) {
@@ -145,7 +151,9 @@ export function offboardRegionalAmbassador(
   for (const [recipientName, eas] of recipientGroups.entries()) {
     const recipient = regionalAmbassadors.get(recipientName);
     if (!recipient) {
-      throw new Error(`Recipient Regional Ambassador "${recipientName}" not found`);
+      throw new Error(
+        `Recipient Regional Ambassador "${recipientName}" not found`,
+      );
     }
 
     for (const eaName of eas) {
@@ -196,4 +204,3 @@ export function offboardRegionalAmbassador(
 
   persistChangesLog(log);
 }
-

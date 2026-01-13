@@ -16,8 +16,19 @@ describe("importState", () => {
         exportedAt: "2026-01-07T12:00:00Z",
         data: {
           eventAmbassadors: [["EA1", { name: "Test EA", events: [] }]],
-          eventTeams: [["Event1", { eventShortName: "Event1", eventAmbassador: "EA1", eventDirectors: [] }]],
-          regionalAmbassadors: [["REA1", { name: "Test REA", state: "VIC", supportsEAs: [] }]],
+          eventTeams: [
+            [
+              "Event1",
+              {
+                eventShortName: "Event1",
+                eventAmbassador: "EA1",
+                eventDirectors: [],
+              },
+            ],
+          ],
+          regionalAmbassadors: [
+            ["REA1", { name: "Test REA", state: "VIC", supportsEAs: [] }],
+          ],
           changesLog: [],
         },
       };
@@ -99,19 +110,41 @@ describe("importState", () => {
         exportedAt: "2026-01-07T12:00:00Z",
         data: {
           eventAmbassadors: [["EA1", { name: "Test EA", events: [] }]],
-          eventTeams: [["Event1", { eventShortName: "Event1", eventAmbassador: "EA1", eventDirectors: [] }]],
-          regionalAmbassadors: [["REA1", { name: "Test REA", state: "VIC", supportsEAs: [] }]],
+          eventTeams: [
+            [
+              "Event1",
+              {
+                eventShortName: "Event1",
+                eventAmbassador: "EA1",
+                eventDirectors: [],
+              },
+            ],
+          ],
+          regionalAmbassadors: [
+            ["REA1", { name: "Test REA", state: "VIC", supportsEAs: [] }],
+          ],
           changesLog: [],
         },
       };
 
       importApplicationState(state);
 
-      expect(saveToStorage).toHaveBeenCalledWith("eventAmbassadors", state.data.eventAmbassadors);
-      expect(saveToStorage).toHaveBeenCalledWith("eventTeams", state.data.eventTeams);
-      expect(saveToStorage).toHaveBeenCalledWith("regionalAmbassadors", state.data.regionalAmbassadors);
-      expect(saveToStorage).toHaveBeenCalledWith("changesLog", state.data.changesLog);
+      expect(saveToStorage).toHaveBeenCalledWith(
+        "eventAmbassadors",
+        state.data.eventAmbassadors,
+      );
+      expect(saveToStorage).toHaveBeenCalledWith(
+        "eventTeams",
+        state.data.eventTeams,
+      );
+      expect(saveToStorage).toHaveBeenCalledWith(
+        "regionalAmbassadors",
+        state.data.regionalAmbassadors,
+      );
+      expect(saveToStorage).toHaveBeenCalledWith(
+        "changesLog",
+        state.data.changesLog,
+      );
     });
   });
 });
-

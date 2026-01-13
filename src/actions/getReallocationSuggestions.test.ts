@@ -20,14 +20,14 @@ describe("getReallocationSuggestions", () => {
 
   beforeEach(() => {
     eventShortName = "test-event";
-    
+
     eventTeamsTableData = new Map();
     eventTeamsTableData.set("test-event", {
       eventShortName: "test-event",
       eventDirectors: "Director 1",
       eventAmbassador: "Current EA",
       regionalAmbassador: "Current REA",
-      eventCoordinates: "(-37.8, 144.9)",
+      eventCoordinates: "37.80000° S 144.90000° E",
       eventSeries: 1,
       eventCountryCode: 3,
       eventCountry: "Australia",
@@ -81,7 +81,7 @@ describe("getReallocationSuggestions", () => {
       eventAmbassadors,
       eventDetails,
       limits,
-      regionalAmbassadors
+      regionalAmbassadors,
     );
 
     expect(suggestEventReallocation).toHaveBeenCalledWith(
@@ -90,7 +90,7 @@ describe("getReallocationSuggestions", () => {
       eventAmbassadors,
       eventDetails,
       limits,
-      regionalAmbassadors
+      regionalAmbassadors,
     );
     expect(result).toEqual(mockSuggestions);
   });
@@ -103,7 +103,7 @@ describe("getReallocationSuggestions", () => {
         eventAmbassadors,
         eventDetails,
         limits,
-        regionalAmbassadors
+        regionalAmbassadors,
       );
     }).toThrow("Event 'non-existent-event' not found in table data");
   });
@@ -114,7 +114,7 @@ describe("getReallocationSuggestions", () => {
       eventDirectors: "Director 1",
       eventAmbassador: "",
       regionalAmbassador: "",
-      eventCoordinates: "(-37.8, 144.9)",
+      eventCoordinates: "37.80000° S 144.90000° E",
       eventSeries: 1,
       eventCountryCode: 3,
       eventCountry: "Australia",
@@ -127,9 +127,11 @@ describe("getReallocationSuggestions", () => {
         eventAmbassadors,
         eventDetails,
         limits,
-        regionalAmbassadors
+        regionalAmbassadors,
       );
-    }).toThrow("Event 'unassigned-event' is not currently assigned to any ambassador");
+    }).toThrow(
+      "Event 'unassigned-event' is not currently assigned to any ambassador",
+    );
   });
 
   it("should throw error if current ambassador does not exist in EventAmbassadorMap", () => {
@@ -138,7 +140,7 @@ describe("getReallocationSuggestions", () => {
       eventDirectors: "Director 1",
       eventAmbassador: "Non-existent EA",
       regionalAmbassador: "",
-      eventCoordinates: "(-37.8, 144.9)",
+      eventCoordinates: "37.80000° S 144.90000° E",
       eventSeries: 1,
       eventCountryCode: 3,
       eventCountry: "Australia",
@@ -151,7 +153,7 @@ describe("getReallocationSuggestions", () => {
         eventAmbassadors,
         eventDetails,
         limits,
-        regionalAmbassadors
+        regionalAmbassadors,
       );
     }).toThrow("Current ambassador 'Non-existent EA' not found");
   });

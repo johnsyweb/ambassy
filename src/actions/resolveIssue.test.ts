@@ -137,8 +137,7 @@ describe("resolveIssueWithPin", () => {
     expect(log[0].event).toBe(issue.eventShortName);
     expect(log[0].oldValue).toBe("Missing coordinates");
     expect(log[0].newValue).toContain("Manual pin placement");
-    expect(log[0].newValue).toContain("-37.8136");
-    expect(log[0].newValue).toContain("144.9631");
+    expect(log[0].newValue).toContain("37.81360° S 144.96310° E");
   });
 
   it("should throw error for invalid longitude", () => {

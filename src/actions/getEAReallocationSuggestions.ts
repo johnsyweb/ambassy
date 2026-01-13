@@ -12,14 +12,19 @@ export function getEAReallocationSuggestions(
   eventAmbassadorName: string,
   eventAmbassadors: EventAmbassadorMap,
   regionalAmbassadors: RegionalAmbassadorMap,
-  limits: CapacityLimits
+  limits: CapacityLimits,
 ): ReallocationSuggestion[] {
   if (!eventAmbassadors.has(eventAmbassadorName)) {
     throw new Error(`Event Ambassador "${eventAmbassadorName}" not found`);
   }
 
-  const currentREA = getRegionalAmbassadorForEventAmbassador(eventAmbassadorName, regionalAmbassadors);
-  const currentREAState = currentREA ? regionalAmbassadors.get(currentREA)?.state : null;
+  const currentREA = getRegionalAmbassadorForEventAmbassador(
+    eventAmbassadorName,
+    regionalAmbassadors,
+  );
+  const currentREAState = currentREA
+    ? regionalAmbassadors.get(currentREA)?.state
+    : null;
 
   const suggestions: ReallocationSuggestion[] = [];
 
@@ -41,7 +46,8 @@ export function getEAReallocationSuggestions(
     const warnings: string[] = [];
 
     // Prioritize same state
-    const isSameState = currentREAState !== null && recipient.state === currentREAState;
+    const isSameState =
+      currentREAState !== null && recipient.state === currentREAState;
     if (isSameState) {
       reasons.push(`Same state (${recipient.state})`);
     }
@@ -54,7 +60,9 @@ export function getEAReallocationSuggestions(
     }
 
     if (currentEACount + 1 > limits.regionalAmbassadorMax) {
-      warnings.push(`Would exceed maximum capacity (${limits.regionalAmbassadorMax})`);
+      warnings.push(
+        `Would exceed maximum capacity (${limits.regionalAmbassadorMax})`,
+      );
     }
 
     // Calculate score:
@@ -62,7 +70,7 @@ export function getEAReallocationSuggestions(
     // - Bonus for same state: +1000
     // - Penalty for being at or near capacity
     let score = availableCapacity * 10; // Scale capacity for better sorting
-    
+
     if (isSameState) {
       score += 1000; // Large bonus for same state
     }

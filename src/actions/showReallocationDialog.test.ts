@@ -1,6 +1,6 @@
 import { showReallocationDialog } from "./showReallocationDialog";
-import { ReallocationSuggestion } from "@models/ReallocationSuggestion";
-import { EventAmbassadorMap } from "@models/EventAmbassadorMap";
+import { ReallocationSuggestion } from "../models/ReallocationSuggestion";
+import { EventAmbassadorMap } from "../models/EventAmbassadorMap";
 
 jest.mock("./getReallocationSuggestions");
 

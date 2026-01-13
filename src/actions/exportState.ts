@@ -3,12 +3,26 @@ import { loadFromStorage } from "@utils/storage";
 import { loadCapacityLimits } from "./checkCapacity";
 
 export function exportApplicationState(): Blob {
-  const eventAmbassadors = loadFromStorage<Array<[string, import("@models/EventAmbassador").EventAmbassador]>>("eventAmbassadors");
-  const eventTeams = loadFromStorage<Array<[string, import("@models/EventTeam").EventTeam]>>("eventTeams");
-  const regionalAmbassadors = loadFromStorage<Array<[string, import("@models/RegionalAmbassador").RegionalAmbassador]>>("regionalAmbassadors");
-  const changesLog = loadFromStorage<import("@models/LogEntry").LogEntry[]>("changesLog");
+  const eventAmbassadors =
+    loadFromStorage<
+      Array<[string, import("@models/EventAmbassador").EventAmbassador]>
+    >("eventAmbassadors");
+  const eventTeams =
+    loadFromStorage<Array<[string, import("@models/EventTeam").EventTeam]>>(
+      "eventTeams",
+    );
+  const regionalAmbassadors = loadFromStorage<
+    Array<[string, import("@models/RegionalAmbassador").RegionalAmbassador]>
+  >("regionalAmbassadors");
+  const changesLog =
+    loadFromStorage<import("@models/LogEntry").LogEntry[]>("changesLog");
 
-  if (eventAmbassadors === null || eventTeams === null || regionalAmbassadors === null || changesLog === null) {
+  if (
+    eventAmbassadors === null ||
+    eventTeams === null ||
+    regionalAmbassadors === null ||
+    changesLog === null
+  ) {
     throw new Error("Cannot export: incomplete application state");
   }
 
@@ -40,4 +54,3 @@ export function downloadStateFile(blob: Blob, filename: string): void {
   document.body.removeChild(link);
   URL.revokeObjectURL(url);
 }
-

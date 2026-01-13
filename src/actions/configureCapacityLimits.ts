@@ -33,8 +33,9 @@ export function validateCapacityLimits(limits: CapacityLimits): boolean {
 
 export function saveCapacityLimits(limits: CapacityLimits): void {
   if (!validateCapacityLimits(limits)) {
-    throw new Error("Invalid capacity limits: minimum must be less than or equal to maximum, and all values must be non-negative integers");
+    throw new Error(
+      "Invalid capacity limits: minimum must be less than or equal to maximum, and all values must be non-negative integers",
+    );
   }
   saveToStorage("capacityLimits", limits);
 }
-

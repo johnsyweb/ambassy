@@ -2,7 +2,10 @@ import { EventAmbassadorMap } from "@models/EventAmbassadorMap";
 import { RegionalAmbassadorMap } from "@models/RegionalAmbassadorMap";
 import { LogEntry } from "@models/LogEntry";
 import { persistEventAmbassadors } from "./persistState";
-import { calculateAllCapacityStatuses, loadCapacityLimits } from "./checkCapacity";
+import {
+  calculateAllCapacityStatuses,
+  loadCapacityLimits,
+} from "./checkCapacity";
 
 /**
  * Assign an event to an Event Ambassador.
@@ -15,7 +18,7 @@ export function assignEventToAmbassador(
   newEventAmbassador: string,
   eventAmbassadors: EventAmbassadorMap,
   log: LogEntry[],
-  regionalAmbassadors?: RegionalAmbassadorMap
+  regionalAmbassadors?: RegionalAmbassadorMap,
 ): void {
   // Remove event from old ambassador's events array
   if (oldEventAmbassador && oldEventAmbassador.trim() !== "") {
@@ -46,7 +49,11 @@ export function assignEventToAmbassador(
   // Recalculate capacity statuses after assignment
   const capacityLimits = loadCapacityLimits();
   const regionalAmbassadorsToUse = regionalAmbassadors ?? new Map();
-  calculateAllCapacityStatuses(eventAmbassadors, regionalAmbassadorsToUse, capacityLimits);
+  calculateAllCapacityStatuses(
+    eventAmbassadors,
+    regionalAmbassadorsToUse,
+    capacityLimits,
+  );
 
   // Log the change
   log.push({
@@ -57,4 +64,3 @@ export function assignEventToAmbassador(
     timestamp: Date.now(),
   });
 }
-

@@ -7,8 +7,15 @@ import { EventAmbassadorMap } from "../models/EventAmbassadorMap";
 import { RegionalAmbassadorMap } from "../models/RegionalAmbassadorMap";
 import { EventTeamMap } from "../models/EventTeamMap";
 import { EventAmbassador } from "../models/EventAmbassador";
-import { CapacityLimits, defaultCapacityLimits } from "../models/CapacityLimits";
-import { persistEventAmbassadors, persistRegionalAmbassadors, persistChangesLog } from "./persistState";
+import {
+  CapacityLimits,
+  defaultCapacityLimits,
+} from "../models/CapacityLimits";
+import {
+  persistEventAmbassadors,
+  persistRegionalAmbassadors,
+  persistChangesLog,
+} from "./persistState";
 
 jest.mock("./persistState");
 
@@ -28,12 +35,27 @@ describe("offboardAmbassador", () => {
 
       const recipient: EventAmbassador = {
         name: "EA1",
-        events: ["Event1", "Event2", "Event3", "Event4", "Event5", "Event6", "Event7", "Event8", "Event9"], // 9 events (at max)
+        events: [
+          "Event1",
+          "Event2",
+          "Event3",
+          "Event4",
+          "Event5",
+          "Event6",
+          "Event7",
+          "Event8",
+          "Event9",
+        ], // 9 events (at max)
       };
 
       const itemsToReallocate = ["Event10", "Event11"]; // Would exceed max of 9
 
-      const warning = checkReallocationCapacityWarning(recipient, itemsToReallocate, "events", limits);
+      const warning = checkReallocationCapacityWarning(
+        recipient,
+        itemsToReallocate,
+        "events",
+        limits,
+      );
       expect(warning).toBeTruthy();
       expect(warning).toContain("exceed");
     });
@@ -46,7 +68,12 @@ describe("offboardAmbassador", () => {
       };
       const itemsToReallocate = ["Event3", "Event4"]; // Would be 4 total (within limit)
 
-      const warning = checkReallocationCapacityWarning(recipient, itemsToReallocate, "events", limits);
+      const warning = checkReallocationCapacityWarning(
+        recipient,
+        itemsToReallocate,
+        "events",
+        limits,
+      );
       expect(warning).toBeNull();
     });
   });
@@ -59,10 +86,30 @@ describe("offboardAmbassador", () => {
       ]);
       const regionalAmbassadors: RegionalAmbassadorMap = new Map();
       const eventTeams: EventTeamMap = new Map([
-        ["Event1", { eventShortName: "Event1", eventAmbassador: "EA1", eventDirectors: [] }],
-        ["Event2", { eventShortName: "Event2", eventAmbassador: "EA1", eventDirectors: [] }],
+        [
+          "Event1",
+          {
+            eventShortName: "Event1",
+            eventAmbassador: "EA1",
+            eventDirectors: [],
+          },
+        ],
+        [
+          "Event2",
+          {
+            eventShortName: "Event2",
+            eventAmbassador: "EA1",
+            eventDirectors: [],
+          },
+        ],
       ]);
-      const log: Array<{ type: string; event: string; oldValue: string; newValue: string; timestamp: number }> = [];
+      const log: Array<{
+        type: string;
+        event: string;
+        oldValue: string;
+        newValue: string;
+        timestamp: number;
+      }> = [];
 
       const eventRecipients = new Map<string, string>([
         ["Event1", "EA2"],
@@ -74,7 +121,7 @@ describe("offboardAmbassador", () => {
         eventAmbassadors,
         regionalAmbassadors,
         eventTeams,
-        log
+        log,
       );
 
       expect(eventAmbassadors.has("EA1")).toBe(false);
@@ -90,10 +137,30 @@ describe("offboardAmbassador", () => {
       ]);
       const regionalAmbassadors: RegionalAmbassadorMap = new Map();
       const eventTeams: EventTeamMap = new Map([
-        ["Event1", { eventShortName: "Event1", eventAmbassador: "EA1", eventDirectors: [] }],
-        ["Event2", { eventShortName: "Event2", eventAmbassador: "EA1", eventDirectors: [] }],
+        [
+          "Event1",
+          {
+            eventShortName: "Event1",
+            eventAmbassador: "EA1",
+            eventDirectors: [],
+          },
+        ],
+        [
+          "Event2",
+          {
+            eventShortName: "Event2",
+            eventAmbassador: "EA1",
+            eventDirectors: [],
+          },
+        ],
       ]);
-      const log: Array<{ type: string; event: string; oldValue: string; newValue: string; timestamp: number }> = [];
+      const log: Array<{
+        type: string;
+        event: string;
+        oldValue: string;
+        newValue: string;
+        timestamp: number;
+      }> = [];
 
       const eventRecipients = new Map<string, string>([
         ["Event1", "EA2"],
@@ -105,11 +172,15 @@ describe("offboardAmbassador", () => {
         eventAmbassadors,
         regionalAmbassadors,
         eventTeams,
-        log
+        log,
       );
 
-      const assignmentLogs = log.filter((entry) => entry.type === "assign event to ambassador");
-      const offboardLog = log.find((entry) => entry.type === "offboard event ambassador");
+      const assignmentLogs = log.filter(
+        (entry) => entry.type === "assign event to ambassador",
+      );
+      const offboardLog = log.find(
+        (entry) => entry.type === "offboard event ambassador",
+      );
 
       expect(assignmentLogs.length).toBe(2);
       expect(assignmentLogs[0].event).toBe("Event1");
@@ -129,7 +200,13 @@ describe("offboardAmbassador", () => {
       ]);
       const regionalAmbassadors: RegionalAmbassadorMap = new Map();
       const eventTeams: EventTeamMap = new Map();
-      const log: Array<{ type: string; event: string; oldValue: string; newValue: string; timestamp: number }> = [];
+      const log: Array<{
+        type: string;
+        event: string;
+        oldValue: string;
+        newValue: string;
+        timestamp: number;
+      }> = [];
 
       offboardEventAmbassador(
         "EA1",
@@ -137,7 +214,7 @@ describe("offboardAmbassador", () => {
         eventAmbassadors,
         regionalAmbassadors,
         eventTeams,
-        log
+        log,
       );
 
       expect(eventAmbassadors.has("EA1")).toBe(false);
@@ -155,7 +232,13 @@ describe("offboardAmbassador", () => {
         ["EA2", { name: "EA2", events: [] }],
         ["EA3", { name: "EA3", events: [] }],
       ]);
-      const log: Array<{ type: string; event: string; oldValue: string; newValue: string; timestamp: number }> = [];
+      const log: Array<{
+        type: string;
+        event: string;
+        oldValue: string;
+        newValue: string;
+        timestamp: number;
+      }> = [];
 
       const eaRecipients = new Map<string, string>([
         ["EA1", "REA2"],
@@ -166,7 +249,7 @@ describe("offboardAmbassador", () => {
         eaRecipients,
         regionalAmbassadors,
         eventAmbassadors,
-        log
+        log,
       );
 
       expect(regionalAmbassadors.has("REA1")).toBe(false);
@@ -184,7 +267,13 @@ describe("offboardAmbassador", () => {
         ["EA1", { name: "EA1", events: [] }],
         ["EA2", { name: "EA2", events: [] }],
       ]);
-      const log: Array<{ type: string; event: string; oldValue: string; newValue: string; timestamp: number }> = [];
+      const log: Array<{
+        type: string;
+        event: string;
+        oldValue: string;
+        newValue: string;
+        timestamp: number;
+      }> = [];
 
       const eaRecipients = new Map<string, string>([
         ["EA1", "REA2"],
@@ -195,11 +284,16 @@ describe("offboardAmbassador", () => {
         eaRecipients,
         regionalAmbassadors,
         eventAmbassadors,
-        log
+        log,
       );
 
-      const assignmentLogs = log.filter((entry) => entry.type === "assign event ambassador to regional ambassador");
-      const offboardLog = log.find((entry) => entry.type === "offboard regional ambassador");
+      const assignmentLogs = log.filter(
+        (entry) =>
+          entry.type === "assign event ambassador to regional ambassador",
+      );
+      const offboardLog = log.find(
+        (entry) => entry.type === "offboard regional ambassador",
+      );
 
       expect(assignmentLogs.length).toBe(2);
       expect(assignmentLogs[0].event).toBe("EA1");
@@ -222,10 +316,30 @@ describe("offboardAmbassador", () => {
       ]);
       const regionalAmbassadors: RegionalAmbassadorMap = new Map();
       const eventTeams: EventTeamMap = new Map([
-        ["Event1", { eventShortName: "Event1", eventAmbassador: "EA1", eventDirectors: [] }],
-        ["Event2", { eventShortName: "Event2", eventAmbassador: "EA1", eventDirectors: [] }],
+        [
+          "Event1",
+          {
+            eventShortName: "Event1",
+            eventAmbassador: "EA1",
+            eventDirectors: [],
+          },
+        ],
+        [
+          "Event2",
+          {
+            eventShortName: "Event2",
+            eventAmbassador: "EA1",
+            eventDirectors: [],
+          },
+        ],
       ]);
-      const log: Array<{ type: string; event: string; oldValue: string; newValue: string; timestamp: number }> = [];
+      const log: Array<{
+        type: string;
+        event: string;
+        oldValue: string;
+        newValue: string;
+        timestamp: number;
+      }> = [];
 
       const eventRecipients = new Map<string, string>([
         ["Event1", "EA2"],
@@ -237,20 +351,19 @@ describe("offboardAmbassador", () => {
         eventAmbassadors,
         regionalAmbassadors,
         eventTeams,
-        log
+        log,
       );
 
       // Verify ambassador removed
       expect(eventAmbassadors.has("EA1")).toBe(false);
-      
+
       // Verify events reallocated
       const ea2 = eventAmbassadors.get("EA2");
       expect(ea2?.events).toContain("Event1");
       expect(ea2?.events).toContain("Event2");
-      
+
       // Verify logging
       expect(log.length).toBeGreaterThan(0);
     });
   });
 });
-
