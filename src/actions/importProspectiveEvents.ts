@@ -90,7 +90,6 @@ export async function importProspectiveEvents(
         const processed = await processProspectiveEvent(
           event,
           eventAmbassadors,
-          regionalAmbassadors,
         );
         processedEvents.push(processed.event);
 
@@ -204,8 +203,6 @@ export async function importProspectiveEvents(
 async function processProspectiveEvent(
   event: ProspectiveEvent,
   eventAmbassadors: EventAmbassadorMap,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  _regionalAmbassadors: RegionalAmbassadorMap, // Reserved for future use
 ): Promise<{
   event: ProspectiveEvent;
   warnings: string[];
