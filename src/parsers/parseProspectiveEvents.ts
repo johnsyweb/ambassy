@@ -6,7 +6,7 @@
  */
 
 import { ProspectiveEvent } from '../models/ProspectiveEvent';
-import { CSVParseResult, CSVParseError, ValidationError } from '../types/ProspectiveEventTypes';
+import { CSVParseResult, CSVParseError } from '../types/ProspectiveEventTypes';
 import { validateCSVHeaders, validateProspectiveEvent } from '../utils/prospectValidation';
 
 /**
@@ -102,6 +102,7 @@ function parseCSVRows(content: string): string[][] {
         inQuotes = !inQuotes;
         i++;
       }
+      // Empty else block is intentional - quote toggling handled above
     } else if (char === ',' && !inQuotes) {
       // Field separator
       currentRow.push(currentField.trim());
@@ -139,44 +140,6 @@ function parseCSVRows(content: string): string[][] {
   return rows;
 }
 
-/**
- * Parse a single CSV line handling quoted values (legacy function for backward compatibility)
- */
-function parseCSVLine(line: string): string[] {
-  const result: string[] = [];
-  let current = '';
-  let inQuotes = false;
-  let i = 0;
-
-  while (i < line.length) {
-    const char = line[i];
-
-    if (char === '"') {
-      if (inQuotes && line[i + 1] === '"') {
-        // Escaped quote
-        current += '"';
-        i += 2;
-      } else {
-        // Toggle quote state
-        inQuotes = !inQuotes;
-        i++;
-      }
-    } else if (char === ',' && !inQuotes) {
-      // Field separator
-      result.push(current.trim());
-      current = '';
-      i++;
-    } else {
-      current += char;
-      i++;
-    }
-  }
-
-  // Add the last field
-  result.push(current.trim());
-
-  return result;
-}
 
 /**
  * Parse a single prospective event row
@@ -258,7 +221,8 @@ function parseProspectiveEventRow(
 /**
  * Parse a date string
  */
-function parseDate(dateStr: string, rowNumber: number): Date | null {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+function parseDate(dateStr: string, _rowNumber: number): Date | null {
   const trimmed = dateStr.trim();
   if (!trimmed) {
     return null;
@@ -297,7 +261,8 @@ function parseDate(dateStr: string, rowNumber: number): Date | null {
 /**
  * Parse a boolean value from string
  */
-function parseBoolean(value: string, fieldName: string, rowNumber: number): boolean {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+function parseBoolean(value: string, _fieldName: string, _rowNumber: number): boolean {
   const trimmed = value.trim().toLowerCase();
 
   // Accept various boolean representations for true

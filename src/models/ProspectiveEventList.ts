@@ -6,6 +6,7 @@
  */
 
 import { ProspectiveEvent } from './ProspectiveEvent';
+import { EventAmbassadorMap } from './EventAmbassadorMap';
 
 export class ProspectiveEventList {
   private events: Map<string, ProspectiveEvent> = new Map();
@@ -84,7 +85,7 @@ export class ProspectiveEventList {
   /**
    * Get the Regional Ambassador for a prospect (inferred from EA)
    */
-  getRegionalAmbassador(prospectId: string, eventAmbassadors: Map<string, any>): string | undefined {
+  getRegionalAmbassador(prospectId: string, eventAmbassadors: EventAmbassadorMap): string | undefined {
     const prospect = this.findById(prospectId);
     if (!prospect) return undefined;
 
@@ -95,7 +96,7 @@ export class ProspectiveEventList {
   /**
    * Get prospects by Regional Ambassador (inferred relationship)
    */
-  getByRegionalAmbassador(raId: string, eventAmbassadors: Map<string, any>): ProspectiveEvent[] {
+  getByRegionalAmbassador(raId: string, eventAmbassadors: EventAmbassadorMap): ProspectiveEvent[] {
     return this.getAll().filter(prospect => {
       const ea = eventAmbassadors.get(prospect.eventAmbassador);
       return ea?.regionalAmbassador === raId;

@@ -1,7 +1,7 @@
 import { importProspectiveEvents } from "./importProspectiveEvents";
 import { EventAmbassadorMap } from "../models/EventAmbassadorMap";
 import { RegionalAmbassadorMap } from "../models/RegionalAmbassadorMap";
-import { ProspectiveEventList } from "../models/ProspectiveEventList";
+import { ProspectiveEvent } from "../models/ProspectiveEvent";
 import {
   saveProspectiveEvents,
   loadProspectiveEvents,
@@ -245,10 +245,10 @@ describe("importProspectiveEvents", () => {
       const saveCall = mockSaveProspectiveEvents.mock.calls[0][0];
       expect(saveCall).toHaveLength(2);
       expect(
-        saveCall.some((p: any) => p.prospectEvent === "Existing Event"),
+        saveCall.some((p: ProspectiveEvent) => p.prospectEvent === "Existing Event"),
       ).toBe(true);
       expect(
-        saveCall.some((p: any) => p.prospectEvent === "Botanical Gardens"),
+        saveCall.some((p: ProspectiveEvent) => p.prospectEvent === "Botanical Gardens"),
       ).toBe(true);
     });
 

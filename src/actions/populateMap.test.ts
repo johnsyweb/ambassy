@@ -1,11 +1,11 @@
-import { EventDetailsMap } from "@models/EventDetailsMap";
-import { EventTeamsTableDataMap } from "@models/EventTeamsTableData";
-
 describe("populateMap duplicate filtering", () => {
-  // Mock the dependencies
-  const mockMap = {} as any;
-  const mockMarkersLayer = {} as any;
-  const mockPolygonsLayer = {} as any;
+  // Mock the dependencies (reserved for future use)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars
+  const _mockMap = {} as any;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars
+  const _mockMarkersLayer = {} as any;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars
+  const _mockPolygonsLayer = {} as any;
 
   beforeEach(() => {
     // Reset global state between tests

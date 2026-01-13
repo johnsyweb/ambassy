@@ -1,8 +1,4 @@
-import { EventDetailsMap } from '@models/EventDetailsMap';
-import { EventTeamsTableDataMap, EventTeamsTableData, eventAmbassadorsFrom, regionalAmbassadorsFrom } from '@models/EventTeamsTableData';
-import { LogEntry } from '@models/LogEntry';
-import { EventAmbassadorMap } from '@models/EventAmbassadorMap';
-import { RegionalAmbassadorMap } from '@models/RegionalAmbassadorMap';
+import { EventTeamsTableDataMap, eventAmbassadorsFrom, regionalAmbassadorsFrom } from '@models/EventTeamsTableData';
 import { SelectionState } from '@models/SelectionState';
 import { colorPalette } from './colorPalette';
 
@@ -13,10 +9,14 @@ function assignColorToName(name: string, allNames: string[]): string {
 
 export function populateEventTeamsTable(
   eventTeamsTableData: EventTeamsTableDataMap,
-  eventDetailsMap: EventDetailsMap,
-  changelog: LogEntry[],
-  eventAmbassadors?: EventAmbassadorMap,
-  regionalAmbassadors?: RegionalAmbassadorMap
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  _eventDetailsMap: EventDetailsMap,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  _changelog: LogEntry[],
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  _eventAmbassadors?: EventAmbassadorMap,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  _regionalAmbassadors?: RegionalAmbassadorMap
 ): void {
   const tableBody = document.querySelector('#eventTeamsTable tbody');
   if (!tableBody) {

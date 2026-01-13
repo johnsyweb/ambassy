@@ -7,9 +7,9 @@ import {
 import { ProspectiveEvent } from "@models/ProspectiveEvent";
 import { EventAmbassadorMap } from "@models/EventAmbassadorMap";
 import { RegionalAmbassadorMap } from "@models/RegionalAmbassadorMap";
-import { Coordinate, toLeafletArray, toGeoJSONArray, getLatitude, getLongitude } from "@models/Coordinate";
+import { toLeafletArray, toGeoJSONArray, getLatitude, getLongitude } from "@models/Coordinate";
 
-import * as d3GeoVoronoi from "d3-geo-voronoi";
+import d3GeoVoronoi from "d3-geo-voronoi";
 import L from "leaflet";
 import { colorPalette } from "./colorPalette";
 
@@ -52,9 +52,10 @@ export function populateMap(
 
   const voronoiPoints: [number, number, string][] = [];
 
-  let processedEvents = 0;
-  let eventsWithData = 0;
-  const eventsWithoutData = 0;
+  // Tracking variables reserved for future debugging/analytics
+  // let processedEvents = 0;
+  // let eventsWithData = 0;
+  // const eventsWithoutData = 0;
 
   // Will be populated after bounds calculation
   const constrainingEvents: Array<{coords: [number, number], isConstraining: boolean, raColor?: string, tooltip?: string}> = [];
@@ -96,7 +97,6 @@ export function populateMap(
     minLat -= padding;
     maxLat += padding;
     useBoundsFilter = true;
-  } else {
   }
 
   // Build constraining events for Voronoi calculation
@@ -335,7 +335,7 @@ export function populateMap(
   const voronoi = d3GeoVoronoi.geoVoronoi(uniquePoints.map((p) => [p[0], p[1]]));
   const polygons = voronoi.polygons();
 
-  polygons.features.forEach((feature: any, index: number) => {
+  polygons.features.forEach((feature, index) => {
     const { raColor, tooltip } = JSON.parse(uniquePoints[index][2]);
 
     // Skip polygons for constraining points (they have transparent color)

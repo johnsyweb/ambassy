@@ -173,6 +173,7 @@ describe("populateAmbassadorsTable", () => {
   });
 
   it("should handle empty actions gracefully", () => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const emptyAmbassadors = new Map<string, any>();
     populateAmbassadorsTable(emptyAmbassadors, regionalAmbassadors);
 

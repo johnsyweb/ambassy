@@ -101,8 +101,8 @@ export function validateProspectiveEvent(event: ProspectiveEvent): ValidationRes
 
   // Business rule validations
   if (event.prospectEvent && event.country && event.state) {
-    const key = `${event.prospectEvent}-${event.country}-${event.state}`.toLowerCase();
     // Could add uniqueness check here if needed
+    // const key = `${event.prospectEvent}-${event.country}-${event.state}`.toLowerCase();
   }
 
   // Warnings for potential issues
@@ -173,7 +173,7 @@ export function validateCSVHeaders(headers: string[]): { isValid: boolean; error
     'Funding Confirmed'
   ];
 
-  const optionalHeaders: string[] = [];
+  // const optionalHeaders: string[] = []; // Reserved for future use
 
   const errors: string[] = [];
 
