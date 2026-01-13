@@ -348,55 +348,32 @@ function generateProspectReallocationSuggestions(
     // Primary ordering: total allocation count (fewer = higher priority, 0 = highest)
     const baseScore = Math.max(0, 1000 - (totalCount * 10));
     
-    // Calculate distance to nearest event (live or prospect)
+    // Calculate distance to nearest LIVE event (tiebreaker - only live events count)
     let distanceBonus = 0;
     let neighboringEvents: Array<{ name: string; distanceKm: number }> = [];
     
-    if (prospectCoords && (ambassador.events.length > 0 || (ambassador.prospectiveEvents && ambassador.prospectiveEvents.length > 0))) {
-      const allEvents: Array<{ name: string; lat: number; lon: number }> = [];
+    if (prospectCoords && ambassador.events.length > 0 && eventDetails) {
+      // Only consider live events for distance tiebreaker
+      let nearestLiveDistance = Infinity;
+      let nearestLiveEvent: { name: string; distanceKm: number } | null = null;
       
-      // Add live events
-      if (eventDetails) {
-        for (const eventName of ambassador.events) {
-          const eventDetail = eventDetails.get(eventName);
-          if (eventDetail?.geometry?.coordinates) {
-            const [lon, lat] = eventDetail.geometry.coordinates;
-            allEvents.push({ name: eventName, lat, lon });
+      for (const eventName of ambassador.events) {
+        const eventDetail = eventDetails.get(eventName);
+        if (eventDetail?.geometry?.coordinates) {
+          const [lon, lat] = eventDetail.geometry.coordinates;
+          const distance = calculateDistance(prospectCoords.lat, prospectCoords.lon, lat, lon);
+          if (distance < nearestLiveDistance) {
+            nearestLiveDistance = distance;
+            nearestLiveEvent = { name: eventName, distanceKm: distance };
           }
         }
       }
       
-      // Add prospect events
-      if (prospects && ambassador.prospectiveEvents) {
-        for (const prospectId of ambassador.prospectiveEvents) {
-          const prospectEvent = prospects.findById(prospectId);
-          if (prospectEvent?.coordinates && prospectEvent.geocodingStatus === 'success') {
-            allEvents.push({
-              name: prospectEvent.prospectEvent,
-              lat: prospectEvent.coordinates.latitude,
-              lon: prospectEvent.coordinates.longitude
-            });
-          }
-        }
-      }
-      
-      // Find nearest event
-      if (allEvents.length > 0) {
-        let nearestDistance = Infinity;
-        let nearestEvent: { name: string; distanceKm: number } | null = null;
-        
-        for (const event of allEvents) {
-          const distance = calculateDistance(prospectCoords.lat, prospectCoords.lon, event.lat, event.lon);
-          if (distance < nearestDistance) {
-            nearestDistance = distance;
-            nearestEvent = { name: event.name, distanceKm: distance };
-          }
-        }
-        
-        if (nearestEvent && nearestDistance <= 50) {
-          neighboringEvents = [nearestEvent];
-          distanceBonus = Math.max(0, 100 - nearestDistance);
-        }
+      // Use distance to nearest live event as tiebreaker
+      if (nearestLiveEvent && nearestLiveDistance <= 50) {
+        neighboringEvents = [nearestLiveEvent];
+        // Distance bonus: closer = higher bonus (inverse relationship)
+        distanceBonus = Math.max(0, 100 - nearestLiveDistance);
       }
     }
     
