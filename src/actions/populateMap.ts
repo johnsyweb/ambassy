@@ -53,7 +53,7 @@ export function populateMap(
   const voronoiPoints: [number, number, string][] = [];
 
   // Tracking variables reserved for future debugging/analytics
-  // let processedEvents = 0;
+  let processedEvents = 0;
   // let eventsWithData = 0;
   // const eventsWithoutData = 0;
 
