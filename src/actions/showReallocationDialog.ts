@@ -305,25 +305,25 @@ export function showReallocationDialog(
           }
         }
         
-        // For prospect reallocation, prioritize live events for distance (tiebreaker)
-        // For live event reallocation, also prioritize live events
-        if (reallocCoords && ea.events.length > 0 && eventDetails) {
+        if (reallocCoords && (ea.events.length > 0 || (ea.prospectiveEvents && ea.prospectiveEvents.length > 0))) {
           let nearestEvent: { name: string; distanceKm: number } | null = null;
           
-          // Check live events first (prioritized for tiebreaker)
-          for (const eventName of ea.events) {
-            const eventDetail = eventDetails.get(eventName);
-            if (eventDetail?.geometry?.coordinates) {
-              const [eventLon, eventLat] = eventDetail.geometry.coordinates;
-              const distance = calculateDistance(reallocCoords.lat, reallocCoords.lon, eventLat, eventLon);
-              if (!nearestEvent || distance < nearestEvent.distanceKm) {
-                nearestEvent = { name: eventName, distanceKm: distance };
+          // Check live events
+          if (eventDetails) {
+            for (const eventName of ea.events) {
+              const eventDetail = eventDetails.get(eventName);
+              if (eventDetail?.geometry?.coordinates) {
+                const [eventLon, eventLat] = eventDetail.geometry.coordinates;
+                const distance = calculateDistance(reallocCoords.lat, reallocCoords.lon, eventLat, eventLon);
+                if (!nearestEvent || distance < nearestEvent.distanceKm) {
+                  nearestEvent = { name: eventName, distanceKm: distance };
+                }
               }
             }
           }
           
-          // Only check prospect events if no live events found (for display purposes)
-          if (!nearestEvent && prospects && ea.prospectiveEvents) {
+          // Check prospect events
+          if (prospects && ea.prospectiveEvents) {
             for (const prospectId of ea.prospectiveEvents) {
               const prospectEvent = prospects.findById(prospectId);
               if (prospectEvent?.coordinates && prospectEvent.geocodingStatus === 'success') {
