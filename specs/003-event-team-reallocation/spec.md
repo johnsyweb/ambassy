@@ -17,6 +17,7 @@ Enable users to select an Event Team from the Event Teams table and reallocate i
 - Q: What should be displayed if an Event Ambassador has no events assigned? → A: Display "No events assigned" text, distance field is null/undefined/not shown
 - Q: What should be displayed for REA name if an Event Ambassador has no assigned REA? → A: Display "Unassigned" or "No REA" text
 - Q: What is the exact scoring formula for prioritisation? → A: Base score = (1000 - totalAllocations * 10), distance bonus = (100 - distanceKm), final score = base + bonus
+- Q: What format should be used for "Other" dropdown options? → A: Short form: "Ambassador Name (live+prospect=total allocations) [REA] - X.X km to Event Name". For edge cases: show "0+0=0 allocations", "Unassigned" for REA, omit distance when no events
 
 ## User Stories
 
@@ -61,6 +62,11 @@ Enable users to select an Event Team from the Event Teams table and reallocate i
 
 **Acceptance Criteria:**
 - User can select a suggested ambassador or choose "Other" to manually select
+- "Other" dropdown displays all available ambassadors in short form format: "Ambassador Name (live+prospect=total allocations) [REA] - X.X km to Event Name"
+- For edge cases in "Other" dropdown:
+  - Show "0+0=0 allocations" when EA has no events
+  - Show "Unassigned" for REA when missing
+  - Omit distance portion when EA has no events (no distance calculation possible)
 - Reallocation removes the event from the old ambassador's events array
 - Reallocation adds the event to the new ambassador's events array
 - Event Teams table data is updated

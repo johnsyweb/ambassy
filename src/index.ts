@@ -359,7 +359,8 @@ function setupOffboardingButtons(): void {
             },
             () => {
               resolve(null);
-            }
+            },
+            eventDetails ?? undefined
           );
         });
 
@@ -974,7 +975,8 @@ function initializeTableMapNavigation(): void {
         },
         () => {
           // Handle cancel - dialog already closed by showEventTeamReallocationDialog
-        }
+        },
+        eventDetails
       );
     } catch (error) {
       alert(`Failed to get reallocation suggestions: ${error instanceof Error ? error.message : "Unknown error"}`);

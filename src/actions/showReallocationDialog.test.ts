@@ -2,6 +2,7 @@ import { showReallocationDialog } from "./showReallocationDialog";
 import { ReallocationSuggestion } from "../models/ReallocationSuggestion";
 import { EventAmbassadorMap } from "../models/EventAmbassadorMap";
 import { RegionalAmbassadorMap } from "../models/RegionalAmbassadorMap";
+import { EventDetailsMap } from "../models/EventDetailsMap";
 
 jest.mock("./getReallocationSuggestions");
 
@@ -110,6 +111,142 @@ describe("showReallocationDialog", () => {
 
     const dropdown = content.querySelector("select#otherRecipientSelect") as HTMLSelectElement;
     expect(dropdown).not.toBeNull();
+  });
+
+  it("should display short form format in Other dropdown with live+prospect counts", () => {
+    eventAmbassadors.set("EA 1", { name: "EA 1", events: ["Event1", "Event2"], prospectiveEvents: ["prospect1"] });
+    const eventDetails: EventDetailsMap = new Map([
+      ["test-event", {
+        id: "test",
+        type: "Feature",
+        geometry: { type: "Point", coordinates: [-37.8136, 144.9631] },
+        properties: {
+          eventname: "test-event",
+          EventLongName: "Test Event",
+          EventShortName: "test-event",
+          LocalisedEventLongName: null,
+          countrycode: 13,
+          seriesid: 1,
+          EventLocation: "Melbourne",
+        },
+      }],
+      ["Event1", {
+        id: "1",
+        type: "Feature",
+        geometry: { type: "Point", coordinates: [-37.82, 144.97] },
+        properties: {
+          eventname: "Event1",
+          EventLongName: "Event 1",
+          EventShortName: "Event1",
+          LocalisedEventLongName: null,
+          countrycode: 13,
+          seriesid: 1,
+          EventLocation: "Melbourne",
+        },
+      }],
+    ]);
+
+    showReallocationDialog("test-event", "Current EA", suggestions, eventAmbassadors, undefined, onSelect, onCancel, eventDetails);
+
+    const dropdown = content.querySelector("select#otherRecipientSelect") as HTMLSelectElement;
+    const ea1Option = Array.from(dropdown.options).find(opt => opt.value === "EA 1");
+    expect(ea1Option).toBeDefined();
+    expect(ea1Option?.textContent).toContain("EA 1");
+    expect(ea1Option?.textContent).toContain("2+1=3 allocations");
+  });
+
+  it("should display REA name in Other dropdown format", () => {
+    const regionalAmbassadors: RegionalAmbassadorMap = new Map([
+      ["REA 1", { name: "REA 1", state: "VIC", supportsEAs: ["EA 1"] }],
+    ]);
+    eventAmbassadors.set("EA 1", { name: "EA 1", events: ["Event1"] });
+
+    showReallocationDialog("test-event", "Current EA", suggestions, eventAmbassadors, regionalAmbassadors, onSelect, onCancel);
+
+    const dropdown = content.querySelector("select#otherRecipientSelect") as HTMLSelectElement;
+    const ea1Option = Array.from(dropdown.options).find(opt => opt.value === "EA 1");
+    expect(ea1Option).toBeDefined();
+    expect(ea1Option?.textContent).toContain("[REA 1]");
+  });
+
+  it("should display 'Unassigned' for REA in Other dropdown when missing", () => {
+    eventAmbassadors.set("EA 1", { name: "EA 1", events: ["Event1"] });
+
+    showReallocationDialog("test-event", "Current EA", suggestions, eventAmbassadors, undefined, onSelect, onCancel);
+
+    const dropdown = content.querySelector("select#otherRecipientSelect") as HTMLSelectElement;
+    const ea1Option = Array.from(dropdown.options).find(opt => opt.value === "EA 1");
+    expect(ea1Option).toBeDefined();
+    expect(ea1Option?.textContent).toContain("[Unassigned]");
+  });
+
+  it("should display distance in Other dropdown when eventDetails available", () => {
+    eventAmbassadors.set("EA 1", { name: "EA 1", events: ["Event1"] });
+    const eventDetails: EventDetailsMap = new Map([
+      ["test-event", {
+        id: "test",
+        type: "Feature",
+        geometry: { type: "Point", coordinates: [-37.8136, 144.9631] },
+        properties: {
+          eventname: "test-event",
+          EventLongName: "Test Event",
+          EventShortName: "test-event",
+          LocalisedEventLongName: null,
+          countrycode: 13,
+          seriesid: 1,
+          EventLocation: "Melbourne",
+        },
+      }],
+      ["Event1", {
+        id: "1",
+        type: "Feature",
+        geometry: { type: "Point", coordinates: [-37.82, 144.97] },
+        properties: {
+          eventname: "Event1",
+          EventLongName: "Event 1",
+          EventShortName: "Event1",
+          LocalisedEventLongName: null,
+          countrycode: 13,
+          seriesid: 1,
+          EventLocation: "Melbourne",
+        },
+      }],
+    ]);
+
+    showReallocationDialog("test-event", "Current EA", suggestions, eventAmbassadors, undefined, onSelect, onCancel, eventDetails);
+
+    const dropdown = content.querySelector("select#otherRecipientSelect") as HTMLSelectElement;
+    const ea1Option = Array.from(dropdown.options).find(opt => opt.value === "EA 1");
+    expect(ea1Option).toBeDefined();
+    expect(ea1Option?.textContent).toMatch(/\d+\.\d+ km to Event1/);
+  });
+
+  it("should omit distance in Other dropdown when EA has no events", () => {
+    eventAmbassadors.set("EA 1", { name: "EA 1", events: [] });
+    const eventDetails: EventDetailsMap = new Map([
+      ["test-event", {
+        id: "test",
+        type: "Feature",
+        geometry: { type: "Point", coordinates: [-37.8136, 144.9631] },
+        properties: {
+          eventname: "test-event",
+          EventLongName: "Test Event",
+          EventShortName: "test-event",
+          LocalisedEventLongName: null,
+          countrycode: 13,
+          seriesid: 1,
+          EventLocation: "Melbourne",
+        },
+      }],
+    ]);
+
+    showReallocationDialog("test-event", "Current EA", suggestions, eventAmbassadors, undefined, onSelect, onCancel, eventDetails);
+
+    const dropdown = content.querySelector("select#otherRecipientSelect") as HTMLSelectElement;
+    const ea1Option = Array.from(dropdown.options).find(opt => opt.value === "EA 1");
+    expect(ea1Option).toBeDefined();
+    expect(ea1Option?.textContent).toContain("0+0=0 allocations");
+    expect(ea1Option?.textContent).not.toContain("km to");
   });
 
   it("should call onSelect when suggestion button is clicked", () => {

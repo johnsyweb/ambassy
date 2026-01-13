@@ -1,6 +1,8 @@
 import { ReallocationSuggestion } from "@models/ReallocationSuggestion";
 import { EventAmbassadorMap } from "@models/EventAmbassadorMap";
 import { RegionalAmbassadorMap } from "@models/RegionalAmbassadorMap";
+import { EventDetailsMap } from "@models/EventDetailsMap";
+import { calculateDistance } from "../utils/geography";
 
 /**
  * Display a modal dialog with prioritised ambassador suggestions for reallocating an event or event ambassador.
@@ -13,7 +15,8 @@ export function showReallocationDialog(
   eventAmbassadors?: EventAmbassadorMap,
   regionalAmbassadors?: RegionalAmbassadorMap,
   onSelect?: (ambassadorName: string) => void,
-  onCancel?: () => void
+  onCancel?: () => void,
+  eventDetails?: EventDetailsMap
 ): void {
   const dialog = document.getElementById("reallocationDialog") as HTMLElement;
   const title = document.getElementById("reallocationDialogTitle") as HTMLElement;
@@ -247,6 +250,11 @@ export function showReallocationDialog(
     : Array.from((regionalAmbassadors as RegionalAmbassadorMap).keys())
         .filter(ambassador => ambassador !== currentAmbassador)
         .sort();
+  
+  const reallocatingEventName = isEventReallocation && suggestions.length > 0 && suggestions[0].items.length > 0
+    ? suggestions[0].items[0]
+    : itemName;
+  
   allAmbassadors.forEach((ambassador) => {
     const optionElement = document.createElement("option");
     optionElement.value = ambassador;
@@ -255,9 +263,12 @@ export function showReallocationDialog(
     if (isEventReallocation && eventAmbassadors) {
       const ea = eventAmbassadors.get(ambassador);
       if (ea) {
-        let reaName = "?";
+        const liveCount = ea.events.length;
+        const prospectCount = ea.prospectiveEvents?.length ?? 0;
+        const totalCount = liveCount + prospectCount;
+        
+        let reaName: string | null = null;
         if (regionalAmbassadors) {
-          // Find which RA supports this EA
           for (const [raName, ra] of regionalAmbassadors) {
             if (ra.supportsEAs.includes(ambassador)) {
               reaName = raName;
@@ -265,7 +276,35 @@ export function showReallocationDialog(
             }
           }
         }
-        displayText = `${ambassador} (${ea.events.length} allocation${ea.events.length !== 1 ? "s" : ""}) [${reaName}]`;
+        
+        const reaDisplay = reaName ?? "Unassigned";
+        const allocationText = `(${liveCount}+${prospectCount}=${totalCount} allocation${totalCount !== 1 ? "s" : ""})`;
+        
+        let distanceText = "";
+        if (eventDetails && ea.events.length > 0) {
+          const reallocatingEvent = eventDetails.get(reallocatingEventName);
+          if (reallocatingEvent?.geometry?.coordinates) {
+            const [reallocLon, reallocLat] = reallocatingEvent.geometry.coordinates;
+            
+            let nearestEvent: { name: string; distanceKm: number } | null = null;
+            for (const eventName of ea.events) {
+              const eventDetail = eventDetails.get(eventName);
+              if (eventDetail?.geometry?.coordinates) {
+                const [eventLon, eventLat] = eventDetail.geometry.coordinates;
+                const distance = calculateDistance(reallocLat, reallocLon, eventLat, eventLon);
+                if (!nearestEvent || distance < nearestEvent.distanceKm) {
+                  nearestEvent = { name: eventName, distanceKm: distance };
+                }
+              }
+            }
+            
+            if (nearestEvent) {
+              distanceText = ` - ${nearestEvent.distanceKm.toFixed(1)} km to ${nearestEvent.name}`;
+            }
+          }
+        }
+        
+        displayText = `${ambassador} ${allocationText} [${reaDisplay}]${distanceText}`;
       }
     }
 
