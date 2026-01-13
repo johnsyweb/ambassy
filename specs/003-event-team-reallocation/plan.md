@@ -1,25 +1,24 @@
 # Implementation Plan: Event Team Reallocation
 
-**Branch**: `003-event-team-reallocation` | **Date**: 2026-01-08 | **Spec**: [spec.md](./spec.md)  
+**Branch**: `003-event-team-reallocation` | **Date**: 2026-01-08 | **Spec**: [spec.md](./spec.md)
 **Input**: Feature specification from `/specs/003-event-team-reallocation/spec.md`
 
 **Note**: This template is filled in by the `/speckit.plan` command. See `.specify/templates/commands/plan.md` for the execution workflow.
 
 ## Summary
 
-Enable users to select an Event Team from the Event Teams table and reallocate it to another Event Ambassador. The application prioritises potential recipients based on their available capacity and the geographic proximity of events they already support to the event being reallocated. This feature leverages existing reallocation scoring logic (`suggestEventReallocation`) and assignment functionality (`assignEventToAmbassador`) to provide a streamlined UI workflow for reallocating individual events.
+Enable users to select an Event Team from the Event Teams table and reallocate it to another Event Ambassador. The application prioritises potential recipients based on total allocation count (live + prospect events, with 0 = highest priority) and geographic proximity (distance to nearest supported event as tiebreaker). The reallocation dialog displays comprehensive context including live/prospect event counts, supporting REA name, and distance to nearest event. This feature extends existing reallocation scoring logic and dialog UI to support enhanced context display.
 
 ## Technical Context
 
-**Language/Version**: TypeScript (strict mode enabled)  
+**Language/Version**: TypeScript 5.9.3 (strict mode enabled)  
 **Primary Dependencies**: 
-- Leaflet (map rendering)
-- PapaParse (CSV parsing)
-- Existing modules: `assignEventToAmbassador`, `suggestEventReallocation`, `calculateGeographicProximityScore`, `checkEventAmbassadorCapacity`
+- Leaflet 1.9.4 (map rendering and geographic calculations)
+- Existing modules: `assignEventToAmbassador`, `suggestEventReallocation`, `calculateGeographicProximityScore`, `checkEventAmbassadorCapacity`, `showReallocationDialog`
 
 **Storage**: Browser localStorage/sessionStorage (via existing `persistState` utilities)  
-**Testing**: Jest (unit tests, integration tests)  
-**Target Platform**: Modern web browsers (ES6+)  
+**Testing**: Jest 30.2.0 with ts-jest, jest-environment-jsdom  
+**Target Platform**: Modern web browsers (ES6+, Chrome, Firefox, Safari, Edge)  
 **Project Type**: Single-page web application  
 **Performance Goals**: 
 - UI interactions should feel responsive (<100ms perceived latency)
@@ -28,52 +27,67 @@ Enable users to select an Event Team from the Event Teams table and reallocate i
 
 **Constraints**: 
 - Must maintain keyboard accessibility (all interactions keyboard-controllable)
-- Must use Australian English for user-facing text
+- Must use Australian English for all user-facing text
 - Must integrate with existing table-map navigation feature
 - Must preserve existing logging and persistence mechanisms
-- Must follow existing code structure (models/, actions/, utils/)
+- Must handle edge cases: EAs with no events, EAs with no REA assignment
 
 **Scale/Scope**: 
-- Typical dataset: 50-200 Event Ambassadors, 500-2000 Event Teams
-- Single user workflow (no concurrent editing)
-- Feature adds one new UI action (reallocation button/dialog) to Event Teams table
+- Typical dataset: <100 Event Ambassadors, <200 events
+- Dialog displays top 5 suggestions plus "Other" dropdown
+- Must handle up to 200 events for performance testing
 
 ## Constitution Check
 
 *GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
 
-### I. Quality Gates
-✅ **PASS**: Code will be formatted with Prettier, pass ESLint, pass TypeScript type checking, and all tests must pass before commit.
+### Quality Gates ✅
+- **Code Formatting**: Prettier configured, will be applied before commit
+- **Linting**: ESLint configured with TypeScript support, will pass before commit
+- **Type Checking**: TypeScript strict mode enabled, will pass before commit
+- **Tests**: Jest configured, tests will be written following TDD principles
+- **Disused Code**: Will be removed immediately
 
-### II. Test-Driven Development
-✅ **PASS**: Tests will be written for all new functions. Tests will test production code directly (no test environment checks). Functions will maintain low cyclomatic complexity.
+### Test-Driven Development ✅
+- Tests will be written for all production code
+- Tests will test production code directly (no test environment checks)
+- Functions will have low cyclomatic complexity
+- Tests will not pollute console
 
-### III. Atomic Commits with Semantic Messages
-✅ **PASS**: Each change will be committed atomically with Conventional Commits format messages.
+### Atomic Commits ✅
+- Each change will be committed atomically with semantic commit messages
+- Commits will follow Conventional Commits specification
 
-### IV. Single Responsibility & Clean Architecture
-✅ **PASS**: Feature will follow existing code structure:
-- `src/actions/reallocateEventTeam.ts` - Core reallocation action
-- `src/actions/showReallocationDialog.ts` - UI dialog management
-- `src/models/ReallocationState.ts` - Selection state model (if needed)
-- Tests alongside source files
+### Single Responsibility & Clean Architecture ✅
+- Each component has single responsibility:
+  - `ReallocationSuggestion` model: Data structure only
+  - `suggestEventReallocation()`: Scoring logic only
+  - `showReallocationDialog()`: UI rendering only
+  - `assignEventToAmbassador()`: Assignment logic only
+- Code follows existing structure: models/, actions/, utils/
+- Comments avoided in favor of self-documenting code
 
-### V. Accessibility & User Experience
-✅ **PASS**: All interactions will be keyboard accessible. UI will be clean and professional. Australian English will be used.
+### Accessibility & User Experience ✅
+- All interactions keyboard accessible (Tab, Enter, Arrow keys)
+- Dialog supports keyboard navigation
+- Screen reader compatible (ARIA attributes)
+- Australian English for user-facing text
+- Clear visual feedback for selections
 
-### VI. Open Source Preference
-✅ **PASS**: Feature uses existing open source libraries (no new dependencies required).
+### Open Source Preference ✅
+- Using Leaflet (open source map library)
+- No custom geographic calculation needed
 
-### VII. Documentation Currency
-✅ **PASS**: README will be updated if feature affects setup or usage.
+### Documentation Currency ✅
+- README will be updated if setup/usage changes
+- Feature documentation in quickstart.md
 
-### VIII. Production/Test Parity
-✅ **PASS**: Code will behave identically in production and test environments.
+### Production/Test Parity ✅
+- Code behaves identically in production and test
+- No environment-specific branches
+- Tests exercise same code paths as production
 
-### IX. Twelve-Factor App Principles
-✅ **PASS**: Feature follows existing application patterns (stateless, configuration via environment variables where applicable).
-
-**Constitution Check Result**: ✅ **ALL GATES PASS**
+**Status**: ✅ All gates pass. No violations.
 
 ## Project Structure
 
@@ -82,37 +96,39 @@ Enable users to select an Event Team from the Event Teams table and reallocate i
 ```text
 specs/003-event-team-reallocation/
 ├── plan.md              # This file (/speckit.plan command output)
-├── research.md          # Phase 0 output (/speckit.plan command)
-├── data-model.md        # Phase 1 output (/speckit.plan command)
-├── quickstart.md        # Phase 1 output (/speckit.plan command)
-├── contracts/           # Phase 1 output (/speckit.plan command)
+├── research.md          # Phase 0 output (/speckit.plan command) - COMPLETE
+├── data-model.md        # Phase 1 output (/speckit.plan command) - COMPLETE
+├── quickstart.md        # Phase 1 output (/speckit.plan command) - COMPLETE
+├── contracts/           # Phase 1 output (/speckit.plan command) - COMPLETE
 │   └── reallocation-contracts.md
-└── tasks.md             # Phase 2 output (/speckit.tasks command - NOT created by /speckit.plan)
+└── tasks.md             # Phase 2 output (/speckit.tasks command - NOT created by /speckit.plan) - COMPLETE
 ```
 
 ### Source Code (repository root)
 
 ```text
 src/
-├── actions/
-│   ├── reallocateEventTeam.ts          # Core reallocation action
-│   ├── reallocateEventTeam.test.ts     # Tests for reallocation
-│   ├── showReallocationDialog.ts       # UI dialog management
-│   └── showReallocationDialog.test.ts  # Tests for dialog
 ├── models/
-│   └── ReallocationState.ts            # Selection state (if needed)
+│   └── ReallocationSuggestion.ts    # Extended with liveEventsCount, prospectEventsCount
+├── actions/
+│   ├── suggestReallocation.ts        # Extended to calculate and include live/prospect counts
+│   ├── showReallocationDialog.ts     # Extended to display enhanced context
+│   ├── assignEventToAmbassador.ts    # Core assignment logic (existing)
+│   └── reallocateEventTeam.ts        # Reallocation coordination (may need updates)
 └── utils/
-    └── (no new utilities - uses existing)
+    └── geography.ts                  # Distance calculations (existing)
 
-src/actions/populateEventTeamsTable.ts   # Modified to add reallocation button/action
-public/index.html                         # Modified to add reallocation dialog HTML
-public/style.css                          # Modified to add dialog styles
+tests/
+└── (tests co-located with source files)
+    └── actions/
+        ├── suggestReallocation.test.ts
+        └── showReallocationDialog.test.ts
 ```
 
-**Structure Decision**: Single project structure. Feature adds new action modules following existing patterns. UI components (dialog) follow existing modal dialog pattern (similar to reallocation dialog used in offboarding). No new utilities required - leverages existing `suggestEventReallocation`, `assignEventToAmbassador`, and storage utilities.
+**Structure Decision**: Single project structure following existing codebase layout. Models in `src/models/`, action logic in `src/actions/`, utilities in `src/utils/`. Tests co-located with source files using `.test.ts` suffix.
 
 ## Complexity Tracking
 
 > **Fill ONLY if Constitution Check has violations that must be justified**
 
-No violations - all constitution checks pass.
+No violations - all constitution gates pass.

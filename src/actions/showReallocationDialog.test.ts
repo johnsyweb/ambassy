@@ -1,6 +1,7 @@
 import { showReallocationDialog } from "./showReallocationDialog";
 import { ReallocationSuggestion } from "../models/ReallocationSuggestion";
 import { EventAmbassadorMap } from "../models/EventAmbassadorMap";
+import { RegionalAmbassadorMap } from "../models/RegionalAmbassadorMap";
 
 jest.mock("./getReallocationSuggestions");
 
@@ -182,5 +183,146 @@ describe("showReallocationDialog", () => {
     cancelButton.click();
 
     expect(dialog.style.display).toBe("none");
+  });
+
+  describe("Enhanced context display", () => {
+    it("should display live events count, prospect events count, and total allocations", () => {
+      const enhancedSuggestions: ReallocationSuggestion[] = [
+        {
+          fromAmbassador: "Current EA",
+          toAmbassador: "EA 1",
+          items: ["test-event"],
+          score: 980,
+          liveEventsCount: 2,
+          prospectEventsCount: 1,
+          allocationCount: 3,
+          reasons: ["Has available capacity"],
+        },
+      ];
+
+      showReallocationDialog("test-event", "Current EA", enhancedSuggestions, eventAmbassadors, undefined, onSelect, onCancel);
+
+      const firstButton = content.querySelector("button.suggestion-button") as HTMLButtonElement;
+      expect(firstButton.textContent).toContain("2 live");
+      expect(firstButton.textContent).toContain("1 prospect");
+      expect(firstButton.textContent).toContain("3 total");
+    });
+
+    it("should display REA name when available", () => {
+      const regionalAmbassadors: RegionalAmbassadorMap = new Map([
+        ["REA 1", { name: "REA 1", state: "VIC", supportsEAs: ["EA 1"] }],
+      ]);
+
+      const enhancedSuggestions: ReallocationSuggestion[] = [
+        {
+          fromAmbassador: "Current EA",
+          toAmbassador: "EA 1",
+          items: ["test-event"],
+          score: 980,
+          liveEventsCount: 2,
+          prospectEventsCount: 0,
+          allocationCount: 2,
+        },
+      ];
+
+      showReallocationDialog("test-event", "Current EA", enhancedSuggestions, eventAmbassadors, regionalAmbassadors, onSelect, onCancel);
+
+      const firstButton = content.querySelector("button.suggestion-button") as HTMLButtonElement;
+      expect(firstButton.textContent).toContain("REA: REA 1");
+    });
+
+    it("should display 'Unassigned' when REA is missing", () => {
+      const regionalAmbassadors: RegionalAmbassadorMap = new Map();
+
+      const enhancedSuggestions: ReallocationSuggestion[] = [
+        {
+          fromAmbassador: "Current EA",
+          toAmbassador: "EA 1",
+          items: ["test-event"],
+          score: 980,
+          liveEventsCount: 2,
+          prospectEventsCount: 0,
+          allocationCount: 2,
+        },
+      ];
+
+      showReallocationDialog("test-event", "Current EA", enhancedSuggestions, eventAmbassadors, regionalAmbassadors, onSelect, onCancel);
+
+      const firstButton = content.querySelector("button.suggestion-button") as HTMLButtonElement;
+      expect(firstButton.textContent).toContain("REA: Unassigned");
+    });
+
+    it("should display distance to nearest event in correct format", () => {
+      const enhancedSuggestions: ReallocationSuggestion[] = [
+        {
+          fromAmbassador: "Current EA",
+          toAmbassador: "EA 1",
+          items: ["test-event"],
+          score: 980,
+          liveEventsCount: 2,
+          prospectEventsCount: 0,
+          allocationCount: 2,
+          neighboringEvents: [
+            { name: "Armstrong Creek", distanceKm: 5.2 },
+          ],
+        },
+      ];
+
+      showReallocationDialog("test-event", "Current EA", enhancedSuggestions, eventAmbassadors, undefined, onSelect, onCancel);
+
+      const firstButton = content.querySelector("button.suggestion-button") as HTMLButtonElement;
+      expect(firstButton.textContent).toContain("5.2 km to Armstrong Creek");
+    });
+
+    it("should display 'No events assigned' when EA has no events", () => {
+      const enhancedSuggestions: ReallocationSuggestion[] = [
+        {
+          fromAmbassador: "Current EA",
+          toAmbassador: "EA 1",
+          items: ["test-event"],
+          score: 1000,
+          liveEventsCount: 0,
+          prospectEventsCount: 0,
+          allocationCount: 0,
+        },
+      ];
+
+      showReallocationDialog("test-event", "Current EA", enhancedSuggestions, eventAmbassadors, undefined, onSelect, onCancel);
+
+      const firstButton = content.querySelector("button.suggestion-button") as HTMLButtonElement;
+      expect(firstButton.textContent).toContain("No events assigned");
+    });
+
+    it("should include enhanced context in aria-label", () => {
+      const regionalAmbassadors: RegionalAmbassadorMap = new Map([
+        ["REA 1", { name: "REA 1", state: "VIC", supportsEAs: ["EA 1"] }],
+      ]);
+
+      const enhancedSuggestions: ReallocationSuggestion[] = [
+        {
+          fromAmbassador: "Current EA",
+          toAmbassador: "EA 1",
+          items: ["test-event"],
+          score: 980,
+          liveEventsCount: 2,
+          prospectEventsCount: 1,
+          allocationCount: 3,
+          neighboringEvents: [
+            { name: "Armstrong Creek", distanceKm: 5.2 },
+          ],
+          reasons: ["Has available capacity"],
+        },
+      ];
+
+      showReallocationDialog("test-event", "Current EA", enhancedSuggestions, eventAmbassadors, regionalAmbassadors, onSelect, onCancel);
+
+      const firstButton = content.querySelector("button.suggestion-button") as HTMLButtonElement;
+      const ariaLabel = firstButton.getAttribute("aria-label");
+      expect(ariaLabel).toContain("2 live events");
+      expect(ariaLabel).toContain("1 prospect events");
+      expect(ariaLabel).toContain("3 total allocations");
+      expect(ariaLabel).toContain("REA: REA 1");
+      expect(ariaLabel).toContain("5.2 km to Armstrong Creek");
+    });
   });
 });

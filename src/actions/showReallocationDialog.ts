@@ -62,28 +62,54 @@ export function showReallocationDialog(
       nameSpan.textContent = suggestion.toAmbassador;
       buttonText.appendChild(nameSpan);
       
-      if (suggestion.allocationCount !== undefined) {
-        const allocationSpan = document.createElement("span");
-        allocationSpan.style.marginLeft = "0.5em";
-        allocationSpan.style.color = "#666";
-        allocationSpan.style.fontWeight = "normal";
+      if (isEventReallocation) {
+        const contextDiv = document.createElement("div");
+        contextDiv.style.fontSize = "0.9em";
+        contextDiv.style.color = "#555";
+        contextDiv.style.marginTop = "0.25em";
+        contextDiv.style.display = "flex";
+        contextDiv.style.flexDirection = "column";
+        contextDiv.style.gap = "0.25em";
 
-        let displayText = `(${suggestion.allocationCount} allocation${suggestion.allocationCount !== 1 ? "s" : ""})`;
+        const liveCount = suggestion.liveEventsCount ?? 0;
+        const prospectCount = suggestion.prospectEventsCount ?? 0;
+        const totalCount = suggestion.allocationCount ?? (liveCount + prospectCount);
 
-        // For event reallocation (EA suggestions), show the supporting REA
-        if (isEventReallocation && regionalAmbassadors) {
-          let reaName = "?";
-          // Find which RA supports this EA
+        const allocationInfo = document.createElement("div");
+        allocationInfo.textContent = `${liveCount} live, ${prospectCount} prospect, ${totalCount} total`;
+        contextDiv.appendChild(allocationInfo);
+
+        if (regionalAmbassadors) {
+          let reaName: string | null = null;
           for (const [raName, ra] of regionalAmbassadors) {
             if (ra.supportsEAs.includes(suggestion.toAmbassador)) {
               reaName = raName;
               break;
             }
           }
-          displayText += ` [${reaName}]`;
+          const reaInfo = document.createElement("div");
+          reaInfo.textContent = `REA: ${reaName ?? "Unassigned"}`;
+          contextDiv.appendChild(reaInfo);
         }
 
-        allocationSpan.textContent = displayText;
+        if (suggestion.neighboringEvents && suggestion.neighboringEvents.length > 0) {
+          const nearestEvent = suggestion.neighboringEvents[0];
+          const distanceInfo = document.createElement("div");
+          distanceInfo.textContent = `${nearestEvent.distanceKm.toFixed(1)} km to ${nearestEvent.name}`;
+          contextDiv.appendChild(distanceInfo);
+        } else if (liveCount === 0 && prospectCount === 0) {
+          const noEventsInfo = document.createElement("div");
+          noEventsInfo.textContent = "No events assigned";
+          contextDiv.appendChild(noEventsInfo);
+        }
+
+        buttonText.appendChild(contextDiv);
+      } else if (suggestion.allocationCount !== undefined) {
+        const allocationSpan = document.createElement("span");
+        allocationSpan.style.marginLeft = "0.5em";
+        allocationSpan.style.color = "#666";
+        allocationSpan.style.fontWeight = "normal";
+        allocationSpan.textContent = `(${suggestion.allocationCount} allocation${suggestion.allocationCount !== 1 ? "s" : ""})`;
         buttonText.appendChild(allocationSpan);
       }
       
@@ -121,7 +147,32 @@ export function showReallocationDialog(
       button.style.backgroundColor = index === 0 ? "#e3f2fd" : "white";
       button.style.cursor = "pointer";
       button.setAttribute("tabindex", index === 0 ? "0" : "-1");
-      button.setAttribute("aria-label", `${suggestion.toAmbassador}, score ${suggestion.score.toFixed(0)}. ${suggestion.reasons?.join(", ") || ""}${suggestion.warnings ? `. Warnings: ${suggestion.warnings.join(", ")}` : ""}`);
+      
+      const liveCount = suggestion.liveEventsCount ?? 0;
+      const prospectCount = suggestion.prospectEventsCount ?? 0;
+      const totalCount = suggestion.allocationCount ?? (liveCount + prospectCount);
+      let ariaLabel = `${suggestion.toAmbassador}, ${liveCount} live events, ${prospectCount} prospect events, ${totalCount} total allocations`;
+      
+      if (isEventReallocation && regionalAmbassadors) {
+        let reaName: string | null = null;
+        for (const [raName, ra] of regionalAmbassadors) {
+          if (ra.supportsEAs.includes(suggestion.toAmbassador)) {
+            reaName = raName;
+            break;
+          }
+        }
+        ariaLabel += `, REA: ${reaName ?? "Unassigned"}`;
+      }
+      
+      if (suggestion.neighboringEvents && suggestion.neighboringEvents.length > 0) {
+        const nearestEvent = suggestion.neighboringEvents[0];
+        ariaLabel += `, ${nearestEvent.distanceKm.toFixed(1)} km to ${nearestEvent.name}`;
+      } else if (liveCount === 0 && prospectCount === 0) {
+        ariaLabel += ", No events assigned";
+      }
+      
+      ariaLabel += `, score ${suggestion.score.toFixed(0)}. ${suggestion.reasons?.join(", ") || ""}${suggestion.warnings ? `. Warnings: ${suggestion.warnings.join(", ")}` : ""}`;
+      button.setAttribute("aria-label", ariaLabel);
 
       button.addEventListener("click", () => {
         dialog.style.display = "none";

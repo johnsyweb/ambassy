@@ -11,6 +11,8 @@ export interface ReallocationSuggestion {
   reasons?: string[];
   warnings?: string[];
   allocationCount?: number;
+  liveEventsCount?: number;
+  prospectEventsCount?: number;
   neighboringEvents?: NeighboringEvent[];
 }
 

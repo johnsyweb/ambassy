@@ -306,6 +306,137 @@ describe("suggestReallocation", () => {
         suggestEventReallocation("EA1", [], eventAmbassadors, eventDetails, limits, regionalAmbassadors);
       }).toThrow();
     });
+
+    it("should include liveEventsCount and prospectEventsCount in suggestions", () => {
+      const eventAmbassadors: EventAmbassadorMap = new Map([
+        ["EA1", { name: "EA1", events: ["Event1"], capacityStatus: undefined }],
+        ["EA2", { 
+          name: "EA2", 
+          events: ["Event2", "Event3"], 
+          prospectiveEvents: ["prospect1", "prospect2"],
+          capacityStatus: undefined 
+        }],
+      ]);
+
+      const eventDetails: EventDetailsMap = new Map([
+        ["Event1", {
+          id: "1",
+          type: "Feature",
+          geometry: { type: "Point", coordinates: [-37.8136, 144.9631] },
+          properties: {
+            eventname: "Event1",
+            EventLongName: "Event 1",
+            EventShortName: "Event1",
+            LocalisedEventLongName: null,
+            countrycode: 13,
+            seriesid: 1,
+            EventLocation: "Melbourne",
+          },
+        }],
+        ["Event2", {
+          id: "2",
+          type: "Feature",
+          geometry: { type: "Point", coordinates: [-37.82, 144.97] },
+          properties: {
+            eventname: "Event2",
+            EventLongName: "Event 2",
+            EventShortName: "Event2",
+            LocalisedEventLongName: null,
+            countrycode: 13,
+            seriesid: 1,
+            EventLocation: "Melbourne",
+          },
+        }],
+      ]);
+
+      const regionalAmbassadors: RegionalAmbassadorMap = new Map();
+      const suggestions = suggestEventReallocation(
+        "EA1",
+        ["Event1"],
+        eventAmbassadors,
+        eventDetails,
+        limits,
+        regionalAmbassadors
+      );
+
+      const ea2Suggestion = suggestions.find(s => s.toAmbassador === "EA2");
+      expect(ea2Suggestion).toBeDefined();
+      expect(ea2Suggestion?.liveEventsCount).toBe(2);
+      expect(ea2Suggestion?.prospectEventsCount).toBe(2);
+      expect(ea2Suggestion?.allocationCount).toBe(4);
+    });
+
+    it("should use total allocations (live + prospect) for scoring prioritisation", () => {
+      const eventAmbassadors: EventAmbassadorMap = new Map([
+        ["EA1", { name: "EA1", events: ["Event1"], capacityStatus: undefined }],
+        ["EA2", { 
+          name: "EA2", 
+          events: [], 
+          prospectiveEvents: ["prospect1"],
+          capacityStatus: undefined 
+        }],
+        ["EA3", { 
+          name: "EA3", 
+          events: ["Event2"], 
+          capacityStatus: undefined 
+        }],
+      ]);
+
+      const eventDetails: EventDetailsMap = new Map([
+        ["Event1", {
+          id: "1",
+          type: "Feature",
+          geometry: { type: "Point", coordinates: [-37.8136, 144.9631] },
+          properties: {
+            eventname: "Event1",
+            EventLongName: "Event 1",
+            EventShortName: "Event1",
+            LocalisedEventLongName: null,
+            countrycode: 13,
+            seriesid: 1,
+            EventLocation: "Melbourne",
+          },
+        }],
+        ["Event2", {
+          id: "2",
+          type: "Feature",
+          geometry: { type: "Point", coordinates: [-37.82, 144.97] },
+          properties: {
+            eventname: "Event2",
+            EventLongName: "Event 2",
+            EventShortName: "Event2",
+            LocalisedEventLongName: null,
+            countrycode: 13,
+            seriesid: 1,
+            EventLocation: "Melbourne",
+          },
+        }],
+      ]);
+
+      const regionalAmbassadors: RegionalAmbassadorMap = new Map();
+      const suggestions = suggestEventReallocation(
+        "EA1",
+        ["Event1"],
+        eventAmbassadors,
+        eventDetails,
+        limits,
+        regionalAmbassadors
+      );
+
+      const ea2Suggestion = suggestions.find(s => s.toAmbassador === "EA2");
+      const ea3Suggestion = suggestions.find(s => s.toAmbassador === "EA3");
+      
+      expect(ea2Suggestion).toBeDefined();
+      expect(ea3Suggestion).toBeDefined();
+      
+      expect(ea2Suggestion?.allocationCount).toBe(1);
+      expect(ea3Suggestion?.allocationCount).toBe(1);
+      
+      expect(ea2Suggestion?.liveEventsCount).toBe(0);
+      expect(ea2Suggestion?.prospectEventsCount).toBe(1);
+      expect(ea3Suggestion?.liveEventsCount).toBe(1);
+      expect(ea3Suggestion?.prospectEventsCount).toBe(0);
+    });
   });
 
   describe("suggestEventAmbassadorReallocation", () => {

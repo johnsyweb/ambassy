@@ -306,11 +306,14 @@ export function suggestEventReallocation(
 
     const proximityScore = calculateGeographicProximityScore(recipient.events, events, eventDetails);
     const neighboringEvents = findNeighboringEvents(recipient.events, events, eventDetails, 50);
-    const allocationCount = recipient.events.length;
+    
+    const liveEventsCount = recipient.events.length;
+    const prospectEventsCount = recipient.prospectiveEvents?.length ?? 0;
+    const totalAllocations = liveEventsCount + prospectEventsCount;
 
-    // Primary ordering: allocation count (fewer = higher priority)
-    // Use a base score that decreases with allocation count
-    const baseScore = Math.max(0, 1000 - (allocationCount * 10));
+    // Primary ordering: total allocation count (fewer = higher priority, 0 = highest)
+    // Use a base score that decreases with total allocation count
+    const baseScore = Math.max(0, 1000 - (totalAllocations * 10));
 
     // Secondary ordering: distance to nearest supported event (closer = higher priority)
     let distanceBonus = 0;
@@ -342,7 +345,9 @@ export function suggestEventReallocation(
       score,
       reasons: reasons.length > 0 ? reasons : undefined,
       warnings: warnings.length > 0 ? warnings : undefined,
-      allocationCount,
+      allocationCount: totalAllocations,
+      liveEventsCount,
+      prospectEventsCount,
       neighboringEvents: neighboringEvents.length > 0 ? neighboringEvents : undefined,
     });
   });
