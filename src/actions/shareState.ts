@@ -113,37 +113,40 @@ export async function shareStateViaNativeShare(): Promise<ShareStateResult> {
       return {
         method: "native",
         success: false,
-        error: `State is too large for sharing (${Math.round(sizeInBytes / 1024)}KB). Please use file download instead.`,
+        error: `State is too large to share as a link (${Math.round(
+          sizeInBytes / 1024,
+        )}KB). Please use "Save to File" or "Copy State Text" instead.`,
         timestamp: Date.now(),
       };
     }
 
-    const dataUrl = createDataUrl(jsonString);
     const currentUrl = window.location.href.split("?")[0];
+    const dataUrl = createDataUrl(jsonString);
     const shareUrl = `${currentUrl}?state=${encodeURIComponent(dataUrl)}`;
 
-    // Check if URL would be too long (most servers limit to ~2000 chars, browsers ~2000-8000)
-    // If too long, share the data URL directly with instructions
+    // Avoid creating URLs that are too long for typical server/browser limits
     const MAX_URL_LENGTH = 2000;
     if (shareUrl.length > MAX_URL_LENGTH) {
-      await navigator.share({
-        title: "Ambassy Map and Allocations",
-        text: `Shared Ambassy map and event allocations. Open Ambassy and paste this data URL:\n\n${dataUrl}`,
-      });
-    } else {
-      await navigator.share({
-        title: "Ambassy Map and Allocations",
-        text: "Shared Ambassy map and event allocations",
-        url: shareUrl,
-      });
+      return {
+        method: "native",
+        success: false,
+        error:
+          'State is too large to share as a link. Please use "Save to File" or "Copy State Text" instead.',
+        timestamp: Date.now(),
+      };
     }
 
+    await navigator.share({
+      title: "Ambassy Map and Allocations",
+      text: "Shared Ambassy map and event allocations",
+      url: shareUrl,
+    });
+
     markStateExported();
-    const finalUrl = shareUrl.length > 2000 ? dataUrl : shareUrl;
     return {
       method: "native",
       success: true,
-      data: finalUrl,
+      data: shareUrl,
       timestamp: Date.now(),
     };
   } catch (error) {
