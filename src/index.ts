@@ -18,6 +18,7 @@ import { refreshUI } from "./actions/refreshUI";
 import { restoreApplicationState } from "./actions/persistState";
 import { loadFromStorage } from "@utils/storage";
 import { exportApplicationState, downloadStateFile } from "./actions/exportState";
+import { showSharingDialog } from "./actions/showSharingDialog";
 import { validateStateFile, importApplicationState, InvalidFileFormatError, MissingFieldError, VersionMismatchError, InvalidDataError } from "./actions/importState";
 import { onboardEventAmbassador, onboardRegionalAmbassador } from "./actions/onboardAmbassador";
 import { persistChangesLog, persistEventDetails } from "./actions/persistState";
@@ -143,13 +144,7 @@ document.getElementById("purgeButton")?.addEventListener("click", () => {
 
 function setupExportButton(buttonId: string): void {
   document.getElementById(buttonId)?.addEventListener("click", () => {
-    try {
-      const blob = exportApplicationState();
-      const filename = `ambassy-state-${new Date().toISOString().split("T")[0]}.json`;
-      downloadStateFile(blob, filename);
-    } catch (error) {
-      alert(`Export failed: ${error instanceof Error ? error.message : "Unknown error"}`);
-    }
+    showSharingDialog();
   });
 }
 
