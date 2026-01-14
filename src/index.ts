@@ -1062,6 +1062,59 @@ window.addEventListener("storage", () => {
   }
 });
 
+function showSharedStateBanner(message: string, type: "success" | "error" = "success"): void {
+  const existingBanner = document.getElementById("sharedStateBanner");
+  const banner = existingBanner ?? document.createElement("div");
+
+  banner.id = "sharedStateBanner";
+  banner.setAttribute("role", "status");
+  banner.setAttribute("aria-live", "polite");
+  banner.style.position = "fixed";
+  banner.style.top = "1rem";
+  banner.style.left = "50%";
+  banner.style.transform = "translateX(-50%)";
+  banner.style.zIndex = "2000";
+  banner.style.padding = "0.75rem 1.25rem";
+  banner.style.borderRadius = "999px";
+  banner.style.boxShadow = "0 2px 4px rgba(0,0,0,0.2)";
+  banner.style.display = "flex";
+  banner.style.alignItems = "center";
+  banner.style.gap = "0.75rem";
+
+  if (type === "success") {
+    banner.style.backgroundColor = "#e8f5e9";
+    banner.style.color = "#1b5e20";
+    banner.style.border = "1px solid #1b5e20";
+  } else {
+    banner.style.backgroundColor = "#ffebee";
+    banner.style.color = "#b71c1c";
+    banner.style.border = "1px solid #b71c1c";
+  }
+
+  const textSpan = existingBanner?.querySelector("span") ?? document.createElement("span");
+  textSpan.textContent = message;
+
+  const closeButton =
+    existingBanner?.querySelector("button") ?? document.createElement("button");
+  closeButton.type = "button";
+  closeButton.textContent = "×";
+  closeButton.setAttribute("aria-label", "Dismiss shared state message");
+  closeButton.style.background = "transparent";
+  closeButton.style.border = "none";
+  closeButton.style.color = "inherit";
+  closeButton.style.cursor = "pointer";
+  closeButton.style.fontSize = "1.1rem";
+  closeButton.addEventListener("click", () => {
+    banner.remove();
+  });
+
+  if (!existingBanner) {
+    banner.appendChild(textSpan);
+    banner.appendChild(closeButton);
+    document.body.appendChild(banner);
+  }
+}
+
 async function checkForSharedStateInUrl(): Promise<void> {
   const urlParams = new URLSearchParams(window.location.search);
   const stateParam = urlParams.get("state");
@@ -1075,12 +1128,17 @@ async function checkForSharedStateInUrl(): Promise<void> {
         const newUrl = window.location.pathname;
         window.history.replaceState({}, document.title, newUrl);
         ambassy();
-        alert(result.message);
+        showSharedStateBanner("Shared state loaded from link. " + result.message, "success");
       } else {
-        alert(result.message);
+        showSharedStateBanner(result.message, "error");
       }
     } catch (error) {
-      alert(`Unable to open shared state: ${error instanceof Error ? error.message : "Unknown error"}`);
+      const message =
+        error instanceof Error ? error.message : "Unknown error";
+      showSharedStateBanner(
+        `Unable to open shared state: ${message}`,
+        "error",
+      );
     }
   }
 }
