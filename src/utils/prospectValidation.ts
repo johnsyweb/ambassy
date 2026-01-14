@@ -6,7 +6,7 @@
  */
 
 import { ProspectiveEvent } from '../models/ProspectiveEvent';
-import { ValidationResult, ValidationError } from '../types/ProspectiveEventTypes';
+import { ValidationResult, ValidationError } from '@localtypes/ProspectiveEventTypes';
 import { isValidCoordinate, formatCoordinate } from '../models/Coordinate';
 
 /**

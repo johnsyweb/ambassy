@@ -6,7 +6,7 @@
  */
 
 import { ProspectiveEvent } from '../models/ProspectiveEvent';
-import { ProspectiveEventsStorage } from '../types/ProspectiveEventTypes';
+import { ProspectiveEventsStorage } from '@localtypes/ProspectiveEventTypes';
 
 const STORAGE_KEY = 'prospectiveEvents';
 const STORAGE_VERSION = '1.0.0';

@@ -6,7 +6,7 @@
  */
 
 import { ProspectiveEvent } from '../models/ProspectiveEvent';
-import { CSVParseResult, CSVParseError } from '../types/ProspectiveEventTypes';
+import { CSVParseResult, CSVParseError } from '@localtypes/ProspectiveEventTypes';
 import { validateCSVHeaders, validateProspectiveEvent } from '../utils/prospectValidation';
 
 /**

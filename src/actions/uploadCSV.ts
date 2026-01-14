@@ -2,7 +2,7 @@ import Papa from 'papaparse';
 import { parseEventTeams, EventTeamRow } from '@parsers/parseEventTeams';
 import { parseEventAmbassadors, EventAmbassadorRow } from '@parsers/parseEventAmbassadors';
 import { parseRegionalAmbassadors, RegionalAmbassadorRow } from '@parsers/parseRegionalAmbassadors';
-import { FileUploadCallback } from '@localtypes/FileUploadCallback';
+import { FileUploadCallback } from "@localtypes/FileUploadCallback";
 import { persistEventAmbassadors } from './persistState';
 import { persistEventTeams } from './persistState';
 import { persistRegionalAmbassadors } from './persistState';

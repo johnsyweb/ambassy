@@ -7,7 +7,7 @@
 import { parseProspectiveEventsCSV } from "../parsers/parseProspectiveEvents";
 import { ProspectiveEvent } from "../models/ProspectiveEvent";
 import { ProspectiveEventList } from "../models/ProspectiveEventList";
-import { CSVParseResult } from "../types/ProspectiveEventTypes";
+import { CSVParseResult } from "@localtypes/ProspectiveEventTypes";
 import { EventAmbassadorMap } from "../models/EventAmbassadorMap";
 import { RegionalAmbassadorMap } from "../models/RegionalAmbassadorMap";
 import { geocodeProspectiveEvent } from "../utils/geography";
