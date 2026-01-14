@@ -70,9 +70,12 @@ export function showSharingDialog(): void {
             downloadStateFile(result.data, filename);
             successMessage.textContent = "State saved to file successfully!";
           } else if (result.method === "url" && typeof result.data === "string") {
+            const currentUrl = window.location.href.split("?")[0];
+            const shareUrl = `${currentUrl}?state=${encodeURIComponent(result.data)}`;
+            
             const urlInput = document.createElement("input");
             urlInput.type = "text";
-            urlInput.value = result.data;
+            urlInput.value = shareUrl;
             urlInput.style.width = "100%";
             urlInput.style.padding = "0.5em";
             urlInput.style.marginTop = "0.5em";
@@ -91,6 +94,9 @@ export function showSharingDialog(): void {
             successMessage.innerHTML = "";
             successMessage.appendChild(urlLabel);
             successMessage.appendChild(urlInput);
+            successMessage.style.display = "block";
+          } else if (result.method === "native") {
+            successMessage.textContent = "Shared successfully via your device's share menu!";
             successMessage.style.display = "block";
           } else if (result.method === "clipboard") {
             successMessage.textContent = "State text copied to clipboard! You can now paste it anywhere.";
