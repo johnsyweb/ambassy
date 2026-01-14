@@ -1,4 +1,4 @@
-import { shareStateAsFile, shareStateAsUrl, shareStateToClipboard } from "./shareState";
+import { shareStateAsFile, shareStateAsUrl, shareStateToClipboard, shareStateViaNativeShare } from "./shareState";
 import { downloadStateFile } from "./exportState";
 import { ShareStateResult } from "@localtypes/SharingTypes";
 
@@ -114,10 +114,18 @@ export function showSharingDialog(): void {
   const fileButton = createShareButton("Save to File", "💾", shareStateAsFile);
   const urlButton = createShareButton("Copy Share Link", "🔗", shareStateAsUrl);
   const clipboardButton = createShareButton("Copy State Text", "📋", shareStateToClipboard);
+  
+  const nativeShareButton = createShareButton("Share via Device", "📱", shareStateViaNativeShare);
+  if (!navigator.share) {
+    nativeShareButton.disabled = true;
+    nativeShareButton.title = "Native sharing not available in this browser";
+    nativeShareButton.style.opacity = "0.6";
+  }
 
   buttonContainer.appendChild(fileButton);
   buttonContainer.appendChild(urlButton);
   buttonContainer.appendChild(clipboardButton);
+  buttonContainer.appendChild(nativeShareButton);
 
   container.appendChild(buttonContainer);
   container.appendChild(errorMessage);

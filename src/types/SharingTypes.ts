@@ -1,4 +1,4 @@
-export type SharingMethod = "file" | "url" | "clipboard";
+export type SharingMethod = "file" | "url" | "clipboard" | "native";
 
 export interface ShareStateResult {
   method: SharingMethod;

@@ -23,6 +23,8 @@ import { validateStateFile } from "./actions/importState";
 import { shouldShowImportGuidance, showImportGuidance } from "./actions/showImportGuidance";
 import { setupExportReminder } from "./actions/trackChanges";
 import { handleStateImport } from "./actions/handleStateImport";
+import { validateStateFromUrl } from "./actions/importState";
+import { parseDataUrl } from "@utils/urlSharing";
 import { onboardEventAmbassador, onboardRegionalAmbassador } from "./actions/onboardAmbassador";
 import { persistChangesLog, persistEventDetails } from "./actions/persistState";
 import { initializeTabs } from "./utils/tabs";
@@ -1060,9 +1062,32 @@ window.addEventListener("storage", () => {
   }
 });
 
-document.addEventListener("DOMContentLoaded", () => {
+async function checkForSharedStateInUrl(): Promise<void> {
+  const urlParams = new URLSearchParams(window.location.search);
+  const stateParam = urlParams.get("state");
+  
+  if (stateParam) {
+    try {
+      const result = await handleStateImport(undefined, stateParam);
+      if (result.success) {
+        // Clear the URL parameter to avoid re-importing on refresh
+        const newUrl = window.location.pathname;
+        window.history.replaceState({}, document.title, newUrl);
+        ambassy();
+        alert(result.message);
+      } else {
+        alert(result.message);
+      }
+    } catch (error) {
+      alert(`Unable to open shared state: ${error instanceof Error ? error.message : "Unknown error"}`);
+    }
+  }
+}
+
+document.addEventListener("DOMContentLoaded", async () => {
   initializeTabs();
   setupExportReminder();
+  await checkForSharedStateInUrl();
   ambassy();
 });
 
