@@ -19,7 +19,8 @@ import { restoreApplicationState } from "./actions/persistState";
 import { loadFromStorage } from "@utils/storage";
 import { exportApplicationState, downloadStateFile } from "./actions/exportState";
 import { showSharingDialog } from "./actions/showSharingDialog";
-import { validateStateFile, importApplicationState, InvalidFileFormatError, MissingFieldError, VersionMismatchError, InvalidDataError } from "./actions/importState";
+import { validateStateFile, validateStateFromUrl, validateStateFromClipboard, importApplicationState, InvalidFileFormatError, MissingFieldError, VersionMismatchError, InvalidDataError } from "./actions/importState";
+import { shouldShowImportGuidance, showImportGuidance } from "./actions/showImportGuidance";
 import { onboardEventAmbassador, onboardRegionalAmbassador } from "./actions/onboardAmbassador";
 import { persistChangesLog, persistEventDetails } from "./actions/persistState";
 import { initializeTabs } from "./utils/tabs";
@@ -600,19 +601,24 @@ document.getElementById("importFileInput")?.addEventListener("change", async (ev
       const state = await validateStateFile(file);
       importApplicationState(state);
       ambassy();
-      alert("State imported successfully");
+      
+      const eventCount = state.data.eventTeams.length;
+      const ambassadorCount = state.data.eventAmbassadors.length;
+      alert(`State imported successfully! Loaded ${eventCount} event${eventCount !== 1 ? 's' : ''} and ${ambassadorCount} ambassador${ambassadorCount !== 1 ? 's' : ''}.`);
     } catch (error) {
-      let errorMessage = "Import failed: ";
+      let errorMessage = "Unable to import the file. ";
       if (error instanceof InvalidFileFormatError) {
-        errorMessage += "File format is invalid. Please select a valid Ambassy state file.";
+        errorMessage += "The file format is not recognised. Please make sure you're importing a file that was exported from Ambassy.";
       } else if (error instanceof MissingFieldError) {
-        errorMessage += "File is missing required data. Please ensure file is complete.";
+        errorMessage += "The file appears to be incomplete. Please ask your colleague to export the file again.";
       } else if (error instanceof VersionMismatchError) {
-        errorMessage += "File version is incompatible. Please export a new file from the current version.";
+        const versionMatch = error.message.match(/version (\d+\.\d+\.\d+)/);
+        const version = versionMatch ? versionMatch[1] : "unknown";
+        errorMessage += `This file was created with a different version of Ambassy (version ${version}). Please ask your colleague to export using the current version.`;
       } else if (error instanceof InvalidDataError) {
-        errorMessage += "File contains invalid data. Please verify the file is not corrupted.";
+        errorMessage += "The file data is not valid. Please make sure the file hasn't been modified or corrupted.";
       } else {
-        errorMessage += error instanceof Error ? error.message : "Unknown error";
+        errorMessage += error instanceof Error ? error.message : "An unexpected error occurred.";
       }
       alert(errorMessage);
     }
@@ -646,6 +652,10 @@ async function ambassy() {
   log.push(...currentLog);
   
   const hasData = hasApplicationData(eventTeams, eventAmbassadors, regionalAmbassadors);
+
+  if (!hasData && shouldShowImportGuidance()) {
+    showImportGuidance();
+  }
 
   if (hasData) {
     // Update the UI

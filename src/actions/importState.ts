@@ -4,6 +4,8 @@ import {
   saveCapacityLimits,
   validateCapacityLimits,
 } from "./configureCapacityLimits";
+import { parseDataUrl } from "@utils/urlSharing";
+import { markDataImported } from "./showImportGuidance";
 
 export class InvalidFileFormatError extends Error {
   constructor(message: string) {
@@ -41,68 +43,7 @@ export async function validateStateFile(file: File): Promise<ApplicationState> {
       try {
         const text = event.target?.result as string;
         const parsed = JSON.parse(text);
-
-        if (!parsed.version) {
-          reject(
-            new MissingFieldError("File is missing required 'version' field"),
-          );
-          return;
-        }
-
-        if (parsed.version !== "1.0.0") {
-          reject(
-            new VersionMismatchError(
-              `File version ${parsed.version} is incompatible. Expected version 1.0.0`,
-            ),
-          );
-          return;
-        }
-
-        if (!parsed.exportedAt) {
-          reject(
-            new MissingFieldError(
-              "File is missing required 'exportedAt' field",
-            ),
-          );
-          return;
-        }
-
-        if (!parsed.data) {
-          reject(
-            new MissingFieldError("File is missing required 'data' field"),
-          );
-          return;
-        }
-
-        const { data } = parsed;
-
-        if (!Array.isArray(data.eventAmbassadors)) {
-          reject(
-            new InvalidDataError("File data.eventAmbassadors must be an array"),
-          );
-          return;
-        }
-
-        if (!Array.isArray(data.eventTeams)) {
-          reject(new InvalidDataError("File data.eventTeams must be an array"));
-          return;
-        }
-
-        if (!Array.isArray(data.regionalAmbassadors)) {
-          reject(
-            new InvalidDataError(
-              "File data.regionalAmbassadors must be an array",
-            ),
-          );
-          return;
-        }
-
-        if (!Array.isArray(data.changesLog)) {
-          reject(new InvalidDataError("File data.changesLog must be an array"));
-          return;
-        }
-
-        resolve(parsed as ApplicationState);
+        resolve(validateApplicationState(parsed));
       } catch (error) {
         if (error instanceof SyntaxError) {
           reject(new InvalidFileFormatError("File is not valid JSON"));
@@ -132,4 +73,85 @@ export function importApplicationState(state: ApplicationState): void {
   ) {
     saveCapacityLimits(state.data.capacityLimits);
   }
+
+  markDataImported();
+}
+
+export async function validateStateFromUrl(dataUrl: string): Promise<ApplicationState> {
+  try {
+    const jsonString = parseDataUrl(dataUrl);
+    const parsed = JSON.parse(jsonString);
+    return validateApplicationState(parsed);
+  } catch (error) {
+    if (error instanceof SyntaxError) {
+      throw new InvalidFileFormatError("URL does not contain valid JSON data");
+    }
+    throw error;
+  }
+}
+
+export async function validateStateFromClipboard(text: string): Promise<ApplicationState> {
+  try {
+    const parsed = JSON.parse(text);
+    return validateApplicationState(parsed);
+  } catch (error) {
+    if (error instanceof SyntaxError) {
+      throw new InvalidFileFormatError("Clipboard data is not valid JSON");
+    }
+    throw error;
+  }
+}
+
+function validateApplicationState(parsed: unknown): ApplicationState {
+  if (!parsed || typeof parsed !== "object") {
+    throw new InvalidFileFormatError("Invalid state format");
+  }
+
+  const state = parsed as Record<string, unknown>;
+
+  if (!state.version) {
+    throw new MissingFieldError("File is missing required 'version' field");
+  }
+
+  if (state.version !== "1.0.0") {
+    throw new VersionMismatchError(
+      `File version ${state.version} is incompatible. Expected version 1.0.0`,
+    );
+  }
+
+  if (!state.exportedAt) {
+    throw new MissingFieldError("File is missing required 'exportedAt' field");
+  }
+
+  if (!state.data) {
+    throw new MissingFieldError("File is missing required 'data' field");
+  }
+
+  const { data } = state;
+
+  if (!data || typeof data !== "object") {
+    throw new InvalidDataError("File data field is invalid");
+  }
+
+  const dataObj = data as Record<string, unknown>;
+
+  if (!Array.isArray(dataObj.eventAmbassadors)) {
+    throw new InvalidDataError("File data.eventAmbassadors must be an array");
+  }
+
+  if (!Array.isArray(dataObj.eventTeams)) {
+    throw new InvalidDataError("File data.eventTeams must be an array");
+  }
+
+  if (!Array.isArray(dataObj.regionalAmbassadors)) {
+    throw new InvalidDataError(
+      "File data.regionalAmbassadors must be an array",
+    );
+  }
+
+  if (!Array.isArray(dataObj.changesLog)) {
+    throw new InvalidDataError("File data.changesLog must be an array");
+  }
+
+  return state as ApplicationState;
 }
