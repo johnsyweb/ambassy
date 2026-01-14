@@ -153,5 +153,5 @@ function validateApplicationState(parsed: unknown): ApplicationState {
     throw new InvalidDataError("File data.changesLog must be an array");
   }
 
-  return state as ApplicationState;
+  return state as unknown as ApplicationState;
 }
