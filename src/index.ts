@@ -19,8 +19,9 @@ import { restoreApplicationState } from "./actions/persistState";
 import { loadFromStorage } from "@utils/storage";
 import { exportApplicationState, downloadStateFile } from "./actions/exportState";
 import { showSharingDialog } from "./actions/showSharingDialog";
-import { validateStateFile, validateStateFromUrl, validateStateFromClipboard, importApplicationState, InvalidFileFormatError, MissingFieldError, VersionMismatchError, InvalidDataError } from "./actions/importState";
+import { validateStateFile } from "./actions/importState";
 import { shouldShowImportGuidance, showImportGuidance } from "./actions/showImportGuidance";
+import { handleStateImport } from "./actions/handleStateImport";
 import { onboardEventAmbassador, onboardRegionalAmbassador } from "./actions/onboardAmbassador";
 import { persistChangesLog, persistEventDetails } from "./actions/persistState";
 import { initializeTabs } from "./utils/tabs";
@@ -586,45 +587,42 @@ document.getElementById("importFileInput")?.addEventListener("change", async (ev
   const input = event.target as HTMLInputElement;
   if (input.files && input.files.length > 0) {
     const file = input.files[0];
-    try {
-      const hasExistingData = localStorage.getItem("ambassy:eventAmbassadors") !== null ||
-                              localStorage.getItem("ambassy:eventTeams") !== null ||
-                              localStorage.getItem("ambassy:regionalAmbassadors") !== null;
-
-      if (hasExistingData) {
-        const confirmed = confirm("Importing will replace your current data. Do you want to continue?");
-        if (!confirmed) {
-          return;
-        }
-      }
-
-      const state = await validateStateFile(file);
-      importApplicationState(state);
+    const result = await handleStateImport(file);
+    if (result.success) {
       ambassy();
-      
-      const eventCount = state.data.eventTeams.length;
-      const ambassadorCount = state.data.eventAmbassadors.length;
-      alert(`State imported successfully! Loaded ${eventCount} event${eventCount !== 1 ? 's' : ''} and ${ambassadorCount} ambassador${ambassadorCount !== 1 ? 's' : ''}.`);
-    } catch (error) {
-      let errorMessage = "Unable to import the file. ";
-      if (error instanceof InvalidFileFormatError) {
-        errorMessage += "The file format is not recognised. Please make sure you're importing a file that was exported from Ambassy.";
-      } else if (error instanceof MissingFieldError) {
-        errorMessage += "The file appears to be incomplete. Please ask your colleague to export the file again.";
-      } else if (error instanceof VersionMismatchError) {
-        const versionMatch = error.message.match(/version (\d+\.\d+\.\d+)/);
-        const version = versionMatch ? versionMatch[1] : "unknown";
-        errorMessage += `This file was created with a different version of Ambassy (version ${version}). Please ask your colleague to export using the current version.`;
-      } else if (error instanceof InvalidDataError) {
-        errorMessage += "The file data is not valid. Please make sure the file hasn't been modified or corrupted.";
-      } else {
-        errorMessage += error instanceof Error ? error.message : "An unexpected error occurred.";
-      }
-      alert(errorMessage);
     }
+    alert(result.message);
     input.value = "";
   }
 });
+
+function setupDragAndDrop(): void {
+  const body = document.body;
+
+  body.addEventListener("dragover", (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+  });
+
+  body.addEventListener("drop", async (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+
+    const files = event.dataTransfer?.files;
+    if (files && files.length > 0) {
+      const file = files[0];
+      if (file.type === "application/json" || file.name.endsWith(".json")) {
+        const result = await handleStateImport(file);
+        if (result.success) {
+          ambassy();
+        }
+        alert(result.message);
+      }
+    }
+  });
+}
+
+setupDragAndDrop();
 
 async function ambassy() {
   const introduction = document.getElementById("introduction");
