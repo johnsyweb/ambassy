@@ -19,7 +19,6 @@ concurrency:
 jobs:
   generate-screenshots:
     runs-on: ubuntu-latest
-    # If triggered by workflow_run, ensure CI succeeded. If manual dispatch, always run.
     if: |
       github.event_name == 'workflow_dispatch' ||
       (github.event.workflow_run.conclusion == 'success' &&
@@ -55,35 +54,24 @@ jobs:
 
       - name: Generate screenshots
         run: |
-          # Set display for headless browser
           export DISPLAY=:99
-          # Use system-installed Chrome
           export PUPPETEER_EXECUTABLE_PATH=/usr/bin/google-chrome
-          # Start virtual display
           Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
-          # Wait for display to start
           sleep 2
-          # Generate screenshots
           pnpm screenshots
 
       - name: Commit updated screenshots
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
-          # Check if there are any changes to screenshot files
           git add public/screenshot.png public/ambassy-social-preview.png
           if git diff --staged --quiet; then
             echo "No screenshot changes to commit"
           else
-            # Unstage the changes temporarily
             git reset HEAD public/screenshot.png public/ambassy-social-preview.png
-            # Stash the changes
             git stash push -m "temp: screenshot changes"
-            # Pull with rebase to get latest changes
             git pull --rebase origin main
-            # Pop the stashed changes
             git stash pop
-            # Re-add and commit the changes
             git add public/screenshot.png public/ambassy-social-preview.png
             git commit -m "chore: update screenshots [skip ci]"
             git push
