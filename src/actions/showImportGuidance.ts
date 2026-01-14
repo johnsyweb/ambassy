@@ -60,6 +60,8 @@ export function showImportGuidance(): void {
 
   const dismissButton = document.createElement("button");
   dismissButton.textContent = "Got it, thanks!";
+  dismissButton.setAttribute("type", "button");
+  dismissButton.setAttribute("aria-label", "Dismiss import guidance");
   dismissButton.style.padding = "0.5em 1em";
   dismissButton.style.backgroundColor = "#2196f3";
   dismissButton.style.color = "white";

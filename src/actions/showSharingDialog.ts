@@ -14,6 +14,7 @@ export function showSharingDialog(): void {
   }
 
   title.textContent = "Share State";
+  title.id = "sharingDialogTitle";
   content.innerHTML = "";
 
   const container = document.createElement("div");
@@ -47,6 +48,8 @@ export function showSharingDialog(): void {
   ): HTMLButtonElement => {
     const button = document.createElement("button");
     button.innerHTML = `${icon} ${label}`;
+    button.setAttribute("aria-label", `Share via ${label}`);
+    button.setAttribute("type", "button");
     button.style.padding = "0.75em 1em";
     button.style.backgroundColor = "#007bff";
     button.style.color = "white";
@@ -164,6 +167,21 @@ export function showSharingDialog(): void {
 
   document.addEventListener("keydown", handleKeyDown, { once: true });
 
+  dialog.setAttribute("aria-labelledby", "sharingDialogTitle");
   dialog.style.display = "block";
   fileButton.focus();
+  
+  const handleEnterKey = (event: KeyboardEvent) => {
+    if (event.key === "Enter" && document.activeElement?.tagName === "BUTTON") {
+      (document.activeElement as HTMLButtonElement).click();
+    }
+  };
+  
+  document.addEventListener("keydown", handleEnterKey);
+  
+  const originalHandleCancel = handleCancel;
+  handleCancel = () => {
+    document.removeEventListener("keydown", handleEnterKey);
+    originalHandleCancel();
+  };
 }

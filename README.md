@@ -61,18 +61,30 @@ This project is written in TypeScript, has unit tests, and the map will be displ
 
 Ambassy automatically persists your uploaded CSV data to browser local storage, so you don't need to re-upload files every time you visit the application. Your data persists across browser sessions.
 
-### Exporting State
+### Sharing Your State
 
-Click the "Export State" button to download your current application state as a JSON file. This file contains all your uploaded data (Event Ambassadors, Event Teams, Regional Ambassadors, and changes log) and can be shared with other ambassadors or parkrun staff.
+Click the **"Share…"** button to share your current map and allocations with other ambassadors. You can choose from several sharing methods:
 
-### Importing State
+- **Save to File**: Download a JSON file containing your state that you can send via email or file sharing
+- **Copy Share Link**: Copy a link that automatically loads your state when opened (for smaller states)
+- **Copy State Text**: Copy the state data as text that can be pasted into Ambassy
+- **Share via Device**: Use your device's native share menu (mobile/desktop) to share via messaging apps, email, etc.
 
-Click the "Import State" button to load a previously exported state file. This allows you to:
-- Share your data with other users
-- Restore your data on a different device or browser
-- Load data shared by other ambassadors
+**Note**: If your state is too large for link sharing, you'll be prompted to use file or text sharing instead.
 
-**Note**: Importing will replace your current data. You'll be asked to confirm before importing if you have existing data.
+### Opening Shared State
+
+Click the **"Open Saved State"** button to load state shared by another ambassador. You can:
+
+- Select a shared file you received
+- Paste a shared link or data URL
+- Drag and drop a shared file directly onto the page
+
+**Note**: Opening shared state will replace your current data. You'll be asked to confirm before opening if you have existing data.
+
+### Export Reminders
+
+If you've made changes since your last export, Ambassy will remind you to share your state before closing the browser window. This helps ensure your changes aren't lost.
 
 ## Ambassador Capacity Management
 
