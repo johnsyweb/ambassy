@@ -9,7 +9,7 @@ import { EventAmbassadorMap } from "@models/EventAmbassadorMap";
 import { RegionalAmbassadorMap } from "@models/RegionalAmbassadorMap";
 import { toLeafletArray, toGeoJSONArray, getLatitude, getLongitude } from "@models/Coordinate";
 
-import d3GeoVoronoi from "d3-geo-voronoi";
+import { geoVoronoi } from "d3-geo-voronoi";
 import L from "leaflet";
 import { colorPalette } from "./colorPalette";
 
@@ -326,7 +326,7 @@ export function populateMap(
 
 
   // Create Voronoi polygons from the unique points
-  const voronoi = d3GeoVoronoi.geoVoronoi(uniquePoints.map((p) => [p[0], p[1]]));
+  const voronoi = geoVoronoi(uniquePoints.map((p) => [p[0], p[1]]));
   const polygons = voronoi.polygons();
 
   polygons.features.forEach((feature, index) => {
