@@ -21,6 +21,7 @@ import { exportApplicationState, downloadStateFile } from "./actions/exportState
 import { showSharingDialog } from "./actions/showSharingDialog";
 import { validateStateFile } from "./actions/importState";
 import { shouldShowImportGuidance, showImportGuidance } from "./actions/showImportGuidance";
+import { setupExportReminder } from "./actions/trackChanges";
 import { handleStateImport } from "./actions/handleStateImport";
 import { onboardEventAmbassador, onboardRegionalAmbassador } from "./actions/onboardAmbassador";
 import { persistChangesLog, persistEventDetails } from "./actions/persistState";
@@ -1061,6 +1062,7 @@ window.addEventListener("storage", () => {
 
 document.addEventListener("DOMContentLoaded", () => {
   initializeTabs();
+  setupExportReminder();
   ambassy();
 });
 
