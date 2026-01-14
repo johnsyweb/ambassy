@@ -68,7 +68,7 @@ export function showSharingDialog(): void {
           if (result.method === "file" && result.data instanceof Blob) {
             const filename = `ambassy-state-${new Date().toISOString().split("T")[0]}.json`;
             downloadStateFile(result.data, filename);
-            successMessage.textContent = "State exported and downloaded successfully!";
+            successMessage.textContent = "State saved to file successfully!";
           } else if (result.method === "url" && typeof result.data === "string") {
             const urlInput = document.createElement("input");
             urlInput.type = "text";
@@ -93,7 +93,7 @@ export function showSharingDialog(): void {
             successMessage.appendChild(urlInput);
             successMessage.style.display = "block";
           } else if (result.method === "clipboard") {
-            successMessage.textContent = "State copied to clipboard! You can now paste it anywhere.";
+            successMessage.textContent = "State text copied to clipboard! You can now paste it anywhere.";
             successMessage.style.display = "block";
           }
         } else {
@@ -111,9 +111,9 @@ export function showSharingDialog(): void {
     return button;
   };
 
-  const fileButton = createShareButton("Download File", "📥", shareStateAsFile);
-  const urlButton = createShareButton("Copy Shareable URL", "🔗", shareStateAsUrl);
-  const clipboardButton = createShareButton("Copy to Clipboard", "📋", shareStateToClipboard);
+  const fileButton = createShareButton("Save to File", "💾", shareStateAsFile);
+  const urlButton = createShareButton("Copy Share Link", "🔗", shareStateAsUrl);
+  const clipboardButton = createShareButton("Copy State Text", "📋", shareStateToClipboard);
 
   buttonContainer.appendChild(fileButton);
   buttonContainer.appendChild(urlButton);

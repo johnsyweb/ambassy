@@ -48,7 +48,7 @@ export function showImportGuidance(): void {
       <strong>Have you received shared data from a colleague?</strong> You can import it here to see their changes.
     </p>
     <ol style="margin-left: 1.5em; margin-bottom: 1em;">
-      <li style="margin-bottom: 0.5em;">Click the <strong>📥 Import State</strong> button above</li>
+      <li style="margin-bottom: 0.5em;">Click the <strong>📂 Open Saved State</strong> button above</li>
       <li style="margin-bottom: 0.5em;">Select the shared file you received, or paste a shared URL or clipboard data</li>
       <li style="margin-bottom: 0.5em;">Your colleague's data will be loaded and displayed</li>
     </ol>
