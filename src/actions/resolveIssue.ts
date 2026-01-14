@@ -38,6 +38,7 @@ export function resolveIssueWithEvent(
   };
 
   eventDetailsMap.set(issue.eventShortName, eventToAdd);
+  trackStateChange();
 
   const logEntry: LogEntry = {
     type: "Issue Resolved",
