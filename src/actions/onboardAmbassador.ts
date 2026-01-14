@@ -5,6 +5,7 @@ import { RegionalAmbassador } from "@models/RegionalAmbassador";
 import { LogEntry } from "@models/LogEntry";
 import { persistEventAmbassadors } from "./persistState";
 import { persistRegionalAmbassadors } from "./persistState";
+import { trackStateChange } from "./trackChanges";
 
 export function validateAmbassadorName(
   name: string,
@@ -45,6 +46,7 @@ export function onboardEventAmbassador(
 
   eventAmbassadors.set(trimmedName, newAmbassador);
   persistEventAmbassadors(eventAmbassadors);
+  trackStateChange();
 
   log.push({
     type: "onboard event ambassador",
@@ -75,6 +77,7 @@ export function onboardRegionalAmbassador(
 
   regionalAmbassadors.set(trimmedName, newAmbassador);
   persistRegionalAmbassadors(regionalAmbassadors);
+  trackStateChange();
 
   log.push({
     type: "onboard regional ambassador",

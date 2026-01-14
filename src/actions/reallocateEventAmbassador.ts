@@ -3,6 +3,7 @@ import { RegionalAmbassadorMap } from "@models/RegionalAmbassadorMap";
 import { LogEntry } from "@models/LogEntry";
 import { persistRegionalAmbassadors } from "./persistState";
 import { calculateAllCapacityStatuses, loadCapacityLimits } from "./checkCapacity";
+import { trackStateChange } from "./trackChanges";
 
 /**
  * Reallocate an Event Ambassador from one Regional Ambassador to another.
@@ -41,6 +42,7 @@ export function reallocateEventAmbassador(
 
   // Persist the updated Regional Ambassadors
   persistRegionalAmbassadors(regionalAmbassadors);
+  trackStateChange();
 
   // Recalculate capacity statuses after reallocation
   const capacityLimits = loadCapacityLimits();

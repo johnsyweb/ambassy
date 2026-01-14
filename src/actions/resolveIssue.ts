@@ -5,6 +5,7 @@ import { LogEntry } from "@models/LogEntry";
 import { geocodeAddress } from "../utils/geocoding";
 import { fromGeoJSONArray, formatCoordinate, toGeoJSONArray, createCoordinate } from "../models/Coordinate";
 import { getCountryCodeFromCoordinate, getCountryCodeFromDomain } from "../models/country";
+import { trackStateChange } from "./trackChanges";
 
 export function resolveIssueWithEvent(
   issue: EventIssue,
@@ -83,6 +84,7 @@ export function resolveIssueWithPin(
   };
 
   eventDetailsMap.set(issue.eventShortName, eventDetails);
+  trackStateChange();
 
   const logEntry: LogEntry = {
     type: "Issue Resolved",
@@ -147,6 +149,7 @@ export async function resolveIssueWithAddress(
     };
 
     eventDetailsMap.set(issue.eventShortName, eventDetails);
+    trackStateChange();
 
     const logEntry: LogEntry = {
       type: "Issue Resolved",

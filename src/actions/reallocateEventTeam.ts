@@ -8,6 +8,7 @@ import { assignEventToAmbassador } from "./assignEventToAmbassador";
 import { calculateAllCapacityStatuses, loadCapacityLimits } from "./checkCapacity";
 import { getRegionalAmbassadorForEventAmbassador } from "../utils/regions";
 import { extractEventTeamsTableData } from "../models/EventTeamsTable";
+import { trackStateChange } from "./trackChanges";
 
 /**
  * Reallocate an event from one Event Ambassador to another.
@@ -39,6 +40,7 @@ export function reallocateEventTeam(
     log,
     regionalAmbassadors
   );
+  trackStateChange();
 
   // Update the event ambassador in table data
   eventData.eventAmbassador = newAmbassador;

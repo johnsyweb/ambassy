@@ -11,6 +11,7 @@ import {
   persistChangesLog,
 } from "./persistState";
 import { assignEventToAmbassador } from "./assignEventToAmbassador";
+import { trackStateChange } from "./trackChanges";
 
 /**
  * Check if reallocation would exceed capacity limits and return warning message.
@@ -104,6 +105,7 @@ export function offboardEventAmbassador(
   // Remove the ambassador
   eventAmbassadors.delete(ambassadorName);
   persistEventAmbassadors(eventAmbassadors);
+  trackStateChange();
 
   // Log the offboarding (each reassignment already logged separately by assignEventToAmbassador)
   log.push({
@@ -192,6 +194,7 @@ export function offboardRegionalAmbassador(
   // Remove the ambassador
   regionalAmbassadors.delete(ambassadorName);
   persistRegionalAmbassadors(regionalAmbassadors);
+  trackStateChange();
 
   // Log the offboarding
   log.push({
