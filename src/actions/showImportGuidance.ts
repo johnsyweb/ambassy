@@ -37,7 +37,7 @@ export function showImportGuidance(): void {
 
   const title = document.createElement("h2");
   title.id = "importGuidanceTitle";
-  title.textContent = "Import Shared Data";
+  title.textContent = "Open Shared State";
   title.style.marginTop = "0";
   title.style.marginBottom = "1em";
   guidance.appendChild(title);
@@ -45,7 +45,7 @@ export function showImportGuidance(): void {
   const instructions = document.createElement("div");
   instructions.innerHTML = `
     <p style="margin-bottom: 1em;">
-      <strong>Have you received shared data from a colleague?</strong> You can import it here to see their changes.
+      <strong>Have you received shared data from a colleague?</strong> You can open it here to see their changes.
     </p>
     <ol style="margin-left: 1.5em; margin-bottom: 1em;">
       <li style="margin-bottom: 0.5em;">Click the <strong>📂 Open Saved State</strong> button above</li>

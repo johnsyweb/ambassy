@@ -46,7 +46,7 @@ export async function handleStateImport(
     const ambassadorCount = state.data.eventAmbassadors.length;
     return {
       success: true,
-      message: `State imported successfully! Loaded ${eventCount} event${
+      message: `Saved state opened successfully! Loaded ${eventCount} event${
         eventCount !== 1 ? "s" : ""
       } and ${ambassadorCount} ambassador${
         ambassadorCount !== 1 ? "s" : ""
