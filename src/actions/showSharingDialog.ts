@@ -70,12 +70,17 @@ export function showSharingDialog(): void {
             downloadStateFile(result.data, filename);
             successMessage.textContent = "State saved to file successfully!";
           } else if (result.method === "url" && typeof result.data === "string") {
+            const dataUrl = result.data;
             const currentUrl = window.location.href.split("?")[0];
-            const shareUrl = `${currentUrl}?state=${encodeURIComponent(result.data)}`;
+            const shareUrl = `${currentUrl}?state=${encodeURIComponent(dataUrl)}`;
+            
+            // Check if URL would be too long - if so, show data URL with instructions
+            const MAX_URL_LENGTH = 2000;
+            const useAppUrl = shareUrl.length <= MAX_URL_LENGTH;
             
             const urlInput = document.createElement("input");
             urlInput.type = "text";
-            urlInput.value = shareUrl;
+            urlInput.value = useAppUrl ? shareUrl : dataUrl;
             urlInput.style.width = "100%";
             urlInput.style.padding = "0.5em";
             urlInput.style.marginTop = "0.5em";
@@ -87,13 +92,26 @@ export function showSharingDialog(): void {
             });
 
             const urlLabel = document.createElement("label");
-            urlLabel.textContent = "Share this URL:";
+            urlLabel.textContent = useAppUrl 
+              ? "Share this URL:" 
+              : "Share this data URL (URL was too long for app link format):";
             urlLabel.style.display = "block";
             urlLabel.style.marginTop = "0.5em";
+
+            const instructions = useAppUrl ? null : document.createElement("p");
+            if (instructions) {
+              instructions.textContent = "Recipients can paste this into Ambassy's 'Open Saved State' dialog or use the clipboard import option.";
+              instructions.style.fontSize = "0.9em";
+              instructions.style.color = "#666";
+              instructions.style.marginTop = "0.5em";
+            }
 
             successMessage.innerHTML = "";
             successMessage.appendChild(urlLabel);
             successMessage.appendChild(urlInput);
+            if (instructions) {
+              successMessage.appendChild(instructions);
+            }
             successMessage.style.display = "block";
           } else if (result.method === "native") {
             successMessage.textContent = "Shared successfully via your device's share menu!";

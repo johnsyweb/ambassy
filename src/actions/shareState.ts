@@ -122,17 +122,28 @@ export async function shareStateViaNativeShare(): Promise<ShareStateResult> {
     const currentUrl = window.location.href.split("?")[0];
     const shareUrl = `${currentUrl}?state=${encodeURIComponent(dataUrl)}`;
 
-    await navigator.share({
-      title: "Ambassy Map and Allocations",
-      text: "Shared Ambassy map and event allocations",
-      url: shareUrl,
-    });
+    // Check if URL would be too long (most servers limit to ~2000 chars, browsers ~2000-8000)
+    // If too long, share the data URL directly with instructions
+    const MAX_URL_LENGTH = 2000;
+    if (shareUrl.length > MAX_URL_LENGTH) {
+      await navigator.share({
+        title: "Ambassy Map and Allocations",
+        text: `Shared Ambassy map and event allocations. Open Ambassy and paste this data URL:\n\n${dataUrl}`,
+      });
+    } else {
+      await navigator.share({
+        title: "Ambassy Map and Allocations",
+        text: "Shared Ambassy map and event allocations",
+        url: shareUrl,
+      });
+    }
 
     markStateExported();
+    const finalUrl = shareUrl.length > 2000 ? dataUrl : shareUrl;
     return {
       method: "native",
       success: true,
-      data: shareUrl,
+      data: finalUrl,
       timestamp: Date.now(),
     };
   } catch (error) {
