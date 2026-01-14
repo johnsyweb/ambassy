@@ -167,21 +167,36 @@ export function showSharingDialog(): void {
 
   document.addEventListener("keydown", handleKeyDown, { once: true });
 
-  dialog.setAttribute("aria-labelledby", "sharingDialogTitle");
-  dialog.style.display = "block";
-  fileButton.focus();
-  
   const handleEnterKey = (event: KeyboardEvent) => {
     if (event.key === "Enter" && document.activeElement?.tagName === "BUTTON") {
       (document.activeElement as HTMLButtonElement).click();
     }
   };
   
+  const cleanup = () => {
+    document.removeEventListener("keydown", handleEnterKey);
+  };
+  
+  const wrappedCancel = () => {
+    cleanup();
+    handleCancel();
+  };
+  
+  const wrappedKeyDown = (event: KeyboardEvent) => {
+    if (event.key === "Escape") {
+      cleanup();
+      handleCancel();
+    }
+  };
+  
+  cancelButton.removeEventListener("click", handleCancel);
+  cancelButton.addEventListener("click", wrappedCancel);
+  
+  document.removeEventListener("keydown", handleKeyDown);
+  document.addEventListener("keydown", wrappedKeyDown, { once: true });
   document.addEventListener("keydown", handleEnterKey);
   
-  const originalHandleCancel = handleCancel;
-  handleCancel = () => {
-    document.removeEventListener("keydown", handleEnterKey);
-    originalHandleCancel();
-  };
+  dialog.setAttribute("aria-labelledby", "sharingDialogTitle");
+  dialog.style.display = "block";
+  fileButton.focus();
 }
