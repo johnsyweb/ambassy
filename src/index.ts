@@ -1068,6 +1068,7 @@ async function checkForSharedStateInUrl(): Promise<void> {
   
   if (stateParam) {
     try {
+      // stateParam is already a data URL from the shareStateViaNativeShare function
       const result = await handleStateImport(undefined, stateParam);
       if (result.success) {
         // Clear the URL parameter to avoid re-importing on refresh
