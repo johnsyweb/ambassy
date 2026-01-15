@@ -9,7 +9,9 @@ import { LogEntry } from "@models/LogEntry";
 import {
   persistEventAmbassadors,
   persistRegionalAmbassadors,
+  persistChangesLog,
 } from "./persistState";
+import { trackStateChange } from "./trackChanges";
 
 jest.mock("./persistState");
 jest.mock("./trackChanges");
