@@ -1023,9 +1023,21 @@ function initializeTableMapNavigation(): void {
     const markerMap = getMarkerMap();
     const highlightLayer = getHighlightLayer();
     const map = getMap();
-    const eventAmbassadors = getEventAmbassadorsFromSession();
-    const regionalAmbassadors = getRegionalAmbassadorsFromSession();
-    const eventTeams = getEventTeamsFromSession();
+    
+    // Get fresh data from session storage to ensure we have the latest state
+    const currentEventTeams = getEventTeamsFromSession();
+    const currentEventAmbassadors = getEventAmbassadorsFromSession();
+    const currentRegionalAmbassadors = getRegionalAmbassadorsFromSession();
+    
+    // Recalculate eventTeamsTableData to ensure we have the latest state
+    const currentEventTeamsTableData = eventDetails && currentEventTeams
+      ? extractEventTeamsTableData(
+          currentRegionalAmbassadors,
+          currentEventAmbassadors,
+          currentEventTeams,
+          eventDetails
+        )
+      : eventTeamsTableData ?? undefined;
     
     selectMapEvent(
       selectionState,
@@ -1034,10 +1046,10 @@ function initializeTableMapNavigation(): void {
       highlightLayer,
       eventDetails!,
       map,
-      eventTeamsTableData ?? undefined,
-      eventAmbassadors,
-      regionalAmbassadors,
-      eventTeams,
+      currentEventTeamsTableData,
+      currentEventAmbassadors,
+      currentRegionalAmbassadors,
+      currentEventTeams,
       (eventName: string, eaName: string) => {
         const log: LogEntry[] = [];
         const currentEventAmbassadors = getEventAmbassadorsFromSession();
@@ -1077,14 +1089,26 @@ function initializeTableMapNavigation(): void {
       },
       (eventName: string) => {
         // Reallocation from map - reuse the same handler as table reallocation
-        if (!eventTeamsTableData || !eventDetails) {
+        // Get fresh data from session storage
+        const freshEventTeams = getEventTeamsFromSession();
+        const freshEventAmbassadors = getEventAmbassadorsFromSession();
+        const freshRegionalAmbassadors = getRegionalAmbassadorsFromSession();
+        
+        // Recalculate eventTeamsTableData to ensure we have the latest state
+        const freshEventTeamsTableData = eventDetails && freshEventTeams
+          ? extractEventTeamsTableData(
+              freshRegionalAmbassadors,
+              freshEventAmbassadors,
+              freshEventTeams,
+              eventDetails
+            )
+          : null;
+        
+        if (!freshEventTeamsTableData || !eventDetails) {
           return;
         }
 
-        const currentEventAmbassadors = getEventAmbassadorsFromSession();
-        const currentRegionalAmbassadors = getRegionalAmbassadorsFromSession();
-
-        const eventData = eventTeamsTableData.get(eventName);
+        const eventData = freshEventTeamsTableData.get(eventName);
         if (!eventData || !eventData.eventAmbassador) {
           alert("Event is not currently assigned to any ambassador.");
           return;
@@ -1093,29 +1117,43 @@ function initializeTableMapNavigation(): void {
         try {
           const suggestions = getReallocationSuggestions(
             eventName,
-            eventTeamsTableData,
-            currentEventAmbassadors,
+            freshEventTeamsTableData,
+            freshEventAmbassadors,
             eventDetails,
             loadCapacityLimits(),
-            currentRegionalAmbassadors
+            freshRegionalAmbassadors
           );
 
           showEventTeamReallocationDialog(
             eventName,
             eventData.eventAmbassador,
             suggestions,
-            currentEventAmbassadors,
-            currentRegionalAmbassadors,
+            freshEventAmbassadors,
+            freshRegionalAmbassadors,
             (selectedAmbassador: string) => {
-              if (!eventTeamsTableData) {
+              // Get fresh data again in case it changed
+              const latestEventTeams = getEventTeamsFromSession();
+              const latestEventAmbassadors = getEventAmbassadorsFromSession();
+              const latestRegionalAmbassadors = getRegionalAmbassadorsFromSession();
+              
+              const latestEventTeamsTableData = eventDetails && latestEventTeams
+                ? extractEventTeamsTableData(
+                    latestRegionalAmbassadors,
+                    latestEventAmbassadors,
+                    latestEventTeams,
+                    eventDetails
+                  )
+                : null;
+              
+              if (!latestEventTeamsTableData) {
                 return;
               }
 
               const validation = validateReallocation(
                 eventName,
                 selectedAmbassador,
-                currentEventAmbassadors,
-                eventTeamsTableData
+                latestEventAmbassadors,
+                latestEventTeamsTableData
               );
 
               if (!validation.valid) {
@@ -1124,25 +1162,35 @@ function initializeTableMapNavigation(): void {
               }
 
               try {
-                const currentEventTeams = getEventTeamsFromSession();
-                
                 reallocateEventTeam(
                   eventName,
                   eventData.eventAmbassador,
                   selectedAmbassador,
-                  currentEventAmbassadors,
-                  eventTeamsTableData,
+                  latestEventAmbassadors,
+                  latestEventTeamsTableData,
                   log,
-                  currentRegionalAmbassadors,
-                  currentEventTeams,
+                  latestRegionalAmbassadors,
+                  latestEventTeams,
                   eventDetails ?? undefined
                 );
 
                 persistChangesLog(log);
 
-                if (eventDetails) {
+                // Recalculate eventTeamsTableData after reallocation
+                const finalEventTeams = getEventTeamsFromSession();
+                const finalEventAmbassadors = getEventAmbassadorsFromSession();
+                const finalRegionalAmbassadors = getRegionalAmbassadorsFromSession();
+                
+                if (eventDetails && finalEventTeams) {
+                  eventTeamsTableData = extractEventTeamsTableData(
+                    finalRegionalAmbassadors,
+                    finalEventAmbassadors,
+                    finalEventTeams,
+                    eventDetails
+                  );
+                  
                   clearSelection(selectionState);
-                  refreshUI(eventDetails, eventTeamsTableData, log, currentEventAmbassadors, currentRegionalAmbassadors);
+                  refreshUI(eventDetails, eventTeamsTableData, log, finalEventAmbassadors, finalRegionalAmbassadors);
                 }
 
                 alert(`Event "${eventName}" reallocated to "${selectedAmbassador}"`);
