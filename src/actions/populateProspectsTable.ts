@@ -81,7 +81,10 @@ export function populateProspectsTable(
   });
 
   // Initialize sorting with default: Prospect Event (column 0) ascending
-  initializeTableSorting('prospectsTable', 0, 'asc');
+  // Only initialize if we have prospects (not empty state)
+  if (prospectEvents.length > 0) {
+    initializeTableSorting('prospectsTable', 0, 'asc');
+  }
 }
 
 /**

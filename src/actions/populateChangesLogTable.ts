@@ -36,5 +36,8 @@ export function populateChangesLogTable(log: LogEntry[]) {
   });
 
   // Initialize sorting with default: Timestamp (column 4) descending (most recent first)
-  initializeTableSorting('changesTable', 4, 'desc');
+  // Only initialize if we have log entries
+  if (log.length > 0) {
+    initializeTableSorting('changesTable', 4, 'desc');
+  }
 }
