@@ -7,7 +7,18 @@ let beforeUnloadHandler: ((event: BeforeUnloadEvent) => void) | null = null;
 
 export function trackStateChange(): void {
   const tracker = loadFromStorage<ChangeTracker>(STORAGE_KEY) || createChangeTracker();
-  tracker.lastChangeTimestamp = Date.now();
+  const now = Date.now();
+  tracker.lastChangeTimestamp = now;
+  
+  // Ensure lastExportTimestamp is not greater than lastChangeTimestamp
+  // This can happen if markStateExported was called after trackStateChange in the same millisecond
+  // or if there's a timing issue. We want to ensure changes are always tracked.
+  if (tracker.lastExportTimestamp >= tracker.lastChangeTimestamp) {
+    // If export timestamp is >= change timestamp, adjust it to be before the change
+    // This ensures hasUnsavedChanges() will return true
+    tracker.lastExportTimestamp = tracker.lastChangeTimestamp - 1;
+  }
+  
   saveToStorage(STORAGE_KEY, tracker);
 }
 
