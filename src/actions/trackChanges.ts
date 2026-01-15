@@ -45,3 +45,20 @@ export function removeExportReminder(): void {
     beforeUnloadHandler = null;
   }
 }
+
+export function initializeChangeTrackerForLoadedData(): void {
+  const tracker = loadFromStorage<ChangeTracker>(STORAGE_KEY);
+  // If tracker doesn't exist, initialize it with current timestamp as "exported"
+  // This treats loaded data as "already saved" until user makes changes
+  if (!tracker) {
+    const newTracker = createChangeTracker();
+    newTracker.lastExportTimestamp = Date.now();
+    newTracker.lastChangeTimestamp = 0;
+    saveToStorage(STORAGE_KEY, newTracker);
+  } else if (tracker.lastChangeTimestamp === 0 && tracker.lastExportTimestamp === 0) {
+    // If tracker exists but is uninitialized (both timestamps are 0),
+    // treat loaded data as "already saved"
+    tracker.lastExportTimestamp = Date.now();
+    saveToStorage(STORAGE_KEY, tracker);
+  }
+}

@@ -21,7 +21,7 @@ import { exportApplicationState, downloadStateFile } from "./actions/exportState
 import { showSharingDialog } from "./actions/showSharingDialog";
 import { validateStateFile } from "./actions/importState";
 import { shouldShowImportGuidance, showImportGuidance } from "./actions/showImportGuidance";
-import { setupExportReminder } from "./actions/trackChanges";
+import { setupExportReminder, initializeChangeTrackerForLoadedData } from "./actions/trackChanges";
 import { handleStateImport } from "./actions/handleStateImport";
 import { validateStateFromUrl } from "./actions/importState";
 import { parseDataUrl } from "@utils/urlSharing";
@@ -652,7 +652,11 @@ async function ambassy() {
   log.length = 0;
   log.push(...currentLog);
   
+  // Initialize change tracker for loaded data (treat as "saved" until user makes changes)
   const hasData = hasApplicationData(eventTeams, eventAmbassadors, regionalAmbassadors);
+  if (hasData) {
+    initializeChangeTrackerForLoadedData();
+  }
 
   if (!hasData && shouldShowImportGuidance()) {
     showImportGuidance();
