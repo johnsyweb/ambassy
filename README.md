@@ -93,7 +93,10 @@ Ambassy provides tools for managing ambassador capacity and lifecycle:
 ### Onboarding Ambassadors
 
 - **Add Event Ambassador**: Click "Add Event Ambassador" to add a new Event Ambassador to the system
+  - You'll be prompted to enter the ambassador's name and state (e.g., "VIC", "NSW")
+  - You can optionally assign the Event Ambassador to a Regional Ambassador during onboarding
 - **Add Regional Ambassador**: Click "Add Regional Ambassador" to add a new Regional Ambassador to the system
+  - You'll be prompted to enter the ambassador's name and state
 - New ambassadors start with no assigned events/EAs and can be assigned as needed
 
 ### Capacity Checking
@@ -106,10 +109,23 @@ The system automatically checks ambassador capacity against configurable limits:
   - ✅ Within capacity (within preferred range)
   - ⚠️ Over capacity (above maximum)
 
+### Transitioning Ambassadors
+
+Ambassadors can transition between Event Ambassador and Regional Ambassador roles:
+
+- **Event Ambassador to Regional Ambassador**: Click "⬆️ Transition to REA" next to an Event Ambassador
+  - The ambassador's event assignments are preserved for later reallocation
+  - The ambassador moves to the Regional Ambassadors table
+  - Their events are visible in the "Events for reallocation" field
+- **Regional Ambassador to Event Ambassador**: Click "⬇️ Transition to EA" next to a Regional Ambassador
+  - You'll need to reallocate all supported Event Ambassadors to other Regional Ambassadors
+  - The system will show reallocation suggestions for each Event Ambassador
+  - The ambassador moves to the Event Ambassadors table with an empty events list
+
 ### Offboarding Ambassadors
 
 When an ambassador leaves or changes roles:
-- Click the "Offboard" button next to their name in the ambassador tables
+- Click the "🚪 Offboard" button next to their name in the ambassador tables
 - The system suggests reallocation recipients based on:
   - Available capacity
   - Regional alignment (same Regional Ambassador)
