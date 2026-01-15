@@ -43,21 +43,25 @@ describe("clipboard", () => {
         configurable: true,
       });
 
-      const execCommandSpy = jest.spyOn(document, "execCommand").mockReturnValue(true);
+      // Mock execCommand by replacing it on document
+      const originalExecCommand = document.execCommand;
+      document.execCommand = jest.fn().mockReturnValue(true);
       const createElementSpy = jest.spyOn(document, "createElement").mockReturnValue({
         value: "",
         select: jest.fn(),
         setSelectionRange: jest.fn(),
+        focus: jest.fn(),
       } as unknown as HTMLTextAreaElement);
       const appendChildSpy = jest.spyOn(document.body, "appendChild").mockImplementation();
       const removeChildSpy = jest.spyOn(document.body, "removeChild").mockImplementation();
 
       await copyToClipboard("test content");
 
-      expect(execCommandSpy).toHaveBeenCalledWith("copy");
+      expect(document.execCommand).toHaveBeenCalledWith("copy");
       expect(createElementSpy).toHaveBeenCalledWith("textarea");
 
-      execCommandSpy.mockRestore();
+      // Restore original
+      document.execCommand = originalExecCommand;
       createElementSpy.mockRestore();
       appendChildSpy.mockRestore();
       removeChildSpy.mockRestore();
@@ -70,9 +74,37 @@ describe("clipboard", () => {
         configurable: true,
       });
 
-      jest.spyOn(document, "execCommand").mockReturnValue(false);
+      // Mock execCommand by replacing it on document
+      const originalExecCommand = document.execCommand;
+      const mockExecCommand = jest.fn().mockReturnValue(false);
+      document.execCommand = mockExecCommand as typeof document.execCommand;
+
+      // Mock createElement to return a textarea with style object
+      const mockStyle = {};
+      const mockTextarea = {
+        value: "",
+        select: jest.fn(),
+        setSelectionRange: jest.fn(),
+        focus: jest.fn(),
+        style: mockStyle,
+      };
+      // Allow style properties to be set
+      Object.defineProperty(mockTextarea, "style", {
+        value: mockStyle,
+        writable: true,
+        configurable: true,
+      });
+      const createElementSpy = jest.spyOn(document, "createElement").mockReturnValue(mockTextarea as unknown as HTMLElement);
+      const appendChildSpy = jest.spyOn(document.body, "appendChild").mockImplementation();
+      const removeChildSpy = jest.spyOn(document.body, "removeChild").mockImplementation();
 
       await expect(copyToClipboard("test content")).rejects.toThrow();
+
+      // Restore original
+      document.execCommand = originalExecCommand;
+      createElementSpy.mockRestore();
+      appendChildSpy.mockRestore();
+      removeChildSpy.mockRestore();
     });
   });
 });

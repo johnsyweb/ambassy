@@ -35,7 +35,7 @@ describe("showSharingDialog", () => {
 
     expect(dialog.style.display).toBe("block");
     expect(title.textContent).toBe("Share State");
-    expect(content.innerHTML).toContain("Download File");
+    expect(content.innerHTML).toContain("Save to File");
     expect(content.innerHTML).toContain("Copy Shareable URL");
     expect(content.innerHTML).toContain("Copy to Clipboard");
   });
@@ -75,10 +75,16 @@ describe("showSharingDialog", () => {
     const urlButton = buttons[1] as HTMLButtonElement;
     urlButton.click();
 
-    await new Promise((resolve) => setTimeout(resolve, 0));
+    // Wait for async operation to complete
+    await new Promise((resolve) => setTimeout(resolve, 100));
 
     expect(shareStateAsUrl).toHaveBeenCalled();
-    expect(content.innerHTML).toContain(mockUrl);
+    
+    // The URL is displayed in an input field within the success message
+    // The URL is encoded and wrapped: currentUrl + ?state= + encodeURIComponent(mockUrl)
+    const urlInput = content.querySelector('input[type="text"]') as HTMLInputElement;
+    expect(urlInput).toBeTruthy();
+    expect(urlInput?.value).toContain(encodeURIComponent(mockUrl));
   });
 
   it("should handle clipboard sharing", async () => {
