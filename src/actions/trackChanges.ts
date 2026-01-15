@@ -48,17 +48,30 @@ export function removeExportReminder(): void {
 
 export function initializeChangeTrackerForLoadedData(): void {
   const tracker = loadFromStorage<ChangeTracker>(STORAGE_KEY);
+  const now = Date.now();
+  
   // If tracker doesn't exist, initialize it with current timestamp as "exported"
   // This treats loaded data as "already saved" until user makes changes
   if (!tracker) {
     const newTracker = createChangeTracker();
-    newTracker.lastExportTimestamp = Date.now();
+    newTracker.lastExportTimestamp = now;
     newTracker.lastChangeTimestamp = 0;
     saveToStorage(STORAGE_KEY, newTracker);
-  } else if (tracker.lastChangeTimestamp === 0 && tracker.lastExportTimestamp === 0) {
-    // If tracker exists but is uninitialized (both timestamps are 0),
-    // treat loaded data as "already saved"
-    tracker.lastExportTimestamp = Date.now();
-    saveToStorage(STORAGE_KEY, tracker);
+  } else {
+    // If tracker exists, ensure loaded data is treated as "saved"
+    // If there were unsaved changes from a previous session, reset them
+    // (we can't know if those changes were saved externally, so treat as saved)
+    if (tracker.lastChangeTimestamp > tracker.lastExportTimestamp) {
+      // Previous session had unsaved changes - reset to treat loaded data as saved
+      tracker.lastExportTimestamp = now;
+      tracker.lastChangeTimestamp = 0;
+      saveToStorage(STORAGE_KEY, tracker);
+    } else if (tracker.lastChangeTimestamp === 0 && tracker.lastExportTimestamp === 0) {
+      // Uninitialized tracker - treat loaded data as "already saved"
+      tracker.lastExportTimestamp = now;
+      saveToStorage(STORAGE_KEY, tracker);
+    }
+    // If tracker shows no unsaved changes (lastChangeTimestamp <= lastExportTimestamp),
+    // leave it as-is - data is already marked as saved
   }
 }
