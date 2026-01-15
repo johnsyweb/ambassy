@@ -7,6 +7,9 @@ import { EventTeamsTableDataMap, eventAmbassadorsFrom, regionalAmbassadorsFrom }
 import { loadProspectiveEvents } from "@actions/persistProspectiveEvents";
 import { initializeTableSorting } from "./tableSorting";
 import { persistEventAmbassadors } from "./persistState";
+import { EventDetailsMap } from "@models/EventDetailsMap";
+import { CountryMap } from "@models/country";
+import { buildEventHistoryUrl } from "@utils/eventHistoryUrl";
 
 // Forward declaration - will be set by index.ts
 let handleOffboardEventAmbassador: (name: string) => void = () => {
@@ -46,9 +49,11 @@ function assignColorToName(name: string, allNames: string[]): string {
 export function populateAmbassadorsTable(
   eventAmbassadors: EventAmbassadorMap,
   regionalAmbassadors: RegionalAmbassadorMap,
-  eventTeamsTableData?: EventTeamsTableDataMap
+  eventTeamsTableData?: EventTeamsTableDataMap,
+  eventDetails?: EventDetailsMap,
+  countries?: CountryMap
 ): void {
-  populateEventAmbassadorsTable(eventAmbassadors, eventTeamsTableData, regionalAmbassadors);
+  populateEventAmbassadorsTable(eventAmbassadors, eventTeamsTableData, regionalAmbassadors, eventDetails, countries);
   populateRegionalAmbassadorsTable(regionalAmbassadors, eventTeamsTableData);
 }
 
@@ -59,7 +64,13 @@ export function setEAReallocateHandler(handler: (eaName: string) => void): void 
   handleReallocateEA = handler;
 }
 
-function populateEventAmbassadorsTable(eventAmbassadors: EventAmbassadorMap, eventTeamsTableData?: EventTeamsTableDataMap, regionalAmbassadors?: RegionalAmbassadorMap): void {
+function populateEventAmbassadorsTable(
+  eventAmbassadors: EventAmbassadorMap,
+  eventTeamsTableData?: EventTeamsTableDataMap,
+  regionalAmbassadors?: RegionalAmbassadorMap,
+  eventDetails?: EventDetailsMap,
+  countries?: CountryMap
+): void {
   const tableBody = document.querySelector("#eventAmbassadorsTable tbody");
   if (!tableBody) {
     console.error("Event Ambassadors Table Body not found");
@@ -181,17 +192,67 @@ function populateEventAmbassadorsTable(eventAmbassadors: EventAmbassadorMap, eve
       eventsCell.style.fontStyle = "italic";
       eventsCell.style.color = "#666";
     } else {
-      const eventParts = [];
+      const eventParts: (HTMLElement | string)[] = [];
 
       if (allEvents.length > 0) {
-        eventParts.push(allEvents.join(", "));
+        const liveEventElements: (HTMLElement | string)[] = [];
+        allEvents.forEach((eventName, index) => {
+          if (index > 0) {
+            liveEventElements.push(", ");
+          }
+          
+          if (eventDetails && countries) {
+            const eventDetail = eventDetails.get(eventName);
+            if (eventDetail) {
+              const url = buildEventHistoryUrl(
+                eventDetail.properties.eventname,
+                eventDetail.properties.countrycode,
+                countries
+              );
+              
+              if (url) {
+                const link = document.createElement("a");
+                link.href = url;
+                link.target = "_blank";
+                link.rel = "noopener noreferrer";
+                link.textContent = eventName;
+                link.className = "event-history-link";
+                liveEventElements.push(link);
+              } else {
+                const span = document.createElement("span");
+                span.textContent = eventName;
+                span.title = "Event history unavailable - missing country domain";
+                span.setAttribute("aria-label", "Event history unavailable - missing country domain");
+                liveEventElements.push(span);
+              }
+            } else {
+              const span = document.createElement("span");
+              span.textContent = eventName;
+              span.title = "Event history unavailable - event details not found";
+              span.setAttribute("aria-label", "Event history unavailable - event details not found");
+              liveEventElements.push(span);
+            }
+          } else {
+            liveEventElements.push(eventName);
+          }
+        });
+        eventParts.push(...liveEventElements);
       }
 
       if (prospectiveEventNames.length > 0) {
+        if (eventParts.length > 0) {
+          eventParts.push("; ");
+        }
         eventParts.push(`Prospects: ${prospectiveEventNames.join(", ")}`);
       }
 
-      eventsCell.textContent = eventParts.join("; ");
+      eventParts.forEach((part) => {
+        if (typeof part === "string") {
+          eventsCell.appendChild(document.createTextNode(part));
+        } else {
+          eventsCell.appendChild(part);
+        }
+      });
     }
     row.appendChild(eventsCell);
 
