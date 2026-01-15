@@ -387,6 +387,7 @@ export function populateMap(
       const poly = L.polygon(coordinates, {
         color: raColor,
         fillOpacity: 0.1,
+        interactive: false, // Make polygons non-interactive so they don't block marker clicks
       });
       poly.bindTooltip(tooltip);
       polygonsLayer.addLayer(poly);
@@ -394,7 +395,15 @@ export function populateMap(
   });
 
   // Add polygonsLayer to map
+  // Note: polygons are non-interactive (interactive: false) so they don't block marker clicks
   polygonsLayer.addTo(map!);
+  
+  // Ensure markersLayer is on top by removing and re-adding it after polygons
+  // This ensures markers are clickable even though polygons are added later
+  if (map!.hasLayer(markersLayer)) {
+    markersLayer.remove();
+  }
+  markersLayer.addTo(map!);
 
   // Add or update layer control (remove existing if present)
   if (_layersControl) {
