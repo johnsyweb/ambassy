@@ -87,6 +87,7 @@ As an ambassador coordinator, I want the map view to update immediately after al
 - **FR-013**: System MUST validate that the selected Event Ambassador exists before completing allocation
 - **FR-014**: System MUST update the Event Teams table to include newly allocated events with all available information
 - **FR-015**: System MUST display Event Directors in map tooltips when this information is available
+- **FR-016**: System MUST use distance to nearest supported event as a tie-breaker when suggesting Event Ambassadors with similar capacity (same allocation count or within ±1) for event allocation
 
 ### Key Entities *(include if feature involves data)*
 
@@ -124,6 +125,20 @@ As an ambassador coordinator, I want the map view to update immediately after al
 - Event Teams table display (`populateEventTeamsTable`)
 - Changes log system for tracking allocations
 - EventTeam and EventDetails data models
+
+## Clarifications
+
+### CL-001: Allocation Algorithm Tie-Breaker
+
+**Clarification**: The allocation algorithm MUST use the nearest event allocation as a tie-breaker for Event Ambassadors with similar capacity.
+
+**Details**:
+- **Primary ordering**: Total allocation count (fewer allocations = higher priority)
+- **Tie-breaker**: When Event Ambassadors have the same total allocation count (or within ±1 allocation), the distance to the nearest supported event should be used as the primary tie-breaker
+- **Consistency**: This same tie-breaker logic MUST apply to both new allocations (`suggestEventAllocation`) and reallocations (`suggestEventReallocation`) for consistency
+- **Implementation**: The scoring algorithm should ensure that capacity differences dominate the score, with distance only affecting ranking when capacities are similar (same count or within ±1)
+
+**Rationale**: This ensures geographic proximity is considered when multiple EAs have similar capacity, leading to more logical event groupings and better geographic distribution of workload.
 
 ## Out of Scope
 
