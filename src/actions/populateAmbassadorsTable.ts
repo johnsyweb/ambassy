@@ -84,6 +84,14 @@ function populateEventAmbassadorsTable(eventAmbassadors: EventAmbassadorMap, eve
     );
     const prospectiveEventNames = prospectiveEvents.map(event => event.prospectEvent);
 
+    const reaCell = document.createElement("td");
+    reaCell.textContent = ambassador.regionalAmbassador || "—";
+    if (!ambassador.regionalAmbassador) {
+      reaCell.style.fontStyle = "italic";
+      reaCell.style.color = "#666";
+    }
+    row.appendChild(reaCell);
+
     const nameCell = document.createElement("td");
     const nameContainer = document.createElement("div");
     nameContainer.style.display = "flex";
@@ -248,7 +256,7 @@ function populateEventAmbassadorsTable(eventAmbassadors: EventAmbassadorMap, eve
     tableBody.appendChild(row);
   });
 
-  // Initialize sorting with default: Name (column 0) ascending
+  // Initialize sorting with default: Regional Ambassador (column 0) ascending
   initializeTableSorting('eventAmbassadorsTable', 0, 'asc');
 }
 

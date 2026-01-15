@@ -13,7 +13,9 @@ describe("populateAmbassadorsTable", () => {
       <table id="eventAmbassadorsTable">
         <thead>
           <tr>
+            <th>Regional Ambassador</th>
             <th>Name</th>
+            <th>State</th>
             <th>Number of Allocations</th>
             <th>Events Assigned</th>
             <th>Actions</th>
@@ -38,8 +40,8 @@ describe("populateAmbassadorsTable", () => {
     tableBody = document.querySelector("#eventAmbassadorsTable tbody") as HTMLTableSectionElement;
 
     eventAmbassadors = new Map([
-      ["EA 1", { name: "EA 1", events: ["Event1", "Event2"] }],
-      ["EA 2", { name: "EA 2", events: ["Event3"] }],
+      ["EA 1", { name: "EA 1", events: ["Event1", "Event2"], regionalAmbassador: "REA 1", state: "VIC" }],
+      ["EA 2", { name: "EA 2", events: ["Event3"], state: "NSW" }],
     ]);
 
     regionalAmbassadors = new Map([
@@ -106,12 +108,37 @@ describe("populateAmbassadorsTable", () => {
     expect(actionsContainer.style.alignItems).toBe("center");
   });
 
+  it("should have REA column as first column", () => {
+    populateAmbassadorsTable(eventAmbassadors, regionalAmbassadors);
+
+    const rows = tableBody.querySelectorAll("tr");
+    const firstRow = rows[0];
+    const cells = firstRow.querySelectorAll("td");
+    const reaCell = cells[0] as HTMLTableCellElement;
+
+    expect(reaCell.textContent).toBe("REA 1");
+  });
+
+  it("should display '—' in REA column when no REA assigned", () => {
+    populateAmbassadorsTable(eventAmbassadors, regionalAmbassadors);
+
+    const rows = tableBody.querySelectorAll("tr");
+    const secondRow = rows[1];
+    const cells = secondRow.querySelectorAll("td");
+    const reaCell = cells[0] as HTMLTableCellElement;
+
+    expect(reaCell.textContent).toBe("—");
+    expect(reaCell.style.fontStyle).toBe("italic");
+    expect(reaCell.style.color).toBe("rgb(102, 102, 102)");
+  });
+
   it("should have Name column with only name and color indicator", () => {
     populateAmbassadorsTable(eventAmbassadors, regionalAmbassadors);
 
     const rows = tableBody.querySelectorAll("tr");
     const firstRow = rows[0];
-    const nameCell = firstRow.querySelector("td:first-child") as HTMLTableCellElement;
+    const cells = firstRow.querySelectorAll("td");
+    const nameCell = cells[1] as HTMLTableCellElement; // Name is now second column
 
     // Should have a container div
     const nameContainer = nameCell.querySelector("div");

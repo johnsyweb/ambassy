@@ -69,6 +69,10 @@
 - [x] T018 [US1] Add REA selection UI (dropdown or prompt) when onboarding Event Ambassador in src/index.ts
 - [x] T019 [US1] Update populateAmbassadorsTable to display state information for Event Ambassadors in src/actions/populateAmbassadorsTable.ts
 - [x] T020 [US1] Ensure UI refreshes after onboarding with state and REA assignment in src/index.ts
+- [x] T099 [US1] Add REA column as first column in Event Ambassadors table header in public/index.html
+- [x] T100 [US1] Add REA column cell as first column in Event Ambassadors table rows in src/actions/populateAmbassadorsTable.ts
+- [x] T101 [US1] Update table sorting initialization to use REA column (index 0) as default in src/actions/populateAmbassadorsTable.ts
+- [x] T102 [P] [US1] Write unit test for REA column display in Event Ambassadors table in src/actions/populateAmbassadorsTable.test.ts
 
 **Checkpoint**: At this point, User Story 1 should be fully functional and testable independently - users can onboard EAs with state and REA assignment, with all operations logged separately
 
