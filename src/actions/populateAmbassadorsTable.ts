@@ -6,6 +6,7 @@ import { colorPalette } from "@actions/colorPalette";
 import { EventTeamsTableDataMap, eventAmbassadorsFrom, regionalAmbassadorsFrom } from "@models/EventTeamsTableData";
 import { loadProspectiveEvents } from "@actions/persistProspectiveEvents";
 import { initializeTableSorting } from "./tableSorting";
+import { persistEventAmbassadors } from "./persistState";
 
 // Forward declaration - will be set by index.ts
 let handleOffboardEventAmbassador: (name: string) => void = () => {
@@ -47,7 +48,7 @@ export function populateAmbassadorsTable(
   regionalAmbassadors: RegionalAmbassadorMap,
   eventTeamsTableData?: EventTeamsTableDataMap
 ): void {
-  populateEventAmbassadorsTable(eventAmbassadors, eventTeamsTableData);
+  populateEventAmbassadorsTable(eventAmbassadors, eventTeamsTableData, regionalAmbassadors);
   populateRegionalAmbassadorsTable(regionalAmbassadors, eventTeamsTableData);
 }
 
@@ -58,7 +59,7 @@ export function setEAReallocateHandler(handler: (eaName: string) => void): void 
   handleReallocateEA = handler;
 }
 
-function populateEventAmbassadorsTable(eventAmbassadors: EventAmbassadorMap, eventTeamsTableData?: EventTeamsTableDataMap): void {
+function populateEventAmbassadorsTable(eventAmbassadors: EventAmbassadorMap, eventTeamsTableData?: EventTeamsTableDataMap, regionalAmbassadors?: RegionalAmbassadorMap): void {
   const tableBody = document.querySelector("#eventAmbassadorsTable tbody");
   if (!tableBody) {
     console.error("Event Ambassadors Table Body not found");
@@ -74,6 +75,26 @@ function populateEventAmbassadorsTable(eventAmbassadors: EventAmbassadorMap, eve
     ? eventAmbassadorsFrom(eventTeamsTableData)
     : Array.from(eventAmbassadors.keys()).sort((a, b) => a.localeCompare(b));
 
+  // Populate missing regionalAmbassador fields from reverse relationship
+  let needsPersistence = false;
+  if (regionalAmbassadors) {
+    for (const [name, ambassador] of sortedAmbassadors) {
+      if (!ambassador.regionalAmbassador) {
+        for (const [raName, ra] of regionalAmbassadors.entries()) {
+          if (ra.supportsEAs.includes(name)) {
+            ambassador.regionalAmbassador = raName;
+            eventAmbassadors.set(name, ambassador);
+            needsPersistence = true;
+            break;
+          }
+        }
+      }
+    }
+    if (needsPersistence) {
+      persistEventAmbassadors(eventAmbassadors);
+    }
+  }
+
   sortedAmbassadors.forEach(([name, ambassador]) => {
     const row = document.createElement("tr");
     row.setAttribute("data-ea-name", name);
@@ -84,9 +105,12 @@ function populateEventAmbassadorsTable(eventAmbassadors: EventAmbassadorMap, eve
     );
     const prospectiveEventNames = prospectiveEvents.map(event => event.prospectEvent);
 
+    // Get REA - should already be populated from the loop above, but use as fallback
+    const reaName = ambassador.regionalAmbassador;
+
     const reaCell = document.createElement("td");
-    reaCell.textContent = ambassador.regionalAmbassador || "—";
-    if (!ambassador.regionalAmbassador) {
+    reaCell.textContent = reaName || "—";
+    if (!reaName) {
       reaCell.style.fontStyle = "italic";
       reaCell.style.color = "#666";
     }

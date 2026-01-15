@@ -1,7 +1,7 @@
 import { EventAmbassadorMap } from "@models/EventAmbassadorMap";
 import { RegionalAmbassadorMap } from "@models/RegionalAmbassadorMap";
 import { LogEntry } from "@models/LogEntry";
-import { persistRegionalAmbassadors } from "./persistState";
+import { persistRegionalAmbassadors, persistEventAmbassadors } from "./persistState";
 import { calculateAllCapacityStatuses, loadCapacityLimits } from "./checkCapacity";
 import { trackStateChange } from "./trackChanges";
 
@@ -40,6 +40,14 @@ export function reallocateEventAmbassador(
     regionalAmbassadors.set(newREA, newREAObj);
   }
 
+  // Update EA's regionalAmbassador field
+  const ea = eventAmbassadors.get(eventAmbassadorName);
+  if (ea) {
+    ea.regionalAmbassador = newREA;
+    eventAmbassadors.set(eventAmbassadorName, ea);
+    persistEventAmbassadors(eventAmbassadors);
+  }
+
   // Persist the updated Regional Ambassadors
   persistRegionalAmbassadors(regionalAmbassadors);
   trackStateChange();
@@ -51,6 +59,14 @@ export function reallocateEventAmbassador(
   // Log the change
   log.push({
     type: "reallocate event ambassador",
+    event: eventAmbassadorName,
+    oldValue: oldREA || "",
+    newValue: newREA,
+    timestamp: Date.now(),
+  });
+
+  log.push({
+    type: "assign event ambassador to regional ambassador",
     event: eventAmbassadorName,
     oldValue: oldREA || "",
     newValue: newREA,
