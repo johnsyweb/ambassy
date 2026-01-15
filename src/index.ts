@@ -32,7 +32,9 @@ import { calculateAllCapacityStatuses, loadCapacityLimits } from "./actions/chec
 import { offboardEventAmbassador, offboardRegionalAmbassador } from "./actions/offboardAmbassador";
 import { suggestEventReallocation, suggestEventAmbassadorReallocation } from "./actions/suggestReallocation";
 import { setOffboardingHandlers, setEAReallocateHandler, setTransitionHandlers } from "./actions/populateAmbassadorsTable";
-import { transitionEventAmbassadorToRegional } from "./actions/transitionAmbassador";
+import { transitionEventAmbassadorToRegional, transitionRegionalAmbassadorToEvent, validateREAToEATransition } from "./actions/transitionAmbassador";
+import { suggestEventAmbassadorReallocation } from "./actions/suggestReallocation";
+import { showReallocationDialog } from "./actions/showReallocationDialog";
 import { setProspectReallocationRefreshCallback } from "./actions/populateProspectsTable";
 import { saveCapacityLimits, validateCapacityLimits } from "./actions/configureCapacityLimits";
 import { CapacityLimits } from "./models/CapacityLimits";
@@ -550,8 +552,119 @@ function setupOffboardingButtons(): void {
     }
   };
 
-  const handleTransitionREAToEA = (name: string): void => {
-    alert("REA-to-EA transition not yet implemented. This will require reallocation of supported Event Ambassadors.");
+  const handleTransitionREAToEA = async (name: string): Promise<void> => {
+    const eventAmbassadors = getEventAmbassadorsFromSession();
+    const regionalAmbassadors = getRegionalAmbassadorsFromSession();
+    const limits = loadCapacityLimits();
+
+    const validationError = validateREAToEATransition(name, regionalAmbassadors);
+    if (validationError) {
+      alert(validationError);
+      return;
+    }
+
+    const rea = regionalAmbassadors.get(name);
+    if (!rea) {
+      alert(`Regional Ambassador "${name}" not found.`);
+      return;
+    }
+
+    const supportedEAs = rea.supportsEAs;
+
+    if (supportedEAs.length === 0) {
+      if (!confirm(`Are you sure you want to transition Regional Ambassador "${name}" to Event Ambassador?`)) {
+        return;
+      }
+
+      try {
+        const eaRecipients = new Map<string, string>();
+        transitionRegionalAmbassadorToEvent(name, eaRecipients, eventAmbassadors, regionalAmbassadors, log);
+        persistChangesLog(log);
+        ambassy();
+        alert(`Regional Ambassador "${name}" has been transitioned to Event Ambassador.`);
+      } catch (error) {
+        alert(`Failed to transition ambassador: ${error instanceof Error ? error.message : "Unknown error"}`);
+      }
+      return;
+    }
+
+    if (!confirm(`Are you sure you want to transition Regional Ambassador "${name}" to Event Ambassador? You will need to reallocate ${supportedEAs.length} Event Ambassador(s) to other Regional Ambassadors.`)) {
+      return;
+    }
+
+    const eaRecipients = new Map<string, string>();
+    let completedReallocations = 0;
+
+    for (const eaName of supportedEAs) {
+      const suggestions = suggestEventAmbassadorReallocation(
+        name,
+        [eaName],
+        regionalAmbassadors,
+        eventAmbassadors,
+        limits,
+      );
+
+      const otherREAs = Array.from(regionalAmbassadors.keys()).filter((reaName) => reaName !== name);
+      if (otherREAs.length === 0) {
+        alert(`Cannot transition: No other Regional Ambassadors available to reallocate "${eaName}".`);
+        return;
+      }
+
+      await new Promise<void>((resolve) => {
+        showReallocationDialog(
+          eaName,
+          name,
+          suggestions,
+          undefined,
+          regionalAmbassadors,
+          (selectedREA: string) => {
+            if (!selectedREA || selectedREA.trim() === "") {
+              alert("Please select a Regional Ambassador for this Event Ambassador.");
+              resolve();
+              return;
+            }
+
+            if (selectedREA === name) {
+              alert("Cannot assign Event Ambassador to the same Regional Ambassador being transitioned.");
+              resolve();
+              return;
+            }
+
+            if (!regionalAmbassadors.has(selectedREA)) {
+              alert(`Regional Ambassador "${selectedREA}" not found.`);
+              resolve();
+              return;
+            }
+
+            eaRecipients.set(eaName, selectedREA);
+            completedReallocations++;
+            resolve();
+          },
+          () => {
+            resolve();
+          },
+        );
+      });
+
+      if (completedReallocations < supportedEAs.indexOf(eaName) + 1) {
+        alert("Transition cancelled. Not all Event Ambassadors were reallocated.");
+        return;
+      }
+    }
+
+    if (eaRecipients.size !== supportedEAs.length) {
+      alert("Transition cancelled. Not all Event Ambassadors were reallocated.");
+      return;
+    }
+
+    try {
+      transitionRegionalAmbassadorToEvent(name, eaRecipients, eventAmbassadors, regionalAmbassadors, log);
+      persistChangesLog(log);
+      ambassy();
+      alert(`Regional Ambassador "${name}" has been transitioned to Event Ambassador. All Event Ambassadors have been reallocated.`);
+    } catch (error) {
+      alert(`Failed to transition ambassador: ${error instanceof Error ? error.message : "Unknown error"}`);
+    }
   };
 
   setTransitionHandlers(handleTransitionEAToREA, handleTransitionREAToEA);
