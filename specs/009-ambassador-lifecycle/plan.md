@@ -234,6 +234,21 @@ Each operation must log separately:
 - Add optional REA selection dropdown/prompt
 - Update Regional Ambassador onboarding (already has state, no changes needed)
 
+#### Event Ambassadors Table Updates
+
+**File**: `public/index.html` - Event Ambassadors table header
+
+- Add "Regional Ambassador" column header as the first column (before Name)
+- Update column order: Regional Ambassador, Name, State, Number of Allocations, Events Assigned, Actions
+
+**File**: `src/actions/populateAmbassadorsTable.ts` - `populateEventAmbassadorsTable()`
+
+- Add REA column as first column in table rows (before Name column)
+- Display `ambassador.regionalAmbassador` value or "—" if no REA assigned
+- Apply consistent styling (italic, gray) for unassigned REA (matching State column pattern)
+- Update row creation order to match new column order: REA, Name, State, Allocations, Events, Actions
+- Ensure REA column is included in table sorting initialization (column index 0)
+
 #### Transition UI
 
 **File**: `src/index.ts` - New function `setupTransitionButtons()`
@@ -255,6 +270,7 @@ Each operation must log separately:
 - **Logging**: Use existing `persistChangesLog()` after all operations
 - **UI Refresh**: Use existing `refreshUI()` after transitions
 - **Capacity Checking**: Existing capacity checking will automatically apply to new REAs
+- **Table Sorting**: Existing table sorting system (from feature 008) will work with new REA column - ensure REA column is sortable
 
 ## Phase 3: Testing Strategy
 
@@ -264,6 +280,13 @@ Each operation must log separately:
 - Test enhanced `onboardEventAmbassador` with state
 - Test `onboardEventAmbassador` with REA assignment
 - Test logging for each operation separately
+
+**File**: `src/actions/populateAmbassadorsTable.test.ts`
+- Test REA column appears as first column in Event Ambassadors table
+- Test REA column displays REA name when assigned
+- Test REA column displays "—" when no REA assigned
+- Test REA column styling matches State column for unassigned values
+- Test table sorting works with REA column (column index 0)
 
 **File**: `src/actions/transitionAmbassador.test.ts` (NEW)
 - Test `transitionEventAmbassadorToRegional` preserves events
