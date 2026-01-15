@@ -1,7 +1,6 @@
 import { EventAmbassadorMap } from "@models/EventAmbassadorMap";
 import { RegionalAmbassadorMap } from "@models/RegionalAmbassadorMap";
 import { EventDetailsMap } from "@models/EventDetailsMap";
-import { CapacityLimits } from "@models/CapacityLimits";
 import { ReallocationSuggestion } from "@models/ReallocationSuggestion";
 import { calculateGeographicProximityScore, findNeighboringEvents } from "./suggestReallocation";
 import { loadCapacityLimits } from "./checkCapacity";
