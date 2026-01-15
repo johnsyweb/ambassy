@@ -16,6 +16,10 @@ export function hasUnsavedChanges(): boolean {
   if (!tracker) {
     return false;
   }
+  // If lastChangeTimestamp is 0, no changes have been made yet
+  if (tracker.lastChangeTimestamp === 0) {
+    return false;
+  }
   return checkUnsavedChanges(tracker);
 }
 

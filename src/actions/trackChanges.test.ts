@@ -71,6 +71,26 @@ describe("trackChanges", () => {
 
       expect(hasUnsavedChanges()).toBe(false);
     });
+
+    it("should return false when lastChangeTimestamp is 0 (no changes yet)", () => {
+      const mockTracker: ChangeTracker = {
+        lastExportTimestamp: 0,
+        lastChangeTimestamp: 0,
+      };
+      (loadFromStorage as jest.Mock).mockReturnValue(mockTracker);
+
+      expect(hasUnsavedChanges()).toBe(false);
+    });
+
+    it("should return true when changes exist but never exported", () => {
+      const mockTracker: ChangeTracker = {
+        lastExportTimestamp: 0,
+        lastChangeTimestamp: 2000,
+      };
+      (loadFromStorage as jest.Mock).mockReturnValue(mockTracker);
+
+      expect(hasUnsavedChanges()).toBe(true);
+    });
   });
 
   describe("markStateExported", () => {
