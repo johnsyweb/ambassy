@@ -1088,11 +1088,19 @@ function initializeTableMapNavigation(): void {
         alert(`Event "${eventName}" allocated to "${eaName}"`);
       },
       (eventName: string) => {
+        console.log("onReallocate callback called for event:", eventName);
         // Reallocation from map - reuse the same handler as table reallocation
         // Get fresh data from session storage
         const freshEventTeams = getEventTeamsFromSession();
         const freshEventAmbassadors = getEventAmbassadorsFromSession();
         const freshRegionalAmbassadors = getRegionalAmbassadorsFromSession();
+        
+        console.log("Fresh data retrieved:", {
+          hasEventTeams: !!freshEventTeams,
+          hasEventAmbassadors: !!freshEventAmbassadors,
+          hasRegionalAmbassadors: !!freshRegionalAmbassadors,
+          hasEventDetails: !!eventDetails
+        });
         
         // Recalculate eventTeamsTableData to ensure we have the latest state
         const freshEventTeamsTableData = eventDetails && freshEventTeams
@@ -1104,7 +1112,13 @@ function initializeTableMapNavigation(): void {
             )
           : null;
         
+        console.log("Recalculated eventTeamsTableData:", {
+          hasData: !!freshEventTeamsTableData,
+          eventInData: freshEventTeamsTableData ? freshEventTeamsTableData.has(eventName) : false
+        });
+        
         if (!freshEventTeamsTableData || !eventDetails) {
+          console.log("Early return: missing data");
           return;
         }
 
