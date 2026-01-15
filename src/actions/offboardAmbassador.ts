@@ -105,7 +105,6 @@ export function offboardEventAmbassador(
   // Remove the ambassador
   eventAmbassadors.delete(ambassadorName);
   persistEventAmbassadors(eventAmbassadors);
-  trackStateChange();
 
   // Log the offboarding (each reassignment already logged separately by assignEventToAmbassador)
   log.push({
@@ -117,6 +116,9 @@ export function offboardEventAmbassador(
   });
 
   persistChangesLog(log);
+  
+  // Track state change after all persistence operations complete
+  trackStateChange();
 }
 
 /**
@@ -174,6 +176,7 @@ export function offboardRegionalAmbassador(
     }
 
     regionalAmbassadors.set(recipientName, recipient);
+    persistRegionalAmbassadors(regionalAmbassadors);
   }
 
   // Handle unassigned EAs (no recipient specified)
@@ -194,7 +197,6 @@ export function offboardRegionalAmbassador(
   // Remove the ambassador
   regionalAmbassadors.delete(ambassadorName);
   persistRegionalAmbassadors(regionalAmbassadors);
-  trackStateChange();
 
   // Log the offboarding
   log.push({
@@ -206,4 +208,7 @@ export function offboardRegionalAmbassador(
   });
 
   persistChangesLog(log);
+  
+  // Track state change after all persistence operations complete
+  trackStateChange();
 }
