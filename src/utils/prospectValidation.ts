@@ -5,9 +5,9 @@
  * including business rules and data integrity checks.
  */
 
-import { ProspectiveEvent } from '../models/ProspectiveEvent';
-import { ValidationResult, ValidationError } from '@localtypes/ProspectiveEventTypes';
-import { isValidCoordinate, formatCoordinate } from '../models/Coordinate';
+import { ProspectiveEvent } from "@models/ProspectiveEvent";
+import { ValidationResult, ValidationError } from "@localtypes/ProspectiveEventTypes";
+import { isValidCoordinate, formatCoordinate } from "@models/Coordinate";
 
 /**
  * Validate a prospective event

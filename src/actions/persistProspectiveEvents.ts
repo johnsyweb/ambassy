@@ -5,7 +5,7 @@
  * with proper data migration and backward compatibility.
  */
 
-import { ProspectiveEvent } from '../models/ProspectiveEvent';
+import { ProspectiveEvent } from "@models/ProspectiveEvent";
 import { ProspectiveEventsStorage } from '@localtypes/ProspectiveEventTypes';
 
 const STORAGE_KEY = 'prospectiveEvents';

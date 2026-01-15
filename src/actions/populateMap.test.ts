@@ -1,8 +1,4 @@
 import { populateMap } from "./populateMap";
-import { EventTeamsTableDataMap } from "../models/EventTeamsTableData";
-import { EventDetailsMap } from "../models/EventDetailsMap";
-import { EventAmbassadorMap } from "../models/EventAmbassadorMap";
-import { RegionalAmbassadorMap } from "../models/RegionalAmbassadorMap";
 
 jest.mock("d3-geo-voronoi", () => ({
   geoVoronoi: jest.fn(() => ({

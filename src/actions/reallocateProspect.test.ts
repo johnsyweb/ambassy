@@ -1,8 +1,8 @@
 import { reallocateProspect } from "./reallocateProspect";
-import { ProspectiveEventList } from "../models/ProspectiveEventList";
-import { EventAmbassadorMap } from "../models/EventAmbassadorMap";
-import { LogEntry } from "../models/LogEntry";
-import { CapacityStatus } from "../models/CapacityStatus";
+import { ProspectiveEventList } from "@models/ProspectiveEventList";
+import { EventAmbassadorMap } from "@models/EventAmbassadorMap";
+import { LogEntry } from "@models/LogEntry";
+import { CapacityStatus } from "@models/CapacityStatus";
 
 // Mock dependencies
 jest.mock("./persistProspectiveEvents");

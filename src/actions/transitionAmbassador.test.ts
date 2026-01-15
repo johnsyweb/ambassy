@@ -3,15 +3,13 @@ import {
   transitionRegionalAmbassadorToEvent,
   validateREAToEATransition,
 } from "./transitionAmbassador";
-import { EventAmbassadorMap } from "../models/EventAmbassadorMap";
-import { RegionalAmbassadorMap } from "../models/RegionalAmbassadorMap";
-import { LogEntry } from "../models/LogEntry";
+import { EventAmbassadorMap } from "@models/EventAmbassadorMap";
+import { RegionalAmbassadorMap } from "@models/RegionalAmbassadorMap";
+import { LogEntry } from "@models/LogEntry";
 import {
   persistEventAmbassadors,
   persistRegionalAmbassadors,
-  persistChangesLog,
 } from "./persistState";
-import { trackStateChange } from "./trackChanges";
 
 jest.mock("./persistState");
 jest.mock("./trackChanges");

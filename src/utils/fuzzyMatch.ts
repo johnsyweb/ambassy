@@ -1,4 +1,4 @@
-import { getCountries } from "../models/country";
+import { getCountries } from "@models/country";
 
 export function normalizeEventName(name: string): string {
   return name

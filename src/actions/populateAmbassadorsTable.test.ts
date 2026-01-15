@@ -1,9 +1,9 @@
 import { populateAmbassadorsTable, setEAReallocateHandler, setOffboardingHandlers } from "./populateAmbassadorsTable";
-import { EventAmbassadorMap } from "../models/EventAmbassadorMap";
-import { RegionalAmbassadorMap } from "../models/RegionalAmbassadorMap";
-import { EventDetailsMap } from "../models/EventDetailsMap";
-import { EventDetails } from "../models/EventDetails";
-import { CountryMap } from "../models/country";
+import { EventAmbassadorMap } from "@models/EventAmbassadorMap";
+import { RegionalAmbassadorMap } from "@models/RegionalAmbassadorMap";
+import { EventDetailsMap } from "@models/EventDetailsMap";
+import { EventDetails } from "@models/EventDetails";
+import { CountryMap } from "@models/country";
 
 describe("populateAmbassadorsTable", () => {
   let eventAmbassadors: EventAmbassadorMap;

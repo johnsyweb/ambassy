@@ -1,5 +1,4 @@
 import {
-  TableSortState,
   createTableSortState,
   resetToDefault,
 } from "./TableSortState";

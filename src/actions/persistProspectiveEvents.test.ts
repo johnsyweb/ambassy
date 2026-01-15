@@ -3,7 +3,7 @@
  */
 
 import { saveProspectiveEvents, loadProspectiveEvents, clearProspectiveEvents, hasProspectiveEvents, getProspectiveEventsMetadata } from './persistProspectiveEvents';
-import { ProspectiveEvent } from '../models/ProspectiveEvent';
+import { ProspectiveEvent } from "@models/ProspectiveEvent";
 
 // Mock localStorage
 const localStorageMock = (() => {

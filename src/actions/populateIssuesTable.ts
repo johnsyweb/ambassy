@@ -15,9 +15,6 @@ export function populateIssuesTable(
 
   tableBody.innerHTML = "";
 
-  // Only initialize sorting if table has data rows (not empty state)
-  const hasDataRows = issues.length > 0 && issues.some((issue) => issue.status === "unresolved");
-  
   if (issues.length === 0) {
     const row = document.createElement("tr");
     const cell = document.createElement("td");

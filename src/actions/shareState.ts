@@ -1,8 +1,7 @@
 import { exportApplicationState } from "./exportState";
 import { markStateExported } from "./trackChanges";
 import { copyToClipboard } from "@utils/clipboard";
-import { createDataUrl, isDataUrlValid } from "@utils/urlSharing";
-import { ShareStateResult, StateTooLargeError } from "@localtypes/SharingTypes";
+import { createDataUrl } from "@utils/urlSharing";
 
 const MAX_URL_SIZE = 1.5 * 1024 * 1024;
 

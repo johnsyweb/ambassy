@@ -4,7 +4,7 @@
  * Contains all interfaces, types, and contracts for the prospective events feature.
  */
 
-import { ProspectiveEvent, AllocationResult } from '../models/ProspectiveEvent';
+import { ProspectiveEvent, AllocationResult } from "@models/ProspectiveEvent";
 
 // CSV Import and Parsing Types
 export interface CSVImportOptions {

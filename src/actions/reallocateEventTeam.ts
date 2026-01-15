@@ -6,8 +6,8 @@ import { EventTeamMap } from "@models/EventTeamMap";
 import { EventDetailsMap } from "@models/EventDetailsMap";
 import { assignEventToAmbassador } from "./assignEventToAmbassador";
 import { calculateAllCapacityStatuses, loadCapacityLimits } from "./checkCapacity";
-import { getRegionalAmbassadorForEventAmbassador } from "../utils/regions";
-import { extractEventTeamsTableData } from "../models/EventTeamsTable";
+import { getRegionalAmbassadorForEventAmbassador } from "@utils/regions";
+import { extractEventTeamsTableData } from "@models/EventTeamsTable";
 import { trackStateChange } from "./trackChanges";
 
 /**

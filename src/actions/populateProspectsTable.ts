@@ -2,23 +2,23 @@
  * Populate the Prospects table with prospective events data
  */
 
-import { ProspectiveEventList } from '../models/ProspectiveEventList';
-import { EventAmbassadorMap } from '../models/EventAmbassadorMap';
-import { RegionalAmbassadorMap } from '../models/RegionalAmbassadorMap';
-import { showReallocationDialog } from './showReallocationDialog';
-import { reallocateProspect } from './reallocateProspect';
-import { loadCapacityLimits, calculateAllCapacityStatuses } from './checkCapacity';
-import { LogEntry } from '../models/LogEntry';
-import { CapacityStatus } from '../models/CapacityStatus';
-import { ReallocationSuggestion } from '../models/ReallocationSuggestion';
-import { geocodeAddress } from '../utils/geography';
-import { saveProspectiveEvents } from './persistProspectiveEvents';
-import { formatCoordinate, Coordinate, createCoordinate } from '../models/Coordinate';
-import { persistEventAmbassadors, persistChangesLog } from './persistState';
-import { EventDetailsMap } from '../models/EventDetailsMap';
-import { calculateDistance } from '../utils/geography';
-import { ProspectiveEvent } from '../models/ProspectiveEvent';
-import { EventAmbassador } from '../models/EventAmbassador';
+import { ProspectiveEventList } from "@models/ProspectiveEventList";
+import { EventAmbassadorMap } from "@models/EventAmbassadorMap";
+import { RegionalAmbassadorMap } from "@models/RegionalAmbassadorMap";
+import { showReallocationDialog } from "./showReallocationDialog";
+import { reallocateProspect } from "./reallocateProspect";
+import { loadCapacityLimits, calculateAllCapacityStatuses } from "./checkCapacity";
+import { LogEntry } from "@models/LogEntry";
+import { CapacityStatus } from "@models/CapacityStatus";
+import { ReallocationSuggestion } from "@models/ReallocationSuggestion";
+import { geocodeAddress } from "@utils/geography";
+import { saveProspectiveEvents } from "./persistProspectiveEvents";
+import { formatCoordinate, Coordinate, createCoordinate } from "@models/Coordinate";
+import { persistEventAmbassadors, persistChangesLog } from "./persistState";
+import { EventDetailsMap } from "@models/EventDetailsMap";
+import { calculateDistance } from "@utils/geography";
+import { ProspectiveEvent } from "@models/ProspectiveEvent";
+import { EventAmbassador } from "@models/EventAmbassador";
 import { initializeTableSorting } from './tableSorting';
 
 type AmbassadorWithCounts = {

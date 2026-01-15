@@ -4,7 +4,6 @@ import { markStateExported } from "./trackChanges";
 import { copyToClipboard } from "@utils/clipboard";
 import { createDataUrl } from "@utils/urlSharing";
 import { ApplicationState } from "@models/ApplicationState";
-import { ShareStateResult } from "@localtypes/SharingTypes";
 
 jest.mock("./exportState");
 jest.mock("./trackChanges");

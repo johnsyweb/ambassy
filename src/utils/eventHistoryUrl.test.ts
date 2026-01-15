@@ -1,5 +1,5 @@
 import { buildEventHistoryUrl } from './eventHistoryUrl';
-import { CountryMap } from '../models/country';
+import { CountryMap } from "@models/country";
 
 describe('buildEventHistoryUrl', () => {
   const countries: CountryMap = {

@@ -5,9 +5,9 @@
  * and comprehensive validation.
  */
 
-import { ProspectiveEvent } from '../models/ProspectiveEvent';
-import { CSVParseResult, CSVParseError } from '@localtypes/ProspectiveEventTypes';
-import { validateCSVHeaders, validateProspectiveEvent } from '../utils/prospectValidation';
+import { ProspectiveEvent } from "@models/ProspectiveEvent";
+import { CSVParseResult, CSVParseError } from "@localtypes/ProspectiveEventTypes";
+import { validateCSVHeaders, validateProspectiveEvent } from "@utils/prospectValidation";
 
 /**
  * Parse prospective events from CSV content

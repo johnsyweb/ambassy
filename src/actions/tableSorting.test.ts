@@ -317,6 +317,22 @@ describe("tableSorting", () => {
       const header = document.querySelector("#testTable thead th")!;
       expect(header.textContent).toContain("↑");
       expect(header.getAttribute("aria-sort")).toBe("ascending");
+      
+      // Test updateSortIndicators directly - it uses the current sort state
+      // First sort by column 1 (which will toggle to descending if already sorted ascending)
+      sortTable("testTable", 1);
+      // After sorting, updateSortIndicators is called automatically, but let's verify it works
+      updateSortIndicators("testTable");
+      const secondHeader = document.querySelectorAll("#testTable thead th")[1]!;
+      // The sort direction depends on the current state - if it was first click, it's ascending
+      const sortState = getSortState("testTable");
+      if (sortState?.sortDirection === "desc") {
+        expect(secondHeader.textContent).toContain("↓");
+        expect(secondHeader.getAttribute("aria-sort")).toBe("descending");
+      } else {
+        expect(secondHeader.textContent).toContain("↑");
+        expect(secondHeader.getAttribute("aria-sort")).toBe("ascending");
+      }
     });
   });
 

@@ -4,8 +4,8 @@ import {
   centerMapOnEvents,
   clearMapHighlights,
 } from "./mapNavigation";
-import { EventDetailsMap } from "../models/EventDetailsMap";
-import { EventDetails } from "../models/EventDetails";
+import { EventDetailsMap } from "@models/EventDetailsMap";
+import { EventDetails } from "@models/EventDetails";
 
 describe("mapNavigation", () => {
   let map: L.Map;

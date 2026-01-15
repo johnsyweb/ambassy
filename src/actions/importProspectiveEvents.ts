@@ -4,14 +4,14 @@
  * Handles the import pipeline for prospective events CSV files.
  */
 
-import { parseProspectiveEventsCSV } from "../parsers/parseProspectiveEvents";
-import { ProspectiveEvent } from "../models/ProspectiveEvent";
-import { ProspectiveEventList } from "../models/ProspectiveEventList";
+import { parseProspectiveEventsCSV } from "@parsers/parseProspectiveEvents";
+import { ProspectiveEvent } from "@models/ProspectiveEvent";
+import { ProspectiveEventList } from "@models/ProspectiveEventList";
 import { CSVParseResult } from "@localtypes/ProspectiveEventTypes";
-import { EventAmbassadorMap } from "../models/EventAmbassadorMap";
-import { RegionalAmbassadorMap } from "../models/RegionalAmbassadorMap";
-import { geocodeProspectiveEvent } from "../utils/geography";
-import { levenshteinDistance } from "../utils/fuzzyMatch";
+import { EventAmbassadorMap } from "@models/EventAmbassadorMap";
+import { RegionalAmbassadorMap } from "@models/RegionalAmbassadorMap";
+import { geocodeProspectiveEvent } from "@utils/geography";
+import { levenshteinDistance } from "@utils/fuzzyMatch";
 import {
   saveProspectiveEvents,
   loadProspectiveEvents,

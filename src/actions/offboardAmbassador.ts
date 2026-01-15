@@ -1,10 +1,10 @@
-import { EventAmbassadorMap } from "../models/EventAmbassadorMap";
-import { RegionalAmbassadorMap } from "../models/RegionalAmbassadorMap";
-import { EventTeamMap } from "../models/EventTeamMap";
-import { EventAmbassador } from "../models/EventAmbassador";
-import { RegionalAmbassador } from "../models/RegionalAmbassador";
-import { CapacityLimits } from "../models/CapacityLimits";
-import { LogEntry } from "../models/LogEntry";
+import { EventAmbassadorMap } from "@models/EventAmbassadorMap";
+import { RegionalAmbassadorMap } from "@models/RegionalAmbassadorMap";
+import { EventTeamMap } from "@models/EventTeamMap";
+import { EventAmbassador } from "@models/EventAmbassador";
+import { RegionalAmbassador } from "@models/RegionalAmbassador";
+import { CapacityLimits } from "@models/CapacityLimits";
+import { LogEntry } from "@models/LogEntry";
 import {
   persistEventAmbassadors,
   persistRegionalAmbassadors,

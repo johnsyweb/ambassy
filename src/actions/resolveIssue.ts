@@ -2,9 +2,9 @@ import { EventIssue } from "@models/EventIssue";
 import { EventDetails } from "@models/EventDetails";
 import { EventDetailsMap } from "@models/EventDetailsMap";
 import { LogEntry } from "@models/LogEntry";
-import { geocodeAddress } from "../utils/geocoding";
-import { fromGeoJSONArray, formatCoordinate, toGeoJSONArray, createCoordinate } from "../models/Coordinate";
-import { getCountryCodeFromCoordinate, getCountryCodeFromDomain } from "../models/country";
+import { geocodeAddress } from "@utils/geocoding";
+import { fromGeoJSONArray, formatCoordinate, toGeoJSONArray, createCoordinate } from "@models/Coordinate";
+import { getCountryCodeFromCoordinate, getCountryCodeFromDomain } from "@models/country";
 import { trackStateChange } from "./trackChanges";
 
 export function resolveIssueWithEvent(

@@ -1,6 +1,6 @@
 import { EventDetails } from "@models/EventDetails";
 import { EventDetailsMap } from "@models/EventDetailsMap";
-import { normalizeEventName, levenshteinDistance } from "../utils/fuzzyMatch";
+import { normalizeEventName, levenshteinDistance } from "@utils/fuzzyMatch";
 
 interface MatchResult {
   event: EventDetails;

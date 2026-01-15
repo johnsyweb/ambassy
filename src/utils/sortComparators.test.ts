@@ -5,7 +5,6 @@ import {
   compareBooleans,
   parseCellValue,
   detectColumnType,
-  ColumnType,
 } from "./sortComparators";
 
 describe("sortComparators", () => {

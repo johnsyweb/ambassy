@@ -1,5 +1,5 @@
-import { CapacityLimits } from "../models/CapacityLimits";
-import { saveToStorage } from "../utils/storage";
+import { CapacityLimits } from "@models/CapacityLimits";
+import { saveToStorage } from "@utils/storage";
 
 export function validateCapacityLimits(limits: CapacityLimits): boolean {
   if (
