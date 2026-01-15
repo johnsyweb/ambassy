@@ -198,6 +198,27 @@ describe("tableMapNavigation", () => {
       const dialog = document.getElementById("reallocationDialog");
       expect(dialog?.style.display).toBe("block");
     });
+
+    it("should trigger reallocation for allocated events when onReallocate is provided", () => {
+      const onReallocate = jest.fn();
+
+      selectMapEvent(
+        selectionState,
+        "event1",
+        markerMap,
+        highlightLayer,
+        eventDetails,
+        map,
+        eventTeamsTableData,
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        onReallocate
+      );
+
+      expect(onReallocate).toHaveBeenCalledWith("event1");
+    });
   });
 
   describe("highlightTableRow", () => {

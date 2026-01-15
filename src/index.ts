@@ -52,6 +52,7 @@ import { getEAReallocationSuggestions } from "./actions/getEAReallocationSuggest
 import { reallocateEventAmbassador } from "./actions/reallocateEventAmbassador";
 import { getRegionalAmbassadorForEventAmbassador } from "./utils/regions";
 import { allocateEventFromMap } from "./actions/allocateEventFromMap";
+import { showKeyboardShortcutsDialog, initializeKeyboardShortcuts } from "./actions/showKeyboardShortcutsDialog";
 import { detectIssues } from "./actions/detectIssues";
 import { populateIssuesTable } from "./actions/populateIssuesTable";
 import { populateProspectsTable } from "./actions/populateProspectsTable";
@@ -1073,6 +1074,90 @@ function initializeTableMapNavigation(): void {
         scrollToTableRow("eventTeamsTable", eventName);
         
         alert(`Event "${eventName}" allocated to "${eaName}"`);
+      },
+      (eventName: string) => {
+        // Reallocation from map - reuse the same handler as table reallocation
+        if (!eventTeamsTableData || !eventDetails) {
+          return;
+        }
+
+        const currentEventAmbassadors = getEventAmbassadorsFromSession();
+        const currentRegionalAmbassadors = getRegionalAmbassadorsFromSession();
+
+        const eventData = eventTeamsTableData.get(eventName);
+        if (!eventData || !eventData.eventAmbassador) {
+          alert("Event is not currently assigned to any ambassador.");
+          return;
+        }
+
+        try {
+          const suggestions = getReallocationSuggestions(
+            eventName,
+            eventTeamsTableData,
+            currentEventAmbassadors,
+            eventDetails,
+            loadCapacityLimits(),
+            currentRegionalAmbassadors
+          );
+
+          showEventTeamReallocationDialog(
+            eventName,
+            eventData.eventAmbassador,
+            suggestions,
+            currentEventAmbassadors,
+            currentRegionalAmbassadors,
+            (selectedAmbassador: string) => {
+              if (!eventTeamsTableData) {
+                return;
+              }
+
+              const validation = validateReallocation(
+                eventName,
+                selectedAmbassador,
+                currentEventAmbassadors,
+                eventTeamsTableData
+              );
+
+              if (!validation.valid) {
+                alert(`Cannot reallocate: ${validation.error}`);
+                return;
+              }
+
+              try {
+                const currentEventTeams = getEventTeamsFromSession();
+                
+                reallocateEventTeam(
+                  eventName,
+                  eventData.eventAmbassador,
+                  selectedAmbassador,
+                  currentEventAmbassadors,
+                  eventTeamsTableData,
+                  log,
+                  currentRegionalAmbassadors,
+                  currentEventTeams,
+                  eventDetails ?? undefined
+                );
+
+                persistChangesLog(log);
+
+                if (eventDetails) {
+                  clearSelection(selectionState);
+                  refreshUI(eventDetails, eventTeamsTableData, log, currentEventAmbassadors, currentRegionalAmbassadors);
+                }
+
+                alert(`Event "${eventName}" reallocated to "${selectedAmbassador}"`);
+              } catch (error) {
+                alert(`Failed to reallocate event: ${error instanceof Error ? error.message : "Unknown error"}`);
+              }
+            },
+            () => {
+              // Handle cancel - dialog already closed
+            },
+            eventDetails
+          );
+        } catch (error) {
+          alert(`Failed to get reallocation suggestions: ${error instanceof Error ? error.message : "Unknown error"}`);
+        }
       }
     );
   });
@@ -1363,6 +1448,15 @@ async function checkForSharedStateInUrl(): Promise<void> {
 document.addEventListener("DOMContentLoaded", async () => {
   initializeTabs();
   setupExportReminder();
+  initializeKeyboardShortcuts();
+  
+  const keyboardShortcutsButton = document.getElementById("keyboardShortcutsButton");
+  if (keyboardShortcutsButton) {
+    keyboardShortcutsButton.addEventListener("click", () => {
+      showKeyboardShortcutsDialog();
+    });
+  }
+  
   await checkForSharedStateInUrl();
   ambassy();
 });

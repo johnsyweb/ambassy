@@ -82,6 +82,7 @@ describe("showEventAllocationDialog", () => {
         items: ["event1"],
         score: 85,
         reasons: ["Has available capacity"],
+        neighboringEvents: [{ name: "nearby-event", distanceKm: 5.2 }],
       },
       {
         fromAmbassador: "",
@@ -209,5 +210,52 @@ describe("showEventAllocationDialog", () => {
     expect(dialog.getAttribute("role")).toBe("dialog");
     expect(dialog.getAttribute("aria-modal")).toBe("true");
     expect(dialog.getAttribute("aria-labelledby")).toBe("reallocationDialogTitle");
+  });
+
+  it("should display nearest assigned event and distance", () => {
+    showEventAllocationDialog(
+      "event1",
+      eventDetails,
+      eventAmbassadors,
+      regionalAmbassadors,
+      eventTeams,
+      onSelect,
+      onCancel,
+      suggestions
+    );
+
+    const firstButton = content.querySelector("button.suggestion-button") as HTMLButtonElement;
+    expect(firstButton).not.toBeNull();
+    expect(firstButton.textContent).toContain("5.2 km to nearby-event");
+  });
+
+  it("should display 'No events assigned' for EAs with zero allocations", () => {
+    const suggestionsWithNoEvents = [
+      {
+        fromAmbassador: "",
+        toAmbassador: "EA 3",
+        items: ["event1"],
+        score: 1000,
+        reasons: ["Has available capacity"],
+        allocationCount: 0,
+        liveEventsCount: 0,
+        prospectEventsCount: 0,
+      },
+    ];
+
+    showEventAllocationDialog(
+      "event1",
+      eventDetails,
+      eventAmbassadors,
+      regionalAmbassadors,
+      eventTeams,
+      onSelect,
+      onCancel,
+      suggestionsWithNoEvents
+    );
+
+    const button = content.querySelector("button.suggestion-button") as HTMLButtonElement;
+    expect(button).not.toBeNull();
+    expect(button.textContent).toContain("No events assigned");
   });
 });

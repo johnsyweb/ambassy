@@ -51,7 +51,8 @@ export function selectMapEvent(
   eventAmbassadors?: EventAmbassadorMap,
   regionalAmbassadors?: RegionalAmbassadorMap,
   eventTeams?: EventTeamMap,
-  onAllocate?: (eventName: string, eaName: string) => void
+  onAllocate?: (eventName: string, eaName: string) => void,
+  onReallocate?: (eventName: string) => void
 ): void {
   state.selectedEventShortName = eventShortName;
   state.selectedEventAmbassador = null;
@@ -82,6 +83,12 @@ export function selectMapEvent(
         state.highlightedEvents.clear();
       }
     );
+    return;
+  }
+
+  // If allocated and reallocation handler provided, trigger reallocation
+  if (!isUnallocated && onReallocate) {
+    onReallocate(eventShortName);
     return;
   }
 

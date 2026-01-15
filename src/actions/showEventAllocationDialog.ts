@@ -144,6 +144,17 @@ export function showEventAllocationDialog(
         contextDiv.appendChild(reaInfo);
       }
 
+      if (suggestion.neighboringEvents && suggestion.neighboringEvents.length > 0) {
+        const nearestEvent = suggestion.neighboringEvents[0];
+        const distanceInfo = document.createElement("div");
+        distanceInfo.textContent = `${nearestEvent.distanceKm.toFixed(1)} km to ${nearestEvent.name}`;
+        contextDiv.appendChild(distanceInfo);
+      } else if (totalCount === 0) {
+        const noEventsInfo = document.createElement("div");
+        noEventsInfo.textContent = "No events assigned";
+        contextDiv.appendChild(noEventsInfo);
+      }
+
       if (suggestion.reasons && suggestion.reasons.length > 0) {
         const reasonsDiv = document.createElement("div");
         reasonsDiv.style.fontSize = "0.85em";
