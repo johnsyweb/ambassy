@@ -213,11 +213,52 @@ export function populateMap(
         });
       }
     } else {
+      // Unallocated events - make them larger and more visible for easier clicking
       const marker = L.circleMarker([latitude, longitude], {
-        radius: 1,
+        radius: 4,
         color: DEFAULT_EVENT_COLOUR,
+        fillColor: DEFAULT_EVENT_COLOUR,
+        fillOpacity: 0.6,
+        weight: 2,
       });
-      marker.bindTooltip(eventName);
+      marker.bindTooltip(`${eventName}<br><em>Click to allocate</em>`, {
+        permanent: false,
+        direction: "top",
+        offset: [0, -10],
+      });
+      
+      // Add hover effect to make it clear the marker is interactive
+      marker.on("mouseover", () => {
+        marker.setStyle({
+          radius: 6,
+          fillOpacity: 0.8,
+          weight: 3,
+        });
+        const element = marker.getElement() as HTMLElement | null;
+        if (element) {
+          element.style.cursor = "pointer";
+        }
+      });
+      marker.on("mouseout", () => {
+        marker.setStyle({
+          radius: 4,
+          fillOpacity: 0.6,
+          weight: 2,
+        });
+        const element = marker.getElement() as HTMLElement | null;
+        if (element) {
+          element.style.cursor = "pointer";
+        }
+      });
+      
+      // Set cursor style on the marker element when added to map
+      marker.on("add", () => {
+        const element = marker.getElement() as HTMLElement | null;
+        if (element) {
+          element.style.cursor = "pointer";
+        }
+      });
+      
       _markerMap.set(eventName, marker);
       markersLayer.addLayer(marker);
       
