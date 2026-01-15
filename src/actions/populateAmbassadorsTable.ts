@@ -222,6 +222,7 @@ function populateRegionalAmbassadorsTable(regionalAmbassadors: RegionalAmbassado
 
   sortedAmbassadors.forEach(([name, ambassador]) => {
     const row = document.createElement("tr");
+    row.setAttribute("data-ra-name", name);
 
     const nameCell = document.createElement("td");
     const nameContainer = document.createElement("div");
