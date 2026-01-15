@@ -36,8 +36,8 @@ describe("showSharingDialog", () => {
     expect(dialog.style.display).toBe("block");
     expect(title.textContent).toBe("Share State");
     expect(content.innerHTML).toContain("Save to File");
-    expect(content.innerHTML).toContain("Copy Shareable URL");
-    expect(content.innerHTML).toContain("Copy to Clipboard");
+    expect(content.innerHTML).toContain("Copy Share Link");
+    expect(content.innerHTML).toContain("Copy State Text");
   });
 
   it("should handle file download sharing", async () => {

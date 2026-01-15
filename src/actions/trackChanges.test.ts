@@ -145,6 +145,7 @@ describe("trackChanges", () => {
       };
       (loadFromStorage as jest.Mock).mockReturnValue(mockTracker);
 
+      const addEventListenerSpy = jest.spyOn(window, "addEventListener");
       setupExportReminder();
 
       const beforeUnloadEvent = new Event("beforeunload", { cancelable: true }) as BeforeUnloadEvent;
@@ -157,16 +158,18 @@ describe("trackChanges", () => {
         value: jest.fn(),
       });
 
-      const handler = (window.addEventListener as jest.Mock).mock.calls.find(
+      const handler = addEventListenerSpy.mock.calls.find(
         (call) => call[0] === "beforeunload"
-      )?.[1];
+      )?.[1] as ((event: BeforeUnloadEvent) => void) | undefined;
 
-      if (handler) {
+      if (handler && typeof handler === "function") {
         handler(beforeUnloadEvent);
       }
 
       expect(beforeUnloadEvent.returnValue).toBe("");
       expect(beforeUnloadEvent.preventDefault).toHaveBeenCalled();
+      
+      addEventListenerSpy.mockRestore();
     });
 
     it("should not trigger confirmation when no unsaved changes", () => {
@@ -176,6 +179,7 @@ describe("trackChanges", () => {
       };
       (loadFromStorage as jest.Mock).mockReturnValue(mockTracker);
 
+      const addEventListenerSpy = jest.spyOn(window, "addEventListener");
       setupExportReminder();
 
       const beforeUnloadEvent = new Event("beforeunload", { cancelable: true }) as BeforeUnloadEvent;
@@ -188,16 +192,18 @@ describe("trackChanges", () => {
         value: jest.fn(),
       });
 
-      const handler = (window.addEventListener as jest.Mock).mock.calls.find(
+      const handler = addEventListenerSpy.mock.calls.find(
         (call) => call[0] === "beforeunload"
-      )?.[1];
+      )?.[1] as ((event: BeforeUnloadEvent) => void) | undefined;
 
-      if (handler) {
+      if (handler && typeof handler === "function") {
         handler(beforeUnloadEvent);
       }
 
       expect(beforeUnloadEvent.returnValue).toBe("");
       expect(beforeUnloadEvent.preventDefault).not.toHaveBeenCalled();
+      
+      addEventListenerSpy.mockRestore();
     });
   });
 
