@@ -147,10 +147,14 @@ describe("trackChanges", () => {
 
       setupExportReminder();
 
-      const beforeUnloadEvent = new BeforeUnloadEvent("beforeunload", { cancelable: true });
+      const beforeUnloadEvent = new Event("beforeunload", { cancelable: true }) as BeforeUnloadEvent;
       Object.defineProperty(beforeUnloadEvent, "returnValue", {
         writable: true,
         value: "",
+      });
+      Object.defineProperty(beforeUnloadEvent, "preventDefault", {
+        writable: true,
+        value: jest.fn(),
       });
 
       const handler = (window.addEventListener as jest.Mock).mock.calls.find(
@@ -162,6 +166,7 @@ describe("trackChanges", () => {
       }
 
       expect(beforeUnloadEvent.returnValue).toBe("");
+      expect(beforeUnloadEvent.preventDefault).toHaveBeenCalled();
     });
 
     it("should not trigger confirmation when no unsaved changes", () => {
@@ -173,10 +178,14 @@ describe("trackChanges", () => {
 
       setupExportReminder();
 
-      const beforeUnloadEvent = new BeforeUnloadEvent("beforeunload", { cancelable: true });
+      const beforeUnloadEvent = new Event("beforeunload", { cancelable: true }) as BeforeUnloadEvent;
       Object.defineProperty(beforeUnloadEvent, "returnValue", {
         writable: true,
         value: "",
+      });
+      Object.defineProperty(beforeUnloadEvent, "preventDefault", {
+        writable: true,
+        value: jest.fn(),
       });
 
       const handler = (window.addEventListener as jest.Mock).mock.calls.find(
@@ -188,6 +197,7 @@ describe("trackChanges", () => {
       }
 
       expect(beforeUnloadEvent.returnValue).toBe("");
+      expect(beforeUnloadEvent.preventDefault).not.toHaveBeenCalled();
     });
   });
 
