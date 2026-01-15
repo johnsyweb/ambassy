@@ -42,6 +42,43 @@ td {
   font-weight: bold;
 }
 
+/* Sticky table headers */
+thead th {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background-color: #f2f2f2;
+}
+
+/* Ensure sticky headers work for all tables */
+#eventTeamsTable thead th,
+#eventAmbassadorsTable thead th,
+#regionalAmbassadorsTable thead th,
+#prospectsTable thead th,
+#changesTable thead th,
+#issuesTable thead th {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background-color: #f2f2f2;
+}
+
+/* Sortable header hover and focus states */
+thead th[tabindex="0"] {
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+thead th[tabindex="0"]:hover {
+  background-color: #e0e0e0;
+}
+
+thead th[tabindex="0"]:focus {
+  outline: 2px solid #4a90e2;
+  outline-offset: -2px;
+  background-color: #e0e0e0;
+}
+
 tr:nth-child(even) {
   background-color: #f9f9f9;
 }
@@ -106,8 +143,8 @@ tr:hover {
   margin-top: 0;
 }
 
-#eventAmbassadorsTable th,
-#regionalAmbassadorsTable th {
+#eventAmbassadorsTable thead th,
+#regionalAmbassadorsTable thead th {
   background-color: #f2f2f2;
   font-weight: bold;
 }
