@@ -3,8 +3,9 @@ import { RegionalAmbassadorMap } from "@models/RegionalAmbassadorMap";
 import { EventAmbassador } from "@models/EventAmbassador";
 import { RegionalAmbassador } from "@models/RegionalAmbassador";
 import { LogEntry } from "@models/LogEntry";
-import { persistEventAmbassadors } from "./persistState";
+import { persistEventAmbassadors, persistChangesLog } from "./persistState";
 import { persistRegionalAmbassadors } from "./persistState";
+import { trackStateChange } from "./trackChanges";
 
 export function validateAmbassadorName(
   name: string,
@@ -29,9 +30,11 @@ export function validateAmbassadorName(
 
 export function onboardEventAmbassador(
   name: string,
+  state: string,
   eventAmbassadors: EventAmbassadorMap,
   regionalAmbassadors: RegionalAmbassadorMap,
-  log: LogEntry[]
+  log: LogEntry[],
+  regionalAmbassadorName?: string
 ): void {
   const trimmedName = name.trim();
   if (!validateAmbassadorName(trimmedName, eventAmbassadors, regionalAmbassadors)) {
@@ -41,6 +44,7 @@ export function onboardEventAmbassador(
   const newAmbassador: EventAmbassador = {
     name: trimmedName,
     events: [],
+    state: state,
   };
 
   eventAmbassadors.set(trimmedName, newAmbassador);
@@ -53,6 +57,38 @@ export function onboardEventAmbassador(
     newValue: trimmedName,
     timestamp: Date.now(),
   });
+
+  if (regionalAmbassadorName) {
+    const rea = regionalAmbassadors.get(regionalAmbassadorName);
+    if (!rea) {
+      throw new Error(`Regional Ambassador "${regionalAmbassadorName}" not found`);
+    }
+
+    newAmbassador.regionalAmbassador = regionalAmbassadorName;
+    const oldEAs = [...rea.supportsEAs];
+    rea.supportsEAs.push(trimmedName);
+    persistEventAmbassadors(eventAmbassadors);
+    persistRegionalAmbassadors(regionalAmbassadors);
+
+    log.push({
+      type: "assign event ambassador to regional ambassador",
+      event: trimmedName,
+      oldValue: "",
+      newValue: regionalAmbassadorName,
+      timestamp: Date.now(),
+    });
+
+    log.push({
+      type: "add event ambassador to regional supports",
+      event: regionalAmbassadorName,
+      oldValue: oldEAs.join(", ") || "",
+      newValue: rea.supportsEAs.join(", "),
+      timestamp: Date.now(),
+    });
+  }
+
+  persistChangesLog(log);
+  trackStateChange();
 }
 
 export function onboardRegionalAmbassador(
@@ -75,6 +111,7 @@ export function onboardRegionalAmbassador(
 
   regionalAmbassadors.set(trimmedName, newAmbassador);
   persistRegionalAmbassadors(regionalAmbassadors);
+  trackStateChange();
 
   log.push({
     type: "onboard regional ambassador",

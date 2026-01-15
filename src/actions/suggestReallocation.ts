@@ -1,14 +1,14 @@
-import { EventAmbassadorMap } from "../models/EventAmbassadorMap";
-import { RegionalAmbassadorMap } from "../models/RegionalAmbassadorMap";
-import { EventDetailsMap } from "../models/EventDetailsMap";
-import { CapacityLimits } from "../models/CapacityLimits";
-import { ReallocationSuggestion } from "../models/ReallocationSuggestion";
-import { EventAmbassador } from "../models/EventAmbassador";
-import { RegionalAmbassador } from "../models/RegionalAmbassador";
-import { calculateAverageDistance, calculateDistance } from "../utils/geography";
+import { EventAmbassadorMap } from "@models/EventAmbassadorMap";
+import { RegionalAmbassadorMap } from "@models/RegionalAmbassadorMap";
+import { EventDetailsMap } from "@models/EventDetailsMap";
+import { CapacityLimits } from "@models/CapacityLimits";
+import { ReallocationSuggestion } from "@models/ReallocationSuggestion";
+import { EventAmbassador } from "@models/EventAmbassador";
+import { RegionalAmbassador } from "@models/RegionalAmbassador";
+import { calculateAverageDistance, calculateDistance } from "@utils/geography";
 import { checkEventAmbassadorCapacity, checkRegionalAmbassadorCapacity } from "./checkCapacity";
-import { CapacityStatus } from "../models/CapacityStatus";
-import { getRegionalAmbassadorForEventAmbassador } from "../utils/regions";
+import { CapacityStatus } from "@models/CapacityStatus";
+import { getRegionalAmbassadorForEventAmbassador } from "@utils/regions";
 
 export interface ReallocationOptions {
   fromRegionalAmbassador?: string;
@@ -86,7 +86,7 @@ export function calculateGeographicProximityScore(
  * Find neighboring events within a distance threshold.
  * Returns array of neighboring events with their distances.
  */
-function findNeighboringEvents(
+export function findNeighboringEvents(
   recipientEvents: string[],
   reallocatingEvents: string[],
   eventDetails: EventDetailsMap,

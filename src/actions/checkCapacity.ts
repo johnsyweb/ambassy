@@ -1,11 +1,11 @@
-import { CapacityStatus } from "../models/CapacityStatus";
+import { CapacityStatus } from "@models/CapacityStatus";
 import {
   CapacityLimits,
   defaultCapacityLimits,
-} from "../models/CapacityLimits";
-import { EventAmbassadorMap } from "../models/EventAmbassadorMap";
-import { RegionalAmbassadorMap } from "../models/RegionalAmbassadorMap";
-import { loadFromStorage } from "../utils/storage";
+} from "@models/CapacityLimits";
+import { EventAmbassadorMap } from "@models/EventAmbassadorMap";
+import { RegionalAmbassadorMap } from "@models/RegionalAmbassadorMap";
+import { loadFromStorage } from "@utils/storage";
 
 export function checkEventAmbassadorCapacity(
   eventCount: number,

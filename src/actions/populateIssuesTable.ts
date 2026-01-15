@@ -1,5 +1,6 @@
 import { EventIssue } from "@models/EventIssue";
 import { IssuesState } from "@models/IssuesState";
+import { initializeTableSorting } from "./tableSorting";
 
 export function populateIssuesTable(
   issues: EventIssue[],
@@ -31,10 +32,6 @@ export function populateIssuesTable(
   unresolvedIssues.forEach((issue) => {
     const row = document.createElement("tr");
     row.setAttribute("data-issue-event-name", issue.eventShortName);
-
-    if (issuesState.selectedIssue === issue.eventShortName) {
-      row.classList.add("selected");
-    }
 
     const eventNameCell = document.createElement("td");
     eventNameCell.textContent = issue.eventShortName;
@@ -85,4 +82,26 @@ export function populateIssuesTable(
     row.style.cursor = "pointer";
     tableBody.appendChild(row);
   });
+
+  // Initialize sorting with default: Event Name (column 0) ascending
+  // Only initialize if we have unresolved issues (not empty state)
+  if (unresolvedIssues.length > 0) {
+    initializeTableSorting('issuesTable', 0, 'asc');
+    
+    // Apply selection after sorting (sorting may have reordered rows)
+    if (issuesState.selectedIssue) {
+      const selectedRow = tableBody.querySelector(`tr[data-issue-event-name="${issuesState.selectedIssue}"]`);
+      if (selectedRow) {
+        selectedRow.classList.add("selected");
+        selectedRow.setAttribute("aria-selected", "true");
+      }
+    }
+  } else if (issuesState.selectedIssue) {
+    // If no unresolved issues but there's a selection, clear it
+    const selectedRow = tableBody.querySelector("tr.selected");
+    if (selectedRow) {
+      selectedRow.classList.remove("selected");
+      selectedRow.setAttribute("aria-selected", "false");
+    }
+  }
 }

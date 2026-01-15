@@ -76,7 +76,9 @@ Each component MUST have a single responsibility. Code layout MUST follow curren
 
 **Commented-Out Code is Prohibited**: Commented-out code MUST NOT exist in the codebase. It is a liability that becomes outdated, misleading, and clutters the codebase. If code needs to be preserved for reference, use version control (git) to view history. Commented-out code suggests uncertainty about what should exist and violates the principle of clean, maintainable code.
 
-**Rationale**: Maintains code clarity and makes the codebase easier to understand, test, and modify. Single responsibility reduces coupling and increases cohesion. Self-documenting code eliminates the need for comments that can become lies when code evolves but comments don't. Commented-out code is worse than no code - it suggests the codebase is uncertain and creates maintenance burden. See <https://johnsy.com/blog/2012/10/31/comments-are-lies/> for rationale on comments.
+**Import Path Aliases are Mandatory**: All imports from `src/actions/`, `src/models/`, `src/parsers/`, `src/utils/`, and `src/types/` MUST use path aliases (`@actions/*`, `@models/*`, `@parsers/*`, `@utils/*`, `@localtypes/*`) instead of relative paths (`../actions/*`, `../models/*`, etc.). Relative parent imports (`../`) are prohibited for these directories. Same-directory imports (`./`) are allowed. ESLint enforces this rule automatically.
+
+**Rationale**: Maintains code clarity and makes the codebase easier to understand, test, and modify. Single responsibility reduces coupling and increases cohesion. Self-documenting code eliminates the need for comments that can become lies when code evolves but comments don't. Commented-out code is worse than no code - it suggests the codebase is uncertain and creates maintenance burden. Path aliases provide consistent, location-independent imports that remain valid when files are moved, improving maintainability. See <https://johnsy.com/blog/2012/10/31/comments-are-lies/> for rationale on comments.
 
 ### V. Accessibility & User Experience
 

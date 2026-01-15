@@ -1,6 +1,6 @@
-import { EventTeamsTableDataMap } from '../models/EventTeamsTableData';
-import { LogEntry } from '../models/LogEntry';
-import { updateEventAmbassador } from '../actions/updateEventAmbassador';
+import { EventTeamsTableDataMap } from "@models/EventTeamsTableData";
+import { LogEntry } from "@models/LogEntry";
+import { updateEventAmbassador } from "@actions/updateEventAmbassador";
 
 describe('updateEventAmbassador', () => {
   it('should update the event ambassador and log the change', () => {

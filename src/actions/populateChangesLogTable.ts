@@ -1,4 +1,5 @@
 import { LogEntry } from "@models/LogEntry";
+import { initializeTableSorting } from "./tableSorting";
 import { EventDetailsMap } from "@models/EventDetailsMap";
 import { CountryMap } from "@models/country";
 import { buildEventHistoryUrl } from "@utils/eventHistoryUrl";
@@ -68,4 +69,10 @@ export function populateChangesLogTable(
 
     changesTableBody.appendChild(row);
   });
+
+  // Initialize sorting with default: Timestamp (column 4) descending (most recent first)
+  // Only initialize if we have log entries
+  if (log.length > 0) {
+    initializeTableSorting('changesTable', 4, 'desc');
+  }
 }

@@ -1,5 +1,5 @@
-import { Coordinate, getLatitude, getLongitude } from './Coordinate';
-import { getCountries as fetchCountries } from '../actions/fetchEvents';
+import { Coordinate, getLatitude, getLongitude } from "@models/Coordinate";
+import { getCountries as fetchCountries } from "@actions/fetchEvents";
 
 export interface Country {
   url: string | null;

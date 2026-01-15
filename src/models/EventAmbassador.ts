@@ -7,4 +7,5 @@ export interface EventAmbassador {
   capacityStatus?: CapacityStatus;
   conflicts?: string[];
   regionalAmbassador?: string; // RA this EA reports to
+  state?: string; // State information (e.g., "VIC", "NSW")
 }

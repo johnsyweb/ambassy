@@ -11,6 +11,15 @@ describe("populateIssuesTable", () => {
   beforeEach(() => {
     document.body.innerHTML = `
       <table id="issuesTable">
+        <thead>
+          <tr>
+            <th>Event Name</th>
+            <th>Event Ambassador</th>
+            <th>Regional Ambassador</th>
+            <th>Issue Type</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
         <tbody></tbody>
       </table>
     `;
@@ -243,7 +252,8 @@ describe("populateIssuesTable", () => {
       onResolve
     );
 
-    const row = tableBody.querySelector("tr");
+    // After sorting, find the row by data attribute
+    const row = tableBody.querySelector("tr[data-issue-event-name='event1']");
     expect(row?.classList.contains("selected")).toBe(true);
   });
 });

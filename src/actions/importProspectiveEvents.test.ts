@@ -1,16 +1,16 @@
 import { importProspectiveEvents } from "./importProspectiveEvents";
-import { EventAmbassadorMap } from "../models/EventAmbassadorMap";
-import { RegionalAmbassadorMap } from "../models/RegionalAmbassadorMap";
-import { ProspectiveEvent } from "../models/ProspectiveEvent";
+import { EventAmbassadorMap } from "@models/EventAmbassadorMap";
+import { RegionalAmbassadorMap } from "@models/RegionalAmbassadorMap";
+import { ProspectiveEvent } from "@models/ProspectiveEvent";
 import {
   saveProspectiveEvents,
   loadProspectiveEvents,
 } from "./persistProspectiveEvents";
-import { geocodeProspectiveEvent } from "../utils/geography";
+import { geocodeProspectiveEvent } from "@utils/geography";
 
 // Mock dependencies
 jest.mock("./persistProspectiveEvents");
-jest.mock("../utils/geography");
+jest.mock("@utils/geography");
 
 const mockSaveProspectiveEvents = saveProspectiveEvents as jest.MockedFunction<
   typeof saveProspectiveEvents

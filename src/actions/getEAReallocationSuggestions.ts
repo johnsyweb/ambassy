@@ -2,7 +2,7 @@ import { EventAmbassadorMap } from "@models/EventAmbassadorMap";
 import { RegionalAmbassadorMap } from "@models/RegionalAmbassadorMap";
 import { CapacityLimits } from "@models/CapacityLimits";
 import { ReallocationSuggestion } from "@models/ReallocationSuggestion";
-import { getRegionalAmbassadorForEventAmbassador } from "../utils/regions";
+import { getRegionalAmbassadorForEventAmbassador } from "@utils/regions";
 
 /**
  * Generate reallocation suggestions for an Event Ambassador to Regional Ambassadors.

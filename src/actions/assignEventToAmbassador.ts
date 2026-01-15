@@ -6,6 +6,7 @@ import {
   calculateAllCapacityStatuses,
   loadCapacityLimits,
 } from "./checkCapacity";
+import { trackStateChange } from "./trackChanges";
 
 /**
  * Assign an event to an Event Ambassador.
@@ -45,6 +46,7 @@ export function assignEventToAmbassador(
 
   // Persist the updated Event Ambassadors
   persistEventAmbassadors(eventAmbassadors);
+  trackStateChange();
 
   // Recalculate capacity statuses after assignment
   const capacityLimits = loadCapacityLimits();

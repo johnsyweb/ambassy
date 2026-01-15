@@ -4,16 +4,16 @@ import {
   loadCapacityLimits,
   calculateAllCapacityStatuses,
 } from "./checkCapacity";
-import { CapacityStatus } from "../models/CapacityStatus";
+import { CapacityStatus } from "@models/CapacityStatus";
 import {
   CapacityLimits,
   defaultCapacityLimits,
-} from "../models/CapacityLimits";
-import { EventAmbassadorMap } from "../models/EventAmbassadorMap";
-import { RegionalAmbassadorMap } from "../models/RegionalAmbassadorMap";
-import { loadFromStorage } from "../utils/storage";
+} from "@models/CapacityLimits";
+import { EventAmbassadorMap } from "@models/EventAmbassadorMap";
+import { RegionalAmbassadorMap } from "@models/RegionalAmbassadorMap";
+import { loadFromStorage } from "@utils/storage";
 
-jest.mock("../utils/storage");
+jest.mock("@utils/storage");
 
 describe("checkCapacity", () => {
   beforeEach(() => {

@@ -2,9 +2,10 @@ import { EventIssue } from "@models/EventIssue";
 import { EventDetails } from "@models/EventDetails";
 import { EventDetailsMap } from "@models/EventDetailsMap";
 import { LogEntry } from "@models/LogEntry";
-import { geocodeAddress } from "../utils/geocoding";
-import { fromGeoJSONArray, formatCoordinate, toGeoJSONArray, createCoordinate } from "../models/Coordinate";
-import { getCountryCodeFromCoordinate, getCountryCodeFromDomain } from "../models/country";
+import { geocodeAddress } from "@utils/geocoding";
+import { fromGeoJSONArray, formatCoordinate, toGeoJSONArray, createCoordinate } from "@models/Coordinate";
+import { getCountryCodeFromCoordinate, getCountryCodeFromDomain } from "@models/country";
+import { trackStateChange } from "./trackChanges";
 
 export function resolveIssueWithEvent(
   issue: EventIssue,
@@ -40,12 +41,14 @@ export function resolveIssueWithEvent(
   };
 
   eventDetailsMap.set(issue.eventShortName, eventToAdd);
+  trackStateChange();
 
+  const coord = fromGeoJSONArray(eventDetails.geometry.coordinates);
   const logEntry: LogEntry = {
     type: "Issue Resolved",
     event: issue.eventShortName,
     oldValue: "Missing coordinates",
-    newValue: `Found in events.json: ${eventDetails.properties.EventLongName || eventDetails.properties.EventShortName} (${eventDetails.geometry.coordinates[1]}, ${eventDetails.geometry.coordinates[0]})`,
+    newValue: `Found in events.json: ${eventDetails.properties.EventLongName || eventDetails.properties.EventShortName} (${formatCoordinate(coord)})`,
     timestamp: Date.now(),
   };
 
@@ -86,6 +89,7 @@ export function resolveIssueWithPin(
   };
 
   eventDetailsMap.set(issue.eventShortName, eventDetails);
+  trackStateChange();
 
   const logEntry: LogEntry = {
     type: "Issue Resolved",
@@ -152,14 +156,16 @@ export async function resolveIssueWithAddress(
     };
 
     eventDetailsMap.set(issue.eventShortName, eventDetails);
+    trackStateChange();
 
+    const coord = createCoordinate(lat, lng);
     const logEntry: LogEntry = {
       type: "Issue Resolved",
       event: issue.eventShortName,
       oldValue: "Missing coordinates",
       newValue: parkrunUrl
-        ? `Geocoded address: "${address}" (${lat}, ${lng}) with metadata from ${parkrunUrl}`
-        : `Geocoded address: "${address}" (${lat}, ${lng})`,
+        ? `Geocoded address: "${address}" (${formatCoordinate(coord)}) with metadata from ${parkrunUrl}`
+        : `Geocoded address: "${address}" (${formatCoordinate(coord)})`,
       timestamp: Date.now(),
     };
 

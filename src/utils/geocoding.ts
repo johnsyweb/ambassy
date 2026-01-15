@@ -2,7 +2,7 @@
  * Geocoding utilities for converting addresses to coordinates
  */
 
-import { createCoordinate, getLatitude, getLongitude } from '../models/Coordinate';
+import { createCoordinate, getLatitude, getLongitude } from "@models/Coordinate";
 
 const NOMINATIM_URL = 'https://nominatim.openstreetmap.org/search';
 

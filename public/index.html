@@ -224,11 +224,11 @@
           should be self-explanatory.
         </p>
         <img
-          src="screenshot.png"
+          src="ambassy-social-preview.png"
           alt="Screenshot of Ambassy"
           title="Screenshot of Ambassy"
           width="500" height="273"
-           />
+        />
           <p>
             I found this useful (and a fun programming challenge) as an REA and I
             publish it in the hope you do too.
@@ -252,10 +252,10 @@
             accept=".csv"
             multiple
           />
-          <button type="button" id="importButton" title="Import state">📥 Import State</button>
+          <button type="button" id="importButton" title="Open a saved Ambassy file from a colleague">📂 Open Saved State</button>
           <input
             type="file"
-            title="import state"
+            title="open saved state"
             id="importFileInput"
             accept=".json"
             style="display: none;"
@@ -267,13 +267,16 @@
     <div id="ambassy">
       <div id="mapContainer"></div>
 
-      <div style="margin: 1em 0;">
-        <button type="button" id="exportButtonMap" title="Export state">📤 Export State</button>
-        <button type="button" id="importButtonMap" title="Import state">📥 Import State</button>
-        <button type="button" id="addEventAmbassadorButton" title="Add Event Ambassador">👤 Add Event Ambassador</button>
-        <button type="button" id="addRegionalAmbassadorButton" title="Add Regional Ambassador">👥 Add Regional Ambassador</button>
-        <button type="button" id="configureCapacityLimitsButton" title="Configure Capacity Limits">🔧 Configure Capacity Limits</button>
-        <button type="button" id="purgeButton">🗑️ Purge Data</button>
+      <div style="margin: 1em 0; display: flex; justify-content: space-between; align-items: center;">
+        <div>
+          <button type="button" id="exportButtonMap" title="Share your current map and allocations with another ambassador">📤 Share…</button>
+          <button type="button" id="importButtonMap" title="Open a saved Ambassy file from a colleague">📂 Open Saved State</button>
+          <button type="button" id="addEventAmbassadorButton" title="Add Event Ambassador">👤 Add Event Ambassador</button>
+          <button type="button" id="addRegionalAmbassadorButton" title="Add Regional Ambassador">👥 Add Regional Ambassador</button>
+          <button type="button" id="configureCapacityLimitsButton" title="Configure Capacity Limits">🔧 Configure Capacity Limits</button>
+          <button type="button" id="purgeButton">🗑️ Purge Data</button>
+        </div>
+        <button type="button" id="keyboardShortcutsButton" title="Show keyboard shortcuts (Ctrl+/ or ?)">⌨️ Keyboard Shortcuts</button>
       </div>
 
       <div id="reallocationDialog" role="dialog" aria-labelledby="reallocationDialogTitle" aria-modal="true" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 2em; border: 2px solid #333; border-radius: 8px; z-index: 1000; box-shadow: 0 4px 6px rgba(0,0,0,0.3); max-width: 600px; width: 90%;">
@@ -281,6 +284,13 @@
         <div id="reallocationDialogContent"></div>
         <div style="margin-top: 1em; display: flex; gap: 0.5em; justify-content: flex-end;">
           <button type="button" id="reallocationDialogCancel" style="padding: 0.5em 1em;">❌ Cancel</button>
+        </div>
+      </div>
+      <div id="keyboardShortcutsDialog" role="dialog" aria-labelledby="keyboardShortcutsDialogTitle" aria-modal="true" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 2em; border: 2px solid #333; border-radius: 8px; z-index: 1000; box-shadow: 0 4px 6px rgba(0,0,0,0.3); max-width: 600px; width: 90%; max-height: 80vh; overflow-y: auto;">
+        <h2 id="keyboardShortcutsDialogTitle">Keyboard Shortcuts</h2>
+        <div id="keyboardShortcutsDialogContent"></div>
+        <div style="margin-top: 1em; display: flex; gap: 0.5em; justify-content: flex-end;">
+          <button type="button" id="keyboardShortcutsDialogClose" style="padding: 0.5em 1em;">Close</button>
         </div>
       </div>
       <div id="capacityLimitsDialog" role="dialog" aria-labelledby="capacityLimitsDialogTitle" aria-modal="true" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 2em; border: 2px solid #333; border-radius: 8px; z-index: 1000; box-shadow: 0 4px 6px rgba(0,0,0,0.3);">
@@ -350,7 +360,9 @@
           <table id="eventAmbassadorsTable" border="1">
             <thead>
               <tr>
+                <th>Regional Ambassador</th>
                 <th>Name</th>
+                <th>State</th>
                 <th>Number of Allocations</th>
                 <th>Events Assigned</th>
                 <th>Actions</th>

@@ -2,7 +2,7 @@ import { ReallocationSuggestion } from "@models/ReallocationSuggestion";
 import { EventAmbassadorMap } from "@models/EventAmbassadorMap";
 import { RegionalAmbassadorMap } from "@models/RegionalAmbassadorMap";
 import { EventDetailsMap } from "@models/EventDetailsMap";
-import { calculateDistance } from "../utils/geography";
+import { calculateDistance } from "@utils/geography";
 import { ProspectiveEventList } from "@models/ProspectiveEventList";
 
 /**

@@ -61,18 +61,30 @@ This project is written in TypeScript, has unit tests, and the map will be displ
 
 Ambassy automatically persists your uploaded CSV data to browser local storage, so you don't need to re-upload files every time you visit the application. Your data persists across browser sessions.
 
-### Exporting State
+### Sharing Your State
 
-Click the "Export State" button to download your current application state as a JSON file. This file contains all your uploaded data (Event Ambassadors, Event Teams, Regional Ambassadors, and changes log) and can be shared with other ambassadors or parkrun staff.
+Click the **"Share…"** button to share your current map and allocations with other ambassadors. You can choose from several sharing methods:
 
-### Importing State
+- **Save to File**: Download a JSON file containing your state that you can send via email or file sharing
+- **Copy Share Link**: Copy a link that automatically loads your state when opened (for smaller states)
+- **Copy State Text**: Copy the state data as text that can be pasted into Ambassy
+- **Share via Device**: Use your device's native share menu (mobile/desktop) to share via messaging apps, email, etc.
 
-Click the "Import State" button to load a previously exported state file. This allows you to:
-- Share your data with other users
-- Restore your data on a different device or browser
-- Load data shared by other ambassadors
+**Note**: If your state is too large for link sharing, you'll be prompted to use file or text sharing instead.
 
-**Note**: Importing will replace your current data. You'll be asked to confirm before importing if you have existing data.
+### Opening Shared State
+
+Click the **"Open Saved State"** button to load state shared by another ambassador. You can:
+
+- Select a shared file you received
+- Paste a shared link or data URL
+- Drag and drop a shared file directly onto the page
+
+**Note**: Opening shared state will replace your current data. You'll be asked to confirm before opening if you have existing data.
+
+### Export Reminders
+
+If you've made changes since your last export, Ambassy will remind you to share your state before closing the browser window. This helps ensure your changes aren't lost.
 
 ## Ambassador Capacity Management
 
@@ -81,8 +93,23 @@ Ambassy provides tools for managing ambassador capacity and lifecycle:
 ### Onboarding Ambassadors
 
 - **Add Event Ambassador**: Click "Add Event Ambassador" to add a new Event Ambassador to the system
+  - You'll be prompted to enter the ambassador's name and state (e.g., "VIC", "NSW")
+  - You can optionally assign the Event Ambassador to a Regional Ambassador during onboarding
 - **Add Regional Ambassador**: Click "Add Regional Ambassador" to add a new Regional Ambassador to the system
+  - You'll be prompted to enter the ambassador's name and state
 - New ambassadors start with no assigned events/EAs and can be assigned as needed
+
+### Allocating Events from the Map
+
+- **Allocate Unallocated Events**: Click on an unallocated event marker on the map (small purple markers) to allocate it to an Event Ambassador
+  - Unallocated events appear as small markers (radius: 1) with default purple colour
+  - Clicking an unallocated event opens an allocation dialog with suggested Event Ambassadors
+  - The system suggests EAs based on capacity, geographic proximity, and existing allocations
+  - You can select from the top suggestions or choose "Other" to manually select any Event Ambassador
+  - The supporting Regional Ambassador is automatically determined from the selected EA's hierarchy
+  - After allocation, the event appears in the Event Teams table with complete information (EA, REA, Event Directors if known)
+  - The map updates immediately to show the newly allocated event with the EA's assigned colour and larger size
+  - All allocations are logged in the changes log
 
 ### Capacity Checking
 
@@ -94,10 +121,23 @@ The system automatically checks ambassador capacity against configurable limits:
   - ✅ Within capacity (within preferred range)
   - ⚠️ Over capacity (above maximum)
 
+### Transitioning Ambassadors
+
+Ambassadors can transition between Event Ambassador and Regional Ambassador roles:
+
+- **Event Ambassador to Regional Ambassador**: Click "⬆️ Transition to REA" next to an Event Ambassador
+  - The ambassador's event assignments are preserved for later reallocation
+  - The ambassador moves to the Regional Ambassadors table
+  - Their events are visible in the "Events for reallocation" field
+- **Regional Ambassador to Event Ambassador**: Click "⬇️ Transition to EA" next to a Regional Ambassador
+  - You'll need to reallocate all supported Event Ambassadors to other Regional Ambassadors
+  - The system will show reallocation suggestions for each Event Ambassador
+  - The ambassador moves to the Event Ambassadors table with an empty events list
+
 ### Offboarding Ambassadors
 
 When an ambassador leaves or changes roles:
-- Click the "Offboard" button next to their name in the ambassador tables
+- Click the "🚪 Offboard" button next to their name in the ambassador tables
 - The system suggests reallocation recipients based on:
   - Available capacity
   - Regional alignment (same Regional Ambassador)

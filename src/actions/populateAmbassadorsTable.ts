@@ -5,6 +5,8 @@ import { loadCapacityLimits, checkEventAmbassadorCapacity, checkRegionalAmbassad
 import { colorPalette } from "@actions/colorPalette";
 import { EventTeamsTableDataMap, eventAmbassadorsFrom, regionalAmbassadorsFrom } from "@models/EventTeamsTableData";
 import { loadProspectiveEvents } from "@actions/persistProspectiveEvents";
+import { initializeTableSorting } from "./tableSorting";
+import { persistEventAmbassadors } from "./persistState";
 import { EventDetailsMap } from "@models/EventDetailsMap";
 import { CountryMap } from "@models/country";
 import { buildEventHistoryUrl } from "@utils/eventHistoryUrl";
@@ -16,6 +18,12 @@ let handleOffboardEventAmbassador: (name: string) => void = () => {
 let handleOffboardRegionalAmbassador: (name: string) => void = () => {
   console.warn("handleOffboardRegionalAmbassador not initialized");
 };
+let handleTransitionEAToREA: (name: string) => void = () => {
+  console.warn("handleTransitionEAToREA not initialized");
+};
+let handleTransitionREAToEA: (name: string) => void = () => {
+  console.warn("handleTransitionREAToEA not initialized");
+};
 
 export function setOffboardingHandlers(
   eventHandler: (name: string) => void,
@@ -23,6 +31,14 @@ export function setOffboardingHandlers(
 ): void {
   handleOffboardEventAmbassador = eventHandler;
   handleOffboardRegionalAmbassador = regionalHandler;
+}
+
+export function setTransitionHandlers(
+  eaToReaHandler: (name: string) => void,
+  reaToEaHandler: (name: string) => void
+): void {
+  handleTransitionEAToREA = eaToReaHandler;
+  handleTransitionREAToEA = reaToEaHandler;
 }
 
 function assignColorToName(name: string, allNames: string[]): string {
@@ -37,7 +53,7 @@ export function populateAmbassadorsTable(
   eventDetails?: EventDetailsMap,
   countries?: CountryMap
 ): void {
-  populateEventAmbassadorsTable(eventAmbassadors, eventTeamsTableData, eventDetails, countries);
+  populateEventAmbassadorsTable(eventAmbassadors, eventTeamsTableData, regionalAmbassadors, eventDetails, countries);
   populateRegionalAmbassadorsTable(regionalAmbassadors, eventTeamsTableData);
 }
 
@@ -51,6 +67,7 @@ export function setEAReallocateHandler(handler: (eaName: string) => void): void 
 function populateEventAmbassadorsTable(
   eventAmbassadors: EventAmbassadorMap,
   eventTeamsTableData?: EventTeamsTableDataMap,
+  regionalAmbassadors?: RegionalAmbassadorMap,
   eventDetails?: EventDetailsMap,
   countries?: CountryMap
 ): void {
@@ -69,6 +86,26 @@ function populateEventAmbassadorsTable(
     ? eventAmbassadorsFrom(eventTeamsTableData)
     : Array.from(eventAmbassadors.keys()).sort((a, b) => a.localeCompare(b));
 
+  // Populate missing regionalAmbassador fields from reverse relationship
+  let needsPersistence = false;
+  if (regionalAmbassadors) {
+    for (const [name, ambassador] of sortedAmbassadors) {
+      if (!ambassador.regionalAmbassador) {
+        for (const [raName, ra] of regionalAmbassadors.entries()) {
+          if (ra.supportsEAs.includes(name)) {
+            ambassador.regionalAmbassador = raName;
+            eventAmbassadors.set(name, ambassador);
+            needsPersistence = true;
+            break;
+          }
+        }
+      }
+    }
+    if (needsPersistence) {
+      persistEventAmbassadors(eventAmbassadors);
+    }
+  }
+
   sortedAmbassadors.forEach(([name, ambassador]) => {
     const row = document.createElement("tr");
     row.setAttribute("data-ea-name", name);
@@ -78,6 +115,17 @@ function populateEventAmbassadorsTable(
       event.eventAmbassador === name && event.ambassadorMatchStatus === 'matched'
     );
     const prospectiveEventNames = prospectiveEvents.map(event => event.prospectEvent);
+
+    // Get REA - should already be populated from the loop above, but use as fallback
+    const reaName = ambassador.regionalAmbassador;
+
+    const reaCell = document.createElement("td");
+    reaCell.textContent = reaName || "—";
+    if (!reaName) {
+      reaCell.style.fontStyle = "italic";
+      reaCell.style.color = "#666";
+    }
+    row.appendChild(reaCell);
 
     const nameCell = document.createElement("td");
     const nameContainer = document.createElement("div");
@@ -103,6 +151,14 @@ function populateEventAmbassadorsTable(
 
     nameCell.appendChild(nameContainer);
     row.appendChild(nameCell);
+
+    const stateCell = document.createElement("td");
+    stateCell.textContent = ambassador.state || "—";
+    if (!ambassador.state) {
+      stateCell.style.fontStyle = "italic";
+      stateCell.style.color = "#666";
+    }
+    row.appendChild(stateCell);
 
     const allocationsCell = document.createElement("td");
     const eventCount = ambassador.events.length;
@@ -234,6 +290,27 @@ function populateEventAmbassadorsTable(
       }
     };
     
+    const transitionButton = document.createElement("button");
+    transitionButton.innerHTML = "⬆️ Transition to REA";
+    transitionButton.type = "button";
+    transitionButton.title = `Transition ${name} to Regional Ambassador`;
+    transitionButton.setAttribute("aria-label", `Transition Event Ambassador ${name} to Regional Ambassador`);
+    transitionButton.style.padding = "2px 8px";
+    transitionButton.style.fontSize = "0.85em";
+    transitionButton.style.cursor = "pointer";
+    transitionButton.addEventListener("click", (e) => {
+      e.stopPropagation();
+      handleTransitionEAToREA(name);
+    });
+    
+    transitionButton.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        e.stopPropagation();
+        handleTransitionEAToREA(name);
+      }
+    });
+    
     const offboardButton = document.createElement("button");
     offboardButton.innerHTML = "🚪 Offboard";
     offboardButton.type = "button";
@@ -256,12 +333,16 @@ function populateEventAmbassadorsTable(
     });
     
     actionsContainer.appendChild(reallocateButton);
+    actionsContainer.appendChild(transitionButton);
     actionsContainer.appendChild(offboardButton);
     actionsCell.appendChild(actionsContainer);
     row.appendChild(actionsCell);
 
     tableBody.appendChild(row);
   });
+
+  // Initialize sorting with default: Regional Ambassador (column 0) ascending
+  initializeTableSorting('eventAmbassadorsTable', 0, 'asc');
 }
 
 function populateRegionalAmbassadorsTable(regionalAmbassadors: RegionalAmbassadorMap, eventTeamsTableData?: EventTeamsTableDataMap): void {
@@ -282,6 +363,7 @@ function populateRegionalAmbassadorsTable(regionalAmbassadors: RegionalAmbassado
 
   sortedAmbassadors.forEach(([name, ambassador]) => {
     const row = document.createElement("tr");
+    row.setAttribute("data-ra-name", name);
 
     const nameCell = document.createElement("td");
     const nameContainer = document.createElement("div");
@@ -339,7 +421,36 @@ function populateRegionalAmbassadorsTable(regionalAmbassadors: RegionalAmbassado
     }
     row.appendChild(easCell);
 
+    if (ambassador.eventsForReallocation && ambassador.eventsForReallocation.length > 0) {
+      const eventsForReallocationCell = document.createElement("td");
+      eventsForReallocationCell.textContent = `Events for reallocation: ${ambassador.eventsForReallocation.join(", ")}`;
+      eventsForReallocationCell.style.fontStyle = "italic";
+      eventsForReallocationCell.style.color = "#666";
+      row.appendChild(eventsForReallocationCell);
+    }
+
     const actionsCell = document.createElement("td");
+    const transitionButton = document.createElement("button");
+    transitionButton.innerHTML = "⬇️ Transition to EA";
+    transitionButton.type = "button";
+    transitionButton.title = `Transition ${name} to Event Ambassador`;
+    transitionButton.setAttribute("aria-label", `Transition Regional Ambassador ${name} to Event Ambassador`);
+    transitionButton.style.padding = "2px 8px";
+    transitionButton.style.fontSize = "0.85em";
+    transitionButton.style.cursor = "pointer";
+    transitionButton.addEventListener("click", (e) => {
+      e.stopPropagation();
+      handleTransitionREAToEA(name);
+    });
+    
+    transitionButton.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        e.stopPropagation();
+        handleTransitionREAToEA(name);
+      }
+    });
+    
     const offboardButton = document.createElement("button");
     offboardButton.innerHTML = "🚪 Offboard";
     offboardButton.type = "button";
@@ -361,10 +472,14 @@ function populateRegionalAmbassadorsTable(regionalAmbassadors: RegionalAmbassado
       }
     });
     
+    actionsCell.appendChild(transitionButton);
     actionsCell.appendChild(offboardButton);
     row.appendChild(actionsCell);
 
     tableBody.appendChild(row);
   });
+
+  // Initialize sorting with default: Name (column 0) ascending
+  initializeTableSorting('regionalAmbassadorsTable', 0, 'asc');
 }
 

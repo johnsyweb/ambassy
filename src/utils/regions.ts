@@ -1,4 +1,4 @@
-import { RegionalAmbassadorMap } from "../models/RegionalAmbassadorMap";
+import { RegionalAmbassadorMap } from "@models/RegionalAmbassadorMap";
 
 export function getRegionalAmbassadorForEventAmbassador(
   eventAmbassadorName: string,

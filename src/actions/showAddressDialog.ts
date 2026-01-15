@@ -2,7 +2,7 @@ import { EventIssue } from "@models/EventIssue";
 import { resolveIssueWithAddress } from "./resolveIssue";
 import { EventDetailsMap } from "@models/EventDetailsMap";
 import { LogEntry } from "@models/LogEntry";
-import { suggestParkrunUrl } from "../utils/fuzzyMatch";
+import { suggestParkrunUrl } from "@utils/fuzzyMatch";
 
 export function showAddressDialog(
   issue: EventIssue,

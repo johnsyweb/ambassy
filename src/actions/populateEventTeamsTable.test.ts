@@ -92,6 +92,47 @@ describe("populateEventTeamsTable - Reallocate Button", () => {
     expect(reallocateButton.disabled).toBe(false);
   });
 
+  it("should display Event Directors in table", () => {
+    populateEventTeamsTable(eventTeamsTableData);
+
+    const row = tableBody.querySelector("tr[data-event-short-name='test-event']");
+    const cells = row?.querySelectorAll("td");
+    expect(cells).toBeDefined();
+    expect(cells?.length).toBeGreaterThan(3);
+    
+    const eventDirectorsCell = Array.from(cells || []).find((cell, index) => {
+      const header = document.querySelector(`#eventTeamsTable thead th:nth-child(${index + 1})`);
+      return header?.textContent === "Event Directors";
+    });
+    
+    expect(eventDirectorsCell?.textContent).toBe("Director 1");
+  });
+
+  it("should display 'N/A' when Event Directors are not known", () => {
+    const dataWithoutDirectors = new Map();
+    dataWithoutDirectors.set("test-event-2", {
+      eventShortName: "test-event-2",
+      eventDirectors: "N/A",
+      eventAmbassador: "Test EA",
+      regionalAmbassador: "Test REA",
+      eventCoordinates: "37.80000° S 144.90000° E",
+      eventSeries: 1,
+      eventCountryCode: 3,
+      eventCountry: "Australia",
+    });
+
+    populateEventTeamsTable(dataWithoutDirectors);
+
+    const row = tableBody.querySelector("tr[data-event-short-name='test-event-2']");
+    const cells = row?.querySelectorAll("td");
+    const eventDirectorsCell = Array.from(cells || []).find((cell, index) => {
+      const header = document.querySelector(`#eventTeamsTable thead th:nth-child(${index + 1})`);
+      return header?.textContent === "Event Directors";
+    });
+    
+    expect(eventDirectorsCell?.textContent).toBe("N/A");
+  });
+
   it("should call handler when Reallocate button is clicked", () => {
     const handler = jest.fn();
     selectionState.selectedEventShortName = "test-event";

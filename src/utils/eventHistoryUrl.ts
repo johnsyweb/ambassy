@@ -1,4 +1,4 @@
-import { CountryMap } from "../models/country";
+import { CountryMap } from "@models/country";
 
 /**
  * Builds the event history URL for a parkrun event

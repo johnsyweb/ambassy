@@ -3,7 +3,7 @@
  */
 
 import { saveProspectiveEvents, loadProspectiveEvents, clearProspectiveEvents, hasProspectiveEvents, getProspectiveEventsMetadata } from './persistProspectiveEvents';
-import { ProspectiveEvent } from '../models/ProspectiveEvent';
+import { ProspectiveEvent } from "@models/ProspectiveEvent";
 
 // Mock localStorage
 const localStorageMock = (() => {
@@ -139,9 +139,11 @@ describe('persistProspectiveEvents', () => {
     });
 
     it('should handle corrupted localStorage data gracefully', () => {
+      const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
       localStorageMock.setItem('prospectiveEvents', 'invalid json');
       const loadedEvents = loadProspectiveEvents();
       expect(loadedEvents).toEqual([]);
+      consoleErrorSpy.mockRestore();
     });
   });
 

@@ -1,10 +1,17 @@
-import { SelectionState } from "../models/SelectionState";
-import { EventTeamsTableDataMap } from "../models/EventTeamsTableData";
-import { highlightEventsOnMap, centerMapOnEvents } from "../utils/mapNavigation";
-import { EventDetailsMap } from "../models/EventDetailsMap";
+import { SelectionState } from "@models/SelectionState";
+import { EventTeamsTableDataMap } from "@models/EventTeamsTableData";
+import {
+  highlightEventsOnMap,
+  centerMapOnEvents,
+} from "@utils/mapNavigation";
+import { EventDetailsMap } from "@models/EventDetailsMap";
 import { updateReallocateButtonStates } from "./populateEventTeamsTable";
-import { ProspectiveEventList } from "../models/ProspectiveEventList";
-import { toLeafletArray } from "../models/Coordinate";
+import { ProspectiveEventList } from "@models/ProspectiveEventList";
+import { toLeafletArray } from "@models/Coordinate";
+import { EventAmbassadorMap } from "@models/EventAmbassadorMap";
+import { RegionalAmbassadorMap } from "@models/RegionalAmbassadorMap";
+import { EventTeamMap } from "@models/EventTeamMap";
+import { showEventAllocationDialog } from "./showEventAllocationDialog";
 import L from "leaflet";
 
 export function selectEventTeamRow(
@@ -14,7 +21,7 @@ export function selectEventTeamRow(
   markerMap: Map<string, L.CircleMarker>,
   highlightLayer: L.LayerGroup | null,
   eventDetails: EventDetailsMap,
-  map: L.Map | null
+  map: L.Map | null,
 ): void {
   if (!eventTeamsTableData.has(eventShortName)) {
     throw new Error(`Event ${eventShortName} does not exist`);
@@ -42,13 +49,77 @@ export function selectMapEvent(
   markerMap: Map<string, L.CircleMarker>,
   highlightLayer: L.LayerGroup | null,
   eventDetails: EventDetailsMap,
-  map: L.Map | null
+  map: L.Map | null,
+  eventTeamsTableData?: EventTeamsTableDataMap,
+  eventAmbassadors?: EventAmbassadorMap,
+  regionalAmbassadors?: RegionalAmbassadorMap,
+  eventTeams?: EventTeamMap,
+  onAllocate?: (eventName: string, eaName: string) => void,
+  onReallocate?: (eventName: string) => void,
 ): void {
   state.selectedEventShortName = eventShortName;
   state.selectedEventAmbassador = null;
   state.selectedRegionalAmbassador = null;
   state.highlightedEvents.clear();
   state.highlightedEvents.add(eventShortName);
+
+  const isUnallocated =
+    eventTeamsTableData !== undefined &&
+    !eventTeamsTableData.has(eventShortName);
+
+  if (
+    isUnallocated &&
+    eventAmbassadors &&
+    regionalAmbassadors &&
+    eventTeams &&
+    onAllocate
+  ) {
+    if (eventAmbassadors.size === 0) {
+      alert(
+        "No Event Ambassadors available. Please onboard an Event Ambassador first.",
+      );
+      return;
+    }
+
+    showEventAllocationDialog(
+      eventShortName,
+      eventDetails,
+      eventAmbassadors,
+      regionalAmbassadors,
+      eventTeams,
+      (eaName) => {
+        onAllocate(eventShortName, eaName);
+      },
+      () => {
+        state.selectedEventShortName = null;
+        state.highlightedEvents.clear();
+      },
+    );
+    return;
+  }
+
+  // If allocated and reallocation handler provided, trigger reallocation
+  // Only trigger if eventTeamsTableData is defined and event exists in it (so we know it's actually allocated)
+  if (
+    eventTeamsTableData !== undefined &&
+    eventTeamsTableData.has(eventShortName) &&
+    onReallocate
+  ) {
+    console.log("Triggering reallocation for event:", eventShortName);
+    onReallocate(eventShortName);
+    return;
+  } else {
+    console.log("Reallocation condition not met:", {
+      eventShortName,
+      hasTableData: eventTeamsTableData !== undefined,
+      eventInTable:
+        eventTeamsTableData !== undefined
+          ? eventTeamsTableData.has(eventShortName)
+          : false,
+      hasOnReallocate: !!onReallocate,
+      isUnallocated,
+    });
+  }
 
   if (highlightLayer && map) {
     highlightEventsOnMap([eventShortName], markerMap, highlightLayer);
@@ -65,7 +136,7 @@ export function selectMapEvent(
 export function highlightTableRow(
   tableId: string,
   identifier: string,
-  isSelected: boolean
+  isSelected: boolean,
 ): void {
   const table = document.querySelector(`#${tableId} tbody`);
   if (!table) {
@@ -81,7 +152,7 @@ export function highlightTableRow(
   }
 
   const row = table.querySelector(
-    `tr[data-event-short-name="${identifier}"]`
+    `tr[data-event-short-name="${identifier}"]`,
   ) as HTMLTableRowElement | null;
 
   if (!row) {
@@ -104,7 +175,7 @@ export function scrollToTableRow(tableId: string, identifier: string): void {
   }
 
   const row = table.querySelector(
-    `tr[data-event-short-name="${identifier}"]`
+    `tr[data-event-short-name="${identifier}"]`,
   ) as HTMLTableRowElement | null;
 
   if (!row) {
@@ -123,15 +194,17 @@ export function selectProspectRow(
   state: SelectionState,
   prospectId: string,
   prospects: ProspectiveEventList,
-  map: L.Map | null
+  map: L.Map | null,
 ): void {
   const prospect = prospects.findById(prospectId);
   if (!prospect) {
     throw new Error(`Prospect ${prospectId} does not exist`);
   }
 
-  if (!prospect.coordinates || prospect.geocodingStatus !== 'success') {
-    throw new Error(`Prospect ${prospect.prospectEvent} does not have valid coordinates`);
+  if (!prospect.coordinates || prospect.geocodingStatus !== "success") {
+    throw new Error(
+      `Prospect ${prospect.prospectEvent} does not have valid coordinates`,
+    );
   }
 
   // Clear any existing selection
@@ -157,7 +230,7 @@ export function selectProspectRow(
 export function highlightProspectTableRow(
   tableId: string,
   prospectId: string,
-  isSelected: boolean
+  isSelected: boolean,
 ): void {
   const table = document.querySelector(`#${tableId} tbody`);
   if (!table) {
@@ -173,7 +246,7 @@ export function highlightProspectTableRow(
   }
 
   const row = table.querySelector(
-    `tr[data-prospect-id="${prospectId}"]`
+    `tr[data-prospect-id="${prospectId}"]`,
   ) as HTMLTableRowElement | null;
 
   if (!row) {
@@ -189,14 +262,17 @@ export function highlightProspectTableRow(
   }
 }
 
-export function scrollToProspectTableRow(tableId: string, prospectId: string): void {
+export function scrollToProspectTableRow(
+  tableId: string,
+  prospectId: string,
+): void {
   const table = document.querySelector(`#${tableId} tbody`);
   if (!table) {
     return;
   }
 
   const row = table.querySelector(
-    `tr[data-prospect-id="${prospectId}"]`
+    `tr[data-prospect-id="${prospectId}"]`,
   ) as HTMLTableRowElement | null;
 
   if (!row) {
@@ -213,16 +289,18 @@ export function isProspectsTabVisible(): boolean {
 
 export function applyDeferredTableSelection(
   state: SelectionState,
-  eventTeamsTableData: EventTeamsTableDataMap
+  eventTeamsTableData: EventTeamsTableDataMap,
 ): void {
   if (!isEventTeamsTabVisible()) {
     return;
   }
 
-  if (state.selectedEventShortName && eventTeamsTableData.has(state.selectedEventShortName)) {
+  if (
+    state.selectedEventShortName &&
+    eventTeamsTableData.has(state.selectedEventShortName)
+  ) {
     highlightTableRow("eventTeamsTable", state.selectedEventShortName, true);
     scrollToTableRow("eventTeamsTable", state.selectedEventShortName);
     updateReallocateButtonStates();
   }
 }
-

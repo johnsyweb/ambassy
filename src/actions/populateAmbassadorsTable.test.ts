@@ -1,9 +1,9 @@
 import { populateAmbassadorsTable, setEAReallocateHandler, setOffboardingHandlers } from "./populateAmbassadorsTable";
-import { EventAmbassadorMap } from "../models/EventAmbassadorMap";
-import { RegionalAmbassadorMap } from "../models/RegionalAmbassadorMap";
-import { EventDetailsMap } from "../models/EventDetailsMap";
-import { EventDetails } from "../models/EventDetails";
-import { CountryMap } from "../models/country";
+import { EventAmbassadorMap } from "@models/EventAmbassadorMap";
+import { RegionalAmbassadorMap } from "@models/RegionalAmbassadorMap";
+import { EventDetailsMap } from "@models/EventDetailsMap";
+import { EventDetails } from "@models/EventDetails";
+import { CountryMap } from "@models/country";
 
 describe("populateAmbassadorsTable", () => {
   let eventAmbassadors: EventAmbassadorMap;
@@ -18,7 +18,9 @@ describe("populateAmbassadorsTable", () => {
       <table id="eventAmbassadorsTable">
         <thead>
           <tr>
+            <th>Regional Ambassador</th>
             <th>Name</th>
+            <th>State</th>
             <th>Number of Allocations</th>
             <th>Events Assigned</th>
             <th>Actions</th>
@@ -43,8 +45,8 @@ describe("populateAmbassadorsTable", () => {
     tableBody = document.querySelector("#eventAmbassadorsTable tbody") as HTMLTableSectionElement;
 
     eventAmbassadors = new Map([
-      ["EA 1", { name: "EA 1", events: ["Event1", "Event2"] }],
-      ["EA 2", { name: "EA 2", events: ["Event3"] }],
+      ["EA 1", { name: "EA 1", events: ["Event1", "Event2"], regionalAmbassador: "REA 1", state: "VIC" }],
+      ["EA 2", { name: "EA 2", events: ["Event3"], state: "NSW" }],
     ]);
 
     regionalAmbassadors = new Map([
@@ -161,12 +163,77 @@ describe("populateAmbassadorsTable", () => {
     expect(actionsContainer.style.alignItems).toBe("center");
   });
 
+  it("should have REA column as first column", () => {
+    populateAmbassadorsTable(eventAmbassadors, regionalAmbassadors);
+
+    const rows = tableBody.querySelectorAll("tr");
+    expect(rows.length).toBeGreaterThan(0);
+    
+    // Find row with EA 1 (which has REA 1 assigned)
+    let ea1Row: HTMLTableRowElement | null = null;
+    for (let i = 0; i < rows.length; i++) {
+      const row = rows[i] as HTMLTableRowElement;
+      const cells = row.querySelectorAll("td");
+      const nameCell = cells[1]; // Name is second column
+      if (nameCell?.textContent?.includes("EA 1")) {
+        ea1Row = row;
+        break;
+      }
+    }
+    
+    expect(ea1Row).not.toBeNull();
+    const cells = ea1Row!.querySelectorAll("td");
+    const reaCell = cells[0] as HTMLTableCellElement;
+    expect(reaCell.textContent).toBe("REA 1");
+  });
+
+  it("should display '—' in REA column when no REA assigned", () => {
+    populateAmbassadorsTable(eventAmbassadors, regionalAmbassadors);
+
+    const rows = tableBody.querySelectorAll("tr");
+    expect(rows.length).toBeGreaterThan(0);
+    
+    // Find row with EA 2 (which has no REA assigned)
+    let ea2Row: HTMLTableRowElement | null = null;
+    for (let i = 0; i < rows.length; i++) {
+      const row = rows[i] as HTMLTableRowElement;
+      const cells = row.querySelectorAll("td");
+      const nameCell = cells[1]; // Name is second column
+      if (nameCell?.textContent?.includes("EA 2")) {
+        ea2Row = row;
+        break;
+      }
+    }
+    
+    expect(ea2Row).not.toBeNull();
+    const cells = ea2Row!.querySelectorAll("td");
+    const reaCell = cells[0] as HTMLTableCellElement;
+    expect(reaCell.textContent).toBe("—");
+    expect(reaCell.style.fontStyle).toBe("italic");
+    expect(reaCell.style.color).toBe("rgb(102, 102, 102)");
+  });
+
   it("should have Name column with only name and color indicator", () => {
     populateAmbassadorsTable(eventAmbassadors, regionalAmbassadors);
 
     const rows = tableBody.querySelectorAll("tr");
-    const firstRow = rows[0];
-    const nameCell = firstRow.querySelector("td:first-child") as HTMLTableCellElement;
+    expect(rows.length).toBeGreaterThan(0);
+    
+    // Find row with EA 1
+    let ea1Row: HTMLTableRowElement | null = null;
+    for (let i = 0; i < rows.length; i++) {
+      const row = rows[i] as HTMLTableRowElement;
+      const cells = row.querySelectorAll("td");
+      const nameCell = cells[1]; // Name is second column
+      if (nameCell?.textContent?.includes("EA 1")) {
+        ea1Row = row;
+        break;
+      }
+    }
+    
+    expect(ea1Row).not.toBeNull();
+    const cells = ea1Row!.querySelectorAll("td");
+    const nameCell = cells[1] as HTMLTableCellElement; // Name is second column
 
     // Should have a container div
     const nameContainer = nameCell.querySelector("div");
@@ -241,8 +308,13 @@ describe("populateAmbassadorsTable", () => {
       populateAmbassadorsTable(eventAmbassadors, regionalAmbassadors, undefined, eventDetails, countries);
 
       const rows = tableBody.querySelectorAll("tr");
-      const firstRow = rows[0];
-      const eventsCell = firstRow.querySelector("td:nth-child(3)") as HTMLTableCellElement;
+      // Find row for "EA 1" (rows are sorted alphabetically)
+      const ea1Row = Array.from(rows).find(row => {
+        const nameCell = row.querySelector("td:nth-child(2)") as HTMLTableCellElement;
+        return nameCell?.textContent?.includes("EA 1");
+      });
+      expect(ea1Row).toBeTruthy();
+      const eventsCell = ea1Row!.querySelector("td:nth-child(5)") as HTMLTableCellElement;
 
       const links = eventsCell.querySelectorAll("a");
       expect(links.length).toBeGreaterThan(0);
@@ -257,8 +329,13 @@ describe("populateAmbassadorsTable", () => {
       populateAmbassadorsTable(eventAmbassadors, regionalAmbassadors, undefined, eventDetails, countries);
 
       const rows = tableBody.querySelectorAll("tr");
-      const firstRow = rows[0];
-      const eventsCell = firstRow.querySelector("td:nth-child(3)") as HTMLTableCellElement;
+      // Find row for "EA 1" (rows are sorted alphabetically)
+      const ea1Row = Array.from(rows).find(row => {
+        const nameCell = row.querySelector("td:nth-child(2)") as HTMLTableCellElement;
+        return nameCell?.textContent?.includes("EA 1");
+      });
+      expect(ea1Row).toBeTruthy();
+      const eventsCell = ea1Row!.querySelector("td:nth-child(5)") as HTMLTableCellElement;
       const links = eventsCell.querySelectorAll("a");
 
       links.forEach((link) => {
@@ -273,8 +350,13 @@ describe("populateAmbassadorsTable", () => {
       populateAmbassadorsTable(eventAmbassadors, regionalAmbassadors, undefined, eventDetails, countries);
 
       const rows = tableBody.querySelectorAll("tr");
-      const firstRow = rows[0];
-      const eventsCell = firstRow.querySelector("td:nth-child(3)") as HTMLTableCellElement;
+      // Find row for "EA 1" (rows are sorted alphabetically)
+      const ea1Row = Array.from(rows).find(row => {
+        const nameCell = row.querySelector("td:nth-child(2)") as HTMLTableCellElement;
+        return nameCell?.textContent?.includes("EA 1");
+      });
+      expect(ea1Row).toBeTruthy();
+      const eventsCell = ea1Row!.querySelector("td:nth-child(5)") as HTMLTableCellElement;
       const firstLink = eventsCell.querySelector("a") as HTMLAnchorElement;
 
       expect(firstLink).not.toBeNull();
@@ -295,8 +377,13 @@ describe("populateAmbassadorsTable", () => {
       populateAmbassadorsTable(eventAmbassadors, regionalAmbassadors, undefined, eventDetails, countriesWithoutUrl);
 
       const rows = tableBody.querySelectorAll("tr");
-      const firstRow = rows[0];
-      const eventsCell = firstRow.querySelector("td:nth-child(3)") as HTMLTableCellElement;
+      // Find row for "EA 1" (rows are sorted alphabetically)
+      const ea1Row = Array.from(rows).find(row => {
+        const nameCell = row.querySelector("td:nth-child(2)") as HTMLTableCellElement;
+        return nameCell?.textContent?.includes("EA 1");
+      });
+      expect(ea1Row).toBeTruthy();
+      const eventsCell = ea1Row!.querySelector("td:nth-child(5)") as HTMLTableCellElement;
 
       const links = eventsCell.querySelectorAll("a");
       expect(links.length).toBe(0);
@@ -314,8 +401,13 @@ describe("populateAmbassadorsTable", () => {
       populateAmbassadorsTable(eventAmbassadors, regionalAmbassadors, undefined, eventDetails, countriesWithoutUrl);
 
       const rows = tableBody.querySelectorAll("tr");
-      const firstRow = rows[0];
-      const eventsCell = firstRow.querySelector("td:nth-child(3)") as HTMLTableCellElement;
+      // Find row for "EA 1" (rows are sorted alphabetically)
+      const ea1Row = Array.from(rows).find(row => {
+        const nameCell = row.querySelector("td:nth-child(2)") as HTMLTableCellElement;
+        return nameCell?.textContent?.includes("EA 1");
+      });
+      expect(ea1Row).toBeTruthy();
+      const eventsCell = ea1Row!.querySelector("td:nth-child(5)") as HTMLTableCellElement;
 
       const spans = eventsCell.querySelectorAll("span");
       if (spans.length > 0) {
