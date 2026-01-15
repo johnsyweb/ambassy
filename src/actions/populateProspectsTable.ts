@@ -19,6 +19,7 @@ import { EventDetailsMap } from '../models/EventDetailsMap';
 import { calculateDistance } from '../utils/geography';
 import { ProspectiveEvent } from '../models/ProspectiveEvent';
 import { EventAmbassador } from '../models/EventAmbassador';
+import { initializeTableSorting } from './tableSorting';
 
 type AmbassadorWithCounts = {
   name: string;
@@ -78,6 +79,9 @@ export function populateProspectsTable(
     const row = createProspectRow(prospect, eventAmbassadors, regionalAmbassadors, prospects, log, eventDetails);
     tableBody.appendChild(row);
   });
+
+  // Initialize sorting with default: Prospect Event (column 0) ascending
+  initializeTableSorting('prospectsTable', 0, 'asc');
 }
 
 /**

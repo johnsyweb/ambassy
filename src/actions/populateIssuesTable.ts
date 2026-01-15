@@ -1,5 +1,6 @@
 import { EventIssue } from "@models/EventIssue";
 import { IssuesState } from "@models/IssuesState";
+import { initializeTableSorting } from "./tableSorting";
 
 export function populateIssuesTable(
   issues: EventIssue[],
@@ -85,4 +86,7 @@ export function populateIssuesTable(
     row.style.cursor = "pointer";
     tableBody.appendChild(row);
   });
+
+  // Initialize sorting with default: Event Name (column 0) ascending
+  initializeTableSorting('issuesTable', 0, 'asc');
 }

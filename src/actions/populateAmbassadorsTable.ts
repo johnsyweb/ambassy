@@ -5,6 +5,7 @@ import { loadCapacityLimits, checkEventAmbassadorCapacity, checkRegionalAmbassad
 import { colorPalette } from "@actions/colorPalette";
 import { EventTeamsTableDataMap, eventAmbassadorsFrom, regionalAmbassadorsFrom } from "@models/EventTeamsTableData";
 import { loadProspectiveEvents } from "@actions/persistProspectiveEvents";
+import { initializeTableSorting } from "./tableSorting";
 
 // Forward declaration - will be set by index.ts
 let handleOffboardEventAmbassador: (name: string) => void = () => {
@@ -202,6 +203,9 @@ function populateEventAmbassadorsTable(eventAmbassadors: EventAmbassadorMap, eve
 
     tableBody.appendChild(row);
   });
+
+  // Initialize sorting with default: Name (column 0) ascending
+  initializeTableSorting('eventAmbassadorsTable', 0, 'asc');
 }
 
 function populateRegionalAmbassadorsTable(regionalAmbassadors: RegionalAmbassadorMap, eventTeamsTableData?: EventTeamsTableDataMap): void {
@@ -307,5 +311,8 @@ function populateRegionalAmbassadorsTable(regionalAmbassadors: RegionalAmbassado
 
     tableBody.appendChild(row);
   });
+
+  // Initialize sorting with default: Name (column 0) ascending
+  initializeTableSorting('regionalAmbassadorsTable', 0, 'asc');
 }
 

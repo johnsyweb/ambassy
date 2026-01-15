@@ -1,4 +1,5 @@
 import { LogEntry } from "@models/LogEntry";
+import { initializeTableSorting } from "./tableSorting";
 
 export function populateChangesLogTable(log: LogEntry[]) {
   const changesTableBody = document.querySelector('#changesTable tbody');
@@ -33,4 +34,7 @@ export function populateChangesLogTable(log: LogEntry[]) {
 
     changesTableBody.appendChild(row);
   });
+
+  // Initialize sorting with default: Timestamp (column 4) descending (most recent first)
+  initializeTableSorting('changesTable', 4, 'desc');
 }

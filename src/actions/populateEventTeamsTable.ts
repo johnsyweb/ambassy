@@ -1,6 +1,7 @@
 import { EventTeamsTableDataMap, eventAmbassadorsFrom, regionalAmbassadorsFrom } from '@models/EventTeamsTableData';
 import { SelectionState } from '@models/SelectionState';
 import { colorPalette } from './colorPalette';
+import { initializeTableSorting } from './tableSorting';
 
 function assignColorToName(name: string, allNames: string[]): string {
   const index = allNames.indexOf(name);
@@ -140,6 +141,9 @@ export function populateEventTeamsTable(
 
     tableBody.appendChild(row);
   });
+
+  // Initialize sorting with default: Event Name (column 2) ascending
+  initializeTableSorting('eventTeamsTable', 2, 'asc');
 }
 
 let _rowClickHandler: ((eventShortName: string) => void) | null = null;
