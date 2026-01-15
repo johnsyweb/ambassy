@@ -10,6 +10,7 @@
 ### Session 2026-01-15
 
 - Q: How should changes be logged in the changelog - grouped or separate entries? → A: Each individual state change must be logged as a separate row in the changelog (one log entry per state modification). This includes: onboarding operations, assigning EA to REA, removing EA from REA's supportsEAs list, each EA reallocation during REA-to-EA transition, and all transition operations. This provides clear auditability, easier filtering/searching, and maintains consistency with existing individual assignment logging patterns.
+- Q: How should the supporting REA be displayed in the Event Ambassadors table? → A: The Event Ambassadors Table must display the supporting REA in the first column (before Name). When an EA has no REA assigned, the column should display "—" (consistent with the State column pattern for missing values). This makes the organizational hierarchy immediately visible and emphasizes the REA relationship.
 
 ## User Scenarios & Testing *(mandatory)*
 
@@ -25,7 +26,7 @@ As a Regional Event Ambassador, I want to onboard new Event Ambassadors with the
 
 1. **Given** a user wants to onboard a new Event Ambassador, **When** the user provides the ambassador's name and state, **Then** the Event Ambassador is added with the state information stored, and the onboarding operation is logged in the changes log
 2. **Given** a user wants to onboard a new Event Ambassador, **When** the user provides the ambassador's name, state, and assigns them to a Regional Ambassador, **Then** the Event Ambassador is added, the EA appears in the REA's supportsEAs list, the EA's regionalAmbassador field is set to the REA's name, and each change (onboarding, REA assignment, addition to supportsEAs list) is logged as a separate entry in the changes log
-3. **Given** a new Event Ambassador has been onboarded with state and REA assignment, **When** the user views the ambassador information, **Then** the state is visible and the REA relationship is clear
+3. **Given** a new Event Ambassador has been onboarded with state and REA assignment, **When** the user views the Event Ambassadors table, **Then** the REA is displayed in the first column, the state is visible, and the REA relationship is clear
 4. **Given** a user wants to onboard a new Regional Ambassador, **When** the user provides the ambassador's name and state, **Then** the Regional Ambassador is added with the state information stored and the onboarding operation is logged in the changes log (REA onboarding remains unchanged from existing functionality)
 
 ---
@@ -102,6 +103,8 @@ As a Regional Event Ambassador, I want to transition a Regional Ambassador to be
 - **FR-019**: System MUST log each individual state change as a separate entry in the changes log, including: onboarding operations, REA assignments, removals from supportsEAs lists, each EA reallocation during REA-to-EA transitions, and all transition operations
 - **FR-020**: System MUST prevent REA-to-EA transition if no other REAs exist and the REA has supported EAs
 - **FR-021**: System MUST allow REA-to-EA transition if the REA has no supported EAs, even if no other REAs exist
+- **FR-022**: Event Ambassadors table MUST display the supporting REA in the first column (before Name column)
+- **FR-023**: Event Ambassadors table MUST display "—" in the REA column when an EA has no REA assigned
 
 ### Key Entities *(include if feature involves data)*
 
