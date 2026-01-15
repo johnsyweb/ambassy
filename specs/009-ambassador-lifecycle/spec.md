@@ -5,6 +5,12 @@
 **Status**: Draft  
 **Input**: User description: "Onboarding, cross-boarding and offboarding ambassadors. When we onboard an ambassador we should ensure that we know which state they're in. We should allocate an EA to an REA. Sometimes an EA will become an REA. We should leave their EA-Team assignments intact at this point. One of their first acts as an REA will be to reallocate their event teams to other EAs. Sometimes an REA will become an EA. We should reallocate their ambassador-ambassador assigments at this point."
 
+## Clarifications
+
+### Session 2026-01-15
+
+- Q: How should changes be logged in the changelog - grouped or separate entries? → A: Each individual state change must be logged as a separate row in the changelog (one log entry per state modification). This includes: onboarding operations, assigning EA to REA, removing EA from REA's supportsEAs list, each EA reallocation during REA-to-EA transition, and all transition operations. This provides clear auditability, easier filtering/searching, and maintains consistency with existing individual assignment logging patterns.
+
 ## User Scenarios & Testing *(mandatory)*
 
 ### User Story 1 - Enhanced Onboarding with State and Allocation (Priority: P1)
@@ -17,10 +23,10 @@ As a Regional Event Ambassador, I want to onboard new Event Ambassadors with the
 
 **Acceptance Scenarios**:
 
-1. **Given** a user wants to onboard a new Event Ambassador, **When** the user provides the ambassador's name and state, **Then** the Event Ambassador is added with the state information stored
-2. **Given** a user wants to onboard a new Event Ambassador, **When** the user provides the ambassador's name, state, and assigns them to a Regional Ambassador, **Then** the Event Ambassador is added, the EA appears in the REA's supportsEAs list, and the EA's regionalAmbassador field is set to the REA's name
+1. **Given** a user wants to onboard a new Event Ambassador, **When** the user provides the ambassador's name and state, **Then** the Event Ambassador is added with the state information stored, and the onboarding operation is logged in the changes log
+2. **Given** a user wants to onboard a new Event Ambassador, **When** the user provides the ambassador's name, state, and assigns them to a Regional Ambassador, **Then** the Event Ambassador is added, the EA appears in the REA's supportsEAs list, the EA's regionalAmbassador field is set to the REA's name, and each change (onboarding, REA assignment, addition to supportsEAs list) is logged as a separate entry in the changes log
 3. **Given** a new Event Ambassador has been onboarded with state and REA assignment, **When** the user views the ambassador information, **Then** the state is visible and the REA relationship is clear
-4. **Given** a user wants to onboard a new Regional Ambassador, **When** the user provides the ambassador's name and state, **Then** the Regional Ambassador is added with the state information stored (REA onboarding remains unchanged from existing functionality)
+4. **Given** a user wants to onboard a new Regional Ambassador, **When** the user provides the ambassador's name and state, **Then** the Regional Ambassador is added with the state information stored and the onboarding operation is logged in the changes log (REA onboarding remains unchanged from existing functionality)
 
 ---
 
@@ -34,11 +40,11 @@ As a Regional Event Ambassador, I want to transition an Event Ambassador to beco
 
 **Acceptance Scenarios**:
 
-1. **Given** an Event Ambassador supports 5 events and is assigned to a Regional Ambassador, **When** the user transitions the EA to become an REA, **Then** the ambassador is removed from the Event Ambassadors list, added to the Regional Ambassadors list with their state information, their event assignments remain intact (events list preserved), and they have an empty supportsEAs list
+1. **Given** an Event Ambassador supports 5 events and is assigned to a Regional Ambassador, **When** the user transitions the EA to become an REA, **Then** the ambassador is removed from the Event Ambassadors list, added to the Regional Ambassadors list with their state information, their event assignments remain intact (events list preserved), they have an empty supportsEAs list, and each change (removal from EA list, addition to REA list, removal from previous REA's supportsEAs list) is logged as a separate entry in the changes log
 2. **Given** an Event Ambassador has prospective events assigned, **When** the user transitions the EA to become an REA, **Then** the prospective events assignments remain intact
 3. **Given** an Event Ambassador is transitioned to REA, **When** the user views the new REA's information, **Then** their previous event assignments are visible, indicating they need to be reallocated
-4. **Given** an Event Ambassador is transitioned to REA, **When** the transition completes, **Then** the ambassador is removed from their previous REA's supportsEAs list (since they are no longer an EA)
-5. **Given** an Event Ambassador is transitioned to REA, **When** the transition completes, **Then** the changes are logged appropriately in the changes log
+4. **Given** an Event Ambassador is transitioned to REA, **When** the transition completes, **Then** the ambassador is removed from their previous REA's supportsEAs list (since they are no longer an EA), and this removal is logged as a separate entry in the changes log
+5. **Given** an Event Ambassador is transitioned to REA, **When** the transition completes, **Then** all state changes are logged as separate entries in the changes log with clear old and new values
 
 ---
 
@@ -52,11 +58,11 @@ As a Regional Event Ambassador, I want to transition a Regional Ambassador to be
 
 **Acceptance Scenarios**:
 
-1. **Given** a Regional Ambassador supports 4 Event Ambassadors, **When** the user transitions the REA to become an EA, **Then** the system prompts for reallocation of the 4 EAs to other Regional Ambassadors, the ambassador is removed from the Regional Ambassadors list, added to the Event Ambassadors list with their state information, and has an empty events list
-2. **Given** a Regional Ambassador supports Event Ambassadors and there are other REAs with capacity, **When** the user transitions the REA to EA and reallocates the supported EAs, **Then** the EAs are moved to the new REAs' supportsEAs lists, each EA's regionalAmbassador field is updated, and the reallocation is logged
+1. **Given** a Regional Ambassador supports 4 Event Ambassadors, **When** the user transitions the REA to become an EA, **Then** the system prompts for reallocation of the 4 EAs to other Regional Ambassadors, the ambassador is removed from the Regional Ambassadors list, added to the Event Ambassadors list with their state information, has an empty events list, and each change (removal from REA list, addition to EA list, each EA reallocation) is logged as a separate entry in the changes log
+2. **Given** a Regional Ambassador supports Event Ambassadors and there are other REAs with capacity, **When** the user transitions the REA to EA and reallocates the supported EAs, **Then** the EAs are moved to the new REAs' supportsEAs lists, each EA's regionalAmbassador field is updated, and each EA reallocation (removal from old REA's supportsEAs list, addition to new REA's supportsEAs list, update to EA's regionalAmbassador field) is logged as a separate entry in the changes log
 3. **Given** a Regional Ambassador supports Event Ambassadors, **When** the user transitions the REA to EA, **Then** the system validates that all supported EAs can be reallocated before allowing the transition to complete
-4. **Given** a Regional Ambassador is transitioned to EA, **When** the transition completes, **Then** the changes are logged appropriately in the changes log
-5. **Given** a Regional Ambassador has no supported EAs, **When** the user transitions the REA to become an EA, **Then** the transition completes immediately without requiring reallocation
+4. **Given** a Regional Ambassador is transitioned to EA, **When** the transition completes, **Then** all state changes are logged as separate entries in the changes log with clear old and new values
+5. **Given** a Regional Ambassador has no supported EAs, **When** the user transitions the REA to become an EA, **Then** the transition completes immediately without requiring reallocation, and the transition (removal from REA list, addition to EA list) is logged as separate entries in the changes log
 
 ---
 
@@ -93,7 +99,7 @@ As a Regional Event Ambassador, I want to transition a Regional Ambassador to be
 - **FR-016**: System MUST remove the ambassador from Regional Ambassadors list when transitioning REA to EA
 - **FR-017**: System MUST add the ambassador to Event Ambassadors list when transitioning REA to EA
 - **FR-018**: System MUST preserve state information when transitioning REA to EA
-- **FR-019**: System MUST log all transitions and reallocations in the changes log
+- **FR-019**: System MUST log each individual state change as a separate entry in the changes log, including: onboarding operations, REA assignments, removals from supportsEAs lists, each EA reallocation during REA-to-EA transitions, and all transition operations
 - **FR-020**: System MUST prevent REA-to-EA transition if no other REAs exist and the REA has supported EAs
 - **FR-021**: System MUST allow REA-to-EA transition if the REA has no supported EAs, even if no other REAs exist
 
@@ -117,7 +123,7 @@ As a Regional Event Ambassador, I want to transition a Regional Ambassador to be
 - **SC-006**: Users can complete REA-to-EA transition with reallocation in under 3 minutes
 - **SC-007**: 100% of REA-to-EA transitions successfully reallocate all supported Event Ambassadors
 - **SC-008**: System prevents REA-to-EA transitions when reallocation is not possible (validation occurs before transition)
-- **SC-009**: All transitions and reallocations are logged in the changes log with clear old and new values
+- **SC-009**: 100% of state changes (onboarding, assignments, removals, reallocations, transitions) are logged as separate entries in the changes log with clear old and new values
 - **SC-010**: State information is preserved correctly in 100% of role transitions
 
 ## Assumptions
