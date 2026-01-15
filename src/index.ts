@@ -38,7 +38,7 @@ import { setProspectReallocationRefreshCallback } from "./actions/populateProspe
 import { saveCapacityLimits, validateCapacityLimits } from "./actions/configureCapacityLimits";
 import { CapacityLimits } from "./models/CapacityLimits";
 import { SelectionState, createSelectionState } from "./models/SelectionState";
-import { selectEventTeamRow, selectMapEvent, selectProspectRow, applyDeferredTableSelection, highlightProspectTableRow, scrollToProspectTableRow } from "./actions/tableMapNavigation";
+import { selectEventTeamRow, selectMapEvent, selectProspectRow, applyDeferredTableSelection, highlightProspectTableRow, scrollToProspectTableRow, highlightTableRow, scrollToTableRow } from "./actions/tableMapNavigation";
 import { getMarkerMap, getHighlightLayer, getMap, setMarkerClickHandler, populateMap } from "./actions/populateMap";
 import { setRowClickHandler, setReallocateButtonHandler } from "./actions/populateEventTeamsTable";
 import { setProspectRowClickHandler } from "./actions/populateProspectsTable";
@@ -51,6 +51,7 @@ import { clearSelection } from "./models/SelectionState";
 import { getEAReallocationSuggestions } from "./actions/getEAReallocationSuggestions";
 import { reallocateEventAmbassador } from "./actions/reallocateEventAmbassador";
 import { getRegionalAmbassadorForEventAmbassador } from "./utils/regions";
+import { allocateEventFromMap } from "./actions/allocateEventFromMap";
 import { detectIssues } from "./actions/detectIssues";
 import { populateIssuesTable } from "./actions/populateIssuesTable";
 import { populateProspectsTable } from "./actions/populateProspectsTable";
@@ -1021,13 +1022,58 @@ function initializeTableMapNavigation(): void {
     const markerMap = getMarkerMap();
     const highlightLayer = getHighlightLayer();
     const map = getMap();
+    const eventAmbassadors = getEventAmbassadorsFromSession();
+    const regionalAmbassadors = getRegionalAmbassadorsFromSession();
+    const eventTeams = getEventTeamsFromSession();
+    
     selectMapEvent(
       selectionState,
       eventShortName,
       markerMap,
       highlightLayer,
       eventDetails!,
-      map
+      map,
+      eventTeamsTableData ?? undefined,
+      eventAmbassadors,
+      regionalAmbassadors,
+      eventTeams,
+      (eventName: string, eaName: string) => {
+        const log: LogEntry[] = [];
+        const currentEventAmbassadors = getEventAmbassadorsFromSession();
+        const currentRegionalAmbassadors = getRegionalAmbassadorsFromSession();
+        const currentEventTeams = getEventTeamsFromSession();
+        
+        allocateEventFromMap(
+          eventName,
+          eaName,
+          currentEventAmbassadors,
+          currentRegionalAmbassadors,
+          currentEventTeams,
+          eventDetails!,
+          log
+        );
+        
+        persistChangesLog(log);
+        
+        const updatedEventAmbassadors = getEventAmbassadorsFromSession();
+        const updatedRegionalAmbassadors = getRegionalAmbassadorsFromSession();
+        
+        if (eventDetails && currentEventTeams) {
+          eventTeamsTableData = extractEventTeamsTableData(
+            updatedRegionalAmbassadors,
+            updatedEventAmbassadors,
+            currentEventTeams,
+            eventDetails
+          );
+        }
+        
+        refreshUI(eventDetails!, eventTeamsTableData!, log, updatedEventAmbassadors, updatedRegionalAmbassadors);
+        
+        highlightTableRow("eventTeamsTable", eventName, true);
+        scrollToTableRow("eventTeamsTable", eventName);
+        
+        alert(`Event "${eventName}" allocated to "${eaName}"`);
+      }
     );
   });
 

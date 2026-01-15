@@ -5,6 +5,10 @@ import { EventDetailsMap } from "../models/EventDetailsMap";
 import { updateReallocateButtonStates } from "./populateEventTeamsTable";
 import { ProspectiveEventList } from "../models/ProspectiveEventList";
 import { toLeafletArray } from "../models/Coordinate";
+import { EventAmbassadorMap } from "../models/EventAmbassadorMap";
+import { RegionalAmbassadorMap } from "../models/RegionalAmbassadorMap";
+import { EventTeamMap } from "../models/EventTeamMap";
+import { showEventAllocationDialog } from "./showEventAllocationDialog";
 import L from "leaflet";
 
 export function selectEventTeamRow(
@@ -42,13 +46,44 @@ export function selectMapEvent(
   markerMap: Map<string, L.CircleMarker>,
   highlightLayer: L.LayerGroup | null,
   eventDetails: EventDetailsMap,
-  map: L.Map | null
+  map: L.Map | null,
+  eventTeamsTableData?: EventTeamsTableDataMap,
+  eventAmbassadors?: EventAmbassadorMap,
+  regionalAmbassadors?: RegionalAmbassadorMap,
+  eventTeams?: EventTeamMap,
+  onAllocate?: (eventName: string, eaName: string) => void
 ): void {
   state.selectedEventShortName = eventShortName;
   state.selectedEventAmbassador = null;
   state.selectedRegionalAmbassador = null;
   state.highlightedEvents.clear();
   state.highlightedEvents.add(eventShortName);
+
+  const isUnallocated =
+    eventTeamsTableData !== undefined && !eventTeamsTableData.has(eventShortName);
+
+  if (isUnallocated && eventAmbassadors && regionalAmbassadors && eventTeams && onAllocate) {
+    if (eventAmbassadors.size === 0) {
+      alert("No Event Ambassadors available. Please onboard an Event Ambassador first.");
+      return;
+    }
+
+    showEventAllocationDialog(
+      eventShortName,
+      eventDetails,
+      eventAmbassadors,
+      regionalAmbassadors,
+      eventTeams,
+      (eaName) => {
+        onAllocate(eventShortName, eaName);
+      },
+      () => {
+        state.selectedEventShortName = null;
+        state.highlightedEvents.clear();
+      }
+    );
+    return;
+  }
 
   if (highlightLayer && map) {
     highlightEventsOnMap([eventShortName], markerMap, highlightLayer);

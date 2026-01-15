@@ -99,6 +99,18 @@ Ambassy provides tools for managing ambassador capacity and lifecycle:
   - You'll be prompted to enter the ambassador's name and state
 - New ambassadors start with no assigned events/EAs and can be assigned as needed
 
+### Allocating Events from the Map
+
+- **Allocate Unallocated Events**: Click on an unallocated event marker on the map (small purple markers) to allocate it to an Event Ambassador
+  - Unallocated events appear as small markers (radius: 1) with default purple colour
+  - Clicking an unallocated event opens an allocation dialog with suggested Event Ambassadors
+  - The system suggests EAs based on capacity, geographic proximity, and existing allocations
+  - You can select from the top suggestions or choose "Other" to manually select any Event Ambassador
+  - The supporting Regional Ambassador is automatically determined from the selected EA's hierarchy
+  - After allocation, the event appears in the Event Teams table with complete information (EA, REA, Event Directors if known)
+  - The map updates immediately to show the newly allocated event with the EA's assigned colour and larger size
+  - All allocations are logged in the changes log
+
 ### Capacity Checking
 
 The system automatically checks ambassador capacity against configurable limits:

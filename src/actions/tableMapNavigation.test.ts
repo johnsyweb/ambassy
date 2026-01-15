@@ -9,6 +9,9 @@ import {
 import { SelectionState, createSelectionState } from "../models/SelectionState";
 import { EventTeamsTableDataMap } from "../models/EventTeamsTableData";
 import { EventDetailsMap } from "../models/EventDetailsMap";
+import { EventAmbassadorMap } from "../models/EventAmbassadorMap";
+import { RegionalAmbassadorMap } from "../models/RegionalAmbassadorMap";
+import { EventTeamMap } from "../models/EventTeamMap";
 import L from "leaflet";
 
 // Mock d3-geo-voronoi to avoid ES module issues
@@ -123,7 +126,7 @@ describe("tableMapNavigation", () => {
   });
 
   describe("selectMapEvent", () => {
-    it("should update selection state", () => {
+    it("should update selection state for allocated event", () => {
       selectMapEvent(selectionState, "event1", markerMap, highlightLayer, eventDetails, map);
 
       expect(selectionState.selectedEventShortName).toBe("event1");
@@ -143,6 +146,57 @@ describe("tableMapNavigation", () => {
       expect(selectionState.selectedEventAmbassador).toBeNull();
       expect(selectionState.selectedRegionalAmbassador).toBeNull();
       expect(selectionState.highlightedEvents.has("other")).toBe(false);
+    });
+
+    it("should detect unallocated event when not in eventTeamsTableData", () => {
+      const unallocatedEventDetails = new Map();
+      unallocatedEventDetails.set("unallocatedEvent", {
+        id: "3",
+        type: "Feature",
+        geometry: { type: "Point", coordinates: [144.9631, -37.8136] },
+        properties: {
+          eventname: "Unallocated Event",
+          EventLongName: "Unallocated Event Long Name",
+          EventShortName: "unallocatedEvent",
+          LocalisedEventLongName: null,
+          countrycode: 0,
+          seriesid: 1,
+          EventLocation: "Location 3",
+        },
+      });
+
+      const emptyEventTeamsTableData = new Map();
+      const eventAmbassadors = new Map();
+      eventAmbassadors.set("EA1", { name: "EA1", events: [] });
+      const regionalAmbassadors = new Map();
+      const eventTeams = new Map();
+      const onAllocate = jest.fn();
+
+      document.body.innerHTML = `
+        <div id="reallocationDialog" role="dialog" aria-labelledby="reallocationDialogTitle" aria-modal="true" style="display: none;">
+          <h2 id="reallocationDialogTitle">Allocate Event</h2>
+          <div id="reallocationDialogContent"></div>
+          <button type="button" id="reallocationDialogCancel">Cancel</button>
+        </div>
+      `;
+
+      selectMapEvent(
+        selectionState,
+        "unallocatedEvent",
+        markerMap,
+        highlightLayer,
+        unallocatedEventDetails,
+        map,
+        emptyEventTeamsTableData,
+        eventAmbassadors,
+        regionalAmbassadors,
+        eventTeams,
+        onAllocate
+      );
+
+      expect(selectionState.selectedEventShortName).toBe("unallocatedEvent");
+      const dialog = document.getElementById("reallocationDialog");
+      expect(dialog?.style.display).toBe("block");
     });
   });
 

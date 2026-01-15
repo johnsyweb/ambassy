@@ -86,7 +86,7 @@ export function calculateGeographicProximityScore(
  * Find neighboring events within a distance threshold.
  * Returns array of neighboring events with their distances.
  */
-function findNeighboringEvents(
+export function findNeighboringEvents(
   recipientEvents: string[],
   reallocatingEvents: string[],
   eventDetails: EventDetailsMap,
