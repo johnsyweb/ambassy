@@ -46,12 +46,10 @@ describe("clipboard", () => {
       // Mock execCommand by replacing it on document
       const originalExecCommand = document.execCommand;
       document.execCommand = jest.fn().mockReturnValue(true);
-      const createElementSpy = jest.spyOn(document, "createElement").mockReturnValue({
-        value: "",
-        select: jest.fn(),
-        setSelectionRange: jest.fn(),
-        focus: jest.fn(),
-      } as unknown as HTMLTextAreaElement);
+      const mockTextarea = document.createElement("textarea");
+      mockTextarea.select = jest.fn();
+      mockTextarea.setSelectionRange = jest.fn();
+      const createElementSpy = jest.spyOn(document, "createElement").mockReturnValue(mockTextarea);
       const appendChildSpy = jest.spyOn(document.body, "appendChild").mockImplementation();
       const removeChildSpy = jest.spyOn(document.body, "removeChild").mockImplementation();
 
