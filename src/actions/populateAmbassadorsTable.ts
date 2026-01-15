@@ -95,6 +95,14 @@ function populateEventAmbassadorsTable(eventAmbassadors: EventAmbassadorMap, eve
     nameCell.appendChild(nameContainer);
     row.appendChild(nameCell);
 
+    const stateCell = document.createElement("td");
+    stateCell.textContent = ambassador.state || "—";
+    if (!ambassador.state) {
+      stateCell.style.fontStyle = "italic";
+      stateCell.style.color = "#666";
+    }
+    row.appendChild(stateCell);
+
     const allocationsCell = document.createElement("td");
     const eventCount = ambassador.events.length;
     const prospectiveCount = prospectiveEvents.length;

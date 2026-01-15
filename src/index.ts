@@ -195,13 +195,43 @@ function setupOnboardingButtons(): void {
       return;
     }
 
+    const state = prompt("Enter state (e.g., VIC, NSW):");
+    if (state === null || state.trim() === "") {
+      return;
+    }
+
+    const eventAmbassadors = getEventAmbassadorsFromSession();
+    const regionalAmbassadors = getRegionalAmbassadorsFromSession();
+    
+    const reaOptions = Array.from(regionalAmbassadors.keys());
+    let regionalAmbassadorName: string | undefined;
+    
+    if (reaOptions.length > 0) {
+      const reaPrompt = `Assign to Regional Ambassador?\n\n${reaOptions.map((rea, i) => `${i + 1}. ${rea}`).join("\n")}\n\nEnter number (or press Cancel to skip):`;
+      const reaSelection = prompt(reaPrompt);
+      if (reaSelection !== null && reaSelection.trim() !== "") {
+        const reaIndex = parseInt(reaSelection.trim(), 10) - 1;
+        if (reaIndex >= 0 && reaIndex < reaOptions.length) {
+          regionalAmbassadorName = reaOptions[reaIndex];
+        }
+      }
+    }
+
     try {
-      const eventAmbassadors = getEventAmbassadorsFromSession();
-      const regionalAmbassadors = getRegionalAmbassadorsFromSession();
-      onboardEventAmbassador(name, eventAmbassadors, regionalAmbassadors, log);
+      onboardEventAmbassador(
+        name,
+        state,
+        eventAmbassadors,
+        regionalAmbassadors,
+        log,
+        regionalAmbassadorName,
+      );
       persistChangesLog(log);
       ambassy();
-      alert(`Event Ambassador "${name.trim()}" added successfully.`);
+      const successMsg = regionalAmbassadorName
+        ? `Event Ambassador "${name.trim()}" added successfully and assigned to ${regionalAmbassadorName}.`
+        : `Event Ambassador "${name.trim()}" added successfully.`;
+      alert(successMsg);
     } catch (error) {
       alert(`Failed to add Event Ambassador: ${error instanceof Error ? error.message : "Unknown error"}`);
     }
