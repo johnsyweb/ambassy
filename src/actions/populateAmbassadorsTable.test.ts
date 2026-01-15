@@ -308,8 +308,13 @@ describe("populateAmbassadorsTable", () => {
       populateAmbassadorsTable(eventAmbassadors, regionalAmbassadors, undefined, eventDetails, countries);
 
       const rows = tableBody.querySelectorAll("tr");
-      const firstRow = rows[0];
-      const eventsCell = firstRow.querySelector("td:nth-child(5)") as HTMLTableCellElement;
+      // Find row for "EA 1" (rows are sorted alphabetically)
+      const ea1Row = Array.from(rows).find(row => {
+        const nameCell = row.querySelector("td:nth-child(2)") as HTMLTableCellElement;
+        return nameCell?.textContent?.includes("EA 1");
+      });
+      expect(ea1Row).toBeTruthy();
+      const eventsCell = ea1Row!.querySelector("td:nth-child(5)") as HTMLTableCellElement;
 
       const links = eventsCell.querySelectorAll("a");
       expect(links.length).toBeGreaterThan(0);
@@ -324,8 +329,13 @@ describe("populateAmbassadorsTable", () => {
       populateAmbassadorsTable(eventAmbassadors, regionalAmbassadors, undefined, eventDetails, countries);
 
       const rows = tableBody.querySelectorAll("tr");
-      const firstRow = rows[0];
-      const eventsCell = firstRow.querySelector("td:nth-child(5)") as HTMLTableCellElement;
+      // Find row for "EA 1" (rows are sorted alphabetically)
+      const ea1Row = Array.from(rows).find(row => {
+        const nameCell = row.querySelector("td:nth-child(2)") as HTMLTableCellElement;
+        return nameCell?.textContent?.includes("EA 1");
+      });
+      expect(ea1Row).toBeTruthy();
+      const eventsCell = ea1Row!.querySelector("td:nth-child(5)") as HTMLTableCellElement;
       const links = eventsCell.querySelectorAll("a");
 
       links.forEach((link) => {
@@ -340,8 +350,13 @@ describe("populateAmbassadorsTable", () => {
       populateAmbassadorsTable(eventAmbassadors, regionalAmbassadors, undefined, eventDetails, countries);
 
       const rows = tableBody.querySelectorAll("tr");
-      const firstRow = rows[0];
-      const eventsCell = firstRow.querySelector("td:nth-child(5)") as HTMLTableCellElement;
+      // Find row for "EA 1" (rows are sorted alphabetically)
+      const ea1Row = Array.from(rows).find(row => {
+        const nameCell = row.querySelector("td:nth-child(2)") as HTMLTableCellElement;
+        return nameCell?.textContent?.includes("EA 1");
+      });
+      expect(ea1Row).toBeTruthy();
+      const eventsCell = ea1Row!.querySelector("td:nth-child(5)") as HTMLTableCellElement;
       const firstLink = eventsCell.querySelector("a") as HTMLAnchorElement;
 
       expect(firstLink).not.toBeNull();
@@ -362,8 +377,13 @@ describe("populateAmbassadorsTable", () => {
       populateAmbassadorsTable(eventAmbassadors, regionalAmbassadors, undefined, eventDetails, countriesWithoutUrl);
 
       const rows = tableBody.querySelectorAll("tr");
-      const firstRow = rows[0];
-      const eventsCell = firstRow.querySelector("td:nth-child(5)") as HTMLTableCellElement;
+      // Find row for "EA 1" (rows are sorted alphabetically)
+      const ea1Row = Array.from(rows).find(row => {
+        const nameCell = row.querySelector("td:nth-child(2)") as HTMLTableCellElement;
+        return nameCell?.textContent?.includes("EA 1");
+      });
+      expect(ea1Row).toBeTruthy();
+      const eventsCell = ea1Row!.querySelector("td:nth-child(5)") as HTMLTableCellElement;
 
       const links = eventsCell.querySelectorAll("a");
       expect(links.length).toBe(0);
@@ -381,8 +401,13 @@ describe("populateAmbassadorsTable", () => {
       populateAmbassadorsTable(eventAmbassadors, regionalAmbassadors, undefined, eventDetails, countriesWithoutUrl);
 
       const rows = tableBody.querySelectorAll("tr");
-      const firstRow = rows[0];
-      const eventsCell = firstRow.querySelector("td:nth-child(5)") as HTMLTableCellElement;
+      // Find row for "EA 1" (rows are sorted alphabetically)
+      const ea1Row = Array.from(rows).find(row => {
+        const nameCell = row.querySelector("td:nth-child(2)") as HTMLTableCellElement;
+        return nameCell?.textContent?.includes("EA 1");
+      });
+      expect(ea1Row).toBeTruthy();
+      const eventsCell = ea1Row!.querySelector("td:nth-child(5)") as HTMLTableCellElement;
 
       const spans = eventsCell.querySelectorAll("span");
       if (spans.length > 0) {
