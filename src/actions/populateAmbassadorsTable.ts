@@ -14,6 +14,12 @@ let handleOffboardEventAmbassador: (name: string) => void = () => {
 let handleOffboardRegionalAmbassador: (name: string) => void = () => {
   console.warn("handleOffboardRegionalAmbassador not initialized");
 };
+let handleTransitionEAToREA: (name: string) => void = () => {
+  console.warn("handleTransitionEAToREA not initialized");
+};
+let handleTransitionREAToEA: (name: string) => void = () => {
+  console.warn("handleTransitionREAToEA not initialized");
+};
 
 export function setOffboardingHandlers(
   eventHandler: (name: string) => void,
@@ -21,6 +27,14 @@ export function setOffboardingHandlers(
 ): void {
   handleOffboardEventAmbassador = eventHandler;
   handleOffboardRegionalAmbassador = regionalHandler;
+}
+
+export function setTransitionHandlers(
+  eaToReaHandler: (name: string) => void,
+  reaToEaHandler: (name: string) => void
+): void {
+  handleTransitionEAToREA = eaToReaHandler;
+  handleTransitionREAToEA = reaToEaHandler;
 }
 
 function assignColorToName(name: string, allNames: string[]): string {
@@ -183,6 +197,27 @@ function populateEventAmbassadorsTable(eventAmbassadors: EventAmbassadorMap, eve
       }
     };
     
+    const transitionButton = document.createElement("button");
+    transitionButton.innerHTML = "⬆️ Transition to REA";
+    transitionButton.type = "button";
+    transitionButton.title = `Transition ${name} to Regional Ambassador`;
+    transitionButton.setAttribute("aria-label", `Transition Event Ambassador ${name} to Regional Ambassador`);
+    transitionButton.style.padding = "2px 8px";
+    transitionButton.style.fontSize = "0.85em";
+    transitionButton.style.cursor = "pointer";
+    transitionButton.addEventListener("click", (e) => {
+      e.stopPropagation();
+      handleTransitionEAToREA(name);
+    });
+    
+    transitionButton.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        e.stopPropagation();
+        handleTransitionEAToREA(name);
+      }
+    });
+    
     const offboardButton = document.createElement("button");
     offboardButton.innerHTML = "🚪 Offboard";
     offboardButton.type = "button";
@@ -205,6 +240,7 @@ function populateEventAmbassadorsTable(eventAmbassadors: EventAmbassadorMap, eve
     });
     
     actionsContainer.appendChild(reallocateButton);
+    actionsContainer.appendChild(transitionButton);
     actionsContainer.appendChild(offboardButton);
     actionsCell.appendChild(actionsContainer);
     row.appendChild(actionsCell);
@@ -292,7 +328,36 @@ function populateRegionalAmbassadorsTable(regionalAmbassadors: RegionalAmbassado
     }
     row.appendChild(easCell);
 
+    if (ambassador.eventsForReallocation && ambassador.eventsForReallocation.length > 0) {
+      const eventsForReallocationCell = document.createElement("td");
+      eventsForReallocationCell.textContent = `Events for reallocation: ${ambassador.eventsForReallocation.join(", ")}`;
+      eventsForReallocationCell.style.fontStyle = "italic";
+      eventsForReallocationCell.style.color = "#666";
+      row.appendChild(eventsForReallocationCell);
+    }
+
     const actionsCell = document.createElement("td");
+    const transitionButton = document.createElement("button");
+    transitionButton.innerHTML = "⬇️ Transition to EA";
+    transitionButton.type = "button";
+    transitionButton.title = `Transition ${name} to Event Ambassador`;
+    transitionButton.setAttribute("aria-label", `Transition Regional Ambassador ${name} to Event Ambassador`);
+    transitionButton.style.padding = "2px 8px";
+    transitionButton.style.fontSize = "0.85em";
+    transitionButton.style.cursor = "pointer";
+    transitionButton.addEventListener("click", (e) => {
+      e.stopPropagation();
+      handleTransitionREAToEA(name);
+    });
+    
+    transitionButton.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        e.stopPropagation();
+        handleTransitionREAToEA(name);
+      }
+    });
+    
     const offboardButton = document.createElement("button");
     offboardButton.innerHTML = "🚪 Offboard";
     offboardButton.type = "button";
@@ -314,6 +379,7 @@ function populateRegionalAmbassadorsTable(regionalAmbassadors: RegionalAmbassado
       }
     });
     
+    actionsCell.appendChild(transitionButton);
     actionsCell.appendChild(offboardButton);
     row.appendChild(actionsCell);
 

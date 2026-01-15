@@ -31,7 +31,8 @@ import { initializeTabs } from "./utils/tabs";
 import { calculateAllCapacityStatuses, loadCapacityLimits } from "./actions/checkCapacity";
 import { offboardEventAmbassador, offboardRegionalAmbassador } from "./actions/offboardAmbassador";
 import { suggestEventReallocation, suggestEventAmbassadorReallocation } from "./actions/suggestReallocation";
-import { setOffboardingHandlers, setEAReallocateHandler } from "./actions/populateAmbassadorsTable";
+import { setOffboardingHandlers, setEAReallocateHandler, setTransitionHandlers } from "./actions/populateAmbassadorsTable";
+import { transitionEventAmbassadorToRegional } from "./actions/transitionAmbassador";
 import { setProspectReallocationRefreshCallback } from "./actions/populateProspectsTable";
 import { saveCapacityLimits, validateCapacityLimits } from "./actions/configureCapacityLimits";
 import { CapacityLimits } from "./models/CapacityLimits";
@@ -531,6 +532,29 @@ function setupOffboardingButtons(): void {
   };
 
   setOffboardingHandlers(handleOffboardEA, handleOffboardRA);
+
+  const handleTransitionEAToREA = (name: string): void => {
+    if (!confirm(`Are you sure you want to transition Event Ambassador "${name}" to Regional Ambassador? Their event assignments will be preserved for later reallocation.`)) {
+      return;
+    }
+
+    try {
+      const eventAmbassadors = getEventAmbassadorsFromSession();
+      const regionalAmbassadors = getRegionalAmbassadorsFromSession();
+      transitionEventAmbassadorToRegional(name, eventAmbassadors, regionalAmbassadors, log);
+      persistChangesLog(log);
+      ambassy();
+      alert(`Event Ambassador "${name}" has been transitioned to Regional Ambassador. Their events are preserved for reallocation.`);
+    } catch (error) {
+      alert(`Failed to transition ambassador: ${error instanceof Error ? error.message : "Unknown error"}`);
+    }
+  };
+
+  const handleTransitionREAToEA = (name: string): void => {
+    alert("REA-to-EA transition not yet implemented. This will require reallocation of supported Event Ambassadors.");
+  };
+
+  setTransitionHandlers(handleTransitionEAToREA, handleTransitionREAToEA);
 
   setEAReallocateHandler((eaName: string) => {
     const eventAmbassadors = getEventAmbassadorsFromSession();
