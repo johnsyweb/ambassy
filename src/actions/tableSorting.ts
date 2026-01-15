@@ -139,7 +139,8 @@ export function sortTable(
   const detectedType = columnType || detectColumnType(tableId, columnIndex);
 
   let sortDirection: "asc" | "desc" = "asc";
-  if (state.sortColumn === columnIndex) {
+  const isSameColumn = state.sortColumn === columnIndex;
+  if (isSameColumn && state.sortColumn !== null) {
     sortDirection = state.sortDirection === "asc" ? "desc" : "asc";
   }
 
@@ -204,7 +205,65 @@ export function resetToDefaultSort(tableId: string): void {
   }
 
   resetToDefault(state);
-  sortTable(tableId, state.defaultColumn);
+  
+  // Apply default sort directly without toggling
+  const table = document.querySelector(`#${tableId} tbody`);
+  if (!table) {
+    return;
+  }
+
+  const rows = Array.from(table.querySelectorAll("tr"));
+  if (rows.length === 0) {
+    return;
+  }
+
+  const detectedType = detectColumnType(tableId, state.defaultColumn);
+
+  const sortedRows = [...rows].sort((a, b) => {
+    const aCell = a.querySelectorAll("td")[state.defaultColumn];
+    const bCell = b.querySelectorAll("td")[state.defaultColumn];
+
+    if (!aCell || !bCell) {
+      return 0;
+    }
+
+    const aText = aCell.textContent?.trim() || "";
+    const bText = bCell.textContent?.trim() || "";
+
+    const aValue = parseCellValue(aText, detectedType);
+    const bValue = parseCellValue(bText, detectedType);
+
+    if (aValue === null && bValue === null) {
+      return 0;
+    }
+    if (aValue === null) {
+      return 1;
+    }
+    if (bValue === null) {
+      return -1;
+    }
+
+    let comparison = 0;
+    if (detectedType === "number" && typeof aValue === "number" && typeof bValue === "number") {
+      comparison = compareNumbers(aValue, bValue);
+    } else if (detectedType === "date" && aValue instanceof Date && bValue instanceof Date) {
+      comparison = compareDates(aValue, bValue);
+    } else if (detectedType === "boolean" && typeof aValue === "boolean" && typeof bValue === "boolean") {
+      comparison = compareBooleans(aValue, bValue);
+    } else {
+      comparison = compareText(String(aValue), String(bValue));
+    }
+
+    return state.defaultDirection === "asc" ? comparison : -comparison;
+  });
+
+  preserveAndRestoreSelection(tableId, () => {
+    sortedRows.forEach((row) => {
+      table.appendChild(row);
+    });
+  });
+
+  updateSortIndicators(tableId);
 }
 
 function applyDefaultSort(tableId: string): void {
@@ -213,7 +272,68 @@ function applyDefaultSort(tableId: string): void {
     return;
   }
 
-  sortTable(tableId, state.defaultColumn);
+  // Set sort state to defaults without toggling
+  state.sortColumn = state.defaultColumn;
+  state.sortDirection = state.defaultDirection;
+
+  // Now sort the table (this won't toggle since we just set the state)
+  const table = document.querySelector(`#${tableId} tbody`);
+  if (!table) {
+    return;
+  }
+
+  const rows = Array.from(table.querySelectorAll("tr"));
+  if (rows.length === 0) {
+    return;
+  }
+
+  const detectedType = detectColumnType(tableId, state.defaultColumn);
+
+  const sortedRows = [...rows].sort((a, b) => {
+    const aCell = a.querySelectorAll("td")[state.defaultColumn];
+    const bCell = b.querySelectorAll("td")[state.defaultColumn];
+
+    if (!aCell || !bCell) {
+      return 0;
+    }
+
+    const aText = aCell.textContent?.trim() || "";
+    const bText = bCell.textContent?.trim() || "";
+
+    const aValue = parseCellValue(aText, detectedType);
+    const bValue = parseCellValue(bText, detectedType);
+
+    if (aValue === null && bValue === null) {
+      return 0;
+    }
+    if (aValue === null) {
+      return 1;
+    }
+    if (bValue === null) {
+      return -1;
+    }
+
+    let comparison = 0;
+    if (detectedType === "number" && typeof aValue === "number" && typeof bValue === "number") {
+      comparison = compareNumbers(aValue, bValue);
+    } else if (detectedType === "date" && aValue instanceof Date && bValue instanceof Date) {
+      comparison = compareDates(aValue, bValue);
+    } else if (detectedType === "boolean" && typeof aValue === "boolean" && typeof bValue === "boolean") {
+      comparison = compareBooleans(aValue, bValue);
+    } else {
+      comparison = compareText(String(aValue), String(bValue));
+    }
+
+    return state.defaultDirection === "asc" ? comparison : -comparison;
+  });
+
+  preserveAndRestoreSelection(tableId, () => {
+    sortedRows.forEach((row) => {
+      table.appendChild(row);
+    });
+  });
+
+  updateSortIndicators(tableId);
 }
 
 export function updateSortIndicators(tableId: string): void {
