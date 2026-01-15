@@ -7,11 +7,16 @@ import { CapacityStatus } from "../models/CapacityStatus";
 // Mock dependencies
 jest.mock("./persistProspectiveEvents");
 jest.mock("./checkCapacity");
+jest.mock("./persistState");
+jest.mock("./trackChanges");
 
 const mockLoadCapacityLimits = jest.requireMock("./checkCapacity").loadCapacityLimits;
 
 const mockSaveProspectiveEvents = jest.requireMock("./persistProspectiveEvents").saveProspectiveEvents;
 const mockCalculateAllCapacityStatuses = jest.requireMock("./checkCapacity").calculateAllCapacityStatuses;
+const mockPersistEventAmbassadors = jest.requireMock("./persistState").persistEventAmbassadors;
+const mockPersistChangesLog = jest.requireMock("./persistState").persistChangesLog;
+const mockTrackStateChange = jest.requireMock("./trackChanges").trackStateChange;
 
 describe("reallocateProspect", () => {
   let prospects: ProspectiveEventList;
@@ -101,6 +106,9 @@ describe("reallocateProspect", () => {
       }
     );
 
+    // Check event ambassadors were persisted
+    expect(mockPersistEventAmbassadors).toHaveBeenCalledWith(eventAmbassadors);
+
     // Check prospects were saved
     expect(mockSaveProspectiveEvents).toHaveBeenCalledWith(prospects.getAll());
 
@@ -110,6 +118,12 @@ describe("reallocateProspect", () => {
     expect(log[0].event).toContain("Test Prospect");
     expect(log[0].oldValue).toBe("Old EA");
     expect(log[0].newValue).toBe("New EA");
+
+    // Check log was persisted
+    expect(mockPersistChangesLog).toHaveBeenCalledWith(log);
+
+    // Check state change was tracked
+    expect(mockTrackStateChange).toHaveBeenCalled();
   });
 
   it("should handle unassigning a prospect (setting to empty string)", () => {

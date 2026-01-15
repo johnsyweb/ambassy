@@ -4,6 +4,8 @@ import { RegionalAmbassadorMap } from "@models/RegionalAmbassadorMap";
 import { LogEntry } from "@models/LogEntry";
 import { calculateAllCapacityStatuses, loadCapacityLimits } from "./checkCapacity";
 import { saveProspectiveEvents } from "./persistProspectiveEvents";
+import { persistEventAmbassadors, persistChangesLog } from "./persistState";
+import { trackStateChange } from "./trackChanges";
 
 /**
  * Reallocate a prospective event from one Event Ambassador to another.
@@ -62,6 +64,9 @@ export function reallocateProspect(
   const capacityLimits = loadCapacityLimits();
   calculateAllCapacityStatuses(eventAmbassadors, regionalAmbassadors ?? new Map(), capacityLimits);
 
+  // Persist the updated Event Ambassadors (prospectiveEvents arrays were modified)
+  persistEventAmbassadors(eventAmbassadors);
+
   // Save the updated prospects
   saveProspectiveEvents(prospects.getAll());
 
@@ -76,4 +81,8 @@ export function reallocateProspect(
   };
 
   log.unshift(changeEntry);
+  persistChangesLog(log);
+
+  // Track state change after all persistence operations complete
+  trackStateChange();
 }
