@@ -55,9 +55,11 @@ describe("storage", () => {
     });
 
     it("should return null when JSON is invalid", () => {
+      const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
       localStorage.setItem("ambassy:invalid", "not json");
       const result = loadFromStorage("invalid");
       expect(result).toBeNull();
+      consoleErrorSpy.mockRestore();
     });
   });
 
