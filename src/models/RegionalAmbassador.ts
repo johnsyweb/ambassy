@@ -7,4 +7,6 @@ export interface RegionalAmbassador {
   prospectiveEvents?: string[]; // Prospect IDs inherited through EAs
   capacityStatus?: CapacityStatus;
   conflicts?: string[];
+  eventsForReallocation?: string[]; // Preserved events when EA transitions to REA
+  prospectiveEventsForReallocation?: string[]; // Preserved prospective events when EA transitions to REA
 }
