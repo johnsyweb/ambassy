@@ -1,16 +1,16 @@
-import { SelectionState } from "../models/SelectionState";
-import { EventTeamsTableDataMap } from "../models/EventTeamsTableData";
+import { SelectionState } from "@models/SelectionState";
+import { EventTeamsTableDataMap } from "@models/EventTeamsTableData";
 import {
   highlightEventsOnMap,
   centerMapOnEvents,
-} from "../utils/mapNavigation";
-import { EventDetailsMap } from "../models/EventDetailsMap";
+} from "@utils/mapNavigation";
+import { EventDetailsMap } from "@models/EventDetailsMap";
 import { updateReallocateButtonStates } from "./populateEventTeamsTable";
-import { ProspectiveEventList } from "../models/ProspectiveEventList";
-import { toLeafletArray } from "../models/Coordinate";
-import { EventAmbassadorMap } from "../models/EventAmbassadorMap";
-import { RegionalAmbassadorMap } from "../models/RegionalAmbassadorMap";
-import { EventTeamMap } from "../models/EventTeamMap";
+import { ProspectiveEventList } from "@models/ProspectiveEventList";
+import { toLeafletArray } from "@models/Coordinate";
+import { EventAmbassadorMap } from "@models/EventAmbassadorMap";
+import { RegionalAmbassadorMap } from "@models/RegionalAmbassadorMap";
+import { EventTeamMap } from "@models/EventTeamMap";
 import { showEventAllocationDialog } from "./showEventAllocationDialog";
 import L from "leaflet";
 

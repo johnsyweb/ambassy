@@ -6,12 +6,12 @@ import {
   isEventTeamsTabVisible,
   applyDeferredTableSelection,
 } from "./tableMapNavigation";
-import { SelectionState, createSelectionState } from "../models/SelectionState";
-import { EventTeamsTableDataMap } from "../models/EventTeamsTableData";
-import { EventDetailsMap } from "../models/EventDetailsMap";
-import { EventAmbassadorMap } from "../models/EventAmbassadorMap";
-import { RegionalAmbassadorMap } from "../models/RegionalAmbassadorMap";
-import { EventTeamMap } from "../models/EventTeamMap";
+import { SelectionState, createSelectionState } from "@models/SelectionState";
+import { EventTeamsTableDataMap } from "@models/EventTeamsTableData";
+import { EventDetailsMap } from "@models/EventDetailsMap";
+import { EventAmbassadorMap } from "@models/EventAmbassadorMap";
+import { RegionalAmbassadorMap } from "@models/RegionalAmbassadorMap";
+import { EventTeamMap } from "@models/EventTeamMap";
 import L from "leaflet";
 
 // Mock d3-geo-voronoi to avoid ES module issues
