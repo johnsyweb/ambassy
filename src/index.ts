@@ -33,7 +33,6 @@ import { offboardEventAmbassador, offboardRegionalAmbassador } from "./actions/o
 import { suggestEventReallocation, suggestEventAmbassadorReallocation } from "./actions/suggestReallocation";
 import { setOffboardingHandlers, setEAReallocateHandler, setTransitionHandlers } from "./actions/populateAmbassadorsTable";
 import { transitionEventAmbassadorToRegional, transitionRegionalAmbassadorToEvent, validateREAToEATransition } from "./actions/transitionAmbassador";
-import { suggestEventAmbassadorReallocation } from "./actions/suggestReallocation";
 import { showReallocationDialog } from "./actions/showReallocationDialog";
 import { setProspectReallocationRefreshCallback } from "./actions/populateProspectsTable";
 import { saveCapacityLimits, validateCapacityLimits } from "./actions/configureCapacityLimits";
