@@ -219,6 +219,27 @@ describe("tableMapNavigation", () => {
 
       expect(onReallocate).toHaveBeenCalledWith("event1");
     });
+
+    it("should not trigger reallocation when eventTeamsTableData is undefined", () => {
+      const onReallocate = jest.fn();
+
+      selectMapEvent(
+        selectionState,
+        "event1",
+        markerMap,
+        highlightLayer,
+        eventDetails,
+        map,
+        undefined, // eventTeamsTableData is undefined
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        onReallocate
+      );
+
+      expect(onReallocate).not.toHaveBeenCalled();
+    });
   });
 
   describe("highlightTableRow", () => {

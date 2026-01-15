@@ -87,7 +87,8 @@ export function selectMapEvent(
   }
 
   // If allocated and reallocation handler provided, trigger reallocation
-  if (!isUnallocated && onReallocate) {
+  // Only trigger if eventTeamsTableData is defined (so we know it's actually allocated)
+  if (eventTeamsTableData !== undefined && !isUnallocated && onReallocate) {
     onReallocate(eventShortName);
     return;
   }
