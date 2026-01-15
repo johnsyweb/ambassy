@@ -1,4 +1,7 @@
-import { EventDetailsMap, eventDetailsToCoordinate } from "@models/EventDetailsMap";
+import {
+  EventDetailsMap,
+  eventDetailsToCoordinate,
+} from "@models/EventDetailsMap";
 import {
   regionalAmbassadorsFrom,
   eventAmbassadorsFrom,
@@ -7,7 +10,12 @@ import {
 import { ProspectiveEvent } from "@models/ProspectiveEvent";
 import { EventAmbassadorMap } from "@models/EventAmbassadorMap";
 import { RegionalAmbassadorMap } from "@models/RegionalAmbassadorMap";
-import { toLeafletArray, toGeoJSONArray, getLatitude, getLongitude } from "@models/Coordinate";
+import {
+  toLeafletArray,
+  toGeoJSONArray,
+  getLatitude,
+  getLongitude,
+} from "@models/Coordinate";
 
 import { geoVoronoi } from "d3-geo-voronoi";
 import L from "leaflet";
@@ -21,13 +29,13 @@ export function populateMap(
   eventDetails: EventDetailsMap,
   eventAmbassadors: EventAmbassadorMap,
   regionalAmbassadors: RegionalAmbassadorMap,
-  prospectiveEvents?: ProspectiveEvent[]
+  prospectiveEvents?: ProspectiveEvent[],
 ) {
   console.log("populateMap called with:", {
     eventTeamsTableDataSize: eventTeamsTableData.size,
     eventDetailsSize: eventDetails.size,
     eventTeamsTableDataKeys: Array.from(eventTeamsTableData.keys()).slice(0, 5),
-    eventDetailsKeys: Array.from(eventDetails.keys()).slice(0, 5)
+    eventDetailsKeys: Array.from(eventDetails.keys()).slice(0, 5),
   });
 
   const raNames = regionalAmbassadorsFrom(eventTeamsTableData);
@@ -39,12 +47,12 @@ export function populateMap(
     raNames,
     eaNames,
     raColorMap: Object.fromEntries(raColorMap),
-    eaColorMap: Object.fromEntries(eaColorMap)
+    eaColorMap: Object.fromEntries(eaColorMap),
   });
 
   // Calculate event bounds for map centering
   const eventBounds = calculateEventBounds(eventTeamsTableData, eventDetails);
-  const {map, markersLayer, polygonsLayer} = setupMapView(eventBounds);
+  const { map, markersLayer, polygonsLayer } = setupMapView(eventBounds);
 
   markersLayer.clearLayers();
   polygonsLayer.clearLayers();
@@ -52,15 +60,23 @@ export function populateMap(
 
   const voronoiPoints: [number, number, string][] = [];
 
-
   // Will be populated after bounds calculation
-  const constrainingEvents: Array<{coords: [number, number], isConstraining: boolean, raColor?: string, tooltip?: string}> = [];
+  const constrainingEvents: Array<{
+    coords: [number, number];
+    isConstraining: boolean;
+    raColor?: string;
+    tooltip?: string;
+  }> = [];
 
   // Build Voronoi points from constraining events
-  constrainingEvents.forEach(({coords: [lng, lat], isConstraining}) => {
+  constrainingEvents.forEach(({ coords: [lng, lat], isConstraining }) => {
     if (isConstraining) {
       // Constraining points don't create polygons, just help define boundaries
-      voronoiPoints.push([lng, lat, JSON.stringify({ raColor: 'transparent', tooltip: '' })]);
+      voronoiPoints.push([
+        lng,
+        lat,
+        JSON.stringify({ raColor: "transparent", tooltip: "" }),
+      ]);
     }
   });
 
@@ -76,7 +92,10 @@ export function populateMap(
 
   // Calculate bounding box with some padding
   // Note: toLeafletArray returns [lat, lng]
-  let minLng = Infinity, maxLng = -Infinity, minLat = Infinity, maxLat = -Infinity;
+  let minLng = Infinity,
+    maxLng = -Infinity,
+    minLat = Infinity,
+    maxLat = -Infinity;
   ambassadorEventCoords.forEach(([lat, lng]) => {
     minLng = Math.min(minLng, lng);
     maxLng = Math.max(maxLng, lng);
@@ -101,8 +120,8 @@ export function populateMap(
   eventDetails.forEach((event, eventName) => {
     const data = eventTeamsTableData.get(eventName);
     if (data) {
-
-      const raColor = raColorMap.get(data.regionalAmbassador) ?? DEFAULT_POLYGON_COLOUR;
+      const raColor =
+        raColorMap.get(data.regionalAmbassador) ?? DEFAULT_POLYGON_COLOUR;
       const tooltip = `
         <strong>Event:</strong> ${eventName}<br>
         <strong>Event Director(s):</strong> ${data.eventDirectors}<br>
@@ -115,7 +134,7 @@ export function populateMap(
         coords: toGeoJSONArray(coord), // Voronoi uses GeoJSON format [lng, lat]
         isConstraining: false,
         raColor,
-        tooltip
+        tooltip,
       });
     }
   });
@@ -129,7 +148,7 @@ export function populateMap(
       minLng: minLng - 2, // Additional 2 degrees for constraining points
       maxLng: maxLng + 2,
       minLat: minLat - 2,
-      maxLat: maxLat + 2
+      maxLat: maxLat + 2,
     };
 
     eventDetails.forEach((event, eventName) => {
@@ -140,12 +159,16 @@ export function populateMap(
 
       // Include as constraining point if it's near ambassador events but doesn't have an ambassador
       // These points create boundaries without generating visible polygons
-      if (!hasAmbassador &&
-          lng >= expandedBounds.minLng && lng <= expandedBounds.maxLng &&
-          lat >= expandedBounds.minLat && lat <= expandedBounds.maxLat) {
+      if (
+        !hasAmbassador &&
+        lng >= expandedBounds.minLng &&
+        lng <= expandedBounds.maxLng &&
+        lat >= expandedBounds.minLat &&
+        lat <= expandedBounds.maxLat
+      ) {
         constrainingEvents.push({
           coords: toGeoJSONArray(coord), // Voronoi uses GeoJSON format [lng, lat]
-          isConstraining: true
+          isConstraining: true,
         });
       }
     });
@@ -156,10 +179,18 @@ export function populateMap(
 
       if (event.isConstraining) {
         // Constraining points don't create polygons, just help define boundaries
-        voronoiPoints.push([lng, lat, JSON.stringify({ raColor: 'transparent', tooltip: '' })]);
+        voronoiPoints.push([
+          lng,
+          lat,
+          JSON.stringify({ raColor: "transparent", tooltip: "" }),
+        ]);
       } else {
         // Ambassador events create polygons
-        voronoiPoints.push([lng, lat, JSON.stringify({ raColor: event.raColor, tooltip: event.tooltip })]);
+        voronoiPoints.push([
+          lng,
+          lat,
+          JSON.stringify({ raColor: event.raColor, tooltip: event.tooltip }),
+        ]);
       }
     });
   } else {
@@ -170,7 +201,8 @@ export function populateMap(
         const coord = eventDetailsToCoordinate(event);
         const [lng, lat] = toGeoJSONArray(coord); // Voronoi uses GeoJSON format [lng, lat]
 
-        const raColor = raColorMap.get(data.regionalAmbassador) ?? DEFAULT_POLYGON_COLOUR;
+        const raColor =
+          raColorMap.get(data.regionalAmbassador) ?? DEFAULT_POLYGON_COLOUR;
         const tooltip = `
           <strong>Event:</strong> ${eventName}<br>
           <strong>Event Director(s):</strong> ${data.eventDirectors}<br>
@@ -191,7 +223,8 @@ export function populateMap(
     // Skip events without ambassador data for processing
 
     if (data) {
-      const eaColor = eaColorMap.get(data.eventAmbassador) ?? DEFAULT_EVENT_COLOUR;
+      const eaColor =
+        eaColorMap.get(data.eventAmbassador) ?? DEFAULT_EVENT_COLOUR;
       const tooltip = `
         <strong>Event:</strong> ${eventName}<br>
         <strong>Event Director(s):</strong> ${data.eventDirectors}<br>
@@ -226,7 +259,7 @@ export function populateMap(
         direction: "top",
         offset: [0, -10],
       });
-      
+
       // Add hover effect to make it clear the marker is interactive
       marker.on("mouseover", () => {
         marker.setStyle({
@@ -250,7 +283,7 @@ export function populateMap(
           element.style.cursor = "pointer";
         }
       });
-      
+
       // Set cursor style on the marker element when added to map
       marker.on("add", () => {
         const element = marker.getElement() as HTMLElement | null;
@@ -258,10 +291,10 @@ export function populateMap(
           element.style.cursor = "pointer";
         }
       });
-      
+
       _markerMap.set(eventName, marker);
       markersLayer.addLayer(marker);
-      
+
       if (_markerClickHandler) {
         marker.on("click", () => {
           _markerClickHandler!(eventName);
@@ -275,43 +308,48 @@ export function populateMap(
 
   // Add markers for prospective events
   if (prospectiveEvents && prospectiveEvents.length > 0) {
-    console.log(`Processing ${prospectiveEvents.length} prospective events for map markers`);
+    console.log(
+      `Processing ${prospectiveEvents.length} prospective events for map markers`,
+    );
     let prospectsWithCoordinates = 0;
     let prospectsDisplayed = 0;
 
     prospectiveEvents.forEach((prospect) => {
-      const hasCoordinates = !!(prospect.coordinates && prospect.geocodingStatus === 'success');
+      const hasCoordinates = !!(
+        prospect.coordinates && prospect.geocodingStatus === "success"
+      );
       const hasAmbassador = !!prospect.eventAmbassador;
 
       if (hasCoordinates) prospectsWithCoordinates++;
       if (hasCoordinates && hasAmbassador) prospectsDisplayed++;
     });
 
-    console.log(`Summary: ${prospectsWithCoordinates}/${prospectiveEvents.length} have coordinates, ${prospectsDisplayed} will be displayed on map`);
+    console.log(
+      `Summary: ${prospectsWithCoordinates}/${prospectiveEvents.length} have coordinates, ${prospectsDisplayed} will be displayed on map`,
+    );
 
     prospectiveEvents.forEach((prospect) => {
-      if (prospect.coordinates && prospect.geocodingStatus === 'success') {
-
+      if (prospect.coordinates && prospect.geocodingStatus === "success") {
         // Get the EA's color for the prospective event marker
         const eaColor = prospect.eventAmbassador
-          ? eaColorMap.get(prospect.eventAmbassador) ?? DEFAULT_EVENT_COLOUR
+          ? (eaColorMap.get(prospect.eventAmbassador) ?? DEFAULT_EVENT_COLOUR)
           : DEFAULT_EVENT_COLOUR; // Default color for unassigned prospects
 
         // Use diamond shape with EA's color
         const marker = L.marker(toLeafletArray(prospect.coordinates), {
           icon: L.divIcon({
-            className: 'prospective-event-marker',
+            className: "prospective-event-marker",
             html: `<span style="color: ${eaColor}; font-size: 16px;">◆</span>`,
             iconSize: [16, 16],
-            iconAnchor: [8, 8]
-          })
+            iconAnchor: [8, 8],
+          }),
         });
 
         const tooltip = `
           <strong>Prospective Event:</strong> ${prospect.prospectEvent}<br>
           <strong>Country:</strong> ${prospect.country}<br>
           <strong>State:</strong> ${prospect.state}<br>
-          <strong>Event Ambassador:</strong> ${prospect.eventAmbassador || 'Unassigned'}<br>
+          <strong>Event Ambassador:</strong> ${prospect.eventAmbassador || "Unassigned"}<br>
           <strong>Status:</strong> ${prospect.ambassadorMatchStatus}
         `;
 
@@ -320,7 +358,7 @@ export function populateMap(
       }
     });
   } else {
-    console.log('No prospective events to process');
+    console.log("No prospective events to process");
   }
 
   // Add markersLayer to map
@@ -330,7 +368,11 @@ export function populateMap(
   if (prospectiveEvents && prospectiveEvents.length > 0) {
     let prospectsInVoronoi = 0;
     prospectiveEvents.forEach((prospect) => {
-      if (prospect.coordinates && prospect.geocodingStatus === 'success' && prospect.eventAmbassador) {
+      if (
+        prospect.coordinates &&
+        prospect.geocodingStatus === "success" &&
+        prospect.eventAmbassador
+      ) {
         prospectsInVoronoi++;
         const coord = prospect.coordinates;
         const [lng, lat] = toGeoJSONArray(coord); // Voronoi uses GeoJSON format [lng, lat]
@@ -338,7 +380,7 @@ export function populateMap(
         // Get the RA color for the voronoi polygon
         const ea = eventAmbassadors.get(prospect.eventAmbassador);
         const raColor = ea?.regionalAmbassador
-          ? raColorMap.get(ea.regionalAmbassador) ?? DEFAULT_POLYGON_COLOUR
+          ? (raColorMap.get(ea.regionalAmbassador) ?? DEFAULT_POLYGON_COLOUR)
           : DEFAULT_POLYGON_COLOUR;
 
         const tooltip = `
@@ -346,25 +388,29 @@ export function populateMap(
           <strong>Country:</strong> ${prospect.country}<br>
           <strong>State:</strong> ${prospect.state}<br>
           <strong>Event Ambassador:</strong> ${prospect.eventAmbassador}<br>
-          <strong>Regional Ambassador:</strong> ${ea?.regionalAmbassador || 'Unknown'}<br>
+          <strong>Regional Ambassador:</strong> ${ea?.regionalAmbassador || "Unknown"}<br>
           <strong>Status:</strong> ${prospect.ambassadorMatchStatus}
         `;
 
         voronoiPoints.push([lng, lat, JSON.stringify({ raColor, tooltip })]);
       }
     });
-    console.log(`${prospectsInVoronoi} prospective events added to Voronoi calculation`);
+    console.log(
+      `${prospectsInVoronoi} prospective events added to Voronoi calculation`,
+    );
   }
 
   // Remove duplicate coordinates to prevent degenerate Voronoi polygons
   const uniquePoints = voronoiPoints.filter((point, index, arr) => {
     const [lng, lat] = point;
-    return !arr.slice(0, index).some(otherPoint => {
+    return !arr.slice(0, index).some((otherPoint) => {
       const [otherLng, otherLat] = otherPoint;
-      return Math.abs(lng - otherLng) < 0.000001 && Math.abs(lat - otherLat) < 0.000001;
+      return (
+        Math.abs(lng - otherLng) < 0.000001 &&
+        Math.abs(lat - otherLat) < 0.000001
+      );
     });
   });
-
 
   // Create Voronoi polygons from the unique points
   const voronoi = geoVoronoi(uniquePoints.map((p) => [p[0], p[1]]));
@@ -374,7 +420,7 @@ export function populateMap(
     const { raColor, tooltip } = JSON.parse(uniquePoints[index][2]);
 
     // Skip polygons for constraining points (they have transparent color)
-    if (raColor === 'transparent') {
+    if (raColor === "transparent") {
       return;
     }
 
@@ -383,7 +429,8 @@ export function populateMap(
     ).map((coord) => [coord[1], coord[0]] as L.LatLngTuple);
 
     // Let Leaflet handle coordinate bounds - don't pre-clip to avoid splitting polygons
-    if (coordinates.length >= 3) { // Need at least 3 points for a polygon
+    if (coordinates.length >= 3) {
+      // Need at least 3 points for a polygon
       const poly = L.polygon(coordinates, {
         color: raColor,
         fillOpacity: 0.1,
@@ -397,7 +444,7 @@ export function populateMap(
   // Add polygonsLayer to map
   // Note: polygons are non-interactive (interactive: false) so they don't block marker clicks
   polygonsLayer.addTo(map!);
-  
+
   // Ensure markersLayer is on top by removing and re-adding it after polygons
   // This ensures markers are clickable even though polygons are added later
   if (map!.hasLayer(markersLayer)) {
@@ -422,7 +469,7 @@ export function populateMap(
  */
 function calculateEventBounds(
   eventTeamsTableData: EventTeamsTableDataMap,
-  eventDetails: EventDetailsMap
+  eventDetails: EventDetailsMap,
 ): L.LatLngBounds | null {
   const bounds = new L.LatLngBounds([]);
   let hasBounds = false;
@@ -446,13 +493,13 @@ function setupMapView(eventBounds: L.LatLngBounds | null) {
     L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
       attribution: "&copy; OpenStreetMap contributors",
     }).addTo(_map);
-    
+
     if (eventBounds) {
       _map.fitBounds(eventBounds);
     } else {
       _map.setView([0, 0], 2); // Default view if no bounds
     }
-    
+
     _markersLayer = L.layerGroup();
     _polygonsLayer = L.layerGroup();
     _highlightLayer = L.layerGroup();
@@ -461,7 +508,11 @@ function setupMapView(eventBounds: L.LatLngBounds | null) {
     // Update bounds if map already exists
     _map.fitBounds(eventBounds);
   }
-  return {map: _map, markersLayer: _markersLayer, polygonsLayer: _polygonsLayer};
+  return {
+    map: _map,
+    markersLayer: _markersLayer,
+    polygonsLayer: _polygonsLayer,
+  };
 }
 
 function assignColorsToNames(names: string[]): Map<string, string> {
@@ -493,6 +544,8 @@ export function getMap(): L.Map | null {
   return _map;
 }
 
-export function setMarkerClickHandler(handler: (eventShortName: string) => void): void {
+export function setMarkerClickHandler(
+  handler: (eventShortName: string) => void,
+): void {
   _markerClickHandler = handler;
 }

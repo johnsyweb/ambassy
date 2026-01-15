@@ -17,32 +17,86 @@ import { EventTeamsTableData } from "@models/EventTeamsTableData";
 import { refreshUI } from "./actions/refreshUI";
 import { restoreApplicationState } from "./actions/persistState";
 import { loadFromStorage } from "@utils/storage";
-import { exportApplicationState, downloadStateFile } from "./actions/exportState";
+import {
+  exportApplicationState,
+  downloadStateFile,
+} from "./actions/exportState";
 import { showSharingDialog } from "./actions/showSharingDialog";
 import { validateStateFile } from "./actions/importState";
-import { shouldShowImportGuidance, showImportGuidance } from "./actions/showImportGuidance";
-import { setupExportReminder, initializeChangeTrackerForLoadedData } from "./actions/trackChanges";
+import {
+  shouldShowImportGuidance,
+  showImportGuidance,
+} from "./actions/showImportGuidance";
+import {
+  setupExportReminder,
+  initializeChangeTrackerForLoadedData,
+} from "./actions/trackChanges";
 import { handleStateImport } from "./actions/handleStateImport";
 import { validateStateFromUrl } from "./actions/importState";
 import { parseDataUrl } from "@utils/urlSharing";
-import { onboardEventAmbassador, onboardRegionalAmbassador } from "./actions/onboardAmbassador";
+import {
+  onboardEventAmbassador,
+  onboardRegionalAmbassador,
+} from "./actions/onboardAmbassador";
 import { persistChangesLog, persistEventDetails } from "./actions/persistState";
 import { initializeTabs } from "./utils/tabs";
-import { calculateAllCapacityStatuses, loadCapacityLimits } from "./actions/checkCapacity";
-import { offboardEventAmbassador, offboardRegionalAmbassador } from "./actions/offboardAmbassador";
-import { suggestEventReallocation, suggestEventAmbassadorReallocation } from "./actions/suggestReallocation";
-import { setOffboardingHandlers, setEAReallocateHandler, setTransitionHandlers } from "./actions/populateAmbassadorsTable";
-import { transitionEventAmbassadorToRegional, transitionRegionalAmbassadorToEvent, validateREAToEATransition } from "./actions/transitionAmbassador";
+import {
+  calculateAllCapacityStatuses,
+  loadCapacityLimits,
+} from "./actions/checkCapacity";
+import {
+  offboardEventAmbassador,
+  offboardRegionalAmbassador,
+} from "./actions/offboardAmbassador";
+import {
+  suggestEventReallocation,
+  suggestEventAmbassadorReallocation,
+} from "./actions/suggestReallocation";
+import {
+  setOffboardingHandlers,
+  setEAReallocateHandler,
+  setTransitionHandlers,
+} from "./actions/populateAmbassadorsTable";
+import {
+  transitionEventAmbassadorToRegional,
+  transitionRegionalAmbassadorToEvent,
+  validateREAToEATransition,
+} from "./actions/transitionAmbassador";
 import { showReallocationDialog } from "./actions/showReallocationDialog";
 import { setProspectReallocationRefreshCallback } from "./actions/populateProspectsTable";
-import { saveCapacityLimits, validateCapacityLimits } from "./actions/configureCapacityLimits";
+import {
+  saveCapacityLimits,
+  validateCapacityLimits,
+} from "./actions/configureCapacityLimits";
 import { CapacityLimits } from "./models/CapacityLimits";
 import { SelectionState, createSelectionState } from "./models/SelectionState";
-import { selectEventTeamRow, selectMapEvent, selectProspectRow, applyDeferredTableSelection, highlightProspectTableRow, scrollToProspectTableRow, highlightTableRow, scrollToTableRow } from "./actions/tableMapNavigation";
-import { getMarkerMap, getHighlightLayer, getMap, setMarkerClickHandler, populateMap } from "./actions/populateMap";
-import { setRowClickHandler, setReallocateButtonHandler } from "./actions/populateEventTeamsTable";
+import {
+  selectEventTeamRow,
+  selectMapEvent,
+  selectProspectRow,
+  applyDeferredTableSelection,
+  highlightProspectTableRow,
+  scrollToProspectTableRow,
+  highlightTableRow,
+  scrollToTableRow,
+} from "./actions/tableMapNavigation";
+import {
+  getMarkerMap,
+  getHighlightLayer,
+  getMap,
+  setMarkerClickHandler,
+  populateMap,
+} from "./actions/populateMap";
+import {
+  setRowClickHandler,
+  setReallocateButtonHandler,
+} from "./actions/populateEventTeamsTable";
 import { setProspectRowClickHandler } from "./actions/populateProspectsTable";
-import { setEventTeamsTabVisibleCallback, setIssuesTabVisibleCallback, setProspectsTabVisibleCallback } from "./utils/tabs";
+import {
+  setEventTeamsTabVisibleCallback,
+  setIssuesTabVisibleCallback,
+  setProspectsTabVisibleCallback,
+} from "./utils/tabs";
 import { getReallocationSuggestions } from "./actions/getReallocationSuggestions";
 import { showReallocationDialog as showEventTeamReallocationDialog } from "./actions/showReallocationDialog";
 import { reallocateEventTeam } from "./actions/reallocateEventTeam";
@@ -52,7 +106,10 @@ import { getEAReallocationSuggestions } from "./actions/getEAReallocationSuggest
 import { reallocateEventAmbassador } from "./actions/reallocateEventAmbassador";
 import { getRegionalAmbassadorForEventAmbassador } from "./utils/regions";
 import { allocateEventFromMap } from "./actions/allocateEventFromMap";
-import { showKeyboardShortcutsDialog, initializeKeyboardShortcuts } from "./actions/showKeyboardShortcutsDialog";
+import {
+  showKeyboardShortcutsDialog,
+  initializeKeyboardShortcuts,
+} from "./actions/showKeyboardShortcutsDialog";
 import { detectIssues } from "./actions/detectIssues";
 import { populateIssuesTable } from "./actions/populateIssuesTable";
 import { populateProspectsTable } from "./actions/populateProspectsTable";
@@ -65,7 +122,9 @@ import { resolveIssueWithEvent } from "./actions/resolveIssue";
 import { showAddressDialog } from "./actions/showAddressDialog";
 
 function getRegionalAmbassadorsFromSession(): RegionalAmbassadorMap {
-  const storedRegionalAmbassadors = loadFromStorage<Array<[string, RegionalAmbassador]>>("regionalAmbassadors");
+  const storedRegionalAmbassadors = loadFromStorage<
+    Array<[string, RegionalAmbassador]>
+  >("regionalAmbassadors");
   if (storedRegionalAmbassadors) {
     return new Map<string, RegionalAmbassador>(storedRegionalAmbassadors);
   }
@@ -73,7 +132,8 @@ function getRegionalAmbassadorsFromSession(): RegionalAmbassadorMap {
 }
 
 function getEventAmbassadorsFromSession(): EventAmbassadorMap {
-  const storedEventAmbassadors = loadFromStorage<Array<[string, EventAmbassador]>>("eventAmbassadors");
+  const storedEventAmbassadors =
+    loadFromStorage<Array<[string, EventAmbassador]>>("eventAmbassadors");
   if (storedEventAmbassadors) {
     return new Map<string, EventAmbassador>(storedEventAmbassadors);
   }
@@ -98,9 +158,13 @@ const issuesState = createIssuesState();
 function hasApplicationData(
   eventTeams: EventTeamMap,
   eventAmbassadors: EventAmbassadorMap,
-  regionalAmbassadors: RegionalAmbassadorMap
+  regionalAmbassadors: RegionalAmbassadorMap,
 ): boolean {
-  return eventTeams.size > 0 && eventAmbassadors.size > 0 && regionalAmbassadors.size > 0;
+  return (
+    eventTeams.size > 0 &&
+    eventAmbassadors.size > 0 &&
+    regionalAmbassadors.size > 0
+  );
 }
 
 function isMapViewDisplayed(): boolean {
@@ -110,7 +174,7 @@ function isMapViewDisplayed(): boolean {
 
 function updateButtonVisibility(
   hasData: boolean,
-  isMapViewVisible: boolean
+  isMapViewVisible: boolean,
 ): void {
   const exportButtonMap = document.getElementById("exportButtonMap");
   const importButton = document.getElementById("importButton");
@@ -132,7 +196,7 @@ function updateButtonVisibility(
     importButtonMap.style.display = "";
   }
 }
-  
+
 document.getElementById("csvFileInput")?.addEventListener("change", (event) => {
   const input = event.target as HTMLInputElement;
   if (input.files && input.files.length > 0) {
@@ -190,8 +254,12 @@ setupImportButton("importButtonMap");
 setupProspectsImportButton();
 
 function setupOnboardingButtons(): void {
-  const addEventAmbassadorButton = document.getElementById("addEventAmbassadorButton");
-  const addRegionalAmbassadorButton = document.getElementById("addRegionalAmbassadorButton");
+  const addEventAmbassadorButton = document.getElementById(
+    "addEventAmbassadorButton",
+  );
+  const addRegionalAmbassadorButton = document.getElementById(
+    "addRegionalAmbassadorButton",
+  );
 
   addEventAmbassadorButton?.addEventListener("click", () => {
     const name = prompt("Enter Event Ambassador name:");
@@ -206,10 +274,10 @@ function setupOnboardingButtons(): void {
 
     const eventAmbassadors = getEventAmbassadorsFromSession();
     const regionalAmbassadors = getRegionalAmbassadorsFromSession();
-    
+
     const reaOptions = Array.from(regionalAmbassadors.keys());
     let regionalAmbassadorName: string | undefined;
-    
+
     if (reaOptions.length > 0) {
       const reaPrompt = `Assign to Regional Ambassador?\n\n${reaOptions.map((rea, i) => `${i + 1}. ${rea}`).join("\n")}\n\nEnter number (or press Cancel to skip):`;
       const reaSelection = prompt(reaPrompt);
@@ -237,7 +305,9 @@ function setupOnboardingButtons(): void {
         : `Event Ambassador "${name.trim()}" added successfully.`;
       alert(successMsg);
     } catch (error) {
-      alert(`Failed to add Event Ambassador: ${error instanceof Error ? error.message : "Unknown error"}`);
+      alert(
+        `Failed to add Event Ambassador: ${error instanceof Error ? error.message : "Unknown error"}`,
+      );
     }
   });
 
@@ -255,12 +325,20 @@ function setupOnboardingButtons(): void {
     try {
       const eventAmbassadors = getEventAmbassadorsFromSession();
       const regionalAmbassadors = getRegionalAmbassadorsFromSession();
-      onboardRegionalAmbassador(name, state, eventAmbassadors, regionalAmbassadors, log);
+      onboardRegionalAmbassador(
+        name,
+        state,
+        eventAmbassadors,
+        regionalAmbassadors,
+        log,
+      );
       persistChangesLog(log);
       ambassy();
       alert(`Regional Ambassador "${name.trim()}" added successfully.`);
     } catch (error) {
-      alert(`Failed to add Regional Ambassador: ${error instanceof Error ? error.message : "Unknown error"}`);
+      alert(
+        `Failed to add Regional Ambassador: ${error instanceof Error ? error.message : "Unknown error"}`,
+      );
     }
   });
 }
@@ -268,7 +346,9 @@ function setupOnboardingButtons(): void {
 setupOnboardingButtons();
 
 function setupCapacityLimitsConfiguration(): void {
-  const configureButton = document.getElementById("configureCapacityLimitsButton");
+  const configureButton = document.getElementById(
+    "configureCapacityLimitsButton",
+  );
   const dialog = document.getElementById("capacityLimitsDialog");
   const form = document.getElementById("capacityLimitsForm") as HTMLFormElement;
   const cancelButton = document.getElementById("cancelCapacityLimitsButton");
@@ -276,11 +356,19 @@ function setupCapacityLimitsConfiguration(): void {
 
   configureButton?.addEventListener("click", () => {
     const limits = loadCapacityLimits();
-    const minEAInput = document.getElementById("eventAmbassadorMin") as HTMLInputElement;
-    const maxEAInput = document.getElementById("eventAmbassadorMax") as HTMLInputElement;
-    const minRAInput = document.getElementById("regionalAmbassadorMin") as HTMLInputElement;
-    const maxRAInput = document.getElementById("regionalAmbassadorMax") as HTMLInputElement;
-    
+    const minEAInput = document.getElementById(
+      "eventAmbassadorMin",
+    ) as HTMLInputElement;
+    const maxEAInput = document.getElementById(
+      "eventAmbassadorMax",
+    ) as HTMLInputElement;
+    const minRAInput = document.getElementById(
+      "regionalAmbassadorMin",
+    ) as HTMLInputElement;
+    const maxRAInput = document.getElementById(
+      "regionalAmbassadorMax",
+    ) as HTMLInputElement;
+
     minEAInput.value = limits.eventAmbassadorMin.toString();
     minEAInput.setAttribute("min", "0");
     maxEAInput.value = limits.eventAmbassadorMax.toString();
@@ -289,7 +377,7 @@ function setupCapacityLimitsConfiguration(): void {
     minRAInput.setAttribute("min", "0");
     maxRAInput.value = limits.regionalAmbassadorMax.toString();
     maxRAInput.setAttribute("min", "0");
-    
+
     if (errorDiv) {
       errorDiv.style.display = "none";
       errorDiv.textContent = "";
@@ -316,17 +404,32 @@ function setupCapacityLimitsConfiguration(): void {
     e.preventDefault();
     if (!errorDiv) return;
 
-    const minEAInput = document.getElementById("eventAmbassadorMin") as HTMLInputElement;
+    const minEAInput = document.getElementById(
+      "eventAmbassadorMin",
+    ) as HTMLInputElement;
     const newLimits: CapacityLimits = {
       eventAmbassadorMin: parseInt(minEAInput.value, 10),
-      eventAmbassadorMax: parseInt((document.getElementById("eventAmbassadorMax") as HTMLInputElement).value, 10),
-      regionalAmbassadorMin: parseInt((document.getElementById("regionalAmbassadorMin") as HTMLInputElement).value, 10),
-      regionalAmbassadorMax: parseInt((document.getElementById("regionalAmbassadorMax") as HTMLInputElement).value, 10),
+      eventAmbassadorMax: parseInt(
+        (document.getElementById("eventAmbassadorMax") as HTMLInputElement)
+          .value,
+        10,
+      ),
+      regionalAmbassadorMin: parseInt(
+        (document.getElementById("regionalAmbassadorMin") as HTMLInputElement)
+          .value,
+        10,
+      ),
+      regionalAmbassadorMax: parseInt(
+        (document.getElementById("regionalAmbassadorMax") as HTMLInputElement)
+          .value,
+        10,
+      ),
     };
 
     if (!validateCapacityLimits(newLimits)) {
       errorDiv.style.display = "block";
-      errorDiv.textContent = "Invalid limits: minimum must be less than or equal to maximum, and all values must be non-negative integers.";
+      errorDiv.textContent =
+        "Invalid limits: minimum must be less than or equal to maximum, and all values must be non-negative integers.";
       return;
     }
 
@@ -342,7 +445,11 @@ function setupCapacityLimitsConfiguration(): void {
 
       const eventAmbassadors = getEventAmbassadorsFromSession();
       const regionalAmbassadors = getRegionalAmbassadorsFromSession();
-      calculateAllCapacityStatuses(eventAmbassadors, regionalAmbassadors, newLimits);
+      calculateAllCapacityStatuses(
+        eventAmbassadors,
+        regionalAmbassadors,
+        newLimits,
+      );
       ambassy();
       alert("Capacity limits updated successfully.");
       configureButton?.focus();
@@ -358,7 +465,9 @@ setupCapacityLimitsConfiguration();
 
 function setupOffboardingButtons(): void {
   const handleOffboardEA = async (name: string) => {
-    if (!confirm(`Are you sure you want to offboard Event Ambassador "${name}"?`)) {
+    if (
+      !confirm(`Are you sure you want to offboard Event Ambassador "${name}"?`)
+    ) {
       return;
     }
     const eventAmbassadors = getEventAmbassadorsFromSession();
@@ -378,7 +487,7 @@ function setupOffboardingButtons(): void {
           workingEventAmbassadors,
           eventDetails!,
           loadCapacityLimits(),
-          regionalAmbassadors
+          regionalAmbassadors,
         );
 
         const recipientName = await new Promise<string | null>((resolve) => {
@@ -394,7 +503,7 @@ function setupOffboardingButtons(): void {
             () => {
               resolve(null);
             },
-            eventDetails ?? undefined
+            eventDetails ?? undefined,
           );
         });
 
@@ -403,8 +512,13 @@ function setupOffboardingButtons(): void {
         }
 
         const trimmedRecipient = recipientName.trim();
-        if (trimmedRecipient !== "" && !workingEventAmbassadors.has(trimmedRecipient)) {
-          alert(`Recipient Event Ambassador "${trimmedRecipient}" not found. Skipping this event.`);
+        if (
+          trimmedRecipient !== "" &&
+          !workingEventAmbassadors.has(trimmedRecipient)
+        ) {
+          alert(
+            `Recipient Event Ambassador "${trimmedRecipient}" not found. Skipping this event.`,
+          );
           eventRecipients.set(eventName, "");
         } else {
           eventRecipients.set(eventName, trimmedRecipient);
@@ -425,31 +539,52 @@ function setupOffboardingButtons(): void {
           eventAmbassadors,
           regionalAmbassadors,
           eventTeams,
-          log
+          log,
         );
         persistChangesLog(log);
         ambassy();
-        const recipientsSummary = Array.from(new Set(Array.from(eventRecipients.values()).filter(r => r !== "")))
-          .join(", ") || "unassigned";
-        alert(`Event Ambassador "${name}" offboarded. Events reallocated to: ${recipientsSummary}.`);
+        const recipientsSummary =
+          Array.from(
+            new Set(
+              Array.from(eventRecipients.values()).filter((r) => r !== ""),
+            ),
+          ).join(", ") || "unassigned";
+        alert(
+          `Event Ambassador "${name}" offboarded. Events reallocated to: ${recipientsSummary}.`,
+        );
       } catch (error) {
-        alert(`Failed to offboard Event Ambassador: ${error instanceof Error ? error.message : "Unknown error"}`);
+        alert(
+          `Failed to offboard Event Ambassador: ${error instanceof Error ? error.message : "Unknown error"}`,
+        );
       }
     } else {
       try {
         const eventTeams = getEventTeamsFromSession();
-        offboardEventAmbassador(name, new Map(), eventAmbassadors, regionalAmbassadors, eventTeams, log);
+        offboardEventAmbassador(
+          name,
+          new Map(),
+          eventAmbassadors,
+          regionalAmbassadors,
+          eventTeams,
+          log,
+        );
         persistChangesLog(log);
         ambassy();
         alert(`Event Ambassador "${name}" offboarded.`);
       } catch (error) {
-        alert(`Failed to offboard Event Ambassador: ${error instanceof Error ? error.message : "Unknown error"}`);
+        alert(
+          `Failed to offboard Event Ambassador: ${error instanceof Error ? error.message : "Unknown error"}`,
+        );
       }
     }
   };
 
   const handleOffboardRA = async (name: string) => {
-    if (!confirm(`Are you sure you want to offboard Regional Ambassador "${name}"?`)) {
+    if (
+      !confirm(
+        `Are you sure you want to offboard Regional Ambassador "${name}"?`,
+      )
+    ) {
       return;
     }
     const regionalAmbassadors = getRegionalAmbassadorsFromSession();
@@ -467,7 +602,7 @@ function setupOffboardingButtons(): void {
           [eaName],
           workingRegionalAmbassadors,
           eventAmbassadors,
-          loadCapacityLimits()
+          loadCapacityLimits(),
         );
 
         const recipientName = await new Promise<string | null>((resolve) => {
@@ -482,7 +617,7 @@ function setupOffboardingButtons(): void {
             },
             () => {
               resolve(null);
-            }
+            },
           );
         });
 
@@ -491,8 +626,13 @@ function setupOffboardingButtons(): void {
         }
 
         const trimmedRecipient = recipientName.trim();
-        if (trimmedRecipient !== "" && !workingRegionalAmbassadors.has(trimmedRecipient)) {
-          alert(`Recipient Regional Ambassador "${trimmedRecipient}" not found. Skipping this Event Ambassador.`);
+        if (
+          trimmedRecipient !== "" &&
+          !workingRegionalAmbassadors.has(trimmedRecipient)
+        ) {
+          alert(
+            `Recipient Regional Ambassador "${trimmedRecipient}" not found. Skipping this Event Ambassador.`,
+          );
           eaRecipients.set(eaName, "");
         } else {
           eaRecipients.set(eaName, trimmedRecipient);
@@ -512,24 +652,38 @@ function setupOffboardingButtons(): void {
           eaRecipients,
           regionalAmbassadors,
           eventAmbassadors,
-          log
+          log,
         );
         persistChangesLog(log);
         ambassy();
-        const recipientsSummary = Array.from(new Set(Array.from(eaRecipients.values()).filter(r => r !== "")))
-          .join(", ") || "unassigned";
-        alert(`Regional Ambassador "${name}" offboarded. Event Ambassadors reallocated to: ${recipientsSummary}.`);
+        const recipientsSummary =
+          Array.from(
+            new Set(Array.from(eaRecipients.values()).filter((r) => r !== "")),
+          ).join(", ") || "unassigned";
+        alert(
+          `Regional Ambassador "${name}" offboarded. Event Ambassadors reallocated to: ${recipientsSummary}.`,
+        );
       } catch (error) {
-        alert(`Failed to offboard Regional Ambassador: ${error instanceof Error ? error.message : "Unknown error"}`);
+        alert(
+          `Failed to offboard Regional Ambassador: ${error instanceof Error ? error.message : "Unknown error"}`,
+        );
       }
     } else {
       try {
-        offboardRegionalAmbassador(name, new Map(), regionalAmbassadors, eventAmbassadors, log);
+        offboardRegionalAmbassador(
+          name,
+          new Map(),
+          regionalAmbassadors,
+          eventAmbassadors,
+          log,
+        );
         persistChangesLog(log);
         ambassy();
         alert(`Regional Ambassador "${name}" offboarded.`);
       } catch (error) {
-        alert(`Failed to offboard Regional Ambassador: ${error instanceof Error ? error.message : "Unknown error"}`);
+        alert(
+          `Failed to offboard Regional Ambassador: ${error instanceof Error ? error.message : "Unknown error"}`,
+        );
       }
     }
   };
@@ -537,19 +691,32 @@ function setupOffboardingButtons(): void {
   setOffboardingHandlers(handleOffboardEA, handleOffboardRA);
 
   const handleTransitionEAToREA = (name: string): void => {
-    if (!confirm(`Are you sure you want to transition Event Ambassador "${name}" to Regional Ambassador? Their event assignments will be preserved for later reallocation.`)) {
+    if (
+      !confirm(
+        `Are you sure you want to transition Event Ambassador "${name}" to Regional Ambassador? Their event assignments will be preserved for later reallocation.`,
+      )
+    ) {
       return;
     }
 
     try {
       const eventAmbassadors = getEventAmbassadorsFromSession();
       const regionalAmbassadors = getRegionalAmbassadorsFromSession();
-      transitionEventAmbassadorToRegional(name, eventAmbassadors, regionalAmbassadors, log);
+      transitionEventAmbassadorToRegional(
+        name,
+        eventAmbassadors,
+        regionalAmbassadors,
+        log,
+      );
       persistChangesLog(log);
       ambassy();
-      alert(`Event Ambassador "${name}" has been transitioned to Regional Ambassador. Their events are preserved for reallocation.`);
+      alert(
+        `Event Ambassador "${name}" has been transitioned to Regional Ambassador. Their events are preserved for reallocation.`,
+      );
     } catch (error) {
-      alert(`Failed to transition ambassador: ${error instanceof Error ? error.message : "Unknown error"}`);
+      alert(
+        `Failed to transition ambassador: ${error instanceof Error ? error.message : "Unknown error"}`,
+      );
     }
   };
 
@@ -558,7 +725,10 @@ function setupOffboardingButtons(): void {
     const regionalAmbassadors = getRegionalAmbassadorsFromSession();
     const limits = loadCapacityLimits();
 
-    const validationError = validateREAToEATransition(name, regionalAmbassadors);
+    const validationError = validateREAToEATransition(
+      name,
+      regionalAmbassadors,
+    );
     if (validationError) {
       alert(validationError);
       return;
@@ -573,23 +743,41 @@ function setupOffboardingButtons(): void {
     const supportedEAs = rea.supportsEAs;
 
     if (supportedEAs.length === 0) {
-      if (!confirm(`Are you sure you want to transition Regional Ambassador "${name}" to Event Ambassador?`)) {
+      if (
+        !confirm(
+          `Are you sure you want to transition Regional Ambassador "${name}" to Event Ambassador?`,
+        )
+      ) {
         return;
       }
 
       try {
         const eaRecipients = new Map<string, string>();
-        transitionRegionalAmbassadorToEvent(name, eaRecipients, eventAmbassadors, regionalAmbassadors, log);
+        transitionRegionalAmbassadorToEvent(
+          name,
+          eaRecipients,
+          eventAmbassadors,
+          regionalAmbassadors,
+          log,
+        );
         persistChangesLog(log);
         ambassy();
-        alert(`Regional Ambassador "${name}" has been transitioned to Event Ambassador.`);
+        alert(
+          `Regional Ambassador "${name}" has been transitioned to Event Ambassador.`,
+        );
       } catch (error) {
-        alert(`Failed to transition ambassador: ${error instanceof Error ? error.message : "Unknown error"}`);
+        alert(
+          `Failed to transition ambassador: ${error instanceof Error ? error.message : "Unknown error"}`,
+        );
       }
       return;
     }
 
-    if (!confirm(`Are you sure you want to transition Regional Ambassador "${name}" to Event Ambassador? You will need to reallocate ${supportedEAs.length} Event Ambassador(s) to other Regional Ambassadors.`)) {
+    if (
+      !confirm(
+        `Are you sure you want to transition Regional Ambassador "${name}" to Event Ambassador? You will need to reallocate ${supportedEAs.length} Event Ambassador(s) to other Regional Ambassadors.`,
+      )
+    ) {
       return;
     }
 
@@ -605,9 +793,13 @@ function setupOffboardingButtons(): void {
         limits,
       );
 
-      const otherREAs = Array.from(regionalAmbassadors.keys()).filter((reaName) => reaName !== name);
+      const otherREAs = Array.from(regionalAmbassadors.keys()).filter(
+        (reaName) => reaName !== name,
+      );
       if (otherREAs.length === 0) {
-        alert(`Cannot transition: No other Regional Ambassadors available to reallocate "${eaName}".`);
+        alert(
+          `Cannot transition: No other Regional Ambassadors available to reallocate "${eaName}".`,
+        );
         return;
       }
 
@@ -620,13 +812,17 @@ function setupOffboardingButtons(): void {
           regionalAmbassadors,
           (selectedREA: string) => {
             if (!selectedREA || selectedREA.trim() === "") {
-              alert("Please select a Regional Ambassador for this Event Ambassador.");
+              alert(
+                "Please select a Regional Ambassador for this Event Ambassador.",
+              );
               resolve();
               return;
             }
 
             if (selectedREA === name) {
-              alert("Cannot assign Event Ambassador to the same Regional Ambassador being transitioned.");
+              alert(
+                "Cannot assign Event Ambassador to the same Regional Ambassador being transitioned.",
+              );
               resolve();
               return;
             }
@@ -648,23 +844,37 @@ function setupOffboardingButtons(): void {
       });
 
       if (completedReallocations < supportedEAs.indexOf(eaName) + 1) {
-        alert("Transition cancelled. Not all Event Ambassadors were reallocated.");
+        alert(
+          "Transition cancelled. Not all Event Ambassadors were reallocated.",
+        );
         return;
       }
     }
 
     if (eaRecipients.size !== supportedEAs.length) {
-      alert("Transition cancelled. Not all Event Ambassadors were reallocated.");
+      alert(
+        "Transition cancelled. Not all Event Ambassadors were reallocated.",
+      );
       return;
     }
 
     try {
-      transitionRegionalAmbassadorToEvent(name, eaRecipients, eventAmbassadors, regionalAmbassadors, log);
+      transitionRegionalAmbassadorToEvent(
+        name,
+        eaRecipients,
+        eventAmbassadors,
+        regionalAmbassadors,
+        log,
+      );
       persistChangesLog(log);
       ambassy();
-      alert(`Regional Ambassador "${name}" has been transitioned to Event Ambassador. All Event Ambassadors have been reallocated.`);
+      alert(
+        `Regional Ambassador "${name}" has been transitioned to Event Ambassador. All Event Ambassadors have been reallocated.`,
+      );
     } catch (error) {
-      alert(`Failed to transition ambassador: ${error instanceof Error ? error.message : "Unknown error"}`);
+      alert(
+        `Failed to transition ambassador: ${error instanceof Error ? error.message : "Unknown error"}`,
+      );
     }
   };
 
@@ -679,14 +889,17 @@ function setupOffboardingButtons(): void {
       return;
     }
 
-    const currentREA = getRegionalAmbassadorForEventAmbassador(eaName, regionalAmbassadors);
+    const currentREA = getRegionalAmbassadorForEventAmbassador(
+      eaName,
+      regionalAmbassadors,
+    );
 
     try {
       const suggestions = getEAReallocationSuggestions(
         eaName,
         eventAmbassadors,
         regionalAmbassadors,
-        loadCapacityLimits()
+        loadCapacityLimits(),
       );
 
       showEventTeamReallocationDialog(
@@ -702,7 +915,9 @@ function setupOffboardingButtons(): void {
           }
 
           if (selectedREA === currentREA) {
-            alert("Event Ambassador is already assigned to this Regional Ambassador.");
+            alert(
+              "Event Ambassador is already assigned to this Regional Ambassador.",
+            );
             return;
           }
 
@@ -718,7 +933,7 @@ function setupOffboardingButtons(): void {
               selectedREA,
               eventAmbassadors,
               regionalAmbassadors,
-              log
+              log,
             );
 
             persistChangesLog(log);
@@ -731,41 +946,55 @@ function setupOffboardingButtons(): void {
                 regionalAmbassadors,
                 eventAmbassadors,
                 eventTeams,
-                eventDetails
+                eventDetails,
               );
             }
 
-            refreshUI(eventDetails!, eventTeamsTableData!, log, eventAmbassadors, regionalAmbassadors);
+            refreshUI(
+              eventDetails!,
+              eventTeamsTableData!,
+              log,
+              eventAmbassadors,
+              regionalAmbassadors,
+            );
 
-            alert(`Event Ambassador "${eaName}" reallocated to "${selectedREA}"`);
+            alert(
+              `Event Ambassador "${eaName}" reallocated to "${selectedREA}"`,
+            );
           } catch (error) {
-            alert(`Failed to reallocate Event Ambassador: ${error instanceof Error ? error.message : "Unknown error"}`);
+            alert(
+              `Failed to reallocate Event Ambassador: ${error instanceof Error ? error.message : "Unknown error"}`,
+            );
           }
         },
         () => {
           // Handle cancel - dialog already closed by showEventTeamReallocationDialog
-        }
+        },
       );
     } catch (error) {
-      alert(`Failed to get reallocation suggestions: ${error instanceof Error ? error.message : "Unknown error"}`);
+      alert(
+        `Failed to get reallocation suggestions: ${error instanceof Error ? error.message : "Unknown error"}`,
+      );
     }
   });
 }
 
 setupOffboardingButtons();
 
-document.getElementById("importFileInput")?.addEventListener("change", async (event) => {
-  const input = event.target as HTMLInputElement;
-  if (input.files && input.files.length > 0) {
-    const file = input.files[0];
-    const result = await handleStateImport(file);
-    if (result.success) {
-      ambassy();
+document
+  .getElementById("importFileInput")
+  ?.addEventListener("change", async (event) => {
+    const input = event.target as HTMLInputElement;
+    if (input.files && input.files.length > 0) {
+      const file = input.files[0];
+      const result = await handleStateImport(file);
+      if (result.success) {
+        ambassy();
+      }
+      alert(result.message);
+      input.value = "";
     }
-    alert(result.message);
-    input.value = "";
-  }
-});
+  });
 
 function setupDragAndDrop(): void {
   const body = document.body;
@@ -804,7 +1033,13 @@ async function ambassy() {
   eventDetails = await getEvents();
   // Preload countries to populate cache
   await getCountries();
-  if (!introduction || !ambassy || !uploadPrompt || !csvFileInput || !mapContainer) {
+  if (
+    !introduction ||
+    !ambassy ||
+    !uploadPrompt ||
+    !csvFileInput ||
+    !mapContainer
+  ) {
     console.error("Required elements not found");
     return;
   }
@@ -814,14 +1049,18 @@ async function ambassy() {
   const regionalAmbassadors = getRegionalAmbassadorsFromSession();
   const eventAmbassadors = getEventAmbassadorsFromSession();
   const eventTeams = getEventTeamsFromSession();
-  
+
   // Reload log from storage to ensure consistency
   const currentLog = getLogFromSession();
   log.length = 0;
   log.push(...currentLog);
-  
+
   // Initialize change tracker for loaded data (treat as "saved" until user makes changes)
-  const hasData = hasApplicationData(eventTeams, eventAmbassadors, regionalAmbassadors);
+  const hasData = hasApplicationData(
+    eventTeams,
+    eventAmbassadors,
+    regionalAmbassadors,
+  );
   if (hasData) {
     initializeChangeTrackerForLoadedData();
   }
@@ -837,27 +1076,48 @@ async function ambassy() {
 
     // Calculate capacity statuses for all ambassadors
     const capacityLimits = loadCapacityLimits();
-    calculateAllCapacityStatuses(eventAmbassadors, regionalAmbassadors, capacityLimits);
-    
-    eventTeamsTableData = extractEventTeamsTableData(regionalAmbassadors, eventAmbassadors, eventTeams, eventDetails);
-    
+    calculateAllCapacityStatuses(
+      eventAmbassadors,
+      regionalAmbassadors,
+      capacityLimits,
+    );
+
+    eventTeamsTableData = extractEventTeamsTableData(
+      regionalAmbassadors,
+      eventAmbassadors,
+      eventTeams,
+      eventDetails,
+    );
+
     // Initialize navigation handlers BEFORE populating tables
     initializeTableMapNavigation();
-    
+
     // Initialize Issues tab callback
     initializeIssuesTab();
 
-  // Initialize Prospects tab callback
-  initializeProspectsTab();
+    // Initialize Prospects tab callback
+    initializeProspectsTab();
 
-  // Set up prospect reallocation refresh callback
-  setProspectReallocationRefreshCallback(() => {
-    if (eventDetails && eventTeamsTableData) {
-      refreshUI(eventDetails, eventTeamsTableData, log, eventAmbassadors, regionalAmbassadors);
-    }
-  });
-    
-    refreshUI(eventDetails, eventTeamsTableData, log, eventAmbassadors, regionalAmbassadors);
+    // Set up prospect reallocation refresh callback
+    setProspectReallocationRefreshCallback(() => {
+      if (eventDetails && eventTeamsTableData) {
+        refreshUI(
+          eventDetails,
+          eventTeamsTableData,
+          log,
+          eventAmbassadors,
+          regionalAmbassadors,
+        );
+      }
+    });
+
+    refreshUI(
+      eventDetails,
+      eventTeamsTableData,
+      log,
+      eventAmbassadors,
+      regionalAmbassadors,
+    );
   } else {
     introduction.style.display = "block";
     ambassy.style.display = "none";
@@ -887,19 +1147,23 @@ function refreshIssuesTable(): void {
   const eventAmbassadors = getEventAmbassadorsFromSession();
   const regionalAmbassadors = getRegionalAmbassadorsFromSession();
 
-  if (!eventTeams || eventAmbassadors.size === 0 || regionalAmbassadors.size === 0) {
+  if (
+    !eventTeams ||
+    eventAmbassadors.size === 0 ||
+    regionalAmbassadors.size === 0
+  ) {
     return;
   }
 
-  const issues = detectIssues(eventTeams, eventDetails, eventAmbassadors, regionalAmbassadors);
+  const issues = detectIssues(
+    eventTeams,
+    eventDetails,
+    eventAmbassadors,
+    regionalAmbassadors,
+  );
   issuesState.issues = issues;
 
-  populateIssuesTable(
-    issues,
-    issuesState,
-    onIssueSelect,
-    onResolve
-  );
+  populateIssuesTable(issues, issuesState, onIssueSelect, onResolve);
 }
 
 function refreshProspectsTable(): void {
@@ -913,11 +1177,23 @@ function refreshProspectsTable(): void {
   const prospects = loadProspectiveEvents();
   const prospectsList = new ProspectiveEventList(prospects);
 
-  populateProspectsTable(prospectsList, eventAmbassadors, regionalAmbassadors, log, eventDetails ?? undefined);
+  populateProspectsTable(
+    prospectsList,
+    eventAmbassadors,
+    regionalAmbassadors,
+    log,
+    eventDetails ?? undefined,
+  );
 
   // Also refresh the map to show updated prospects
   if (eventDetails && eventTeamsTableData) {
-    populateMap(eventTeamsTableData, eventDetails, eventAmbassadors, regionalAmbassadors, prospects);
+    populateMap(
+      eventTeamsTableData,
+      eventDetails,
+      eventAmbassadors,
+      regionalAmbassadors,
+      prospects,
+    );
   }
 }
 
@@ -957,16 +1233,24 @@ function onResolve(issue: EventIssue): void {
             regionalAmbassadors,
             eventAmbassadors,
             eventTeams,
-            eventDetails
+            eventDetails,
           );
         }
 
-        refreshUI(eventDetails!, eventTeamsTableData!, log, eventAmbassadors, regionalAmbassadors);
+        refreshUI(
+          eventDetails!,
+          eventTeamsTableData!,
+          log,
+          eventAmbassadors,
+          regionalAmbassadors,
+        );
         refreshIssuesTable();
 
         alert(`Event "${issue.eventShortName}" resolved successfully!`);
       } catch (error) {
-        alert(`Failed to resolve issue: ${error instanceof Error ? error.message : "Unknown error"}`);
+        alert(
+          `Failed to resolve issue: ${error instanceof Error ? error.message : "Unknown error"}`,
+        );
       }
     },
     () => {
@@ -975,7 +1259,7 @@ function onResolve(issue: EventIssue): void {
     () => {
       // Switch to address entry
       onEnterAddress(issue);
-    }
+    },
   );
 }
 
@@ -998,7 +1282,7 @@ async function onEnterAddress(issue: EventIssue): Promise<void> {
     },
     () => {
       // Cancel callback - do nothing
-    }
+    },
   );
 }
 
@@ -1023,22 +1307,23 @@ function initializeTableMapNavigation(): void {
     const markerMap = getMarkerMap();
     const highlightLayer = getHighlightLayer();
     const map = getMap();
-    
+
     // Get fresh data from session storage to ensure we have the latest state
     const currentEventTeams = getEventTeamsFromSession();
     const currentEventAmbassadors = getEventAmbassadorsFromSession();
     const currentRegionalAmbassadors = getRegionalAmbassadorsFromSession();
-    
+
     // Recalculate eventTeamsTableData to ensure we have the latest state
-    const currentEventTeamsTableData = eventDetails && currentEventTeams
-      ? extractEventTeamsTableData(
-          currentRegionalAmbassadors,
-          currentEventAmbassadors,
-          currentEventTeams,
-          eventDetails
-        )
-      : eventTeamsTableData ?? undefined;
-    
+    const currentEventTeamsTableData =
+      eventDetails && currentEventTeams
+        ? extractEventTeamsTableData(
+            currentRegionalAmbassadors,
+            currentEventAmbassadors,
+            currentEventTeams,
+            eventDetails,
+          )
+        : (eventTeamsTableData ?? undefined);
+
     selectMapEvent(
       selectionState,
       eventShortName,
@@ -1055,7 +1340,7 @@ function initializeTableMapNavigation(): void {
         const currentEventAmbassadors = getEventAmbassadorsFromSession();
         const currentRegionalAmbassadors = getRegionalAmbassadorsFromSession();
         const currentEventTeams = getEventTeamsFromSession();
-        
+
         allocateEventFromMap(
           eventName,
           eaName,
@@ -1063,28 +1348,34 @@ function initializeTableMapNavigation(): void {
           currentRegionalAmbassadors,
           currentEventTeams,
           eventDetails!,
-          log
+          log,
         );
-        
+
         persistChangesLog(log);
-        
+
         const updatedEventAmbassadors = getEventAmbassadorsFromSession();
         const updatedRegionalAmbassadors = getRegionalAmbassadorsFromSession();
-        
+
         if (eventDetails && currentEventTeams) {
           eventTeamsTableData = extractEventTeamsTableData(
             updatedRegionalAmbassadors,
             updatedEventAmbassadors,
             currentEventTeams,
-            eventDetails
+            eventDetails,
           );
         }
-        
-        refreshUI(eventDetails!, eventTeamsTableData!, log, updatedEventAmbassadors, updatedRegionalAmbassadors);
-        
+
+        refreshUI(
+          eventDetails!,
+          eventTeamsTableData!,
+          log,
+          updatedEventAmbassadors,
+          updatedRegionalAmbassadors,
+        );
+
         highlightTableRow("eventTeamsTable", eventName, true);
         scrollToTableRow("eventTeamsTable", eventName);
-        
+
         alert(`Event "${eventName}" allocated to "${eaName}"`);
       },
       (eventName: string) => {
@@ -1094,29 +1385,32 @@ function initializeTableMapNavigation(): void {
         const freshEventTeams = getEventTeamsFromSession();
         const freshEventAmbassadors = getEventAmbassadorsFromSession();
         const freshRegionalAmbassadors = getRegionalAmbassadorsFromSession();
-        
+
         console.log("Fresh data retrieved:", {
           hasEventTeams: !!freshEventTeams,
           hasEventAmbassadors: !!freshEventAmbassadors,
           hasRegionalAmbassadors: !!freshRegionalAmbassadors,
-          hasEventDetails: !!eventDetails
+          hasEventDetails: !!eventDetails,
         });
-        
+
         // Recalculate eventTeamsTableData to ensure we have the latest state
-        const freshEventTeamsTableData = eventDetails && freshEventTeams
-          ? extractEventTeamsTableData(
-              freshRegionalAmbassadors,
-              freshEventAmbassadors,
-              freshEventTeams,
-              eventDetails
-            )
-          : null;
-        
+        const freshEventTeamsTableData =
+          eventDetails && freshEventTeams
+            ? extractEventTeamsTableData(
+                freshRegionalAmbassadors,
+                freshEventAmbassadors,
+                freshEventTeams,
+                eventDetails,
+              )
+            : null;
+
         console.log("Recalculated eventTeamsTableData:", {
           hasData: !!freshEventTeamsTableData,
-          eventInData: freshEventTeamsTableData ? freshEventTeamsTableData.has(eventName) : false
+          eventInData: freshEventTeamsTableData
+            ? freshEventTeamsTableData.has(eventName)
+            : false,
         });
-        
+
         if (!freshEventTeamsTableData || !eventDetails) {
           console.log("Early return: missing data");
           return;
@@ -1135,7 +1429,7 @@ function initializeTableMapNavigation(): void {
             freshEventAmbassadors,
             eventDetails,
             loadCapacityLimits(),
-            freshRegionalAmbassadors
+            freshRegionalAmbassadors,
           );
 
           showEventTeamReallocationDialog(
@@ -1148,17 +1442,19 @@ function initializeTableMapNavigation(): void {
               // Get fresh data again in case it changed
               const latestEventTeams = getEventTeamsFromSession();
               const latestEventAmbassadors = getEventAmbassadorsFromSession();
-              const latestRegionalAmbassadors = getRegionalAmbassadorsFromSession();
-              
-              const latestEventTeamsTableData = eventDetails && latestEventTeams
-                ? extractEventTeamsTableData(
-                    latestRegionalAmbassadors,
-                    latestEventAmbassadors,
-                    latestEventTeams,
-                    eventDetails
-                  )
-                : null;
-              
+              const latestRegionalAmbassadors =
+                getRegionalAmbassadorsFromSession();
+
+              const latestEventTeamsTableData =
+                eventDetails && latestEventTeams
+                  ? extractEventTeamsTableData(
+                      latestRegionalAmbassadors,
+                      latestEventAmbassadors,
+                      latestEventTeams,
+                      eventDetails,
+                    )
+                  : null;
+
               if (!latestEventTeamsTableData) {
                 return;
               }
@@ -1167,7 +1463,7 @@ function initializeTableMapNavigation(): void {
                 eventName,
                 selectedAmbassador,
                 latestEventAmbassadors,
-                latestEventTeamsTableData
+                latestEventTeamsTableData,
               );
 
               if (!validation.valid) {
@@ -1185,7 +1481,7 @@ function initializeTableMapNavigation(): void {
                   log,
                   latestRegionalAmbassadors,
                   latestEventTeams,
-                  eventDetails ?? undefined
+                  eventDetails ?? undefined,
                 );
 
                 persistChangesLog(log);
@@ -1193,34 +1489,47 @@ function initializeTableMapNavigation(): void {
                 // Recalculate eventTeamsTableData after reallocation
                 const finalEventTeams = getEventTeamsFromSession();
                 const finalEventAmbassadors = getEventAmbassadorsFromSession();
-                const finalRegionalAmbassadors = getRegionalAmbassadorsFromSession();
-                
+                const finalRegionalAmbassadors =
+                  getRegionalAmbassadorsFromSession();
+
                 if (eventDetails && finalEventTeams) {
                   eventTeamsTableData = extractEventTeamsTableData(
                     finalRegionalAmbassadors,
                     finalEventAmbassadors,
                     finalEventTeams,
-                    eventDetails
+                    eventDetails,
                   );
-                  
+
                   clearSelection(selectionState);
-                  refreshUI(eventDetails, eventTeamsTableData, log, finalEventAmbassadors, finalRegionalAmbassadors);
+                  refreshUI(
+                    eventDetails,
+                    eventTeamsTableData,
+                    log,
+                    finalEventAmbassadors,
+                    finalRegionalAmbassadors,
+                  );
                 }
 
-                alert(`Event "${eventName}" reallocated to "${selectedAmbassador}"`);
+                alert(
+                  `Event "${eventName}" reallocated to "${selectedAmbassador}"`,
+                );
               } catch (error) {
-                alert(`Failed to reallocate event: ${error instanceof Error ? error.message : "Unknown error"}`);
+                alert(
+                  `Failed to reallocate event: ${error instanceof Error ? error.message : "Unknown error"}`,
+                );
               }
             },
             () => {
               // Handle cancel - dialog already closed
             },
-            eventDetails
+            eventDetails,
           );
         } catch (error) {
-          alert(`Failed to get reallocation suggestions: ${error instanceof Error ? error.message : "Unknown error"}`);
+          alert(
+            `Failed to get reallocation suggestions: ${error instanceof Error ? error.message : "Unknown error"}`,
+          );
         }
-      }
+      },
     );
   });
 
@@ -1235,7 +1544,7 @@ function initializeTableMapNavigation(): void {
       markerMap,
       highlightLayer,
       eventDetails!,
-      map
+      map,
     );
   });
 
@@ -1243,29 +1552,25 @@ function initializeTableMapNavigation(): void {
     const map = getMap();
     const prospectiveEvents = loadProspectiveEvents();
     const prospectsList = new ProspectiveEventList(prospectiveEvents);
-    selectProspectRow(
-      selectionState,
-      prospectId,
-      prospectsList,
-      map
-    );
+    selectProspectRow(selectionState, prospectId, prospectsList, map);
   });
 
   setEventTeamsTabVisibleCallback(() => {
-    applyDeferredTableSelection(
-      selectionState,
-      eventTeamsTableData!
-    );
+    applyDeferredTableSelection(selectionState, eventTeamsTableData!);
   });
 
   setProspectsTabVisibleCallback(() => {
     // Handle deferred prospect selection when prospects tab becomes visible
-    if (selectionState.selectedEventShortName?.startsWith('prospect:')) {
+    if (selectionState.selectedEventShortName?.startsWith("prospect:")) {
       const prospectId = selectionState.selectedEventShortName.substring(9); // Remove 'prospect:' prefix
       const prospectiveEvents = loadProspectiveEvents();
       const prospectsList = new ProspectiveEventList(prospectiveEvents);
       const prospect = prospectsList.findById(prospectId);
-      if (prospect && prospect.coordinates && prospect.geocodingStatus === 'success') {
+      if (
+        prospect &&
+        prospect.coordinates &&
+        prospect.geocodingStatus === "success"
+      ) {
         highlightProspectTableRow("prospectsTable", prospectId, true);
         scrollToProspectTableRow("prospectsTable", prospectId);
       }
@@ -1293,7 +1598,7 @@ function initializeTableMapNavigation(): void {
         eventAmbassadors,
         eventDetails,
         loadCapacityLimits(),
-        regionalAmbassadors
+        regionalAmbassadors,
       );
 
       showEventTeamReallocationDialog(
@@ -1311,7 +1616,7 @@ function initializeTableMapNavigation(): void {
             eventShortName,
             selectedAmbassador,
             eventAmbassadors,
-            eventTeamsTableData
+            eventTeamsTableData,
           );
 
           if (!validation.valid) {
@@ -1321,7 +1626,7 @@ function initializeTableMapNavigation(): void {
 
           try {
             const eventTeams = getEventTeamsFromSession();
-            
+
             reallocateEventTeam(
               eventShortName,
               eventData.eventAmbassador,
@@ -1331,29 +1636,41 @@ function initializeTableMapNavigation(): void {
               log,
               regionalAmbassadors,
               eventTeams,
-              eventDetails ?? undefined
+              eventDetails ?? undefined,
             );
 
             persistChangesLog(log);
 
             if (eventDetails) {
               clearSelection(selectionState);
-              refreshUI(eventDetails, eventTeamsTableData, log, eventAmbassadors, regionalAmbassadors);
+              refreshUI(
+                eventDetails,
+                eventTeamsTableData,
+                log,
+                eventAmbassadors,
+                regionalAmbassadors,
+              );
             }
 
             const eventNameDisplay = eventShortName;
-            alert(`Event "${eventNameDisplay}" reallocated to "${selectedAmbassador}"`);
+            alert(
+              `Event "${eventNameDisplay}" reallocated to "${selectedAmbassador}"`,
+            );
           } catch (error) {
-            alert(`Failed to reallocate event: ${error instanceof Error ? error.message : "Unknown error"}`);
+            alert(
+              `Failed to reallocate event: ${error instanceof Error ? error.message : "Unknown error"}`,
+            );
           }
         },
         () => {
           // Handle cancel - dialog already closed by showEventTeamReallocationDialog
         },
-        eventDetails
+        eventDetails,
       );
     } catch (error) {
-      alert(`Failed to get reallocation suggestions: ${error instanceof Error ? error.message : "Unknown error"}`);
+      alert(
+        `Failed to get reallocation suggestions: ${error instanceof Error ? error.message : "Unknown error"}`,
+      );
     }
   });
 }
@@ -1365,17 +1682,27 @@ async function handleProspectsFileUpload(file: File): Promise<void> {
     const regionalAmbassadors = getRegionalAmbassadorsFromSession();
 
     // Show progress indicator
-    const progressDiv = document.getElementById('prospectsImportProgress') as HTMLDivElement;
-    const progressBar = document.getElementById('prospectsProgressBar') as HTMLProgressElement;
-    const progressText = document.getElementById('progressText') as HTMLSpanElement;
-    const progressStage = document.getElementById('progressStage') as HTMLDivElement;
-    const progressCurrentEvent = document.getElementById('progressCurrentEvent') as HTMLSpanElement;
+    const progressDiv = document.getElementById(
+      "prospectsImportProgress",
+    ) as HTMLDivElement;
+    const progressBar = document.getElementById(
+      "prospectsProgressBar",
+    ) as HTMLProgressElement;
+    const progressText = document.getElementById(
+      "progressText",
+    ) as HTMLSpanElement;
+    const progressStage = document.getElementById(
+      "progressStage",
+    ) as HTMLDivElement;
+    const progressCurrentEvent = document.getElementById(
+      "progressCurrentEvent",
+    ) as HTMLSpanElement;
 
-    progressDiv.style.display = 'block';
+    progressDiv.style.display = "block";
     progressBar.value = 0;
-    progressText.textContent = '0/0';
-    progressStage.textContent = 'Starting import...';
-    progressCurrentEvent.textContent = '';
+    progressText.textContent = "0/0";
+    progressStage.textContent = "Starting import...";
+    progressCurrentEvent.textContent = "";
 
     const result = await importProspectiveEvents(
       csvContent,
@@ -1393,26 +1720,34 @@ async function handleProspectsFileUpload(file: File): Promise<void> {
         if (progress.currentEvent) {
           progressCurrentEvent.textContent = `Processing: ${progress.currentEvent}`;
         }
-      }
+      },
     );
 
     // Hide progress indicator
-    progressDiv.style.display = 'none';
+    progressDiv.style.display = "none";
 
     if (result.success) {
-      alert(`Successfully imported ${result.imported} prospective events.\n\nWarnings:\n${result.warnings.join('\n')}`);
+      alert(
+        `Successfully imported ${result.imported} prospective events.\n\nWarnings:\n${result.warnings.join("\n")}`,
+      );
       refreshProspectsTable();
     } else {
-      alert(`Import failed:\n\nErrors:\n${result.errors.join('\n')}\n\nWarnings:\n${result.warnings.join('\n')}`);
+      alert(
+        `Import failed:\n\nErrors:\n${result.errors.join("\n")}\n\nWarnings:\n${result.warnings.join("\n")}`,
+      );
     }
 
     // Clear the input
-    const input = document.getElementById("prospectsCsvFileInput") as HTMLInputElement;
+    const input = document.getElementById(
+      "prospectsCsvFileInput",
+    ) as HTMLInputElement;
     if (input) {
       input.value = "";
     }
   } catch (error) {
-    alert(`Failed to process prospects file: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    alert(
+      `Failed to process prospects file: ${error instanceof Error ? error.message : "Unknown error"}`,
+    );
   }
 }
 
@@ -1425,7 +1760,10 @@ window.addEventListener("storage", () => {
   }
 });
 
-function showSharedStateBanner(message: string, type: "success" | "error" = "success"): void {
+function showSharedStateBanner(
+  message: string,
+  type: "success" | "error" = "success",
+): void {
   const existingBanner = document.getElementById("sharedStateBanner");
   const banner = existingBanner ?? document.createElement("div");
 
@@ -1454,7 +1792,8 @@ function showSharedStateBanner(message: string, type: "success" | "error" = "suc
     banner.style.border = "1px solid #b71c1c";
   }
 
-  const textSpan = existingBanner?.querySelector("span") ?? document.createElement("span");
+  const textSpan =
+    existingBanner?.querySelector("span") ?? document.createElement("span");
   textSpan.textContent = message;
 
   const closeButton =
@@ -1481,7 +1820,7 @@ function showSharedStateBanner(message: string, type: "success" | "error" = "suc
 async function checkForSharedStateInUrl(): Promise<void> {
   const urlParams = new URLSearchParams(window.location.search);
   const stateParam = urlParams.get("state");
-  
+
   if (stateParam) {
     try {
       // stateParam is already a data URL from the shareStateViaNativeShare function
@@ -1492,17 +1831,16 @@ async function checkForSharedStateInUrl(): Promise<void> {
         const newUrl = window.location.pathname;
         window.history.replaceState({}, document.title, newUrl);
         ambassy();
-        showSharedStateBanner("Shared state loaded from link. " + result.message, "success");
+        showSharedStateBanner(
+          "Shared state loaded from link. " + result.message,
+          "success",
+        );
       } else {
         showSharedStateBanner(result.message, "error");
       }
     } catch (error) {
-      const message =
-        error instanceof Error ? error.message : "Unknown error";
-      showSharedStateBanner(
-        `Unable to open shared state: ${message}`,
-        "error",
-      );
+      const message = error instanceof Error ? error.message : "Unknown error";
+      showSharedStateBanner(`Unable to open shared state: ${message}`, "error");
     }
   }
 }
@@ -1511,16 +1849,16 @@ document.addEventListener("DOMContentLoaded", async () => {
   initializeTabs();
   setupExportReminder();
   initializeKeyboardShortcuts();
-  
-  const keyboardShortcutsButton = document.getElementById("keyboardShortcutsButton");
+
+  const keyboardShortcutsButton = document.getElementById(
+    "keyboardShortcutsButton",
+  );
   if (keyboardShortcutsButton) {
     keyboardShortcutsButton.addEventListener("click", () => {
       showKeyboardShortcutsDialog();
     });
   }
-  
+
   await checkForSharedStateInUrl();
   ambassy();
 });
-
-
