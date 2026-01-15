@@ -40,11 +40,12 @@ export function resolveIssueWithEvent(
   eventDetailsMap.set(issue.eventShortName, eventToAdd);
   trackStateChange();
 
+  const coord = fromGeoJSONArray(eventDetails.geometry.coordinates);
   const logEntry: LogEntry = {
     type: "Issue Resolved",
     event: issue.eventShortName,
     oldValue: "Missing coordinates",
-    newValue: `Found in events.json: ${eventDetails.properties.EventLongName || eventDetails.properties.EventShortName} (${eventDetails.geometry.coordinates[1]}, ${eventDetails.geometry.coordinates[0]})`,
+    newValue: `Found in events.json: ${eventDetails.properties.EventLongName || eventDetails.properties.EventShortName} (${formatCoordinate(coord)})`,
     timestamp: Date.now(),
   };
 
@@ -152,13 +153,14 @@ export async function resolveIssueWithAddress(
     eventDetailsMap.set(issue.eventShortName, eventDetails);
     trackStateChange();
 
+    const coord = createCoordinate(lat, lng);
     const logEntry: LogEntry = {
       type: "Issue Resolved",
       event: issue.eventShortName,
       oldValue: "Missing coordinates",
       newValue: parkrunUrl
-        ? `Geocoded address: "${address}" (${lat}, ${lng}) with metadata from ${parkrunUrl}`
-        : `Geocoded address: "${address}" (${lat}, ${lng})`,
+        ? `Geocoded address: "${address}" (${formatCoordinate(coord)}) with metadata from ${parkrunUrl}`
+        : `Geocoded address: "${address}" (${formatCoordinate(coord)})`,
       timestamp: Date.now(),
     };
 
