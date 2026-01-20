@@ -748,13 +748,11 @@ export function showAddProspectDialog(
       return;
     }
 
-    // TypeScript type guard: after the check above, inferredCountry is guaranteed to be a non-null string
-    const countryToCheck = inferredCountry;
-
     const existing = loadProspectiveEvents();
     const existingList = new ProspectiveEventList(existing);
     
     // Check for duplicates based on prospectEvent, country, and state (same logic as import)
+    const countryToCheck = inferredCountry;
     const duplicate = existingList.getAll().find(event => 
       event.prospectEvent.toLowerCase() === prospectName.toLowerCase() &&
       event.country.toUpperCase() === countryToCheck.toUpperCase() &&
