@@ -1,17 +1,19 @@
 /**
  * Country Code Type Definitions
  *
- * Defines TypeScript types for two-letter ISO 3166-1 alpha-2 country codes
- * used throughout the application for validation and type safety.
+ * Defines TypeScript types for two-letter country codes based on TLDs (Top Level Domains)
+ * used in parkrun URLs. These map to ISO 3166-1 alpha-2 codes where applicable.
+ * 
+ * Note: "uk" is used as the TLD (parkrun.co.uk) but maps to ISO code "gb" (United Kingdom).
  */
 
 /**
- * Valid two-letter country codes used by parkrun
- * Based on ISO 3166-1 alpha-2 standard
+ * Valid two-letter country codes used by parkrun (based on TLDs)
+ * Most map directly to ISO 3166-1 alpha-2 codes, except "uk" which maps to "gb"
  */
 export type CountryCode =
   | 'au' // Australia
-  | 'uk' // United Kingdom
+  | 'uk' // United Kingdom (TLD, maps to ISO "gb")
   | 'ie' // Ireland
   | 'nz' // New Zealand
   | 'za' // South Africa
@@ -29,10 +31,42 @@ export type CountryCode =
   | 'ru' // Russia
   | 'jp' // Japan
   | 'sg' // Singapore
-  | 'my'; // Malaysia
+  | 'my' // Malaysia
+  | 'lt'; // Lithuania (and other future countries)
 
 /**
- * Set of valid country codes for fast lookup
+ * Mapping from TLD (as used in parkrun URLs) to ISO 3166-1 alpha-2 code
+ * Most TLDs map directly, but "uk" maps to "gb" (United Kingdom)
+ */
+const TLD_TO_ISO: ReadonlyMap<string, string> = new Map([
+  ['au', 'au'],
+  ['uk', 'gb'], // UK TLD maps to GB ISO code
+  ['ie', 'ie'],
+  ['nz', 'nz'],
+  ['za', 'za'],
+  ['us', 'us'],
+  ['ca', 'ca'],
+  ['it', 'it'],
+  ['pl', 'pl'],
+  ['de', 'de'],
+  ['dk', 'dk'],
+  ['se', 'se'],
+  ['no', 'no'],
+  ['fi', 'fi'],
+  ['nl', 'nl'],
+  ['fr', 'fr'],
+  ['ru', 'ru'],
+  ['jp', 'jp'],
+  ['sg', 'sg'],
+  ['my', 'my'],
+  ['lt', 'lt'], // Lithuania
+  // Add more countries as parkrun expands
+]);
+
+/**
+ * Set of valid country codes (TLDs) for fast lookup
+ * This allows for extensibility - new countries can be added without code changes
+ * if they follow the pattern of using their TLD as the country code
  */
 const VALID_COUNTRY_CODES: ReadonlySet<CountryCode> = new Set([
   'au',
@@ -55,6 +89,7 @@ const VALID_COUNTRY_CODES: ReadonlySet<CountryCode> = new Set([
   'jp',
   'sg',
   'my',
+  'lt',
 ]);
 
 /**
@@ -102,18 +137,41 @@ export function tryCountryCode(code: string): CountryCode | null {
 }
 
 /**
- * Extracts a country code from a parkrun domain URL
+ * Extracts a country code (TLD) from a parkrun domain URL
  * e.g., "www.parkrun.com.au" -> "au"
  *       "www.parkrun.co.za" -> "za"
+ *       "www.parkrun.co.uk" -> "uk"
  *
  * @param url - The parkrun URL (e.g., "www.parkrun.com.au")
- * @returns The CountryCode if valid, null otherwise
+ * @returns The CountryCode (TLD) if valid, null otherwise
  */
 export function extractCountryCodeFromUrl(url: string): CountryCode | null {
   // Remove www.parkrun. prefix if present
   const domain = url.replace(/^www\.parkrun\./, '');
   const domainParts = domain.split('.');
-  const lastPart = domainParts[domainParts.length - 1];
+  const lastPart = domainParts[domainParts.length - 1].toLowerCase();
   
   return tryCountryCode(lastPart);
+}
+
+/**
+ * Converts a TLD-based country code to ISO 3166-1 alpha-2 code
+ * Most codes map directly, but "uk" maps to "gb"
+ *
+ * @param tldCode - The TLD-based country code (e.g., "uk", "au")
+ * @returns The ISO 3166-1 alpha-2 code (e.g., "gb", "au") or the original code if no mapping exists
+ */
+export function tldToIso(tldCode: string): string {
+  return TLD_TO_ISO.get(tldCode.toLowerCase()) || tldCode.toLowerCase();
+}
+
+/**
+ * Checks if a TLD code has a special ISO mapping (e.g., "uk" -> "gb")
+ *
+ * @param tldCode - The TLD-based country code
+ * @returns True if the TLD maps to a different ISO code
+ */
+export function hasIsoMapping(tldCode: string): boolean {
+  const iso = TLD_TO_ISO.get(tldCode.toLowerCase());
+  return iso !== undefined && iso !== tldCode.toLowerCase();
 }

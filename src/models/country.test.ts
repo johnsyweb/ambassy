@@ -54,7 +54,7 @@ describe('inferCountryFromCoordinates', () => {
 
   it('should return country name for United Kingdom', async () => {
     const coordinate = createCoordinate(51.5074, -0.1278); // London
-    getCountryCodeFromCoordinateSpy.mockResolvedValue(1); // UK code
+    getCountryCodeFromCoordinateSpy.mockResolvedValue(1); // UK code (maps to GB ISO)
 
     const countryName = await inferCountryFromCoordinates(coordinate);
 
@@ -122,11 +122,11 @@ describe('inferCountryCodeFromCoordinates', () => {
 
   it('should return two-letter country code for United Kingdom', async () => {
     const coordinate = createCoordinate(51.5074, -0.1278); // London
-    getCountryCodeFromCoordinateSpy.mockResolvedValue(1); // UK code
+    getCountryCodeFromCoordinateSpy.mockResolvedValue(1); // UK code (maps to GB ISO)
 
     const countryCode = await inferCountryCodeFromCoordinates(coordinate);
 
-    expect(countryCode).toBe('UK');
+    expect(countryCode).toBe('GB'); // UK TLD maps to GB ISO code
   });
 
   it('should return "Unknown" for country code 0', async () => {

@@ -9,15 +9,18 @@ import {
   toCountryCode,
   tryCountryCode,
   extractCountryCodeFromUrl,
+  tldToIso,
+  hasIsoMapping,
 } from './CountryCode';
 
 describe('CountryCode', () => {
   describe('isValidCountryCode', () => {
-    it('should return true for valid country codes', () => {
+    it('should return true for valid country codes (TLDs)', () => {
       expect(isValidCountryCode('au')).toBe(true);
-      expect(isValidCountryCode('uk')).toBe(true);
+      expect(isValidCountryCode('uk')).toBe(true); // UK TLD is valid
       expect(isValidCountryCode('us')).toBe(true);
       expect(isValidCountryCode('za')).toBe(true);
+      expect(isValidCountryCode('lt')).toBe(true); // Lithuania
     });
 
     it('should return false for invalid country codes', () => {
@@ -75,16 +78,17 @@ describe('CountryCode', () => {
   });
 
   describe('extractCountryCodeFromUrl', () => {
-    it('should extract country code from parkrun URLs', () => {
+    it('should extract TLD from parkrun URLs', () => {
       expect(extractCountryCodeFromUrl('www.parkrun.com.au')).toBe('au');
       expect(extractCountryCodeFromUrl('www.parkrun.co.za')).toBe('za');
-      expect(extractCountryCodeFromUrl('www.parkrun.co.uk')).toBe('uk');
+      expect(extractCountryCodeFromUrl('www.parkrun.co.uk')).toBe('uk'); // UK TLD
       expect(extractCountryCodeFromUrl('www.parkrun.ca')).toBe('ca');
     });
 
     it('should handle URLs without www.parkrun. prefix', () => {
       expect(extractCountryCodeFromUrl('com.au')).toBe('au');
       expect(extractCountryCodeFromUrl('co.za')).toBe('za');
+      expect(extractCountryCodeFromUrl('co.uk')).toBe('uk');
     });
 
     it('should return null for invalid URLs', () => {
@@ -96,6 +100,51 @@ describe('CountryCode', () => {
     it('should handle multi-part domains correctly', () => {
       expect(extractCountryCodeFromUrl('www.parkrun.com.au')).toBe('au');
       expect(extractCountryCodeFromUrl('www.parkrun.co.za')).toBe('za');
+      expect(extractCountryCodeFromUrl('www.parkrun.co.uk')).toBe('uk');
+    });
+
+    it('should be case-insensitive', () => {
+      expect(extractCountryCodeFromUrl('www.parkrun.COM.AU')).toBe('au');
+      expect(extractCountryCodeFromUrl('www.parkrun.CO.UK')).toBe('uk');
+    });
+  });
+
+  describe('tldToIso', () => {
+    it('should map TLDs to ISO codes', () => {
+      expect(tldToIso('au')).toBe('au');
+      expect(tldToIso('us')).toBe('us');
+      expect(tldToIso('za')).toBe('za');
+      expect(tldToIso('lt')).toBe('lt');
+    });
+
+    it('should map UK TLD to GB ISO code', () => {
+      expect(tldToIso('uk')).toBe('gb'); // UK TLD maps to GB ISO code
+    });
+
+    it('should be case-insensitive', () => {
+      expect(tldToIso('UK')).toBe('gb');
+      expect(tldToIso('Au')).toBe('au');
+    });
+
+    it('should return original code if no mapping exists', () => {
+      expect(tldToIso('xx')).toBe('xx');
+    });
+  });
+
+  describe('hasIsoMapping', () => {
+    it('should return true for UK (maps to GB)', () => {
+      expect(hasIsoMapping('uk')).toBe(true);
+      expect(hasIsoMapping('UK')).toBe(true);
+    });
+
+    it('should return false for codes that map to themselves', () => {
+      expect(hasIsoMapping('au')).toBe(false);
+      expect(hasIsoMapping('us')).toBe(false);
+      expect(hasIsoMapping('za')).toBe(false);
+    });
+
+    it('should return false for unmapped codes', () => {
+      expect(hasIsoMapping('xx')).toBe(false);
     });
   });
 

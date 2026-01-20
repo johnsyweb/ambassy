@@ -134,10 +134,11 @@ const COUNTRY_CODE_TO_NAME: Record<number, string> = {
 };
 
 /**
- * Mapping from numeric country codes to two-letter ISO codes
+ * Mapping from numeric country codes to two-letter ISO codes (ISO 3166-1 alpha-2)
+ * Note: United Kingdom uses "GB" (not "UK") per ISO standard
  */
 const COUNTRY_CODE_TO_ISO: Record<number, string> = {
-  1: "UK",
+  1: "GB", // United Kingdom (ISO code is GB, not UK)
   2: "IE",
   3: "AU",
   4: "NZ",
@@ -160,11 +161,11 @@ const COUNTRY_CODE_TO_ISO: Record<number, string> = {
 };
 
 /**
- * Infers two-letter country code from coordinates.
- * Returns uppercase two-letter ISO 3166-1 alpha-2 code (e.g., "AU", "UK").
+ * Infers two-letter ISO 3166-1 alpha-2 country code from coordinates.
+ * Returns uppercase ISO code (e.g., "AU", "GB").
  * 
  * @param coordinate - The coordinate to infer country from
- * @returns Two-letter country code (e.g., "AU") or "Unknown" if inference fails
+ * @returns Two-letter ISO country code (e.g., "AU", "GB") or "Unknown" if inference fails
  */
 export async function inferCountryCodeFromCoordinates(
   coordinate: Coordinate
@@ -181,41 +182,26 @@ export async function inferCountryCodeFromCoordinates(
     return isoCode;
   }
   
-  // Fallback: try to derive from country URL if available
+  // Fallback: try to derive from country URL TLD if available
   const countries = await getCountries();
   const country = countries[countryCode.toString()];
   if (country?.url) {
-    // Extract domain and convert to two-letter code
-    // e.g., "www.parkrun.com.au" -> "AU"
+    // Extract TLD from parkrun URL
+    // e.g., "www.parkrun.com.au" -> "au"
+    //       "www.parkrun.co.uk" -> "uk"
     const domain = country.url.replace(/^www\.parkrun\./, '');
     const domainParts = domain.split('.');
-    const lastPart = domainParts[domainParts.length - 1].toUpperCase();
+    const tld = domainParts[domainParts.length - 1].toLowerCase();
     
-    // Map common domain parts to ISO codes
-    const domainToISO: Record<string, string> = {
-      'AU': 'AU',
-      'UK': 'UK',
-      'IE': 'IE',
-      'NZ': 'NZ',
-      'ZA': 'ZA',
-      'US': 'US',
-      'CA': 'CA',
-      'IT': 'IT',
-      'PL': 'PL',
-      'DE': 'DE',
-      'DK': 'DK',
-      'SE': 'SE',
-      'NO': 'NO',
-      'FI': 'FI',
-      'NL': 'NL',
-      'FR': 'FR',
-      'RU': 'RU',
-      'JP': 'JP',
-      'SG': 'SG',
-      'MY': 'MY',
-    };
+    // Map TLD to ISO code (uk -> gb, others map directly)
+    // This allows for extensibility - new countries can be added without code changes
+    if (tld === 'uk') {
+      return 'GB'; // UK TLD maps to GB ISO code
+    }
     
-    return domainToISO[lastPart] || lastPart || "Unknown";
+    // For other TLDs, use the TLD as ISO code (most TLDs match ISO codes)
+    // Convert to uppercase for consistency
+    return tld.toUpperCase() || "Unknown";
   }
   
   return "Unknown";
@@ -252,8 +238,9 @@ export async function inferCountryFromCoordinates(
     const domainParts = domain.split('.');
     const lastPart = domainParts[domainParts.length - 1];
     
-    // Simple mapping for common domains (using CountryCode values)
-    const domainToName: Record<string, string> = {
+    // Map TLD to country name
+    // This allows for extensibility - new countries can be added by extending this mapping
+    const tldToName: Record<string, string> = {
       'au': 'Australia',
       'uk': 'United Kingdom',
       'ie': 'Ireland',
@@ -274,9 +261,11 @@ export async function inferCountryFromCoordinates(
       'jp': 'Japan',
       'sg': 'Singapore',
       'my': 'Malaysia',
+      'lt': 'Lithuania',
+      // Add more countries as parkrun expands
     };
     
-    return domainToName[lastPart] || domain || "Unknown";
+    return tldToName[lastPart] || domain || "Unknown";
   }
   
   return "Unknown";
