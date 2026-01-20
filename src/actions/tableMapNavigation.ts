@@ -105,20 +105,8 @@ export function selectMapEvent(
     eventTeamsTableData.has(eventShortName) &&
     onReallocate
   ) {
-    console.log("Triggering reallocation for event:", eventShortName);
     onReallocate(eventShortName);
     return;
-  } else {
-    console.log("Reallocation condition not met:", {
-      eventShortName,
-      hasTableData: eventTeamsTableData !== undefined,
-      eventInTable:
-        eventTeamsTableData !== undefined
-          ? eventTeamsTableData.has(eventShortName)
-          : false,
-      hasOnReallocate: !!onReallocate,
-      isUnallocated,
-    });
   }
 
   if (highlightLayer && map) {
