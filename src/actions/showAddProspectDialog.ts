@@ -467,7 +467,7 @@ export function showAddProspectDialog(
   // Display allocation suggestions
   const displayAllocationSuggestions = () => {
     if (allocationSuggestions.length === 0) {
-      suggestionsContainer.innerHTML = '<p style="color: #666;">No allocation suggestions available.</p>'; // Using #666 (grey) is appropriate for CSS colour values
+      suggestionsContainer.innerHTML = '<p style="color: #666;">No allocation suggestions available.</p>';
       suggestionsContainer.style.display = "block";
       return;
     }
