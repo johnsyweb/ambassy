@@ -31,24 +31,10 @@ export function populateMap(
   regionalAmbassadors: RegionalAmbassadorMap,
   prospectiveEvents?: ProspectiveEvent[],
 ) {
-  console.log("populateMap called with:", {
-    eventTeamsTableDataSize: eventTeamsTableData.size,
-    eventDetailsSize: eventDetails.size,
-    eventTeamsTableDataKeys: Array.from(eventTeamsTableData.keys()).slice(0, 5),
-    eventDetailsKeys: Array.from(eventDetails.keys()).slice(0, 5),
-  });
-
   const raNames = regionalAmbassadorsFrom(eventTeamsTableData);
   const eaNames = eventAmbassadorsFrom(eventTeamsTableData);
   const raColorMap = assignColorsToNames(raNames);
   const eaColorMap = assignColorsToNames(eaNames);
-
-  console.log("Map setup:", {
-    raNames,
-    eaNames,
-    raColorMap: Object.fromEntries(raColorMap),
-    eaColorMap: Object.fromEntries(eaColorMap),
-  });
 
   // Calculate event bounds for map centering
   const eventBounds = calculateEventBounds(eventTeamsTableData, eventDetails);
@@ -308,25 +294,6 @@ export function populateMap(
 
   // Add markers for prospective events
   if (prospectiveEvents && prospectiveEvents.length > 0) {
-    console.log(
-      `Processing ${prospectiveEvents.length} prospective events for map markers`,
-    );
-    let prospectsWithCoordinates = 0;
-    let prospectsDisplayed = 0;
-
-    prospectiveEvents.forEach((prospect) => {
-      const hasCoordinates = !!(
-        prospect.coordinates && prospect.geocodingStatus === "success"
-      );
-      const hasAmbassador = !!prospect.eventAmbassador;
-
-      if (hasCoordinates) prospectsWithCoordinates++;
-      if (hasCoordinates && hasAmbassador) prospectsDisplayed++;
-    });
-
-    console.log(
-      `Summary: ${prospectsWithCoordinates}/${prospectiveEvents.length} have coordinates, ${prospectsDisplayed} will be displayed on map`,
-    );
 
     prospectiveEvents.forEach((prospect) => {
       if (prospect.coordinates && prospect.geocodingStatus === "success") {
@@ -357,8 +324,6 @@ export function populateMap(
         markersLayer.addLayer(marker);
       }
     });
-  } else {
-    console.log("No prospective events to process");
   }
 
   // Add markersLayer to map
@@ -366,14 +331,12 @@ export function populateMap(
 
   // Add prospective events to voronoi calculation
   if (prospectiveEvents && prospectiveEvents.length > 0) {
-    let prospectsInVoronoi = 0;
     prospectiveEvents.forEach((prospect) => {
       if (
         prospect.coordinates &&
         prospect.geocodingStatus === "success" &&
         prospect.eventAmbassador
       ) {
-        prospectsInVoronoi++;
         const coord = prospect.coordinates;
         const [lng, lat] = toGeoJSONArray(coord); // Voronoi uses GeoJSON format [lng, lat]
 
@@ -395,9 +358,6 @@ export function populateMap(
         voronoiPoints.push([lng, lat, JSON.stringify({ raColor, tooltip })]);
       }
     });
-    console.log(
-      `${prospectsInVoronoi} prospective events added to Voronoi calculation`,
-    );
   }
 
   // Remove duplicate coordinates to prevent degenerate Voronoi polygons
