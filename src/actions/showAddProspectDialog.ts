@@ -742,27 +742,17 @@ export function showAddProspectDialog(
       return;
     }
     
-    // Only check for duplicates if we have a country (either from geocoding or manual entry)
+    // Only check for duplicates if we have a valid country (either from geocoding or manual entry)
     if (!inferredCountry || inferredCountry === "Unknown") {
       duplicateWarning.style.display = "none";
       return;
     }
 
-    // Type guard: inferredCountry is checked above but TypeScript needs explicit check here
-    if (!inferredCountry) {
-      duplicateWarning.style.display = "none";
-      return;
-    }
+    // TypeScript type guard: after the check above, inferredCountry is guaranteed to be a non-null string
+    const countryToCheck = inferredCountry;
 
     const existing = loadProspectiveEvents();
     const existingList = new ProspectiveEventList(existing);
-    
-    // TypeScript type guard: ensure inferredCountry is not null for comparison
-    const countryToCheck = inferredCountry;
-    if (!countryToCheck) {
-      duplicateWarning.style.display = "none";
-      return;
-    }
     
     // Check for duplicates based on prospectEvent, country, and state (same logic as import)
     const duplicate = existingList.getAll().find(event => 
