@@ -60,7 +60,6 @@ async function fetchEvents(): Promise<void> {
       );
     }
 
-    console.log("Events and countries fetched and cached successfully.");
   } catch (error) {
     console.error("Error fetching events:", error);
   }
@@ -73,7 +72,6 @@ export async function getEvents(): Promise<EventDetailsMap> {
       const parsedCache = JSON.parse(cache);
       const cacheAge = Date.now() - (parsedCache.timestamp || 0);
       if (cacheAge < CACHE_DURATION && parsedCache.eventDetailsMap) {
-        console.log("Returning cached events.");
         return new Map<string, EventDetails>(parsedCache.eventDetailsMap);
       }
     } catch {
@@ -104,7 +102,6 @@ export async function getCountries(): Promise<CountryMap> {
       const parsedCache = JSON.parse(cache);
       const cacheAge = Date.now() - (parsedCache.timestamp || 0);
       if (cacheAge < CACHE_DURATION && parsedCache.countries) {
-        console.log("Returning cached countries.");
         return parsedCache.countries as CountryMap;
       }
     } catch {
