@@ -3,7 +3,7 @@
 **Feature Branch**: `001-persist-state`  
 **Created**: 2026-01-07  
 **Status**: Draft  
-**Input**: User description: "Uploading all of the ambassdor and event information each time I hit https://johnsy.com/ambassy/ is a pain. Let's persist our state to local storage and make it easy to share that state with other ambassadors and parkrun staff."
+**Input**: User description: "Uploading all of the ambassdor and event information each time I hit https://www.johnsy.com/ambassy/ is a pain. Let's persist our state to local storage and make it easy to share that state with other ambassadors and parkrun staff."
 
 ## User Scenarios & Testing *(mandatory)*
 

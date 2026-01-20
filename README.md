@@ -111,6 +111,38 @@ Ambassy provides tools for managing ambassador capacity and lifecycle:
   - The map updates immediately to show the newly allocated event with the EA's assigned colour and larger size
   - All allocations are logged in the changes log
 
+### Adding Prospects by Address
+
+- **Add New Prospect**: Click the "📍 Add Prospect" button in the main toolbar to add a new prospective event
+  - Enter the required information:
+    - **Prospect Name**: The name of the prospective event
+    - **Address**: Any level of detail (e.g., "123 Main St, Melbourne VIC 3000" or just "Melbourne, VIC")
+    - **State/Region**: The state or region (e.g., "VIC", "NSW")
+  - Optional fields include:
+    - **Event Director(s)**: Name of the prospect Event Director(s)
+    - **Date Made Contact**: When contact was first made (defaults to today)
+    - **Course Found**: Checkbox to indicate if a course has been found
+    - **Landowner Permission**: Checkbox to indicate if landowner permission has been obtained
+    - **Funding Confirmed**: Checkbox to indicate if funding has been confirmed
+  - The system automatically:
+    - Geocodes the address to get coordinates (with 500ms debounce)
+    - Infers the country from the coordinates (displays as two-letter code, e.g., "AU")
+    - Generates Event Ambassador allocation suggestions based on capacity and proximity
+  - If geocoding fails:
+    - An error message is displayed with a "Retry Geocoding" button
+    - You can manually enter coordinates in "latitude, longitude" format (e.g., "-37.8136, 144.9631")
+    - The system will validate the coordinates and infer the country
+  - Select an Event Ambassador:
+    - Choose from the top 5 suggestions (showing allocation counts, distances, and reasons)
+    - Or use the "Other" dropdown to manually select any Event Ambassador
+  - Duplicate detection:
+    - If a prospect with the same name, country, and state already exists, a warning is displayed
+    - You can still create the prospect if needed
+  - After creation:
+    - The prospect appears in the Prospects table
+    - The map updates to show the new prospect marker
+    - The allocation is logged in the changes log
+
 ### Capacity Checking
 
 The system automatically checks ambassador capacity against configurable limits:

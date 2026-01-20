@@ -5,6 +5,7 @@ import { EventTeamMap } from "@models/EventTeamMap";
 import { RegionalAmbassadorMap } from "@models/RegionalAmbassadorMap";
 import { EventTeamsTableData, EventTeamsTableDataMap } from "./EventTeamsTableData";
 import { formatCoordinate } from "./Coordinate";
+import { extractCountryCodeFromUrl } from "./CountryCode";
 
 export function extractEventTeamsTableData(
   regionalAmbassadors: RegionalAmbassadorMap,
@@ -25,6 +26,12 @@ export function extractEventTeamsTableData(
           ? formatCoordinate(eventDetailsToCoordinate(eventDetails))
           : "N/A";
         
+        // Extract country code from URL, falling back to "N/A" if invalid
+        const countryUrl = getCountriesSync()[countryCode.toString()]?.url;
+        const eventCountry = countryUrl 
+          ? extractCountryCodeFromUrl(countryUrl) ?? "N/A"
+          : "N/A";
+        
         data.set(eventName, {
           eventShortName: eventName,
           eventDirectors: eventTeam?.eventDirectors.join(", ") ?? "N/A",
@@ -33,7 +40,7 @@ export function extractEventTeamsTableData(
           eventCoordinates,
           eventSeries: eventDetails?.properties.seriesid ?? 0,
           eventCountryCode: countryCode,
-          eventCountry: getCountriesSync()[countryCode.toString()]?.url?.split('.').slice(-1)[0] ?? "N/A",
+          eventCountry,
         });
       });
     });

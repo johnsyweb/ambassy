@@ -1,10 +1,13 @@
 import { EventAmbassadorMap } from "@models/EventAmbassadorMap";
 import { RegionalAmbassadorMap } from "@models/RegionalAmbassadorMap";
 import { EventDetailsMap } from "@models/EventDetailsMap";
+import { EventDetails } from "@models/EventDetails";
 import { ReallocationSuggestion } from "@models/ReallocationSuggestion";
+import { Coordinate, toGeoJSONArray } from "@models/Coordinate";
 import { calculateGeographicProximityScore, findNeighboringEvents } from "./suggestReallocation";
 import { loadCapacityLimits } from "./checkCapacity";
 import { getRegionalAmbassadorForEventAmbassador } from "@utils/regions";
+import { getCountryCodeFromCoordinate } from "@models/country";
 
 /**
  * Generate allocation suggestions for an unallocated event.
@@ -105,4 +108,67 @@ export function suggestEventAllocation(
   });
 
   return suggestions.sort((a, b) => b.score - a.score);
+}
+
+/**
+ * Generate EA allocation suggestions for a prospect based on coordinates.
+ * Creates a temporary EventDetails entry to reuse existing allocation algorithm.
+ * 
+ * @param prospectName - Prospect name (used for temporary EventDetails entry)
+ * @param coordinates - Prospect coordinates
+ * @param eventAmbassadors - All EAs for suggestions
+ * @param eventDetails - Event details map (used for creating temporary entry)
+ * @param regionalAmbassadors - All REAs for REA inference
+ * @returns Sorted suggestions (highest score first)
+ */
+export async function generateProspectAllocationSuggestions(
+  prospectName: string,
+  coordinates: Coordinate,
+  eventAmbassadors: EventAmbassadorMap,
+  eventDetails: EventDetailsMap,
+  regionalAmbassadors: RegionalAmbassadorMap
+): Promise<ReallocationSuggestion[]> {
+  if (eventAmbassadors.size === 0) {
+    return [];
+  }
+
+  // Create temporary EventDetails entry for prospect
+  const countryCode = await getCountryCodeFromCoordinate(coordinates);
+  const tempEventName = `prospect-${prospectName.toLowerCase().replace(/\s+/g, '-')}-${Date.now()}`;
+  
+  const tempEventDetails: EventDetails = {
+    id: tempEventName,
+    type: "Feature",
+    geometry: {
+      type: "Point",
+      coordinates: toGeoJSONArray(coordinates), // GeoJSON format: [longitude, latitude]
+    },
+    properties: {
+      eventname: prospectName.toLowerCase().replace(/\s+/g, ''),
+      EventLongName: prospectName,
+      EventShortName: prospectName,
+      LocalisedEventLongName: null,
+      countrycode: countryCode,
+      seriesid: 1, // Default to 5km
+      EventLocation: "",
+    },
+  };
+
+  // Add temporary entry to map
+  eventDetails.set(tempEventName, tempEventDetails);
+
+  try {
+    // Generate suggestions using existing algorithm
+    const suggestions = suggestEventAllocation(
+      tempEventName,
+      eventAmbassadors,
+      eventDetails,
+      regionalAmbassadors
+    );
+
+    return suggestions;
+  } finally {
+    // Clean up temporary entry
+    eventDetails.delete(tempEventName);
+  }
 }

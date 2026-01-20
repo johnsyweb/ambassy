@@ -1,3 +1,5 @@
+import { CountryCode } from './CountryCode';
+
 export interface EventTeamsTableData {
   eventShortName: string;
   eventDirectors: string;
@@ -6,7 +8,7 @@ export interface EventTeamsTableData {
   eventCoordinates: string;
   eventSeries: number;
   eventCountryCode: number;
-  eventCountry: string;
+  eventCountry: CountryCode | string; // Two-letter country code, or fallback string if invalid
 }
 
 export type EventTeamsTableDataMap = Map<string, EventTeamsTableData>;

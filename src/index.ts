@@ -25,6 +25,7 @@ import {
 import {
   setupExportReminder,
   initializeChangeTrackerForLoadedData,
+  trackStateChange,
 } from "./actions/trackChanges";
 import { handleStateImport } from "./actions/handleStateImport";
 import {
@@ -57,6 +58,7 @@ import {
 } from "./actions/transitionAmbassador";
 import { showReallocationDialog } from "./actions/showReallocationDialog";
 import { setProspectReallocationRefreshCallback } from "./actions/populateProspectsTable";
+import { showAddProspectDialog } from "./actions/showAddProspectDialog";
 import {
   saveCapacityLimits,
   validateCapacityLimits,
@@ -337,6 +339,54 @@ function setupOnboardingButtons(): void {
 }
 
 setupOnboardingButtons();
+
+function setupAddProspectButton(): void {
+  const addProspectButton = document.getElementById("addProspectButton");
+
+  addProspectButton?.addEventListener("click", () => {
+    const eventAmbassadors = getEventAmbassadorsFromSession();
+    const regionalAmbassadors = getRegionalAmbassadorsFromSession();
+
+    if (eventAmbassadors.size === 0) {
+      alert("No Event Ambassadors available. Please onboard an Event Ambassador first.");
+      return;
+    }
+
+    if (!eventDetails) {
+      alert("Event details are not loaded. Please upload data first.");
+      return;
+    }
+
+    showAddProspectDialog(
+      eventAmbassadors,
+      regionalAmbassadors,
+      eventDetails,
+      () => {
+        // On success: refresh table, map, track changes, persist log
+        refreshProspectsTable();
+        if (eventDetails && eventTeamsTableData) {
+          const eventAmbassadorsForMap = getEventAmbassadorsFromSession();
+          const regionalAmbassadorsForMap = getRegionalAmbassadorsFromSession();
+          populateMap(
+            eventTeamsTableData,
+            eventDetails,
+            eventAmbassadorsForMap,
+            regionalAmbassadorsForMap,
+            loadProspectiveEvents(),
+          );
+        }
+        trackStateChange();
+        persistChangesLog(log);
+      },
+      () => {
+        // On cancel: no action needed
+      },
+      log
+    );
+  });
+}
+
+setupAddProspectButton();
 
 function setupCapacityLimitsConfiguration(): void {
   const configureButton = document.getElementById(
