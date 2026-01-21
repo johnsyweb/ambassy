@@ -85,9 +85,9 @@
 
 > **NOTE: Write these tests FIRST, ensure they FAIL before implementation**
 
-- [ ] T025 [P] [US2] Write unit test for geocoding failure handling in src/actions/showAddProspectDialog.test.ts
-- [ ] T026 [P] [US2] Write unit test for manual coordinate entry flow in src/actions/showAddProspectDialog.test.ts
-- [ ] T027 [US2] Write integration test for geocoding failure → manual coordinate entry → prospect creation flow in src/actions/showAddProspectDialog.test.ts
+- [x] T025 [P] [US2] Write unit test for geocoding failure handling in src/actions/showAddProspectDialog.test.ts
+- [x] T026 [P] [US2] Write unit test for manual coordinate entry flow in src/actions/showAddProspectDialog.test.ts
+- [x] T027 [US2] Write integration test for geocoding failure → manual coordinate entry → prospect creation flow in src/actions/showAddProspectDialog.test.ts
 
 ### Implementation for User Story 2
 
@@ -112,9 +112,9 @@
 
 > **NOTE: Write these tests FIRST, ensure they FAIL before implementation**
 
-- [ ] T034 [P] [US3] Write unit test for "Other" button display and EA dropdown/list in src/actions/showAddProspectDialog.test.ts
-- [ ] T035 [P] [US3] Write unit test for manual EA selection from full list in src/actions/showAddProspectDialog.test.ts
-- [ ] T036 [US3] Write integration test for suggestion display → "Other" click → EA selection → prospect creation flow in src/actions/showAddProspectDialog.test.ts
+- [x] T034 [P] [US3] Write unit test for "Other" button display and EA dropdown/list in src/actions/showAddProspectDialog.test.ts
+- [x] T035 [P] [US3] Write unit test for manual EA selection from full list in src/actions/showAddProspectDialog.test.ts
+- [x] T036 [US3] Write integration test for suggestion display → "Other" click → EA selection → prospect creation flow in src/actions/showAddProspectDialog.test.ts
 
 ### Implementation for User Story 3
 

@@ -252,61 +252,49 @@ function createProspectRow(
   });
   buttonContainer.appendChild(resetLocationButton);
 
-  // Remove button
-  const removeButton = document.createElement('button');
-  removeButton.type = 'button';
-  removeButton.title = 'Remove this prospect';
-  removeButton.textContent = '🗑️ Remove';
-  removeButton.setAttribute('aria-label', `Remove prospect ${prospect.prospectEvent}`);
-  removeButton.addEventListener('click', (e) => {
+  // Launch button
+  const launchButton = document.createElement('button');
+  launchButton.type = 'button';
+  launchButton.title = 'Mark this prospect as launched';
+  launchButton.textContent = '🚀 Launch';
+  launchButton.setAttribute(
+    'aria-label',
+    `Mark prospect ${prospect.prospectEvent} as launched`
+  );
+  launchButton.addEventListener('click', (e) => {
     e.stopPropagation();
-    if (!confirm(`Are you sure you want to remove prospect "${prospect.prospectEvent}"? This action cannot be undone.`)) {
-      return;
-    }
-
-    try {
-      // Remove prospect from list
-      prospects.remove(prospect.id);
-
-      // Remove from EA's prospectiveEvents array if assigned
-      if (prospect.eventAmbassador) {
-        const ea = eventAmbassadors.get(prospect.eventAmbassador);
-        if (ea?.prospectiveEvents) {
-          ea.prospectiveEvents = ea.prospectiveEvents.filter(id => id !== prospect.id);
-        }
-      }
-
-      // Recalculate capacity statuses
-      const capacityLimits = loadCapacityLimits();
-      calculateAllCapacityStatuses(eventAmbassadors, regionalAmbassadors, capacityLimits);
-
-      // Save the updated prospects and event ambassadors
-      saveProspectiveEvents(prospects.getAll());
-      persistEventAmbassadors(eventAmbassadors);
-
-      // Log the change if log is available
-      if (log) {
-        const changeEntry: LogEntry = {
-          timestamp: Date.now(),
-          type: 'Prospect Removed',
-          event: `Prospect "${prospect.prospectEvent}" (${prospect.country}, ${prospect.state}) removed`,
-          oldValue: prospect.eventAmbassador || 'Unassigned',
-          newValue: 'Removed'
-        };
-        log.unshift(changeEntry);
-        persistChangesLog(log);
-      }
-
-      // Refresh the UI
-      if (refreshUIAfterReallocation) {
-        refreshUIAfterReallocation();
-      }
-    } catch (error) {
-      console.error('Failed to remove prospect:', error);
-      alert(`Failed to remove prospect: ${error instanceof Error ? error.message : 'Unknown error'}`);
-    }
+    handleProspectLifecycleChange(
+      prospect,
+      prospects,
+      eventAmbassadors,
+      regionalAmbassadors,
+      log,
+      'launched'
+    );
   });
-  buttonContainer.appendChild(removeButton);
+  buttonContainer.appendChild(launchButton);
+
+  // Archive button
+  const archiveButton = document.createElement('button');
+  archiveButton.type = 'button';
+  archiveButton.title = 'Archive this prospect as not viable';
+  archiveButton.textContent = '📦 Archive';
+  archiveButton.setAttribute(
+    'aria-label',
+    `Archive prospect ${prospect.prospectEvent} as not viable`
+  );
+  archiveButton.addEventListener('click', (e) => {
+    e.stopPropagation();
+    handleProspectLifecycleChange(
+      prospect,
+      prospects,
+      eventAmbassadors,
+      regionalAmbassadors,
+      log,
+      'archived'
+    );
+  });
+  buttonContainer.appendChild(archiveButton);
 
   actionsCell.appendChild(buttonContainer);
 
@@ -650,6 +638,88 @@ function updateProspectLocation(
   }
 
   alert(`Location updated for "${prospect.prospectEvent}" using ${source}`);
+}
+
+type ProspectLifecycleAction = "launched" | "archived";
+
+function handleProspectLifecycleChange(
+  prospect: ProspectiveEvent,
+  prospects: ProspectiveEventList,
+  eventAmbassadors: EventAmbassadorMap,
+  regionalAmbassadors: RegionalAmbassadorMap,
+  log: LogEntry[] | undefined,
+  action: ProspectLifecycleAction,
+): void {
+  const verb =
+    action === "launched" ? "mark as launched" : "archive as not viable";
+
+  const confirmed = confirm(
+    `Are you sure you want to ${verb} prospect "${prospect.prospectEvent}"? This action cannot be undone.`,
+  );
+
+  if (!confirmed) {
+    return;
+  }
+
+  try {
+    // Remove prospect from list
+    prospects.remove(prospect.id);
+
+    // Remove from EA's prospectiveEvents array if assigned
+    if (prospect.eventAmbassador) {
+      const ea = eventAmbassadors.get(prospect.eventAmbassador);
+      if (ea?.prospectiveEvents) {
+        ea.prospectiveEvents = ea.prospectiveEvents.filter(
+          (id) => id !== prospect.id,
+        );
+      }
+    }
+
+    // Recalculate capacity statuses
+    const capacityLimits = loadCapacityLimits();
+    calculateAllCapacityStatuses(
+      eventAmbassadors,
+      regionalAmbassadors,
+      capacityLimits,
+    );
+
+    // Save the updated prospects and event ambassadors
+    saveProspectiveEvents(prospects.getAll());
+    persistEventAmbassadors(eventAmbassadors);
+
+    // Log the change if log is available
+    if (log) {
+      const type =
+        action === "launched" ? "Prospect Launched" : "Prospect Archived";
+
+      const newValue =
+        action === "launched" ? "Launched" : "Archived (not viable)";
+
+      const changeEntry: LogEntry = {
+        timestamp: Date.now(),
+        type,
+        event: `Prospect "${prospect.prospectEvent}" (${prospect.country}, ${prospect.state}) ${newValue.toLowerCase()}`,
+        oldValue: prospect.eventAmbassador || "Unassigned",
+        newValue,
+      };
+
+      log.unshift(changeEntry);
+      persistChangesLog(log);
+    }
+
+    // Refresh the UI
+    if (refreshUIAfterReallocation) {
+      refreshUIAfterReallocation();
+    }
+  } catch (error) {
+    const actionLabel = action === "launched" ? "launch" : "archive";
+    console.error(`Failed to ${actionLabel} prospect:`, error);
+    alert(
+      `Failed to ${actionLabel} prospect: ${
+        error instanceof Error ? error.message : "Unknown error"
+      }`,
+    );
+  }
 }
 
 function getStatusText(status: string): string {
