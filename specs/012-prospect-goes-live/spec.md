@@ -2,7 +2,7 @@
 
 **Feature Branch**: `012-prospect-goes-live`  
 **Created**: 2026-01-18  
-**Status**: Draft  
+**Status**: Complete  
 **Input**: User description: "From time to time, a prospect will become an actual parkrun event (go live). We need a way for REAs to mark a prospect as having transitioned to a live event, remove it from the prospects list, and optionally allocate it to an Event Ambassador if it wasn't already allocated. This marks the end of the prospect lifecycle."
 
 **Clarification**: There are two ways for a prospect to finish:
