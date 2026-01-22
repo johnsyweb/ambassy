@@ -202,13 +202,13 @@ src/actions/
 ## Success Criteria
 
 - ✅ Launch/Archive buttons replace Remove button in Prospects table
-- ✅ Launch flow finds matching events, allows manual selection
 - ✅ Archive flow simply removes prospect (no event matching)
 - ✅ EA allocation counts update correctly after launch/archive
 - ✅ All actions logged with correct entry types
 - ✅ UI refreshes after launch/archive
 - ✅ All tests pass
 - ✅ Code passes linting and type checking
+- ⏳ Launch flow with event matching UI (planned for future release)
 
 ## Next Steps
 

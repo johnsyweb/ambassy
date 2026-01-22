@@ -87,4 +87,42 @@ describe("findMatchingEvents", () => {
     expect(results[0].properties.EventShortName).toBe("Closest Event");
     expect(results[1].properties.EventShortName).toBe("Nearby Event");
   });
+
+  it("handles events without coordinates gracefully", () => {
+    eventDetails.set("no-coords-event", {
+      id: "no-coords-event",
+      type: "Feature" as const,
+      geometry: {
+        type: "Point" as const,
+        coordinates: [] as unknown as [number, number],
+      },
+      properties: {
+        eventname: "no-coords",
+        EventShortName: "No Coords Event",
+        EventLongName: "No Coords Event",
+        LocalisedEventLongName: null,
+        countrycode: 1,
+        seriesid: 1,
+        EventLocation: "",
+      },
+    });
+    prospectWithCoords.prospectEvent = "No Coords";
+    const results = findMatchingEvents(prospectWithCoords, eventDetails, 50);
+    expect(results.length).toBe(0);
+  });
+
+  it("returns empty array when no matches found", () => {
+    prospectWithCoords.prospectEvent = "Non-existent Event";
+    const results = findMatchingEvents(prospectWithCoords, eventDetails, 50);
+    expect(results.length).toBe(0);
+  });
+
+  it("handles multiple matches and sorts by distance then match quality", () => {
+    eventDetails.set("exact-match", makeEvent("Exact Match Event", -37.81, 144.96));
+    eventDetails.set("fuzzy-match", makeEvent("Fuzzy Match", -37.80, 144.97));
+    prospectWithCoords.prospectEvent = "Exact Match Event";
+    const results = findMatchingEvents(prospectWithCoords, eventDetails, 50);
+    expect(results.length).toBeGreaterThan(0);
+    expect(results[0].properties.EventShortName).toBe("Exact Match Event");
+  });
 });
