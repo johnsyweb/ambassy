@@ -114,18 +114,18 @@
 ### Tests for User Story 3
 
 - [x] T070 [P] [US3] Add unit tests for `findMatchingEvents` scoring and ordering in `src/actions/findMatchingEvents.test.ts`
-- [ ] T071 [US3] Add tests for the launch flow with event matching in a new test file (e.g. `src/actions/launchProspect.integration.test.ts`)
+- [x] T071 [US3] Add tests for the launch flow with event matching in a new test file (e.g. `src/actions/launchProspect.integration.test.ts`)
   - Launch with matches: user sees list, selects an event, event is (optionally) allocated to EA
   - Launch with no matches: system allows launch without allocation
 
 ### Implementation for User Story 3
 
-- [ ] T080 [US3] Integrate `findMatchingEvents` into `launchProspect`:
+- [x] T080 [US3] Integrate `findMatchingEvents` into `launchProspect`:
   - On launch, compute candidate events and include them in return type for UI to present
-- [ ] T081 [US3] Add UI flow to present matching events and EA allocation options (following `showEventAllocationDialog` pattern or a lightweight dialog):
+- [x] T081 [US3] Add UI flow to present matching events and EA allocation options (following `showEventAllocationDialog` pattern or a lightweight dialog):
   - Show all potential matches (by name + location similarity)
   - Allow selection of an event or "Proceed without allocation"
-- [ ] T082 [US3] Wire selected event into existing allocation logic (`@actions/assignEventToAmbassador`) when user chooses to allocate during launch
+- [x] T082 [US3] Wire selected event into existing allocation logic (`@actions/assignEventToAmbassador`) when user chooses to allocate during launch
 
 **Checkpoint**: Launch flow can optionally allocate a matching live event during the transition.
 
