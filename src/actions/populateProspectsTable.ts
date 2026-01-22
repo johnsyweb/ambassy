@@ -7,14 +7,15 @@ import { EventAmbassadorMap } from "@models/EventAmbassadorMap";
 import { RegionalAmbassadorMap } from "@models/RegionalAmbassadorMap";
 import { showReallocationDialog } from "./showReallocationDialog";
 import { reallocateProspect } from "./reallocateProspect";
-import { loadCapacityLimits, calculateAllCapacityStatuses } from "./checkCapacity";
 import { LogEntry } from "@models/LogEntry";
 import { CapacityStatus } from "@models/CapacityStatus";
 import { ReallocationSuggestion } from "@models/ReallocationSuggestion";
 import { geocodeAddress } from "@utils/geography";
 import { saveProspectiveEvents } from "./persistProspectiveEvents";
 import { formatCoordinate, Coordinate, createCoordinate } from "@models/Coordinate";
-import { persistEventAmbassadors, persistChangesLog } from "./persistState";
+import { persistChangesLog } from "./persistState";
+import { launchProspect } from "./launchProspect";
+import { archiveProspect } from "./archiveProspect";
 import { EventDetailsMap } from "@models/EventDetailsMap";
 import { calculateDistance } from "@utils/geography";
 import { ProspectiveEvent } from "@models/ProspectiveEvent";
@@ -269,7 +270,8 @@ function createProspectRow(
       eventAmbassadors,
       regionalAmbassadors,
       log,
-      'launched'
+      'launched',
+      eventDetails
     );
   });
   buttonContainer.appendChild(launchButton);
@@ -291,7 +293,8 @@ function createProspectRow(
       eventAmbassadors,
       regionalAmbassadors,
       log,
-      'archived'
+      'archived',
+      eventDetails
     );
   });
   buttonContainer.appendChild(archiveButton);
@@ -649,6 +652,7 @@ function handleProspectLifecycleChange(
   regionalAmbassadors: RegionalAmbassadorMap,
   log: LogEntry[] | undefined,
   action: ProspectLifecycleAction,
+  eventDetails?: EventDetailsMap,
 ): void {
   const verb =
     action === "launched" ? "mark as launched" : "archive as not viable";
@@ -662,49 +666,26 @@ function handleProspectLifecycleChange(
   }
 
   try {
-    // Remove prospect from list
-    prospects.remove(prospect.id);
-
-    // Remove from EA's prospectiveEvents array if assigned
-    if (prospect.eventAmbassador) {
-      const ea = eventAmbassadors.get(prospect.eventAmbassador);
-      if (ea?.prospectiveEvents) {
-        ea.prospectiveEvents = ea.prospectiveEvents.filter(
-          (id) => id !== prospect.id,
-        );
+    if (action === "launched") {
+      launchProspect(
+        prospect.id,
+        prospects,
+        eventAmbassadors,
+        regionalAmbassadors,
+        eventDetails ?? new Map(),
+        log ?? [],
+      );
+    } else {
+      archiveProspect(
+        prospect.id,
+        prospects,
+        eventAmbassadors,
+        regionalAmbassadors,
+        log ?? [],
+      );
+      if (log) {
+        persistChangesLog(log);
       }
-    }
-
-    // Recalculate capacity statuses
-    const capacityLimits = loadCapacityLimits();
-    calculateAllCapacityStatuses(
-      eventAmbassadors,
-      regionalAmbassadors,
-      capacityLimits,
-    );
-
-    // Save the updated prospects and event ambassadors
-    saveProspectiveEvents(prospects.getAll());
-    persistEventAmbassadors(eventAmbassadors);
-
-    // Log the change if log is available
-    if (log) {
-      const type =
-        action === "launched" ? "Prospect Launched" : "Prospect Archived";
-
-      const newValue =
-        action === "launched" ? "Launched" : "Archived (not viable)";
-
-      const changeEntry: LogEntry = {
-        timestamp: Date.now(),
-        type,
-        event: `Prospect "${prospect.prospectEvent}" (${prospect.country}, ${prospect.state}) ${newValue.toLowerCase()}`,
-        oldValue: prospect.eventAmbassador || "Unassigned",
-        newValue,
-      };
-
-      log.unshift(changeEntry);
-      persistChangesLog(log);
     }
 
     // Refresh the UI

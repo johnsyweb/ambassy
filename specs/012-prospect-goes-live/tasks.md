@@ -34,23 +34,23 @@
 
 ### Tests for Foundational Actions
 
-- [ ] T010 [P] [US1] Create unit tests for `launchProspect` in `src/actions/launchProspect.test.ts`
+- [x] T010 [P] [US1] Create unit tests for `launchProspect` in `src/actions/launchProspect.test.ts`
   - Happy path: prospect with EA is launched → removed from prospects, EA prospective count decremented, capacity recalculated, change logged
   - Edge: prospect without EA → still removed, no EA mutation
-- [ ] T011 [P] [US2] Create unit tests for `archiveProspect` in `src/actions/archiveProspect.test.ts`
+- [x] T011 [P] [US2] Create unit tests for `archiveProspect` in `src/actions/archiveProspect.test.ts`
   - Happy path: prospect with EA is archived → removed from prospects, EA prospective count decremented, change logged as "not viable"
   - Edge: prospect without EA → still removed, log reflects unassigned prospect
-- [ ] T012 [P] [US3] Create unit tests for `findMatchingEvents` in `src/actions/findMatchingEvents.test.ts`
+- [x] T012 [P] [US3] Create unit tests for `findMatchingEvents` in `src/actions/findMatchingEvents.test.ts`
   - Returns candidate events by name and location similarity
   - Handles no matches, multiple matches, and missing coordinates gracefully
 
 ### Implementation for Foundational Actions
 
-- [ ] T020 [US1] Implement `launchProspect` in `src/actions/launchProspect.ts` following `contracts/launch-archive-contracts.md`
+- [x] T020 [US1] Implement `launchProspect` in `src/actions/launchProspect.ts` following `contracts/launch-archive-contracts.md`
   - Remove prospect, update EA prospective events, recalculate capacity, persist state, append change-log entry (`Prospect Launched`)
-- [ ] T021 [US2] Implement `archiveProspect` in `src/actions/archiveProspect.ts`
+- [x] T021 [US2] Implement `archiveProspect` in `src/actions/archiveProspect.ts`
   - Same structural flow as `launchProspect` but log as archived/not viable (`Prospect Archived`)
-- [ ] T022 [US3] Implement `findMatchingEvents` in `src/actions/findMatchingEvents.ts`
+- [x] T022 [US3] Implement `findMatchingEvents` in `src/actions/findMatchingEvents.ts`
   - Use `@actions/searchEvents` and `EventDetailsMap` to return possible live events for a prospect based on name + coordinate proximity
 
 **Checkpoint**: Lifecycle actions and event matching exist with tests; UI can now call them.
@@ -63,7 +63,7 @@
 
 ### Tests for User Story 1
 
-- [ ] T030 [P] [US1] Add tests for Launch button wiring in `src/actions/populateProspectsTable.test.ts`
+- [x] T030 [P] [US1] Add tests for Launch button wiring in `src/actions/populateProspectsTable.test.ts`
   - Asserts that a Launch button is rendered for each prospect row with correct label and ARIA attributes
   - Verifies clicking the button calls a launch handler with the correct prospect ID
 - [ ] T031 [US1] Add integration-style tests in `src/index.test.ts` (or new test) to cover:
@@ -77,8 +77,8 @@
 - [x] T041 [US1] Add `handleProspectLifecycleChange` helper in `@actions/populateProspectsTable` to:
   - Confirm irreversible action with the user
   - Remove the prospect, update EA prospective events, recalc capacity, persist state, update change log, and refresh UI
-- [ ] T042 [US1] Refactor Launch path in `@actions/populateProspectsTable` to call `launchProspect` from `@actions/launchProspect` instead of duplicating lifecycle logic
-- [ ] T043 [US1] Ensure Launch path removes prospect marker from map via existing refresh flow (`@actions/refreshUI`, `@actions/populateMap`)
+- [x] T042 [US1] Refactor Launch path in `@actions/populateProspectsTable` to call `launchProspect` from `@actions/launchProspect` instead of duplicating lifecycle logic
+- [x] T043 [US1] Ensure Launch path removes prospect marker from map via existing refresh flow (`@actions/refreshUI`, `@actions/populateMap`)
 
 **Checkpoint**: Launching a prospect end-to-end works and is covered by tests.
 
@@ -90,15 +90,15 @@
 
 ### Tests for User Story 2
 
-- [ ] T050 [P] [US2] Add tests for Archive button wiring in `src/actions/populateProspectsTable.test.ts`
+- [x] T050 [P] [US2] Add tests for Archive button wiring in `src/actions/populateProspectsTable.test.ts`
   - Asserts that an Archive button is rendered with correct label and ARIA attributes
   - Verifies clicking the button calls an archive handler with the correct prospect ID
 - [ ] T051 [US2] Add tests for logging semantics (type "Prospect Archived", "not viable" wording) in `launch-archive` tests
 
 ### Implementation for User Story 2
 
-- [ ] T060 [US2] Refactor Archive path in `@actions/populateProspectsTable` to call `archiveProspect` from `@actions/archiveProspect`
-- [ ] T061 [US2] Ensure Archive path mirrors Launch behaviour for:
+- [x] T060 [US2] Refactor Archive path in `@actions/populateProspectsTable` to call `archiveProspect` from `@actions/archiveProspect`
+- [x] T061 [US2] Ensure Archive path mirrors Launch behaviour for:
   - Removing prospect from ProspectiveEventList and EA prospective events
   - Updating capacity, persisting state, refreshing table/map
   - Logging a "Prospect Archived" entry with "not viable" in the description
