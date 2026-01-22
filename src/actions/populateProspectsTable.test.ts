@@ -136,7 +136,8 @@ describe("populateProspectsTable", () => {
     const { launchProspect } = jest.requireMock("./launchProspect");
     const refreshCallback = jest.fn();
 
-    // Set up refresh callback
+    // Set up refresh callback - import the actual module for the callback setter
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
     const { setProspectReallocationRefreshCallback } = require("./populateProspectsTable");
     setProspectReallocationRefreshCallback(refreshCallback);
 
