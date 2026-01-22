@@ -187,4 +187,42 @@ describe("launchProspect", () => {
       ),
     ).toThrow("Event Ambassador 'UnknownEA' not found");
   });
+
+  it("handles prospect without assigned EA correctly", () => {
+    const prospectWithoutEA = {
+      ...baseProspect,
+      id: "p2",
+      eventAmbassador: "",
+    };
+    prospects.add(prospectWithoutEA);
+
+    launchProspect(
+      "p2",
+      prospects,
+      eventAmbassadors,
+      regionalAmbassadors,
+      eventDetails,
+      log,
+    );
+
+    expect(prospects.findById("p2")).toBeUndefined();
+    expect(log[0].oldValue).toBe("Unassigned");
+    expect(log[0].type).toBe("Prospect Launched");
+  });
+
+  it("completes launch when no matching events found", () => {
+    const emptyEventDetails = new Map();
+    launchProspect(
+      "p1",
+      prospects,
+      eventAmbassadors,
+      regionalAmbassadors,
+      emptyEventDetails,
+      log,
+    );
+
+    expect(prospects.findById("p1")).toBeUndefined();
+    expect(log[0].type).toBe("Prospect Launched");
+    expect(log[0].newValue).toBe("No event allocated");
+  });
 });

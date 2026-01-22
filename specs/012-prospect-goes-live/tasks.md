@@ -93,7 +93,7 @@
 - [x] T050 [P] [US2] Add tests for Archive button wiring in `src/actions/populateProspectsTable.test.ts`
   - Asserts that an Archive button is rendered with correct label and ARIA attributes
   - Verifies clicking the button calls an archive handler with the correct prospect ID
-- [ ] T051 [US2] Add tests for logging semantics (type "Prospect Archived", "not viable" wording) in `launch-archive` tests
+- [x] T051 [US2] Add tests for logging semantics (type "Prospect Archived", "not viable" wording) in `launch-archive` tests
 
 ### Implementation for User Story 2
 
@@ -113,7 +113,7 @@
 
 ### Tests for User Story 3
 
-- [ ] T070 [P] [US3] Add unit tests for `findMatchingEvents` scoring and ordering in `src/actions/findMatchingEvents.test.ts`
+- [x] T070 [P] [US3] Add unit tests for `findMatchingEvents` scoring and ordering in `src/actions/findMatchingEvents.test.ts`
 - [ ] T071 [US3] Add tests for the launch flow with event matching in a new test file (e.g. `src/actions/launchProspect.integration.test.ts`)
   - Launch with matches: user sees list, selects an event, event is (optionally) allocated to EA
   - Launch with no matches: system allows launch without allocation
@@ -137,13 +137,13 @@
 
 ### Tests for User Story 4
 
-- [ ] T090 [US4] Add tests for launch with no matching events:
+- [x] T090 [US4] Add tests for launch with no matching events:
   - `findMatchingEvents` returns empty
   - Launch completes, prospect removed, no event allocation attempted
 
 ### Implementation for User Story 4
 
-- [ ] T100 [US4] Ensure `launchProspect` and its UI correctly handle the "no matches" case:
+- [x] T100 [US4] Ensure `launchProspect` and its UI correctly handle the "no matches" case:
   - Skip event allocation UI when there are no matches
   - Still perform full lifecycle transition and logging
 
@@ -155,13 +155,13 @@
 
 **Purpose**: Ensure accessibility, consistency, and auditability across Launch/Archive flows.
 
-- [ ] T110 [P] Add ARIA attributes and keyboard focus behaviour for any new launch/allocation dialogs (re-use patterns from `showAddProspectDialog`)
-- [ ] T111 [P] Verify Australian English is used in all new user-facing text (Launch, Archive, matching messages)
-- [ ] T112 [P] Ensure Launch/Archive actions are fully keyboard accessible from the Prospects table (Tab/Shift+Tab navigation, Enter/Space activation)
-- [ ] T113 [P] Update `README.md` and `quickstart.md` to describe the end-of-lifecycle flows (Launch and Archive, including event allocation where applicable)
-- [ ] T114 [P] Run full test suite (`npm test`) and ensure new tests pass
-- [ ] T115 [P] Run linting (`npm run lint`) and fix any issues
-- [ ] T116 [P] Run TypeScript type-check (`tsc --noEmit` or equivalent) and fix any issues
+- [x] T110 [P] Add ARIA attributes and keyboard focus behaviour for any new launch/allocation dialogs (re-use patterns from `showAddProspectDialog`)
+- [x] T111 [P] Verify Australian English is used in all new user-facing text (Launch, Archive, matching messages)
+- [x] T112 [P] Ensure Launch/Archive actions are fully keyboard accessible from the Prospects table (Tab/Shift+Tab navigation, Enter/Space activation)
+- [x] T113 [P] Update `README.md` and `quickstart.md` to describe the end-of-lifecycle flows (Launch and Archive, including event allocation where applicable)
+- [x] T114 [P] Run full test suite (`npm test`) and ensure new tests pass
+- [x] T115 [P] Run linting (`npm run lint`) and fix any issues
+- [x] T116 [P] Run TypeScript type-check (`tsc --noEmit` or equivalent) and fix any issues
 
 ---
 

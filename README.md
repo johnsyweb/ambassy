@@ -143,6 +143,28 @@ Ambassy provides tools for managing ambassador capacity and lifecycle:
     - The map updates to show the new prospect marker
     - The allocation is logged in the changes log
 
+### Completing Prospect Lifecycle
+
+- **Launch Prospect**: When a prospect transitions to a live parkrun event, click the "🚀 Launch" button in the Prospects table
+  - Confirm the launch action (this cannot be undone)
+  - The prospect is removed from the Prospects table
+  - If the prospect had an assigned Event Ambassador, their allocation count is updated
+  - The launch is logged in the changes log with type "Prospect Launched"
+  - The map updates to remove the prospect marker
+  - **Note**: Event matching and allocation during launch is planned for a future release
+
+- **Archive Prospect**: When a prospect is not viable (no suitable course, no landowner support, no volunteer support), click the "📦 Archive" button in the Prospects table
+  - Confirm the archive action (this cannot be undone)
+  - The prospect is removed from the Prospects table
+  - If the prospect had an assigned Event Ambassador, their allocation count is updated
+  - The archive is logged in the changes log with type "Prospect Archived" and reason "not viable"
+  - The map updates to remove the prospect marker
+
+- **Keyboard Accessibility**: Both Launch and Archive buttons are fully keyboard accessible
+  - Use Tab/Shift+Tab to navigate to the buttons
+  - Press Enter or Space to activate the button
+  - All buttons have descriptive ARIA labels for screen readers
+
 ### Capacity Checking
 
 The system automatically checks ambassador capacity against configurable limits:

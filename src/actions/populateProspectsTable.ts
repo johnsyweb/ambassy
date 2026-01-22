@@ -262,7 +262,7 @@ function createProspectRow(
     'aria-label',
     `Mark prospect ${prospect.prospectEvent} as launched`
   );
-  launchButton.addEventListener('click', (e) => {
+  const handleLaunch = (e: Event) => {
     e.stopPropagation();
     handleProspectLifecycleChange(
       prospect,
@@ -273,6 +273,13 @@ function createProspectRow(
       'launched',
       eventDetails
     );
+  };
+  launchButton.addEventListener('click', handleLaunch);
+  launchButton.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      handleLaunch(e);
+    }
   });
   buttonContainer.appendChild(launchButton);
 
@@ -285,7 +292,7 @@ function createProspectRow(
     'aria-label',
     `Archive prospect ${prospect.prospectEvent} as not viable`
   );
-  archiveButton.addEventListener('click', (e) => {
+  const handleArchive = (e: Event) => {
     e.stopPropagation();
     handleProspectLifecycleChange(
       prospect,
@@ -296,6 +303,13 @@ function createProspectRow(
       'archived',
       eventDetails
     );
+  };
+  archiveButton.addEventListener('click', handleArchive);
+  archiveButton.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      handleArchive(e);
+    }
   });
   buttonContainer.appendChild(archiveButton);
 

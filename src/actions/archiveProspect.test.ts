@@ -101,4 +101,38 @@ describe("archiveProspect", () => {
       ),
     ).toThrow("Prospect with ID 'missing' not found");
   });
+
+  it("logs archive with correct type and 'not viable' wording", () => {
+    archiveProspect(
+      "p1",
+      prospects,
+      eventAmbassadors,
+      regionalAmbassadors,
+      log,
+    );
+
+    expect(log[0].type).toBe("Prospect Archived");
+    expect(log[0].newValue).toBe("Archived (not viable)");
+    expect(log[0].event).toContain("archived (not viable)");
+  });
+
+  it("handles prospect without assigned EA correctly in log", () => {
+    const prospectWithoutEA = {
+      ...baseProspect,
+      id: "p2",
+      eventAmbassador: "",
+    };
+    prospects.add(prospectWithoutEA);
+
+    archiveProspect(
+      "p2",
+      prospects,
+      eventAmbassadors,
+      regionalAmbassadors,
+      log,
+    );
+
+    expect(log[0].oldValue).toBe("Unassigned");
+    expect(log[0].type).toBe("Prospect Archived");
+  });
 });
