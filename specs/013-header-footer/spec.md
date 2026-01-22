@@ -9,6 +9,12 @@
 
 Add a header and footer to Ambassy similar to the Foretoken app structure, but using the MD4 color scheme instead of parkrun brand colors. The header will include the app title, subtitle, and action buttons. The footer will include version information, author credits, and license information.
 
+## Clarifications
+
+### Session 2026-01-18
+
+- Q: Should the header be fixed at the top or scroll naturally with page content? → A: Header scrolls naturally with page content (Option B)
+
 ## Design Inspiration
 
 Based on the Foretoken app (`../foretoken/`), which has:
@@ -71,7 +77,7 @@ The header and footer should integrate seamlessly with the existing Ambassy layo
 
 1. **Given** the header and footer are added, **When** the page loads, **Then** the existing introduction section and map/table views remain functional
 2. **Given** the new layout structure, **When** content is displayed, **Then** the main content area has appropriate padding and doesn't overlap with header/footer
-3. **Given** the page has scrollable content, **When** the user scrolls, **Then** the header remains fixed at the top (or scrolls naturally, depending on design decision)
+3. **Given** the page has scrollable content, **When** the user scrolls, **Then** the header scrolls naturally with the page content
 4. **Given** dialogs are opened, **When** they appear, **Then** they display correctly above the header/footer with proper z-index
 5. **Given** the layout is viewed on different screen sizes, **When** the viewport changes, **Then** the header, footer, and content adapt responsively
 
@@ -109,7 +115,7 @@ The header and footer should integrate seamlessly with the existing Ambassy layo
 ### Layout Integration
 
 - Use flexbox layout to ensure footer stays at bottom
-- Header can be fixed or scroll with content (to be determined)
+- Header scrolls naturally with page content (not fixed)
 - Main content area should have appropriate padding to avoid overlap
 - Existing dialogs should maintain proper z-index above header/footer
 - Introduction section should integrate smoothly with new layout
