@@ -161,7 +161,7 @@
 - [x] T113 [P] Remove any unused styles or markup
 
 ### Documentation
-- [ ] T120 [P] Update README if needed (layout changes)
+- [x] T120 [P] Update README if needed (layout changes)
 - [x] T121 [P] Add comments to CSS for MD4 color references
 - [x] T122 [P] Document any layout decisions in code comments
 
