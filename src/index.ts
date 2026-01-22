@@ -172,9 +172,14 @@ function updateButtonVisibility(
   isMapViewVisible: boolean,
 ): void {
   const exportButtonMap = document.getElementById("exportButtonMap");
-  const importButton = document.getElementById("importButton");
   const importButtonMap = document.getElementById("importButtonMap");
+  const addEventAmbassadorButton = document.getElementById("addEventAmbassadorButton");
+  const addRegionalAmbassadorButton = document.getElementById("addRegionalAmbassadorButton");
+  const addProspectButton = document.getElementById("addProspectButton");
+  const configureCapacityLimitsButton = document.getElementById("configureCapacityLimitsButton");
+  const purgeButton = document.getElementById("purgeButton");
 
+  // Share button - only show when data is loaded and map is visible
   if (exportButtonMap) {
     if (hasData && isMapViewVisible) {
       exportButtonMap.style.display = "";
@@ -183,13 +188,29 @@ function updateButtonVisibility(
     }
   }
 
-  if (importButton) {
-    importButton.style.display = "";
-  }
-
+  // Import button - always visible (allows loading state)
   if (importButtonMap) {
     importButtonMap.style.display = "";
   }
+
+  // Buttons that require state to be loaded
+  const stateDependentButtons = [
+    addEventAmbassadorButton,
+    addRegionalAmbassadorButton,
+    addProspectButton,
+    configureCapacityLimitsButton,
+    purgeButton,
+  ];
+
+  stateDependentButtons.forEach((button) => {
+    if (button) {
+      if (hasData) {
+        button.style.display = "";
+      } else {
+        button.style.display = "none";
+      }
+    }
+  });
 }
 
 document.getElementById("csvFileInput")?.addEventListener("change", (event) => {
@@ -243,7 +264,6 @@ function setupProspectsImportButton(): void {
 }
 
 setupExportButton("exportButtonMap");
-setupImportButton("importButton");
 setupImportButton("importButtonMap");
 setupProspectsImportButton();
 
