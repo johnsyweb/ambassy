@@ -280,6 +280,8 @@ tr.selected:hover {
   display: flex;
   gap: 0.75rem;
   align-items: center;
+  flex-wrap: wrap;
+  justify-content: flex-end;
 }
 
 .app-header .header-actions button {
@@ -362,6 +364,13 @@ tr.selected:hover {
 
   .header-actions {
     justify-content: center;
+    width: 100%;
+  }
+
+  .app-header .header-actions button {
+    font-size: 0.85rem;
+    padding: 0.4rem 0.75rem;
+    white-space: nowrap;
   }
 
   .app-main {
