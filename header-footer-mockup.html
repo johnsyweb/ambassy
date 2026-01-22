@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Ambassy - Header/Footer Mockup with MD4 Colors</title>
+    <style>
+      /* MD4 Color Scheme - selected colors for header/footer */
+      :root {
+        /* Dark colors from MD4 palette for header/footer */
+        --md4-primary: #0d2b33;      /* Deep teal-blue */
+        --md4-secondary: #30403d;     /* Dark green-grey */
+        --md4-accent: #3d9df2;        /* Bright blue */
+        --md4-accent-alt: #ffcc00;    /* Bright yellow */
+        --md4-text-light: #ffffff;
+        --md4-text-dark: #000000;
+        --md4-bg-light: #f5f5f5;
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Atkinson Hyperlegible", -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", sans-serif;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+        background-color: var(--md4-bg-light);
+        color: var(--md4-text-dark);
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .app {
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        max-width: 100%;
+        margin: 0 auto;
+      }
+
+      /* Header - using MD4 dark color */
+      .app-header {
+        background-color: var(--md4-primary);
+        color: var(--md4-text-light);
+        padding: 1rem;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
+
+      .header-content {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        max-width: 1400px;
+        margin: 0 auto;
+      }
+
+      .header-title {
+        display: flex;
+        flex-direction: column;
+      }
+
+      .app-header h1 {
+        font-size: 1.75rem;
+        font-weight: bold;
+        margin-bottom: 0.25rem;
+        color: var(--md4-text-light);
+      }
+
+      .app-header p {
+        font-size: 0.9rem;
+        opacity: 0.95;
+        color: var(--md4-text-light);
+      }
+
+      .header-actions {
+        display: flex;
+        gap: 0.75rem;
+        align-items: center;
+      }
+
+      .header-button {
+        background-color: rgba(255, 255, 255, 0.2);
+        color: var(--md4-text-light);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        border-radius: 6px;
+        padding: 0.5rem 1rem;
+        font-size: 0.9rem;
+        cursor: pointer;
+        transition: background-color 0.2s ease;
+        text-decoration: none;
+        display: inline-block;
+      }
+
+      .header-button:hover {
+        background-color: rgba(255, 255, 255, 0.3);
+      }
+
+      /* Main content area */
+      .app-main {
+        flex: 1;
+        padding: 2rem 1rem;
+        max-width: 1400px;
+        margin: 0 auto;
+        width: 100%;
+      }
+
+      .content-section {
+        background-color: white;
+        border-radius: 8px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      }
+
+      .content-section h2 {
+        color: var(--md4-primary);
+        margin-bottom: 1rem;
+        font-size: 1.5rem;
+      }
+
+      .content-section p {
+        line-height: 1.6;
+        margin-bottom: 1rem;
+      }
+
+      /* Footer - using MD4 secondary dark color */
+      .app-footer {
+        background-color: var(--md4-secondary);
+        color: var(--md4-text-light);
+        padding: 1.5rem 1rem;
+        text-align: center;
+        font-size: 0.875rem;
+        margin-top: auto;
+      }
+
+      .app-footer p {
+        margin: 0.5rem 0;
+        line-height: 1.5;
+      }
+
+      .app-footer a {
+        color: var(--md4-accent);
+        text-decoration: none;
+        transition: opacity 0.2s ease;
+      }
+
+      .app-footer a:hover {
+        opacity: 0.8;
+        text-decoration: underline;
+      }
+
+      .app-footer strong {
+        font-weight: 600;
+        color: var(--md4-accent-alt);
+      }
+
+      /* Color swatches to show MD4 palette */
+      .color-swatches {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        margin-top: 1rem;
+      }
+
+      .color-swatch {
+        width: 40px;
+        height: 40px;
+        border-radius: 4px;
+        border: 1px solid #ddd;
+      }
+
+      @media (max-width: 768px) {
+        .header-content {
+          flex-direction: column;
+          gap: 1rem;
+          text-align: center;
+        }
+
+        .header-actions {
+          justify-content: center;
+        }
+
+        .app-main {
+          padding: 1rem;
+        }
+
+        .content-section {
+          padding: 1.5rem;
+        }
+
+        .app-footer {
+          padding: 1rem;
+          font-size: 0.8rem;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="app">
+      <header class="app-header">
+        <div class="header-content">
+          <div class="header-title">
+            <h1>Ambassy</h1>
+            <p>A tool for parkrun Regional Event Ambassadors</p>
+          </div>
+          <div class="header-actions">
+            <a href="#" class="header-button">📍 Add Prospect</a>
+            <a href="#" class="header-button">⚙️ Settings</a>
+          </div>
+        </div>
+      </header>
+
+      <main class="app-main">
+        <div class="content-section">
+          <h2>Welcome to Ambassy</h2>
+          <p>
+            Ambassy is designed to help parkrun Regional Event Ambassadors (REAs) to
+            allocate events. The tool allows you to upload CSV files containing the names
+            of the Event Ambassadors you support and the events they support.
+          </p>
+          <p>
+            This mockup shows how Ambassy would look with a header and footer similar to
+            Foretoken, but using the MD4 color scheme instead of parkrun brand colors.
+          </p>
+        </div>
+
+        <div class="content-section">
+          <h2>MD4 Color Scheme</h2>
+          <p>
+            The header uses <strong>#0d2b33</strong> (deep teal-blue) and the footer uses
+            <strong>#30403d</strong> (dark green-grey) from the MD4 palette. Accent colors
+            include <strong>#3d9df2</strong> (bright blue) for links and
+            <strong>#ffcc00</strong> (bright yellow) for emphasis.
+          </p>
+          <div class="color-swatches">
+            <div class="color-swatch" style="background-color: #0d2b33;" title="#0d2b33"></div>
+            <div class="color-swatch" style="background-color: #30403d;" title="#30403d"></div>
+            <div class="color-swatch" style="background-color: #3d9df2;" title="#3d9df2"></div>
+            <div class="color-swatch" style="background-color: #ffcc00;" title="#ffcc00"></div>
+            <div class="color-swatch" style="background-color: #ff0066;" title="#ff0066"></div>
+            <div class="color-swatch" style="background-color: #8800cc;" title="#8800cc"></div>
+          </div>
+        </div>
+      </main>
+
+      <footer class="app-footer">
+        <p>
+          <strong>Ambassy</strong>
+          <a href="https://github.com/johnsyweb/ambassy" target="_blank" rel="noopener noreferrer">
+            v1.0.0
+          </a>
+          by
+          <a href="https://www.johnsy.com" target="_blank" rel="noopener noreferrer">
+            Pete Johns
+          </a>
+          (
+          <a href="https://github.com/johnsyweb" target="_blank" rel="noopener noreferrer">
+            @johnsyweb
+          </a>
+          )
+        </p>
+        <p>
+          Licensed under MIT. Not officially associated with parkrun. Written by
+          parkrun volunteers for parkrun volunteers.
+        </p>
+      </footer>
+    </div>
+  </body>
+</html>

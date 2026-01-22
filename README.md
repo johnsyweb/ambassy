@@ -47,6 +47,15 @@ graph TD
     ED -->|cannot support| ET
 ```
 
+## User Interface
+
+Ambassy features a clean, professional interface with:
+
+- **Header**: Displays app branding and primary action buttons (e.g., "Add Prospect")
+- **Footer**: Shows version information, author credits, and license details
+- **Responsive Design**: Adapts seamlessly to desktop, tablet, and mobile devices
+- **MD4 Color Scheme**: Uses a distinctive color palette for header and footer elements
+
 ## What this project will do
 
 - Render a map, showing the locations of each of the parkrun volunteers identified and their allocations
