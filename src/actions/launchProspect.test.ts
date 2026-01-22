@@ -226,3 +226,64 @@ describe("launchProspect", () => {
     expect(log[0].newValue).toBe("No event allocated");
   });
 });
+
+describe("launchProspect integration", () => {
+  let prospects: ProspectiveEventList;
+  let eventAmbassadors: EventAmbassadorMap;
+  let regionalAmbassadors: RegionalAmbassadorMap;
+  let log: LogEntry[];
+  let eventDetails: EventDetailsMap;
+
+  beforeEach(() => {
+    const baseProspect = {
+      id: "p1",
+      prospectEvent: "Test Prospect",
+      country: "AU",
+      state: "VIC",
+      prospectEDs: "ED",
+      eventAmbassador: "EA1",
+      courseFound: false,
+      landownerPermission: false,
+      fundingConfirmed: false,
+      dateMadeContact: null,
+      coordinates: { latitude: -37.8, longitude: 144.9 },
+      geocodingStatus: "success" as const,
+      ambassadorMatchStatus: "matched" as const,
+      importTimestamp: Date.now(),
+      sourceRow: 1,
+      notes: "",
+    };
+
+    prospects = new ProspectiveEventList([baseProspect]);
+    eventAmbassadors = new Map([
+      [
+        "EA1",
+        {
+          name: "EA1",
+          events: [],
+          prospectiveEvents: ["p1"],
+        },
+      ],
+    ]);
+    regionalAmbassadors = new Map();
+    log = [];
+    eventDetails = new Map();
+    jest.clearAllMocks();
+  });
+
+  it("removes prospect from list, updates EA capacity, and logs launch entry", () => {
+    launchProspect(
+      "p1",
+      prospects,
+      eventAmbassadors,
+      regionalAmbassadors,
+      eventDetails,
+      log,
+    );
+
+    expect(prospects.findById("p1")).toBeUndefined();
+    expect(eventAmbassadors.get("EA1")?.prospectiveEvents).toEqual([]);
+    expect(log[0].type).toBe("Prospect Launched");
+    expect(log[0].event).toContain("Test Prospect");
+  });
+});

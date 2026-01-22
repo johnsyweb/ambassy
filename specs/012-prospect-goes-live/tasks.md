@@ -66,7 +66,7 @@
 - [x] T030 [P] [US1] Add tests for Launch button wiring in `src/actions/populateProspectsTable.test.ts`
   - Asserts that a Launch button is rendered for each prospect row with correct label and ARIA attributes
   - Verifies clicking the button calls a launch handler with the correct prospect ID
-- [ ] T031 [US1] Add integration-style tests in `src/index.test.ts` (or new test) to cover:
+- [x] T031 [US1] Add integration-style tests in `src/index.test.ts` (or new test) to cover:
   - Launching a prospect removes it from Prospects table and map
   - EA capacity counts update after launch
   - Change log row for "Prospect Launched" is visible
