@@ -13,6 +13,14 @@ jest.mock("./archiveProspect", () => ({
   archiveProspect: jest.fn(),
 }));
 
+jest.mock("./showLaunchDialog", () => ({
+  showLaunchDialog: jest.fn(),
+}));
+
+jest.mock("./persistState", () => ({
+  persistChangesLog: jest.fn(),
+}));
+
 describe("populateProspectsTable", () => {
   let prospects: ProspectiveEventList;
   let eventAmbassadors: EventAmbassadorMap;
@@ -45,6 +53,11 @@ describe("populateProspectsTable", () => {
         </thead>
         <tbody></tbody>
       </table>
+      <div id="reallocationDialog" role="dialog" aria-labelledby="reallocationDialogTitle" aria-modal="true" style="display: none;">
+        <h2 id="reallocationDialogTitle">Select Recipient</h2>
+        <div id="reallocationDialogContent"></div>
+        <button type="button" id="reallocationDialogCancel">❌ Cancel</button>
+      </div>
     `;
 
     const baseProspect = {
@@ -80,10 +93,12 @@ describe("populateProspectsTable", () => {
     regionalAmbassadors = new Map();
     log = [];
     eventDetails = new Map();
+
+    jest.clearAllMocks();
   });
 
   it("renders Launch and Archive buttons and wires click handlers", () => {
-    const { launchProspect } = jest.requireMock("./launchProspect");
+    const { showLaunchDialog } = jest.requireMock("./showLaunchDialog");
     const { archiveProspect } = jest.requireMock("./archiveProspect");
 
     populateProspectsTable(
@@ -101,13 +116,53 @@ describe("populateProspectsTable", () => {
     expect(archiveButton).not.toBeNull();
 
     launchButton.click();
-    expect(launchProspect).toHaveBeenCalledTimes(1);
-    const launchArgs = (launchProspect as jest.Mock).mock.calls[0];
-    expect(launchArgs[0]).toBe("p1");
+    expect(showLaunchDialog).toHaveBeenCalledTimes(1);
+    const launchArgs = (showLaunchDialog as jest.Mock).mock.calls[0];
+    expect(launchArgs[0].id).toBe("p1");
+    expect(launchArgs[1]).toBe(eventDetails);
+    expect(launchArgs[2]).toBe(eventAmbassadors);
+    expect(launchArgs[3]).toBe(regionalAmbassadors);
+    expect(typeof launchArgs[4]).toBe("function");
+    expect(typeof launchArgs[5]).toBe("function");
 
     archiveButton.click();
     expect(archiveProspect).toHaveBeenCalledTimes(1);
     const archiveArgs = (archiveProspect as jest.Mock).mock.calls[0];
     expect(archiveArgs[0]).toBe("p1");
+  });
+
+  it("calls launchProspect when showLaunchDialog callback is invoked", () => {
+    const { showLaunchDialog } = jest.requireMock("./showLaunchDialog");
+    const { launchProspect } = jest.requireMock("./launchProspect");
+    const refreshCallback = jest.fn();
+
+    // Set up refresh callback
+    const { setProspectReallocationRefreshCallback } = require("./populateProspectsTable");
+    setProspectReallocationRefreshCallback(refreshCallback);
+
+    populateProspectsTable(
+      prospects,
+      eventAmbassadors,
+      regionalAmbassadors,
+      log,
+      eventDetails,
+    );
+
+    const launchButton = document.querySelector("button[aria-label*='launched']") as HTMLButtonElement;
+    launchButton.click();
+
+    expect(showLaunchDialog).toHaveBeenCalledTimes(1);
+    const launchArgs = (showLaunchDialog as jest.Mock).mock.calls[0];
+    const onLaunch = launchArgs[4];
+
+    onLaunch("Event A", "EA1");
+
+    expect(launchProspect).toHaveBeenCalledTimes(1);
+    const launchProspectArgs = (launchProspect as jest.Mock).mock.calls[0];
+    expect(launchProspectArgs[0]).toBe("p1");
+    expect(launchProspectArgs[5]).toBe(log);
+    expect(launchProspectArgs[6]).toBe("Event A");
+    expect(launchProspectArgs[7]).toBe("EA1");
+    expect(refreshCallback).toHaveBeenCalledTimes(1);
   });
 });

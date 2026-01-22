@@ -16,6 +16,7 @@ import { formatCoordinate, Coordinate, createCoordinate } from "@models/Coordina
 import { persistChangesLog } from "./persistState";
 import { launchProspect } from "./launchProspect";
 import { archiveProspect } from "./archiveProspect";
+import { showLaunchDialog } from "./showLaunchDialog";
 import { EventDetailsMap } from "@models/EventDetailsMap";
 import { calculateDistance } from "@utils/geography";
 import { ProspectiveEvent } from "@models/ProspectiveEvent";
@@ -264,14 +265,45 @@ function createProspectRow(
   );
   const handleLaunch = (e: Event) => {
     e.stopPropagation();
-    handleProspectLifecycleChange(
+    if (!eventDetails) {
+      alert("Event details are not available. Cannot launch prospect with event matching.");
+      return;
+    }
+    showLaunchDialog(
       prospect,
-      prospects,
+      eventDetails,
       eventAmbassadors,
       regionalAmbassadors,
-      log,
-      'launched',
-      eventDetails
+      (selectedEventName, selectedEA) => {
+        try {
+          launchProspect(
+            prospect.id,
+            prospects,
+            eventAmbassadors,
+            regionalAmbassadors,
+            eventDetails,
+            log ?? [],
+            selectedEventName,
+            selectedEA,
+          );
+          if (log) {
+            persistChangesLog(log);
+          }
+          if (refreshUIAfterReallocation) {
+            refreshUIAfterReallocation();
+          }
+        } catch (error) {
+          console.error("Failed to launch prospect:", error);
+          alert(
+            `Failed to launch prospect: ${
+              error instanceof Error ? error.message : "Unknown error"
+            }`,
+          );
+        }
+      },
+      () => {
+        // User cancelled
+      },
     );
   };
   launchButton.addEventListener('click', handleLaunch);
