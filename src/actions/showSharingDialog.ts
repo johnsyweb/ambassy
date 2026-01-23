@@ -14,7 +14,6 @@ export function showSharingDialog(): void {
   }
 
   title.textContent = "Share State";
-  title.id = "sharingDialogTitle";
   content.innerHTML = "";
 
   const container = document.createElement("div");
@@ -196,7 +195,7 @@ export function showSharingDialog(): void {
   document.addEventListener("keydown", wrappedKeyDown, { once: true });
   document.addEventListener("keydown", handleEnterKey);
   
-  dialog.setAttribute("aria-labelledby", "sharingDialogTitle");
+  dialog.setAttribute("aria-labelledby", "reallocationDialogTitle");
   dialog.style.display = "block";
   fileButton.focus();
 }
