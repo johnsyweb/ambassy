@@ -3,6 +3,7 @@ import { EventTeam } from "./EventTeam";
 import { RegionalAmbassador } from "./RegionalAmbassador";
 import { LogEntry } from "./LogEntry";
 import { CapacityLimits } from "./CapacityLimits";
+import { EventDetails } from "./EventDetails";
 
 export interface ApplicationStateData {
   eventAmbassadors: Array<[string, EventAmbassador]>;
@@ -10,6 +11,7 @@ export interface ApplicationStateData {
   regionalAmbassadors: Array<[string, RegionalAmbassador]>;
   changesLog: LogEntry[];
   capacityLimits?: CapacityLimits;
+  resolvedEventDetails?: Array<[string, EventDetails]>;
 }
 
 export interface ApplicationState {

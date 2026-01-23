@@ -74,6 +74,38 @@ export function importApplicationState(state: ApplicationState): void {
     saveCapacityLimits(state.data.capacityLimits);
   }
 
+  // Restore resolved eventDetails to cache
+  if (state.data.resolvedEventDetails && state.data.resolvedEventDetails.length > 0) {
+    const CACHE_KEY = "parkrun events";
+    const existingCache = localStorage.getItem(CACHE_KEY);
+    let eventDetailsMap = new Map<string, import("@models/EventDetails").EventDetails>();
+    
+    if (existingCache) {
+      try {
+        const parsed = JSON.parse(existingCache);
+        if (parsed.eventDetailsMap && Array.isArray(parsed.eventDetailsMap)) {
+          eventDetailsMap = new Map(parsed.eventDetailsMap);
+        }
+      } catch {
+        // Ignore parse errors, start with empty map
+      }
+    }
+
+    // Merge resolved eventDetails into the map
+    state.data.resolvedEventDetails.forEach(([key, eventDetails]) => {
+      eventDetailsMap.set(key, eventDetails);
+    });
+
+    // Save merged eventDetails back to cache
+    localStorage.setItem(
+      CACHE_KEY,
+      JSON.stringify({
+        timestamp: Date.now(),
+        eventDetailsMap: Array.from(eventDetailsMap.entries()),
+      }),
+    );
+  }
+
   markDataImported();
 }
 
@@ -151,6 +183,16 @@ function validateApplicationState(parsed: unknown): ApplicationState {
 
   if (!Array.isArray(dataObj.changesLog)) {
     throw new InvalidDataError("File data.changesLog must be an array");
+  }
+
+  // resolvedEventDetails is optional
+  if (
+    dataObj.resolvedEventDetails !== undefined &&
+    !Array.isArray(dataObj.resolvedEventDetails)
+  ) {
+    throw new InvalidDataError(
+      "File data.resolvedEventDetails must be an array if present",
+    );
   }
 
   return state as unknown as ApplicationState;

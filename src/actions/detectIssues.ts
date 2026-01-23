@@ -41,6 +41,7 @@ export function detectIssues(
             status: "unresolved",
           });
         }
+        // If eventDetail exists with valid coordinates, issue is resolved (no entry added)
       });
     });
   });

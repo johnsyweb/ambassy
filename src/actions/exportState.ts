@@ -1,6 +1,20 @@
 import { ApplicationState } from "@models/ApplicationState";
+import { EventDetails } from "@models/EventDetails";
 import { loadFromStorage } from "@utils/storage";
 import { loadCapacityLimits } from "./checkCapacity";
+
+const CACHE_KEY = "parkrun events";
+
+function isManuallyResolvedEventDetails(
+  eventDetails: EventDetails & { manualCoordinates?: boolean; geocodedAddress?: boolean },
+): boolean {
+  return (
+    eventDetails.manualCoordinates === true ||
+    eventDetails.geocodedAddress === true ||
+    eventDetails.id.startsWith("manual-") ||
+    eventDetails.id.startsWith("geocoded-")
+  );
+}
 
 export function exportApplicationState(): Blob {
   const eventAmbassadors =
@@ -27,6 +41,27 @@ export function exportApplicationState(): Blob {
 
   const capacityLimits = loadCapacityLimits();
 
+  // Extract manually resolved eventDetails from cache
+  const resolvedEventDetails: Array<[string, EventDetails]> = [];
+  const cacheData = localStorage.getItem(CACHE_KEY);
+  if (cacheData) {
+    try {
+      const parsed = JSON.parse(cacheData);
+      if (parsed.eventDetailsMap && Array.isArray(parsed.eventDetailsMap)) {
+        const eventDetailsMap = new Map<string, EventDetails>(
+          parsed.eventDetailsMap,
+        );
+        eventDetailsMap.forEach((eventDetails, key) => {
+          if (isManuallyResolvedEventDetails(eventDetails)) {
+            resolvedEventDetails.push([key, eventDetails]);
+          }
+        });
+      }
+    } catch {
+      // Ignore parse errors, proceed without resolved eventDetails
+    }
+  }
+
   const state: ApplicationState = {
     version: "1.0.0",
     exportedAt: new Date().toISOString(),
@@ -36,6 +71,7 @@ export function exportApplicationState(): Blob {
       regionalAmbassadors,
       changesLog,
       capacityLimits,
+      resolvedEventDetails: resolvedEventDetails.length > 0 ? resolvedEventDetails : undefined,
     },
   };
 
