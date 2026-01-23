@@ -357,53 +357,6 @@
     <div id="ambassy">
       <div id="mapContainer"></div>
 
-      <div id="reallocationDialog" role="dialog" aria-labelledby="reallocationDialogTitle" aria-modal="true" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 2em; border: 2px solid #333; border-radius: 8px; z-index: 1000; box-shadow: 0 4px 6px rgba(0,0,0,0.3); max-width: 600px; width: 90%;">
-        <h2 id="reallocationDialogTitle">Select Recipient</h2>
-        <div id="reallocationDialogContent"></div>
-        <div style="margin-top: 1em; display: flex; gap: 0.5em; justify-content: flex-end;">
-          <button type="button" id="reallocationDialogCancel" style="padding: 0.5em 1em;">❌ Cancel</button>
-        </div>
-      </div>
-      <div id="keyboardShortcutsDialog" role="dialog" aria-labelledby="keyboardShortcutsDialogTitle" aria-modal="true" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 2em; border: 2px solid #333; border-radius: 8px; z-index: 1000; box-shadow: 0 4px 6px rgba(0,0,0,0.3); max-width: 600px; width: 90%; max-height: 80vh; overflow-y: auto;">
-        <h2 id="keyboardShortcutsDialogTitle">Keyboard Shortcuts</h2>
-        <div id="keyboardShortcutsDialogContent"></div>
-        <div style="margin-top: 1em; display: flex; gap: 0.5em; justify-content: flex-end;">
-          <button type="button" id="keyboardShortcutsDialogClose" style="padding: 0.5em 1em;">Close</button>
-        </div>
-      </div>
-      <div id="capacityLimitsDialog" role="dialog" aria-labelledby="capacityLimitsDialogTitle" aria-modal="true" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 2em; border: 2px solid #333; border-radius: 8px; z-index: 1000; box-shadow: 0 4px 6px rgba(0,0,0,0.3);">
-        <h2 id="capacityLimitsDialogTitle">Configure Capacity Limits</h2>
-        <form id="capacityLimitsForm">
-          <fieldset>
-            <legend>Event Ambassador Limits</legend>
-            <label>
-              Minimum events:
-              <input type="number" id="eventAmbassadorMin" min="0" required aria-required="true" />
-            </label>
-            <label>
-              Maximum events:
-              <input type="number" id="eventAmbassadorMax" min="0" required aria-required="true" />
-            </label>
-          </fieldset>
-          <fieldset>
-            <legend>Regional Ambassador Limits</legend>
-            <label>
-              Minimum Event Ambassadors:
-              <input type="number" id="regionalAmbassadorMin" min="0" required aria-required="true" />
-            </label>
-            <label>
-              Maximum Event Ambassadors:
-              <input type="number" id="regionalAmbassadorMax" min="0" required aria-required="true" />
-            </label>
-          </fieldset>
-          <div id="capacityLimitsError" role="alert" style="color: #d32f2f; margin: 1em 0; display: none;"></div>
-          <div style="margin-top: 1em;">
-            <button type="submit" id="saveCapacityLimitsButton">✅ Save</button>
-            <button type="button" id="cancelCapacityLimitsButton">❌ Cancel</button>
-          </div>
-        </form>
-      </div>
-
       <div id="tabsContainer">
         <div class="tabs" role="tablist">
           <button class="tab-button active" role="tab" aria-selected="true" aria-controls="eventTeamsTab" id="eventTeamsTabButton" tabindex="0">Event Teams</button>
@@ -553,6 +506,54 @@
 
     </div>
     </main>
+
+    <!-- Dialogs - placed outside main content so they're always accessible -->
+    <div id="reallocationDialog" role="dialog" aria-labelledby="reallocationDialogTitle" aria-modal="true" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 2em; border: 2px solid #333; border-radius: 8px; z-index: 1000; box-shadow: 0 4px 6px rgba(0,0,0,0.3); max-width: 600px; width: 90%;">
+      <h2 id="reallocationDialogTitle">Select Recipient</h2>
+      <div id="reallocationDialogContent"></div>
+      <div style="margin-top: 1em; display: flex; gap: 0.5em; justify-content: flex-end;">
+        <button type="button" id="reallocationDialogCancel" style="padding: 0.5em 1em;">❌ Cancel</button>
+      </div>
+    </div>
+    <div id="keyboardShortcutsDialog" role="dialog" aria-labelledby="keyboardShortcutsDialogTitle" aria-modal="true" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 2em; border: 2px solid #333; border-radius: 8px; z-index: 1000; box-shadow: 0 4px 6px rgba(0,0,0,0.3); max-width: 600px; width: 90%; max-height: 80vh; overflow-y: auto;">
+      <h2 id="keyboardShortcutsDialogTitle">Keyboard Shortcuts</h2>
+      <div id="keyboardShortcutsDialogContent"></div>
+      <div style="margin-top: 1em; display: flex; gap: 0.5em; justify-content: flex-end;">
+        <button type="button" id="keyboardShortcutsDialogClose" style="padding: 0.5em 1em;">Close</button>
+      </div>
+    </div>
+    <div id="capacityLimitsDialog" role="dialog" aria-labelledby="capacityLimitsDialogTitle" aria-modal="true" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 2em; border: 2px solid #333; border-radius: 8px; z-index: 1000; box-shadow: 0 4px 6px rgba(0,0,0,0.3);">
+      <h2 id="capacityLimitsDialogTitle">Configure Capacity Limits</h2>
+      <form id="capacityLimitsForm">
+        <fieldset>
+          <legend>Event Ambassador Limits</legend>
+          <label>
+            Minimum events:
+            <input type="number" id="eventAmbassadorMin" min="0" required aria-required="true" />
+          </label>
+          <label>
+            Maximum events:
+            <input type="number" id="eventAmbassadorMax" min="0" required aria-required="true" />
+          </label>
+        </fieldset>
+        <fieldset>
+          <legend>Regional Ambassador Limits</legend>
+          <label>
+            Minimum Event Ambassadors:
+            <input type="number" id="regionalAmbassadorMin" min="0" required aria-required="true" />
+          </label>
+          <label>
+            Maximum Event Ambassadors:
+            <input type="number" id="regionalAmbassadorMax" min="0" required aria-required="true" />
+          </label>
+        </fieldset>
+        <div id="capacityLimitsError" role="alert" style="color: #d32f2f; margin: 1em 0; display: none;"></div>
+        <div style="margin-top: 1em;">
+          <button type="submit" id="saveCapacityLimitsButton">✅ Save</button>
+          <button type="button" id="cancelCapacityLimitsButton">❌ Cancel</button>
+        </div>
+      </form>
+    </div>
 
     <footer class="app-footer">
       <p>
