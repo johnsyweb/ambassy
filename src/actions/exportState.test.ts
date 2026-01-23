@@ -53,6 +53,36 @@ describe("exportState", () => {
 
       expect(() => exportApplicationState()).toThrow();
     });
+
+    it("should default changesLog to empty array when null", () => {
+      const mockData = {
+        eventAmbassadors: [["EA1", { name: "Test EA", events: [] }]],
+        eventTeams: [
+          [
+            "Event1",
+            {
+              eventShortName: "Event1",
+              eventAmbassador: "EA1",
+              eventDirectors: [],
+            },
+          ],
+        ],
+        regionalAmbassadors: [
+          ["REA1", { name: "Test REA", state: "VIC", supportsEAs: [] }],
+        ],
+      };
+
+      (loadFromStorage as jest.Mock)
+        .mockReturnValueOnce(mockData.eventAmbassadors)
+        .mockReturnValueOnce(mockData.eventTeams)
+        .mockReturnValueOnce(mockData.regionalAmbassadors)
+        .mockReturnValueOnce(null); // changesLog is null
+
+      const blob = exportApplicationState();
+
+      expect(blob).toBeInstanceOf(Blob);
+      expect(blob.type).toBe("application/json");
+    });
   });
 
   describe("downloadStateFile", () => {

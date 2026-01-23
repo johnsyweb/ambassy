@@ -15,13 +15,12 @@ export function exportApplicationState(): Blob {
     Array<[string, import("@models/RegionalAmbassador").RegionalAmbassador]>
   >("regionalAmbassadors");
   const changesLog =
-    loadFromStorage<import("@models/LogEntry").LogEntry[]>("changesLog");
+    loadFromStorage<import("@models/LogEntry").LogEntry[]>("changesLog") ?? [];
 
   if (
     eventAmbassadors === null ||
     eventTeams === null ||
-    regionalAmbassadors === null ||
-    changesLog === null
+    regionalAmbassadors === null
   ) {
     throw new Error("Cannot export: incomplete application state");
   }
