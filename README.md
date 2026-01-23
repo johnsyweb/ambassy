@@ -51,9 +51,16 @@ graph TD
 
 Ambassy features a clean, professional interface with:
 
-- **Header**: Displays app branding and primary action buttons (e.g., "Add Prospect")
+- **Header**: Displays app branding and all primary action buttons
+  - All action buttons are consolidated in the header for easy access
+  - Buttons that require loaded data (Add EA, Add REA, Add Prospect, Configure, Purge) are automatically hidden when no data is loaded
+  - Import and Keyboard Shortcuts buttons remain visible at all times
+  - Share button appears when data is loaded and map view is visible
+  - All buttons have consistent height and styling
 - **Footer**: Shows version information, author credits, and license details
 - **Responsive Design**: Adapts seamlessly to desktop, tablet, and mobile devices
+  - Header buttons wrap appropriately on smaller screens
+  - File input buttons match the styling of other buttons
 - **MD4 Color Scheme**: Uses a distinctive color palette for header and footer elements
 
 ## What this project will do
