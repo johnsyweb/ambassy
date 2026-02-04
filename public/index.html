@@ -9,29 +9,7 @@
     <meta name="keywords" content="parkrun, ambassadors, regional event ambassadors, event ambassadors, parkrun volunteers, event allocation, parkrun management, running community" />
     <meta name="robots" content="index, follow" />
     <meta name="author" content="Pete Johns" />
-    <meta name="theme-color" content="#0d2b33" />
-    <meta
-      name="msapplication-square150x150logo"
-      content="https://www.johnsy.com/icons/mstile-150x150.png"
-    />
-    <meta
-      name="msapplication-square310x310logo"
-      content="https://www.johnsy.com/icons/mstile-310x310.png"
-    />
-    <meta
-      name="msapplication-square70x70logo"
-      content="https://www.johnsy.com/icons/mstile-70x70.png"
-    />
-    <meta name="msapplication-TileColor" content="#FFFFFF" />
-    <meta
-      name="msapplication-TileImage"
-      content="https://www.johnsy.com/icons/mstile-144x144.png"
-    />
-    <meta
-      name="msapplication-wide310x150logo"
-      content="https://www.johnsy.com/icons/mstile-310x150.png"
-    />
-    <meta name="MSSmartTagsPreventParsing" content="TRUE" />
+    <meta name="theme-color" content="#2b233d" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="canonical" href="https://www.johnsy.com/ambassy/" />
 
@@ -173,7 +151,6 @@
     />
     <link rel="sitemap" type="application/xml" href="https://www.johnsy.com/ambassy/sitemap.xml" />
     <link rel="Start" href="https://www.johnsy.com/" title="Back to the start" />
-    <link rel="home" href="https://www.johnsy.com/" />
     <title>Ambassy - A tool for parkrun ambassadors</title>
 
     <!-- Structured Data -->
@@ -204,12 +181,8 @@
           "inLanguage": "en",
           "publisher": { "@id": "https://www.johnsy.com/#person" },
           "potentialAction": {
-            "@type": "SearchAction",
-            "target": {
-              "@type": "EntryPoint",
-              "urlTemplate": "https://www.johnsy.com/ambassy/?q={search_term_string}"
-            },
-            "query-input": "required name=search_term_string"
+            "@type": "Action",
+            "name": "Launch Ambassy"
           }
         },
         {
@@ -221,13 +194,7 @@
           "description": "A tool for parkrun Regional Event Ambassadors (REAs) to visualise and manage event allocations.",
           "inLanguage": "en",
           "datePublished": "2024-01-01",
-          "dateModified": "2026-01-23",
-          "primaryImageOfPage": {
-            "@type": "ImageObject",
-            "url": "https://www.johnsy.com/ambassy/ambassy-social-preview.png",
-            "width": 1200,
-            "height": 630
-          },
+          "dateModified": "2026-01-18",
           "breadcrumb": {
             "@type": "BreadcrumbList",
             "itemListElement": [
@@ -252,48 +219,24 @@
           },
           "author": { "@id": "https://www.johnsy.com/#person" },
           "publisher": { "@id": "https://www.johnsy.com/#person" },
-          "image": "https://www.johnsy.com/ambassy/ambassy-social-preview.png",
           "screenshot": "https://www.johnsy.com/ambassy/ambassy-social-preview.png",
           "applicationSuite": "parkrun Ambassador utilities",
-          "softwareRequirements": "Modern web browser with JavaScript enabled",
           "featureList": [
             "Upload CSV files for Regional and Event Ambassadors",
             "Visualise events on an interactive Leaflet map",
             "Voronoi territories for Regional Event Ambassadors",
-            "Table views for events, ambassadors, prospects, issues, and changes",
-            "Manage prospects (prospective events) with geocoding and allocation",
-            "Launch and archive prospects to complete lifecycle management"
+            "Table views for events, ambassadors, prospects, issues, and changes"
           ],
           "datePublished": "2024-01-01",
-          "dateModified": "2026-01-23",
-          "inLanguage": "en"
+          "dateModified": "2026-01-18"
         }
       ]
     }
     </script>
   </head>
   <body>
-    <header class="app-header">
-      <div class="header-content">
-        <div class="header-title">
-          <h1>Ambassy</h1>
-          <p>A tool for parkrun Regional Event Ambassadors</p>
-        </div>
-        <div class="header-actions">
-          <button type="button" id="exportButtonMap" title="Share your current map and allocations with another ambassador">📤 Share</button>
-          <button type="button" id="importButtonMap" title="Open a saved Ambassy file from a colleague">📂 Open</button>
-          <button type="button" id="addEventAmbassadorButton" title="Add Event Ambassador">👤 Add EA</button>
-          <button type="button" id="addRegionalAmbassadorButton" title="Add Regional Ambassador">👥 Add REA</button>
-          <button type="button" id="addProspectButton" title="Add Prospect by Address">📍 Add Prospect</button>
-          <button type="button" id="configureCapacityLimitsButton" title="Configure Capacity Limits">🔧 Configure</button>
-          <button type="button" id="purgeButton" title="Purge all data">🗑️ Purge</button>
-          <button type="button" id="keyboardShortcutsButton" title="Show keyboard shortcuts (Ctrl+/ or ?)">⌨️ Shortcuts</button>
-        </div>
-      </div>
-    </header>
-
-    <main class="app-main">
     <div id="content">
+      <h1>Ambassy</h1>
       <div id="introduction">
         <p>
           Ambassy is designed to help parkrun Regional Event Ambassadors (REAs) to
@@ -343,6 +286,7 @@
             accept=".csv"
             multiple
           />
+          <button type="button" id="importButton" title="Open a saved Ambassy file from a colleague">📂 Open Saved State</button>
           <input
             type="file"
             title="open saved state"
@@ -356,6 +300,65 @@
 
     <div id="ambassy">
       <div id="mapContainer"></div>
+
+      <div style="margin: 1em 0; display: flex; justify-content: space-between; align-items: center;">
+        <div>
+          <button type="button" id="exportButtonMap" title="Share your current map and allocations with another ambassador">📤 Share…</button>
+          <button type="button" id="importButtonMap" title="Open a saved Ambassy file from a colleague">📂 Open Saved State</button>
+          <button type="button" id="addEventAmbassadorButton" title="Add Event Ambassador">👤 Add Event Ambassador</button>
+          <button type="button" id="addRegionalAmbassadorButton" title="Add Regional Ambassador">👥 Add Regional Ambassador</button>
+          <button type="button" id="configureCapacityLimitsButton" title="Configure Capacity Limits">🔧 Configure Capacity Limits</button>
+          <button type="button" id="purgeButton">🗑️ Purge Data</button>
+        </div>
+        <button type="button" id="keyboardShortcutsButton" title="Show keyboard shortcuts (Ctrl+/ or ?)">⌨️ Keyboard Shortcuts</button>
+      </div>
+
+      <div id="reallocationDialog" role="dialog" aria-labelledby="reallocationDialogTitle" aria-modal="true" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 2em; border: 2px solid #333; border-radius: 8px; z-index: 1000; box-shadow: 0 4px 6px rgba(0,0,0,0.3); max-width: 600px; width: 90%;">
+        <h2 id="reallocationDialogTitle">Select Recipient</h2>
+        <div id="reallocationDialogContent"></div>
+        <div style="margin-top: 1em; display: flex; gap: 0.5em; justify-content: flex-end;">
+          <button type="button" id="reallocationDialogCancel" style="padding: 0.5em 1em;">❌ Cancel</button>
+        </div>
+      </div>
+      <div id="keyboardShortcutsDialog" role="dialog" aria-labelledby="keyboardShortcutsDialogTitle" aria-modal="true" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 2em; border: 2px solid #333; border-radius: 8px; z-index: 1000; box-shadow: 0 4px 6px rgba(0,0,0,0.3); max-width: 600px; width: 90%; max-height: 80vh; overflow-y: auto;">
+        <h2 id="keyboardShortcutsDialogTitle">Keyboard Shortcuts</h2>
+        <div id="keyboardShortcutsDialogContent"></div>
+        <div style="margin-top: 1em; display: flex; gap: 0.5em; justify-content: flex-end;">
+          <button type="button" id="keyboardShortcutsDialogClose" style="padding: 0.5em 1em;">Close</button>
+        </div>
+      </div>
+      <div id="capacityLimitsDialog" role="dialog" aria-labelledby="capacityLimitsDialogTitle" aria-modal="true" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 2em; border: 2px solid #333; border-radius: 8px; z-index: 1000; box-shadow: 0 4px 6px rgba(0,0,0,0.3);">
+        <h2 id="capacityLimitsDialogTitle">Configure Capacity Limits</h2>
+        <form id="capacityLimitsForm">
+          <fieldset>
+            <legend>Event Ambassador Limits</legend>
+            <label>
+              Minimum events:
+              <input type="number" id="eventAmbassadorMin" min="0" required aria-required="true" />
+            </label>
+            <label>
+              Maximum events:
+              <input type="number" id="eventAmbassadorMax" min="0" required aria-required="true" />
+            </label>
+          </fieldset>
+          <fieldset>
+            <legend>Regional Ambassador Limits</legend>
+            <label>
+              Minimum Event Ambassadors:
+              <input type="number" id="regionalAmbassadorMin" min="0" required aria-required="true" />
+            </label>
+            <label>
+              Maximum Event Ambassadors:
+              <input type="number" id="regionalAmbassadorMax" min="0" required aria-required="true" />
+            </label>
+          </fieldset>
+          <div id="capacityLimitsError" role="alert" style="color: #d32f2f; margin: 1em 0; display: none;"></div>
+          <div style="margin-top: 1em;">
+            <button type="submit" id="saveCapacityLimitsButton">✅ Save</button>
+            <button type="button" id="cancelCapacityLimitsButton">❌ Cancel</button>
+          </div>
+        </form>
+      </div>
 
       <div id="tabsContainer">
         <div class="tabs" role="tablist">
@@ -505,71 +508,6 @@
       </div>
 
     </div>
-    </main>
-
-    <!-- Dialogs - placed outside main content so they're always accessible -->
-    <div id="reallocationDialog" role="dialog" aria-labelledby="reallocationDialogTitle" aria-modal="true" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 2em; border: 2px solid #333; border-radius: 8px; z-index: 1000; box-shadow: 0 4px 6px rgba(0,0,0,0.3); max-width: 600px; width: 90%;">
-      <h2 id="reallocationDialogTitle">Select Recipient</h2>
-      <div id="reallocationDialogContent"></div>
-      <div style="margin-top: 1em; display: flex; gap: 0.5em; justify-content: flex-end;">
-        <button type="button" id="reallocationDialogCancel" style="padding: 0.5em 1em;">❌ Cancel</button>
-      </div>
-    </div>
-    <div id="keyboardShortcutsDialog" role="dialog" aria-labelledby="keyboardShortcutsDialogTitle" aria-modal="true" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 2em; border: 2px solid #333; border-radius: 8px; z-index: 1000; box-shadow: 0 4px 6px rgba(0,0,0,0.3); max-width: 600px; width: 90%; max-height: 80vh; overflow-y: auto;">
-      <h2 id="keyboardShortcutsDialogTitle">Keyboard Shortcuts</h2>
-      <div id="keyboardShortcutsDialogContent"></div>
-      <div style="margin-top: 1em; display: flex; gap: 0.5em; justify-content: flex-end;">
-        <button type="button" id="keyboardShortcutsDialogClose" style="padding: 0.5em 1em;">Close</button>
-      </div>
-    </div>
-    <div id="capacityLimitsDialog" role="dialog" aria-labelledby="capacityLimitsDialogTitle" aria-modal="true" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 2em; border: 2px solid #333; border-radius: 8px; z-index: 1000; box-shadow: 0 4px 6px rgba(0,0,0,0.3);">
-      <h2 id="capacityLimitsDialogTitle">Configure Capacity Limits</h2>
-      <form id="capacityLimitsForm">
-        <fieldset>
-          <legend>Event Ambassador Limits</legend>
-          <label>
-            Minimum events:
-            <input type="number" id="eventAmbassadorMin" min="0" required aria-required="true" />
-          </label>
-          <label>
-            Maximum events:
-            <input type="number" id="eventAmbassadorMax" min="0" required aria-required="true" />
-          </label>
-        </fieldset>
-        <fieldset>
-          <legend>Regional Ambassador Limits</legend>
-          <label>
-            Minimum Event Ambassadors:
-            <input type="number" id="regionalAmbassadorMin" min="0" required aria-required="true" />
-          </label>
-          <label>
-            Maximum Event Ambassadors:
-            <input type="number" id="regionalAmbassadorMax" min="0" required aria-required="true" />
-          </label>
-        </fieldset>
-        <div id="capacityLimitsError" role="alert" style="color: #d32f2f; margin: 1em 0; display: none;"></div>
-        <div style="margin-top: 1em;">
-          <button type="submit" id="saveCapacityLimitsButton">✅ Save</button>
-          <button type="button" id="cancelCapacityLimitsButton">❌ Cancel</button>
-        </div>
-      </form>
-    </div>
-
-    <footer class="app-footer">
-      <p>
-        <strong>Ambassy</strong>
-        <a href="https://github.com/johnsyweb/ambassy/blob/main/CHANGELOG.md" target="_blank" rel="noopener noreferrer">v0.0.1</a>
-        by
-        <a href="https://www.johnsy.com" target="_blank" rel="noopener noreferrer">Pete Johns</a>
-        (
-        <a href="https://github.com/johnsyweb" target="_blank" rel="noopener noreferrer">@johnsyweb</a>
-        )
-      </p>
-      <p>
-        Licensed under MIT. Not officially associated with parkrun. Written by
-        parkrun volunteers for parkrun volunteers.
-      </p>
-    </footer>
 
     <script src="bundle.js"></script>
   </body>
