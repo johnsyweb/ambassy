@@ -53,7 +53,7 @@
     "webpack-dev-server": "^5.2.3"
   },
   "dependencies": {
-    "axios": "^1.13.4",
+    "axios": "^1.13.5",
     "d3": "^7.9.0",
     "d3-geo-voronoi": "^2.1.0",
     "fs": "^0.0.2",
