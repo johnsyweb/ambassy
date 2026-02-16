@@ -1,117 +1,46 @@
 # GitHub Actions Workflows
 
-This document describes the GitHub Actions workflows for CI, screenshot generation, and deployment.
+## CI/CD (ci-cd.yml)
 
-## Workflow Chain
+Single workflow for validation, build, and deployment with caching and parallelism.
 
-The workflows are chained together to avoid duplication:
+**Triggers:** Push and pull requests to `main`.
 
-1. **CI** - Runs tests, linting, and build on every push and pull request
-2. **Screenshots** - Only runs after CI succeeds on main branch pushes
-3. **Deploy** - Only runs after Screenshots completes successfully
+### Jobs
 
-## Files
+1. **lint** and **test** run in parallel (pnpm cache, Node from `.tool-versions`).
+2. **build** runs after both pass; uploads `dist` artifact (retention 1 day).
+3. **deploy** runs only on push to `main` after build succeeds:
+   - Checkout, install deps, build
+   - Install Chrome, generate screenshots (`pnpm screenshots`) into `public/`
+   - Build again so `dist` includes updated screenshots
+   - Deploy `dist` to GitHub Pages
 
-### 1. `.github/workflows/CI.yml`
+### Tool versions and caching
 
-CI workflow that runs on every push and pull request to main.
+- **mise** (`jdx/mise-action@v3` with `install: true`) reads `.tool-versions` and installs Node.js and pnpm, so CI uses the same versions as local dev.
+- **Caching:** `actions/setup-node@v4` with `cache: pnpm` so dependency installs are fast on all jobs.
 
-**Steps:**
+### Concurrency
 
-1. Checks out the code
-2. Sets up Node.js and pnpm
-3. Installs dependencies
-4. Runs tests
-5. Runs linting
-6. Builds the project
+- `concurrency: group: pages` so only one Pages deployment runs at a time.
 
-### 2. `.github/workflows/screenshots.yml`
+### Screenshots
 
-Automatically generates screenshots after CI succeeds on main branch pushes.
-
-**Steps:**
-
-1. Checks out the code
-2. Sets up Node.js using the version from `.tool-versions`
-3. Installs pnpm and dependencies
-4. Builds the project
-5. Installs Chrome dependencies (for Puppeteer)
-6. Generates screenshots using `pnpm screenshots`
-7. Commits and pushes updated screenshots back to the repository
-
-**Requirements:**
-
-- Requires `contents: write` permission to commit screenshots back to the repo
-- Only runs after CI workflow succeeds
-- Can also be triggered manually via workflow_dispatch
-
-### 3. `.github/workflows/deploy.yml`
-
-Deploys the built project to GitHub Pages after Screenshots completes.
-
-**Steps:**
-
-1. Checks out the code
-2. Sets up Node.js and pnpm
-3. Installs dependencies
-4. Builds the project
-5. Deploys to GitHub Pages
-
-**Requirements:**
-
-- Only runs after Screenshots workflow completes successfully
-- Requires `contents: write` permission to deploy to GitHub Pages
-
-### 4. `.tool-versions`
-
-Specifies Node.js version 20 for GitHub Actions to use.
-
-### 5. `script/generate-screenshots.ts`
-
-Screenshot generation script that:
-
-- Starts a local dev server
-- Launches a headless browser using Puppeteer
-- Captures screenshots at different viewport sizes
-- Stops the dev server after completion
-- Detects CI environment and adjusts browser settings accordingly
-
-**Screenshots Generated:**
-
-- `public/screenshot.png` (1200x800)
-- `public/ambassy-social-preview.png` (1200x630)
+- Generated during the deploy job (not a separate workflow). No screenshot commits back to the repo; the deployed site includes fresh screenshots each time.
 
 ## Prerequisites
 
-All dependencies are already in place:
+- `.tool-versions` (mise format) for Node and pnpm versions; CI uses mise so versions match dev.
+- `puppeteer` in devDependencies
+- `screenshots` script in package.json
 
-- ✅ `puppeteer` installed in `devDependencies`
-- ✅ `ts-node` installed in `dependencies`
-- ✅ Screenshot script created in `script/generate-screenshots.ts`
-- ✅ `screenshots` script added to `package.json`
-- ✅ GitHub Actions workflow files created
-
-## Usage
-
-### Local Screenshot Generation
+## Local
 
 ```bash
-pnpm screenshots
+pnpm install
+pnpm run lint
+pnpm test
+pnpm run build
+pnpm screenshots   # optional: update public/screenshot.png and public/ambassy-social-preview.png
 ```
-
-### CI Screenshot Generation
-
-The GitHub Actions workflow will automatically:
-
-1. Run on every push to the `main` branch
-2. Build the project
-3. Start a dev server
-4. Generate screenshots
-5. Commit and push the updated screenshots back to the repository
-
-## Notes
-
-- Screenshots are committed with `[skip ci]` to prevent infinite loops
-- The workflow uses `PUPPETEER_EXECUTABLE_PATH=/usr/bin/google-chrome` in CI
-- Uses Xvfb for headless browser display in CI
-- Dev server runs on `http://localhost:8081/` by default
