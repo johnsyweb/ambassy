@@ -3,15 +3,23 @@ import { EventDetails } from "@models/EventDetails";
 import { EventDetailsMap } from "@models/EventDetailsMap";
 import { LogEntry } from "@models/LogEntry";
 import { geocodeAddress } from "@utils/geocoding";
-import { fromGeoJSONArray, formatCoordinate, toGeoJSONArray, createCoordinate } from "@models/Coordinate";
-import { getCountryCodeFromCoordinate, getCountryCodeFromDomain } from "@models/country";
+import {
+  fromGeoJSONArray,
+  formatCoordinate,
+  toGeoJSONArray,
+  createCoordinate,
+} from "@models/Coordinate";
+import {
+  getCountryCodeFromCoordinate,
+  getCountryCodeFromDomain,
+} from "@models/country";
 import { trackStateChange } from "./trackChanges";
 
 export function resolveIssueWithEvent(
   issue: EventIssue,
   eventDetails: EventDetails,
   eventDetailsMap: EventDetailsMap,
-  log: LogEntry[]
+  log: LogEntry[],
 ): void {
   if (
     !eventDetails.geometry?.coordinates ||
@@ -59,7 +67,7 @@ export function resolveIssueWithPin(
   issue: EventIssue,
   coordinates: [number, number],
   eventDetailsMap: EventDetailsMap,
-  log: LogEntry[]
+  log: LogEntry[],
 ): void {
   // Validation handled by fromGeoJSONArray (ONLY place for coordinate validation)
   let coord;
@@ -107,7 +115,7 @@ export async function resolveIssueWithAddress(
   address: string,
   eventDetailsMap: EventDetailsMap,
   log: LogEntry[],
-  parkrunUrl?: string
+  parkrunUrl?: string,
 ): Promise<void> {
   try {
     const { lat, lng } = await geocodeAddress(address);
@@ -125,7 +133,10 @@ export async function resolveIssueWithAddress(
       try {
         extractedMetadata = await extractMetadataFromUrl(parkrunUrl);
       } catch (urlError) {
-        console.warn(`Failed to extract metadata from URL ${parkrunUrl}:`, urlError);
+        console.warn(
+          `Failed to extract metadata from URL ${parkrunUrl}:`,
+          urlError,
+        );
         // Continue without URL metadata
       }
     }
@@ -142,11 +153,17 @@ export async function resolveIssueWithAddress(
         coordinates: [lng, lat], // GeoJSON uses [longitude, latitude]
       },
       properties: {
-        eventname: extractedMetadata.eventname || issue.eventShortName.toLowerCase().replace(/\s+/g, ''),
+        eventname:
+          extractedMetadata.eventname ||
+          issue.eventShortName.toLowerCase().replace(/\s+/g, ""),
         EventLongName: extractedMetadata.EventLongName || issue.eventShortName,
-        EventShortName: extractedMetadata.EventShortName || issue.eventShortName,
+        EventShortName:
+          extractedMetadata.EventShortName || issue.eventShortName,
         LocalisedEventLongName: null,
-        countrycode: extractedMetadata.countrycode || await getCountryCodeFromCoordinate(createCoordinate(lat, lng)) || 0,
+        countrycode:
+          extractedMetadata.countrycode ||
+          (await getCountryCodeFromCoordinate(createCoordinate(lat, lng))) ||
+          0,
         seriesid: extractedMetadata.seriesid || 1, // Default to 5km
         EventLocation: "",
       },
@@ -171,7 +188,10 @@ export async function resolveIssueWithAddress(
 
     log.push(logEntry);
   } catch (error) {
-    throw new Error(`Failed to geocode address "${address}": ${error instanceof Error ? error.message : 'Unknown error'}`);
+    throw new Error(
+      `Failed to geocode address "${address}": ${error instanceof Error ? error.message : "Unknown error"}`,
+      { cause: error },
+    );
   }
 }
 
@@ -186,9 +206,11 @@ async function extractMetadataFromUrl(url: string): Promise<{
   seriesid: number;
 }> {
   // Parse URL to extract components
-  const urlMatch = url.match(/https?:\/\/(?:www\.)?parkrun\.([^/]+)\/([^/]+)\/?/);
+  const urlMatch = url.match(
+    /https?:\/\/(?:www\.)?parkrun\.([^/]+)\/([^/]+)\/?/,
+  );
   if (!urlMatch) {
-    throw new Error('Invalid parkrun URL format');
+    throw new Error("Invalid parkrun URL format");
   }
 
   const [, domain, eventSlug] = urlMatch;
@@ -197,24 +219,25 @@ async function extractMetadataFromUrl(url: string): Promise<{
   const eventname = eventSlug;
 
   // Look up country code from domain dynamically
-  const countrycode = await getCountryCodeFromDomain(domain) || 0;
+  const countrycode = (await getCountryCodeFromDomain(domain)) || 0;
 
   // Determine series (5km vs juniors)
-  const seriesid = eventSlug.endsWith('-juniors') ? 2 : 1; // 1 = 5km, 2 = juniors
+  const seriesid = eventSlug.endsWith("-juniors") ? 2 : 1; // 1 = 5km, 2 = juniors
 
   // Generate EventLongName from eventSlug (e.g., "albertonascot" -> "Alberton Ascot parkrun")
-  const EventLongName = eventSlug
-    .split('-')
-    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-    .join(' ')
-    .replace(/Juniors?$/, 'juniors') + ' parkrun';
+  const EventLongName =
+    eventSlug
+      .split("-")
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(" ")
+      .replace(/Juniors?$/, "juniors") + " parkrun";
 
   // Generate EventShortName (same as EventLongName without "parkrun" suffix, or use eventSlug)
   const EventShortName = eventSlug
-    .split('-')
-    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-    .join(' ')
-    .replace(/Juniors?$/, 'juniors');
+    .split("-")
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(" ")
+    .replace(/Juniors?$/, "juniors");
 
   return {
     eventname,

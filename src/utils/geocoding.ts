@@ -2,9 +2,13 @@
  * Geocoding utilities for converting addresses to coordinates
  */
 
-import { createCoordinate, getLatitude, getLongitude } from "@models/Coordinate";
+import {
+  createCoordinate,
+  getLatitude,
+  getLongitude,
+} from "@models/Coordinate";
 
-const NOMINATIM_URL = 'https://nominatim.openstreetmap.org/search';
+const NOMINATIM_URL = "https://nominatim.openstreetmap.org/search";
 
 export interface GeocodingResult {
   lat: number | string;
@@ -17,9 +21,11 @@ export interface GeocodingResult {
  * Geocodes an address to latitude and longitude coordinates
  * Uses browser Geolocation API if available, falls back to Nominatim
  */
-export async function geocodeAddress(address: string): Promise<{lat: number, lng: number}> {
+export async function geocodeAddress(
+  address: string,
+): Promise<{ lat: number; lng: number }> {
   if (!address || address.trim().length === 0) {
-    throw new Error('Address cannot be empty');
+    throw new Error("Address cannot be empty");
   }
 
   // Try browser geolocation first if address looks like coordinates
@@ -33,7 +39,7 @@ export async function geocodeAddress(address: string): Promise<{lat: number, lng
   // Fall back to Nominatim geocoding service
   try {
     const response = await fetch(
-      `${NOMINATIM_URL}?q=${encodeURIComponent(address)}&format=json&limit=1`
+      `${NOMINATIM_URL}?q=${encodeURIComponent(address)}&format=json&limit=1`,
     );
 
     if (!response.ok) {
@@ -43,7 +49,7 @@ export async function geocodeAddress(address: string): Promise<{lat: number, lng
     const data: GeocodingResult[] = await response.json();
 
     if (!Array.isArray(data) || data.length === 0) {
-      throw new Error('No geocoding results found for address');
+      throw new Error("No geocoding results found for address");
     }
 
     const result = data[0];
@@ -52,24 +58,24 @@ export async function geocodeAddress(address: string): Promise<{lat: number, lng
     let lat: number;
     let lng: number;
 
-    if (typeof result.lat === 'string') {
+    if (typeof result.lat === "string") {
       lat = parseFloat(result.lat);
-    } else if (typeof result.lat === 'number') {
+    } else if (typeof result.lat === "number") {
       lat = result.lat;
     } else {
-      throw new Error('Invalid latitude format in geocoding response');
+      throw new Error("Invalid latitude format in geocoding response");
     }
 
-    if (typeof result.lon === 'string') {
+    if (typeof result.lon === "string") {
       lng = parseFloat(result.lon);
-    } else if (typeof result.lon === 'number') {
+    } else if (typeof result.lon === "number") {
       lng = result.lon;
-    } else if (typeof result.lng === 'string') {
+    } else if (typeof result.lng === "string") {
       lng = parseFloat(result.lng);
-    } else if (typeof result.lng === 'number') {
+    } else if (typeof result.lng === "number") {
       lng = result.lng;
     } else {
-      throw new Error('Invalid longitude format in geocoding response');
+      throw new Error("Invalid longitude format in geocoding response");
     }
 
     if (isNaN(lat) || isNaN(lng)) {
@@ -81,9 +87,9 @@ export async function geocodeAddress(address: string): Promise<{lat: number, lng
     return { lat: getLatitude(coord), lng: getLongitude(coord) };
   } catch (error) {
     if (error instanceof Error) {
-      throw new Error(`Geocoding failed: ${error.message}`);
+      throw new Error(`Geocoding failed: ${error.message}`, { cause: error });
     }
-    throw new Error('Geocoding failed: Unknown error');
+    throw new Error("Geocoding failed: Unknown error", { cause: error });
   }
 }
 
@@ -98,8 +104,8 @@ function isCoordinateFormat(input: string): boolean {
 /**
  * Parses coordinate string in "lat,lng" format
  */
-function parseCoordinates(input: string): {lat: number, lng: number} | null {
-  const parts = input.split(',').map(part => parseFloat(part.trim()));
+function parseCoordinates(input: string): { lat: number; lng: number } | null {
+  const parts = input.split(",").map((part) => parseFloat(part.trim()));
 
   if (parts.length !== 2 || parts.some(isNaN)) {
     return null;
