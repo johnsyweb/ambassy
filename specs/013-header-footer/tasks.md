@@ -1,186 +1,177 @@
-# Implementation Tasks: Header and Footer with MD4 Color Scheme
+# Tasks: Header and Footer with Shared Palette and Breadcrumbs
 
-**Feature**: 013-header-footer  
-**Status**: Draft
+**Input**: Design documents from `/specs/013-header-footer/`
+**Prerequisites**: plan.md, spec.md, research.md, data-model.md, contracts/
 
-## Phase 1: HTML Structure
+**Tests**: No separate test tasks requested; acceptance scenarios in spec and contracts define testable behaviour. Existing tests must pass (Success Criteria).
 
-### Header Implementation
-- [x] T010 [US1] Add `<header>` element to `public/index.html` before main content
-  - Include `class="app-header"` and semantic structure
-  - Add header content div with `class="header-content"`
-  - Add title section with `class="header-title"` containing h1 and p
-- [x] T011 [US1] Add header actions section with `class="header-actions"`
-  - Move "Add Prospect" button from `#ambassy` section to header
-  - Keep button ID `addProspectButton` for JavaScript compatibility
-- [x] T012 [US1] Remove "Add Prospect" button from existing button group in `#ambassy` section
-  - Button is currently at line 346 in index.html
-  - Ensure no duplicate buttons remain
+**Organization**: Tasks grouped by user story so each story can be implemented and validated independently.
 
-### Footer Implementation
-- [x] T020 [US2] Add `<footer>` element to `public/index.html` after main content
-  - Include `class="app-footer"` and semantic structure
-  - Add version information with link to changelog
-  - Add author information with links to website and GitHub
-  - Add license information paragraph
-- [x] T021 [US2] Ensure all footer links have proper attributes
-  - `target="_blank"` for external links
-  - `rel="noopener noreferrer"` for security
-  - Proper href URLs
+## Format: `[ID] [P?] [Story] Description`
 
-### Layout Structure
-- [x] T030 [US3] Wrap main content in `<main>` element
-  - Wrap both `#content` and `#ambassy` divs
-  - Add `class="app-main"` for styling
-- [x] T031 [US3] Ensure body uses flexbox layout for sticky footer
-  - Add flexbox styles to body
-  - Ensure footer stays at bottom on short pages
+- **[P]**: Can run in parallel (different files, no dependencies)
+- **[Story]**: Which user story (US1, US2, US3)
+- All tasks include exact file paths
 
-## Phase 2: CSS Styling
+## Path Conventions
 
-### Header Styles
-- [x] T040 [US1] Add header CSS styles to `public/style.css`
-  - Background color: `#0d2b33` (MD4 deep teal-blue)
-  - Text color: white (`#ffffff`)
-  - Padding: `1rem`
-  - Box shadow for depth
-- [x] T041 [US1] Add header content layout styles
-  - Flexbox layout with space-between
-  - Max-width container (e.g., 1400px) with margin auto
-  - Title section on left, actions on right
-- [x] T042 [US1] Add header typography styles
-  - h1: `1.75rem`, bold, margin-bottom `0.25rem`
-  - p: `0.9rem`, opacity `0.95`
-- [x] T043 [US1] Add header button styles
-  - Background: `rgba(255, 255, 255, 0.2)`
-  - Border: `1px solid rgba(255, 255, 255, 0.3)`
-  - Border radius: `6px`
-  - Padding: `0.5rem 1rem`
-  - Hover and focus states
-  - Transition effects
+- **Single project**: `public/` for HTML and CSS; no new `src/` files (plan.md).
 
-### Footer Styles
-- [x] T050 [US2] Add footer CSS styles to `public/style.css`
-  - Background color: `#30403d` (MD4 dark green-grey)
-  - Text color: white (`#ffffff`)
-  - Padding: `1.5rem 1rem`
-  - Text align: center
-  - Font size: `0.875rem`
-- [x] T051 [US2] Add footer link styles
-  - Link color: `#3d9df2` (MD4 bright blue)
-  - Hover state with opacity change
-  - Text decoration on hover
-- [x] T052 [US2] Add footer emphasis styles
-  - Strong tags use `#ffcc00` (MD4 bright yellow)
-  - Font weight: `600`
-- [x] T053 [US2] Add footer paragraph spacing
-  - Margin: `0.5rem 0`
-  - Line height: `1.5`
+---
 
-### Layout Styles
-- [x] T060 [US3] Add body flexbox layout styles
-  - `display: flex`
-  - `flex-direction: column`
-  - `min-height: 100vh`
-- [x] T061 [US3] Add main content area styles
-  - `flex: 1` to take available space
-  - Appropriate padding
-  - Max-width container if needed
-- [x] T062 [US3] Ensure footer stays at bottom
-  - `margin-top: auto` on footer
-  - Verify on pages with varying content height
+## Phase 1: Setup (Shared Infrastructure)
 
-### Responsive Design
-- [x] T070 [US1, US2, US3] Add mobile responsive styles for header
-  - Breakpoint: `768px` (tablet) and `480px` (mobile)
-  - Stack header content vertically on mobile
-  - Center align on mobile
-  - Adjust font sizes
-- [x] T071 [US1, US2, US3] Add mobile responsive styles for footer
-  - Reduce padding on mobile (`1rem`)
-  - Reduce font size on mobile (`0.8rem`)
-  - Adjust paragraph margins
-- [x] T072 [US1, US2, US3] Add mobile responsive styles for main content
-  - Adjust padding on mobile
-  - Ensure proper spacing
+**Purpose**: Parkrun palette available for all user stories
 
-## Phase 3: Integration and Testing
+- [x] T001 Add parkrun `:root` CSS variables (--parkrun-aubergine, --parkrun-apricot, --parkrun-white, --parkrun-black, --parkrun-grey, --parkrun-light-grey) to public/style.css per spec and data-model.md
 
-### Functionality Verification
-- [x] T080 [US3] Verify "Add Prospect" button functionality
-  - Button in header triggers existing JavaScript
-  - Dialog opens correctly
-  - No duplicate functionality
-- [x] T081 [US3] Verify existing features still work
-  - Map displays correctly
-  - Tables display correctly
-  - Dialogs display with correct z-index
-  - All buttons function correctly
-- [x] T082 [US3] Verify layout doesn't break existing UI
-  - Introduction section displays correctly
-  - Map container has proper spacing
-  - Tabs and tables have proper spacing
+---
 
-### Accessibility
-- [x] T090 [US1, US2] Verify keyboard navigation
-  - Tab order is logical
-  - All interactive elements are focusable
-  - Focus indicators are visible
-  - Enter/Space activate buttons
-- [x] T091 [US1, US2] Verify ARIA and semantic HTML
-  - Header uses `<header>` element
-  - Footer uses `<footer>` element
-  - Proper heading hierarchy (h1 in header)
-  - ARIA labels where needed
-- [x] T092 [US1, US2] Verify color contrast
-  - White text on `#0d2b33` meets WCAG AA (4.5:1)
-  - White text on `#30403d` meets WCAG AA (4.5:1)
-  - Link colors have sufficient contrast
+## Phase 2: Foundational (Blocking Prerequisites)
 
-### Visual Testing
-- [x] T100 [US1, US2, US3] Test on desktop browsers
-  - Chrome, Firefox, Safari, Edge
-  - Verify header displays correctly
-  - Verify footer displays correctly
-  - Verify layout is correct
-- [x] T101 [US1, US2, US3] Test on tablet (768px breakpoint)
-  - Verify responsive layout
-  - Verify header stacks correctly
-  - Verify footer adapts
-- [x] T102 [US1, US2, US3] Test on mobile (480px breakpoint)
-  - Verify responsive layout
-  - Verify touch targets are adequate
-  - Verify text is readable
+**Purpose**: Layout and skip-link target so US1 (header with skip link) can be completed
 
-## Phase 4: Polish
+**⚠️ CRITICAL**: No user story work can begin until this phase is complete
 
-### Code Quality
-- [x] T110 [P] Run linting and fix any issues
-- [x] T111 [P] Verify HTML is valid (W3C validator)
-- [x] T112 [P] Verify CSS is valid (W3C validator)
-- [x] T113 [P] Remove any unused styles or markup
+- [x] T002 [P] Ensure body in public/style.css uses display:flex, flex-direction:column, min-height:100vh for sticky footer per plan
+- [x] T003 [P] Ensure an element with id="content" exists in public/index.html for skip link target (e.g. on <main> or inner wrapper per contracts/header-footer-contracts.md)
 
-### Documentation
-- [x] T120 [P] Update README if needed (layout changes)
-- [x] T121 [P] Add comments to CSS for MD4 color references
-- [x] T122 [P] Document any layout decisions in code comments
+**Checkpoint**: Foundation ready — user story implementation can begin
 
-### Final Checks
-- [x] T130 [P] Verify all existing tests pass
-- [x] T131 [P] Manual smoke test of all major features
-- [x] T132 [P] Verify no console errors
-- [x] T133 [P] Verify performance is acceptable (no layout shifts)
+---
+
+## Phase 3: User Story 1 — Header with App Branding and Actions (Priority: P1) — MVP
+
+**Goal**: User sees a header with breadcrumb, title, subtitle, and primary actions (e.g. Add Prospect); shared parkrun palette; skip link for keyboard users; responsive header.
+
+**Independent Test**: Header visible on load with correct branding; breadcrumb present (johnsy.com → parkrun utilities → Ambassy); skip link first focusable and targets main content; Add Prospect and other action buttons visible and keyboard accessible; header stacks on mobile.
+
+### Implementation for User Story 1
+
+- [x] T004 [US1] Add skip link as first child of body: `<a class="skip-link" href="#content">Skip to main content</a>` in public/index.html
+- [x] T005 [US1] Add .skip-link styles (off-screen until :focus/:focus-visible, apricot background, per eventuate/pr-by-pt) to public/style.css per contracts/header-footer-contracts.md
+- [x] T006 [US1] Add `<nav class="breadcrumbs" aria-label="Breadcrumb">` as first child of `<header>` in public/index.html with trail: johnsy.com link, separator, parkrun utilities link, separator, `<span aria-current="page">Ambassy</span>` per contracts
+- [x] T007 [US1] Add .breadcrumbs styles (pill, apricot links, current page white) to public/style.css per research.md and eventuate/foretoken pattern
+- [x] T008 [US1] Update header styles in public/style.css to use var(--parkrun-aubergine) background and var(--parkrun-white) text; ensure flexbox layout (title left, actions right)
+- [x] T009 [US1] Add header responsive styles in public/style.css (stack vertically on mobile at 768px/480px breakpoints per spec)
+
+**Checkpoint**: User Story 1 complete — header with breadcrumb, skip link, and actions; parkrun palette; responsive.
+
+---
+
+## Phase 4: User Story 2 — Footer with Metadata (Priority: P1)
+
+**Goal**: User sees a footer with version, author, and license in one paragraph; parkrun palette; links open in new tab with security attributes.
+
+**Independent Test**: Footer visible at bottom; single paragraph with changelog link, author link, GitHub link, license text; links have target="_blank" and rel="noopener noreferrer"; keyboard accessible.
+
+### Implementation for User Story 2
+
+- [x] T010 [US2] Update footer content in public/index.html to single paragraph: version (link to changelog), author Pete Johns (link to website), @johnsyweb (link to GitHub), license text per spec
+- [x] T011 [US2] Add target="_blank" and rel="noopener noreferrer" to all footer external links in public/index.html
+- [x] T012 [US2] Update footer styles in public/style.css to use var(--parkrun-aubergine), var(--parkrun-white), var(--parkrun-apricot) for links; centred text; single paragraph layout
+
+**Checkpoint**: User Story 2 complete — footer with correct content and secure links.
+
+---
+
+## Phase 5: User Story 3 — Layout Structure (Priority: P1)
+
+**Goal**: Header and footer integrate with existing layout; full-width breakout when embedded; main content padding; dialogs above header/footer; responsive.
+
+**Independent Test**: Introduction and map/table views still work; main content has padding; header scrolls with page; dialogs display above header/footer; layout adapts to viewport.
+
+### Implementation for User Story 3
+
+- [x] T013 [US3] Add full-width breakout CSS for header and footer in public/style.css (width:100vw; position:relative; left:50%; margin-left:-50vw; margin-right:-50vw; box-sizing:border-box) per spec
+- [x] T014 [US3] Add main content area padding in public/style.css so content does not overlap header/footer
+- [x] T015 [US3] Ensure dialogs in public/index.html or public/style.css have z-index above header/footer (e.g. 1000+) per spec
+- [x] T016 [US3] Add or verify responsive layout for header, footer, and content in public/style.css at 768px and 480px per spec
+
+**Checkpoint**: All three user stories complete — layout integrated and responsive.
+
+---
+
+## Phase 6: Polish & Cross-Cutting Concerns
+
+**Purpose**: Theme, typography, and quality gates
+
+- [x] T017 [P] Set theme-color meta to #4c1a57 in public/index.html per quickstart.md
+- [x] T018 Ensure body font-family in public/style.css includes Atkinson Hyperlegible and fallback stack (-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif) per spec
+- [x] T019 Run pnpm run lint and pnpm test; fix any regressions (Success Criteria: all existing tests pass)
 
 ---
 
 ## Dependencies & Execution Order
 
-- **Phase 1 (HTML Structure)** must complete before Phase 2 (CSS Styling)
-- **Phase 2 (CSS Styling)** must complete before Phase 3 (Integration)
-- **Phase 3 (Integration)** must complete before Phase 4 (Polish)
+### Phase Dependencies
 
-Within each phase:
-- Header implementation (T010-T012) can be done in parallel with Footer implementation (T020-T021)
-- Layout structure (T030-T031) should be done after header/footer HTML
-- CSS styling can be done incrementally (header, then footer, then layout)
-- Responsive styles should be added after base styles
+- **Phase 1 (Setup)**: No dependencies — start immediately
+- **Phase 2 (Foundational)**: Depends on Phase 1 — BLOCKS all user stories
+- **Phase 3 (US1)**: Depends on Phase 2 — header, skip link, breadcrumb
+- **Phase 4 (US2)**: Depends on Phase 2 — footer (can run in parallel with US1 after Phase 2 if desired)
+- **Phase 5 (US3)**: Depends on Phase 3 and 4 — layout integration
+- **Phase 6 (Polish)**: Depends on Phase 5
+
+### User Story Dependencies
+
+- **US1 (Header)**: After Phase 2 — no dependency on US2/US3
+- **US2 (Footer)**: After Phase 2 — no dependency on US1/US3
+- **US3 (Layout)**: After US1 and US2 — full-width breakout and padding apply to header/footer from US1/US2
+
+### Within Each User Story
+
+- HTML structure before CSS (e.g. T004 before T005, T006 before T007)
+- Story checkpoint before moving to next
+
+### Parallel Opportunities
+
+- T002 and T003 (Phase 2) — different files
+- T017 (Phase 6) — single-file change
+- After Phase 2, US1 and US2 can be implemented in parallel (different sections of index.html and style.css)
+
+---
+
+## Parallel Example: After Phase 2
+
+```text
+# Option A: Sequential by story
+T004 → T005 → T006 → T007 → T008 → T009   (US1)
+T010 → T011 → T012                         (US2)
+T013 → T014 → T015 → T016                  (US3)
+
+# Option B: US1 and US2 in parallel (different files/sections)
+Developer A: T004, T005, T006, T007, T008, T009 (US1)
+Developer B: T010, T011, T012 (US2)
+Then: T013–T016 (US3), then T017–T019 (Polish)
+```
+
+---
+
+## Implementation Strategy
+
+### MVP First (User Story 1)
+
+1. Complete Phase 1: T001 (palette)
+2. Complete Phase 2: T002, T003 (layout + content target)
+3. Complete Phase 3: T004–T009 (header, skip link, breadcrumb)
+4. **STOP and VALIDATE**: Manual check — header, breadcrumb, skip link, actions
+5. Then add US2 (footer) and US3 (layout), then Polish
+
+### Incremental Delivery
+
+1. Phase 1 + 2 → palette and layout ready
+2. Phase 3 (US1) → Header with breadcrumb and skip link (MVP)
+3. Phase 4 (US2) → Footer
+4. Phase 5 (US3) → Full-width breakout and responsive
+5. Phase 6 → theme-color, typography, lint/test
+
+---
+
+## Notes
+
+- [P] = different files or no dependencies; safe to run in parallel
+- [USn] = task belongs to that user story for traceability
+- No new `src/` files; all changes in public/index.html and public/style.css
+- Commit after each task or logical group; conventional commits
+- README: update only if setup or usage changes (spec says keep up-to-date)

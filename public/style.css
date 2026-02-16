@@ -1,16 +1,41 @@
-/* MD4 Color Scheme - Header and Footer */
-/* Header: #0d2b33 (deep teal-blue, MD4 palette index 13) */
-/* Footer: #30403d (dark green-grey, MD4 palette index 12) */
-/* Links: #3d9df2 (bright blue, MD4 palette index 3) */
-/* Emphasis: #ffcc00 (bright yellow, MD4 palette index 2) */
+/* parkrun colour palette - shared with eventuate, foretoken, pr-by-pt */
+:root {
+  --parkrun-aubergine: #4c1a57;
+  --parkrun-apricot: #f7a541;
+  --parkrun-white: #ffffff;
+  --parkrun-black: #000000;
+  --parkrun-grey: #666666;
+  --parkrun-light-grey: #f5f5f5;
+}
 
 body {
-  font-family: "Atkinson Hyperlegible", Verdana, serif;
+  font-family: "Atkinson Hyperlegible", -apple-system, BlinkMacSystemFont,
+    "Segoe UI", Roboto, sans-serif;
   display: flex;
   flex-direction: column;
   min-height: 100vh;
   margin: 0;
   padding: 0;
+}
+
+.skip-link {
+  position: absolute;
+  left: 1rem;
+  top: 0.75rem;
+  padding: 0.5rem 0.75rem;
+  background: var(--parkrun-apricot);
+  color: var(--parkrun-black);
+  border-radius: 6px;
+  font-weight: 600;
+  text-decoration: none;
+  transform: translateY(-200%);
+  transition: transform 0.2s ease;
+  z-index: 1000;
+}
+
+.skip-link:focus,
+.skip-link:focus-visible {
+  transform: translateY(0);
 }
 
 .introduction {
@@ -120,7 +145,8 @@ tr:hover {
   padding: 12px 24px;
   cursor: pointer;
   font-size: 16px;
-  font-family: "Atkinson Hyperlegible", Verdana, serif;
+  font-family: "Atkinson Hyperlegible", -apple-system, BlinkMacSystemFont,
+    "Segoe UI", Roboto, sans-serif;
   transition: background-color 0.2s;
   margin-right: 4px;
 }
@@ -246,12 +272,57 @@ tr.selected:hover {
   border-radius: 2px;
 }
 
-/* Header Styles - MD4 Color Scheme */
+/* Full-width breakout so header/footer span viewport when embedded */
+.app-header,
+.app-footer {
+  width: 100vw;
+  position: relative;
+  left: 50%;
+  margin-left: -50vw;
+  margin-right: -50vw;
+  box-sizing: border-box;
+}
+
 .app-header {
-  background-color: #0d2b33; /* MD4 deep teal-blue */
-  color: #ffffff;
-  padding: 1rem;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  background-color: var(--parkrun-aubergine);
+  color: var(--parkrun-white);
+  padding: 1.5rem 2rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.breadcrumbs {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+  margin-bottom: 0.75rem;
+  color: rgba(255, 255, 255, 0.8);
+  background: rgba(255, 255, 255, 0.12);
+  padding: 0.35rem 0.6rem;
+  border-radius: 999px;
+  width: fit-content;
+}
+
+/* Specificity raised so breadcrumb links stay apricot when main site CSS loads after ours */
+.app-header .breadcrumbs a {
+  color: var(--parkrun-apricot);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.app-header .breadcrumbs a:hover,
+.app-header .breadcrumbs a:focus-visible {
+  text-decoration: underline;
+}
+
+.breadcrumbs span[aria-hidden="true"] {
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.breadcrumbs span[aria-current="page"] {
+  color: var(--parkrun-white);
+  font-weight: 600;
 }
 
 .header-content {
@@ -265,15 +336,15 @@ tr.selected:hover {
 .header-title h1 {
   font-size: 1.75rem;
   font-weight: bold;
-  margin: 0 0 0.25rem 0;
-  color: #ffffff;
+  margin: 0.75rem 0 0.25rem 0;
+  color: var(--parkrun-white);
 }
 
 .header-title p {
   font-size: 0.9rem;
   margin: 0;
   opacity: 0.95;
-  color: #ffffff;
+  color: var(--parkrun-white);
 }
 
 .header-actions {
@@ -286,14 +357,15 @@ tr.selected:hover {
 
 .app-header .header-actions button {
   background-color: rgba(255, 255, 255, 0.2);
-  color: #ffffff;
+  color: var(--parkrun-white);
   border: 1px solid rgba(255, 255, 255, 0.3);
   border-radius: 6px;
   padding: 0.5rem 0.75rem;
   font-size: 0.85rem;
   cursor: pointer;
   transition: background-color 0.2s ease;
-  font-family: "Atkinson Hyperlegible", Verdana, serif;
+  font-family: "Atkinson Hyperlegible", -apple-system, BlinkMacSystemFont,
+    "Segoe UI", Roboto, sans-serif;
   white-space: nowrap;
   height: 2.25rem;
   box-sizing: border-box;
@@ -318,14 +390,13 @@ tr.selected:hover {
   flex: 1;
   display: flex;
   flex-direction: column;
-  padding: 0;
+  padding: 1rem 2rem;
 }
 
-/* Footer Styles - MD4 Color Scheme */
 .app-footer {
-  background-color: #30403d; /* MD4 dark green-grey */
-  color: #ffffff;
-  padding: 1.5rem 1rem;
+  background-color: var(--parkrun-aubergine);
+  color: var(--parkrun-white);
+  padding: 1.5rem 2rem;
   text-align: center;
   font-size: 0.875rem;
   margin-top: auto;
@@ -337,25 +408,27 @@ tr.selected:hover {
 }
 
 .app-footer a {
-  color: #3d9df2; /* MD4 bright blue */
+  color: var(--parkrun-apricot);
   text-decoration: none;
   transition: opacity 0.2s ease;
+  text-underline-offset: 0.15em;
 }
 
 .app-footer a:hover {
-  opacity: 0.8;
+  opacity: 0.9;
   text-decoration: underline;
 }
 
-.app-footer a:focus {
-  outline: 2px solid #3d9df2;
+.app-footer a:focus,
+.app-footer a:focus-visible {
+  outline: 2px solid var(--parkrun-apricot);
   outline-offset: 2px;
   border-radius: 2px;
 }
 
 .app-footer strong {
   font-weight: 600;
-  color: #ffcc00; /* MD4 bright yellow */
+  color: var(--parkrun-apricot);
 }
 
 /* Responsive Design */
@@ -403,7 +476,8 @@ tr.selected:hover {
   font-size: 0.85rem;
   cursor: pointer;
   transition: background-color 0.2s ease;
-  font-family: "Atkinson Hyperlegible", Verdana, serif;
+  font-family: "Atkinson Hyperlegible", -apple-system, BlinkMacSystemFont,
+    "Segoe UI", Roboto, sans-serif;
   white-space: nowrap;
   height: 2.25rem;
   box-sizing: border-box;
@@ -436,7 +510,8 @@ tr.selected:hover {
   padding: 0.25rem 0.5rem;
   margin-right: 0.5rem;
   font-size: 0.85rem;
-  font-family: "Atkinson Hyperlegible", Verdana, serif;
+  font-family: "Atkinson Hyperlegible", -apple-system, BlinkMacSystemFont,
+    "Segoe UI", Roboto, sans-serif;
   cursor: pointer;
   height: auto;
 }
