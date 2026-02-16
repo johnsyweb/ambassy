@@ -1,4 +1,8 @@
-import { TableSortState, createTableSortState, resetToDefault } from "@models/TableSortState";
+import {
+  TableSortState,
+  createTableSortState,
+  resetToDefault,
+} from "@models/TableSortState";
 import {
   ColumnType,
   compareText,
@@ -92,10 +96,7 @@ export function initializeTableSorting(
 
     header.setAttribute("role", "columnheader");
     header.setAttribute("tabindex", "0");
-    header.setAttribute(
-      "aria-label",
-      `Sort by ${headerText}. Click to sort.`,
-    );
+    header.setAttribute("aria-label", `Sort by ${headerText}. Click to sort.`);
     header.style.cursor = "pointer";
     header.style.userSelect = "none";
 
@@ -171,12 +172,24 @@ export function sortTable(
       return -1;
     }
 
-    let comparison = 0;
-    if (detectedType === "number" && typeof aValue === "number" && typeof bValue === "number") {
+    let comparison: number;
+    if (
+      detectedType === "number" &&
+      typeof aValue === "number" &&
+      typeof bValue === "number"
+    ) {
       comparison = compareNumbers(aValue, bValue);
-    } else if (detectedType === "date" && aValue instanceof Date && bValue instanceof Date) {
+    } else if (
+      detectedType === "date" &&
+      aValue instanceof Date &&
+      bValue instanceof Date
+    ) {
       comparison = compareDates(aValue, bValue);
-    } else if (detectedType === "boolean" && typeof aValue === "boolean" && typeof bValue === "boolean") {
+    } else if (
+      detectedType === "boolean" &&
+      typeof aValue === "boolean" &&
+      typeof bValue === "boolean"
+    ) {
       comparison = compareBooleans(aValue, bValue);
     } else {
       comparison = compareText(String(aValue), String(bValue));
@@ -205,7 +218,7 @@ export function resetToDefaultSort(tableId: string): void {
   }
 
   resetToDefault(state);
-  
+
   // Apply default sort directly without toggling
   const table = document.querySelector(`#${tableId} tbody`);
   if (!table) {
@@ -243,12 +256,24 @@ export function resetToDefaultSort(tableId: string): void {
       return -1;
     }
 
-    let comparison = 0;
-    if (detectedType === "number" && typeof aValue === "number" && typeof bValue === "number") {
+    let comparison: number;
+    if (
+      detectedType === "number" &&
+      typeof aValue === "number" &&
+      typeof bValue === "number"
+    ) {
       comparison = compareNumbers(aValue, bValue);
-    } else if (detectedType === "date" && aValue instanceof Date && bValue instanceof Date) {
+    } else if (
+      detectedType === "date" &&
+      aValue instanceof Date &&
+      bValue instanceof Date
+    ) {
       comparison = compareDates(aValue, bValue);
-    } else if (detectedType === "boolean" && typeof aValue === "boolean" && typeof bValue === "boolean") {
+    } else if (
+      detectedType === "boolean" &&
+      typeof aValue === "boolean" &&
+      typeof bValue === "boolean"
+    ) {
       comparison = compareBooleans(aValue, bValue);
     } else {
       comparison = compareText(String(aValue), String(bValue));
@@ -313,12 +338,24 @@ function applyDefaultSort(tableId: string): void {
       return -1;
     }
 
-    let comparison = 0;
-    if (detectedType === "number" && typeof aValue === "number" && typeof bValue === "number") {
+    let comparison: number;
+    if (
+      detectedType === "number" &&
+      typeof aValue === "number" &&
+      typeof bValue === "number"
+    ) {
       comparison = compareNumbers(aValue, bValue);
-    } else if (detectedType === "date" && aValue instanceof Date && bValue instanceof Date) {
+    } else if (
+      detectedType === "date" &&
+      aValue instanceof Date &&
+      bValue instanceof Date
+    ) {
       comparison = compareDates(aValue, bValue);
-    } else if (detectedType === "boolean" && typeof aValue === "boolean" && typeof bValue === "boolean") {
+    } else if (
+      detectedType === "boolean" &&
+      typeof aValue === "boolean" &&
+      typeof bValue === "boolean"
+    ) {
       comparison = compareBooleans(aValue, bValue);
     } else {
       comparison = compareText(String(aValue), String(bValue));
@@ -360,7 +397,10 @@ export function updateSortIndicators(tableId: string): void {
     if (state.sortColumn === index) {
       const arrow = state.sortDirection === "asc" ? " ↑" : " ↓";
       currentText += arrow;
-      header.setAttribute("aria-sort", state.sortDirection === "asc" ? "ascending" : "descending");
+      header.setAttribute(
+        "aria-sort",
+        state.sortDirection === "asc" ? "ascending" : "descending",
+      );
     } else {
       header.setAttribute("aria-sort", "none");
     }

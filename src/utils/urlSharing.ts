@@ -8,18 +8,26 @@ export function createDataUrl(jsonString: string): string {
 
 export function parseDataUrl(dataUrl: string): string {
   if (!dataUrl.startsWith(DATA_URL_PREFIX)) {
-    throw new Error("Invalid data URL format. Expected data:application/json;base64,...");
+    throw new Error(
+      "Invalid data URL format. Expected data:application/json;base64,...",
+    );
   }
 
   const base64 = dataUrl.substring(DATA_URL_PREFIX.length);
   try {
     return decodeURIComponent(escape(atob(base64)));
   } catch (error) {
-    throw new Error(`Failed to parse data URL: ${error instanceof Error ? error.message : "Unknown error"}`);
+    throw new Error(
+      `Failed to parse data URL: ${error instanceof Error ? error.message : "Unknown error"}`,
+      { cause: error },
+    );
   }
 }
 
-export function isDataUrlValid(dataUrl: string, maxSize: number = DEFAULT_MAX_SIZE): boolean {
+export function isDataUrlValid(
+  dataUrl: string,
+  maxSize: number = DEFAULT_MAX_SIZE,
+): boolean {
   if (!dataUrl.startsWith(DATA_URL_PREFIX)) {
     return false;
   }

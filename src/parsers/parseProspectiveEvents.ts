@@ -6,8 +6,14 @@
  */
 
 import { ProspectiveEvent } from "@models/ProspectiveEvent";
-import { CSVParseResult, CSVParseError } from "@localtypes/ProspectiveEventTypes";
-import { validateCSVHeaders, validateProspectiveEvent } from "@utils/prospectValidation";
+import {
+  CSVParseResult,
+  CSVParseError,
+} from "@localtypes/ProspectiveEventTypes";
+import {
+  validateCSVHeaders,
+  validateProspectiveEvent,
+} from "@utils/prospectValidation";
 
 /**
  * Parse prospective events from CSV content
@@ -23,7 +29,7 @@ export function parseProspectiveEventsCSV(content: string): CSVParseResult {
     if (rows.length < 2) {
       errors.push({
         row: 0,
-        message: 'CSV must contain at least a header row and one data row'
+        message: "CSV must contain at least a header row and one data row",
       });
       return { events, errors, warnings: [] };
     }
@@ -34,10 +40,10 @@ export function parseProspectiveEventsCSV(content: string): CSVParseResult {
     // Validate headers
     const headerValidation = validateCSVHeaders(headers);
     if (!headerValidation.isValid) {
-      headerValidation.errors.forEach(error => {
+      headerValidation.errors.forEach((error) => {
         errors.push({
           row: 0,
-          message: `Header validation error: ${error}`
+          message: `Header validation error: ${error}`,
         });
       });
       return { events, errors, warnings: [] };
@@ -63,17 +69,16 @@ export function parseProspectiveEventsCSV(content: string): CSVParseResult {
       } catch (error) {
         errors.push({
           row: rowNumber,
-          message: error instanceof Error ? error.message : 'Unknown error'
+          message: error instanceof Error ? error.message : "Unknown error",
         });
       }
     }
 
     return { events, errors, warnings };
-
   } catch (error) {
     errors.push({
       row: 0,
-      message: `CSV parsing failed: ${error instanceof Error ? error.message : 'Unknown error'}`
+      message: `CSV parsing failed: ${error instanceof Error ? error.message : "Unknown error"}`,
     });
     return { events, errors, warnings: [] };
   }
@@ -85,7 +90,7 @@ export function parseProspectiveEventsCSV(content: string): CSVParseResult {
 function parseCSVRows(content: string): string[][] {
   const rows: string[][] = [];
   let currentRow: string[] = [];
-  let currentField = '';
+  let currentField = "";
   let inQuotes = false;
   let i = 0;
 
@@ -103,23 +108,24 @@ function parseCSVRows(content: string): string[][] {
         i++;
       }
       // Empty else block is intentional - quote toggling handled above
-    } else if (char === ',' && !inQuotes) {
+    } else if (char === "," && !inQuotes) {
       // Field separator
       currentRow.push(currentField.trim());
-      currentField = '';
+      currentField = "";
       i++;
-    } else if ((char === '\n' || char === '\r') && !inQuotes) {
+    } else if ((char === "\n" || char === "\r") && !inQuotes) {
       // End of row (handle both \n and \r\n)
       if (currentField.length > 0 || currentRow.length > 0) {
         currentRow.push(currentField.trim());
-        if (currentRow.some(field => field.length > 0)) { // Skip empty rows
+        if (currentRow.some((field) => field.length > 0)) {
+          // Skip empty rows
           rows.push(currentRow);
         }
         currentRow = [];
-        currentField = '';
+        currentField = "";
       }
       // Skip \r if followed by \n
-      if (char === '\r' && i + 1 < content.length && content[i + 1] === '\n') {
+      if (char === "\r" && i + 1 < content.length && content[i + 1] === "\n") {
         i++;
       }
       i++;
@@ -132,7 +138,8 @@ function parseCSVRows(content: string): string[][] {
   // Handle the last field and row
   if (currentField.length > 0 || currentRow.length > 0) {
     currentRow.push(currentField.trim());
-    if (currentRow.some(field => field.length > 0)) { // Skip empty rows
+    if (currentRow.some((field) => field.length > 0)) {
+      // Skip empty rows
       rows.push(currentRow);
     }
   }
@@ -140,20 +147,20 @@ function parseCSVRows(content: string): string[][] {
   return rows;
 }
 
-
 /**
  * Parse a single prospective event row
  */
 function parseProspectiveEventRow(
   fields: string[],
   columnIndex: Record<string, number>,
-  rowNumber: number
+  rowNumber: number,
 ): ProspectiveEvent | null {
-
   // Validate field count matches headers
   const expectedFields = Object.keys(columnIndex).length;
   if (fields.length !== expectedFields) {
-    throw new Error(`Expected ${expectedFields} fields but got ${fields.length}`);
+    throw new Error(
+      `Expected ${expectedFields} fields but got ${fields.length}`,
+    );
   }
 
   // Helper function to get field value
@@ -162,32 +169,32 @@ function parseProspectiveEventRow(
     if (index === undefined) {
       throw new Error(`Required column '${columnName}' not found`);
     }
-    return fields[index] || '';
+    return fields[index] || "";
   };
 
   // Parse individual fields with validation
-  const prospectEvent = getField('Prospect Event').trim();
+  const prospectEvent = getField("Prospect Event").trim();
   if (!prospectEvent) {
-    throw new Error('Prospect Event name is required');
+    throw new Error("Prospect Event name is required");
   }
 
-  const country = getField('Country').trim();
+  const country = getField("Country").trim();
   if (!country) {
-    throw new Error('Country is required');
+    throw new Error("Country is required");
   }
 
-  const state = getField('State').trim();
-  const prospectEDs = getField('Prospect ED/s').trim();
-  const eventAmbassador = getField('EA').trim();
+  const state = getField("State").trim();
+  const prospectEDs = getField("Prospect ED/s").trim();
+  const eventAmbassador = getField("EA").trim();
   // Note: EA field can be empty - it will be marked as unmatched during import
 
   // Parse date
-  const dateMadeContact = parseDate(getField('Date Made Contact'));
+  const dateMadeContact = parseDate(getField("Date Made Contact"));
 
   // Parse boolean fields
-  const courseFound = parseBoolean(getField('Course Found'));
-  const landownerPermission = parseBoolean(getField('Landowner Permission'));
-  const fundingConfirmed = parseBoolean(getField('Funding Confirmed'));
+  const courseFound = parseBoolean(getField("Course Found"));
+  const landownerPermission = parseBoolean(getField("Landowner Permission"));
+  const fundingConfirmed = parseBoolean(getField("Funding Confirmed"));
 
   // Create the prospective event
   const event: ProspectiveEvent = {
@@ -201,10 +208,10 @@ function parseProspectiveEventRow(
     courseFound,
     landownerPermission,
     fundingConfirmed,
-    geocodingStatus: 'pending',
-    ambassadorMatchStatus: 'pending',
+    geocodingStatus: "pending",
+    ambassadorMatchStatus: "pending",
     importTimestamp: Date.now(),
-    sourceRow: rowNumber
+    sourceRow: rowNumber,
   };
 
   // Validate the complete event
@@ -212,7 +219,9 @@ function parseProspectiveEventRow(
   if (!validation.isValid) {
     // Throw the first validation error
     const firstError = validation.errors[0];
-    throw new Error(`Validation error for ${firstError.field}: ${firstError.message}`);
+    throw new Error(
+      `Validation error for ${firstError.field}: ${firstError.message}`,
+    );
   }
 
   return event;
@@ -227,13 +236,16 @@ function parseDate(dateStr: string): Date | null {
     return null;
   }
 
-  let date: Date | null = null;
+  let date: Date | null;
 
   // Try DD/MM/YY format first
   const ddmmyyMatch = trimmed.match(/^(\d{1,2})\/(\d{1,2})\/(\d{2})$/);
   if (ddmmyyMatch) {
     const [, day, month, year] = ddmmyyMatch;
-    const fullYear = year.length === 2 ? (parseInt(year) >= 50 ? 1900 : 2000) + parseInt(year) : parseInt(year);
+    const fullYear =
+      year.length === 2
+        ? (parseInt(year) >= 50 ? 1900 : 2000) + parseInt(year)
+        : parseInt(year);
     date = new Date(fullYear, parseInt(month) - 1, parseInt(day));
   } else {
     // Try to parse as ISO format or other formats
@@ -247,7 +259,7 @@ function parseDate(dateStr: string): Date | null {
 
   // Check for reasonable date range (not too far in past/future)
   const now = new Date();
-  const minDate = new Date('2000-01-01');
+  const minDate = new Date("2000-01-01");
   const maxDate = new Date(now.getFullYear() + 10, 11, 31); // 10 years in future
 
   if (date < minDate || date > maxDate) {
@@ -264,12 +276,12 @@ function parseBoolean(value: string): boolean {
   const trimmed = value.trim().toLowerCase();
 
   // Accept various boolean representations for true
-  if (['true', 'yes', '1', 'y', 't'].includes(trimmed)) {
+  if (["true", "yes", "1", "y", "t"].includes(trimmed)) {
     return true;
   }
 
   // Accept various boolean representations for false, or treat anything else as false
-  if (['false', 'no', '0', 'n', 'f'].includes(trimmed)) {
+  if (["false", "no", "0", "n", "f"].includes(trimmed)) {
     return false;
   }
 
@@ -280,8 +292,14 @@ function parseBoolean(value: string): boolean {
 /**
  * Generate a unique ID for a prospective event
  */
-function generateProspectiveEventId(prospectEvent: string, country: string, state: string): string {
-  const base = `${prospectEvent}-${country}-${state}`.toLowerCase().replace(/[^a-z0-9]/g, '-');
+function generateProspectiveEventId(
+  prospectEvent: string,
+  country: string,
+  state: string,
+): string {
+  const base = `${prospectEvent}-${country}-${state}`
+    .toLowerCase()
+    .replace(/[^a-z0-9]/g, "-");
   const timestamp = Date.now();
   const random = Math.random().toString(36).substring(2, 8);
   return `${base}-${timestamp}-${random}`;

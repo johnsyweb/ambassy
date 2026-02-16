@@ -23,7 +23,7 @@ export async function getCountries(): Promise<CountryMap> {
   }
 
   if (!countriesPromise) {
-    countriesPromise = fetchCountries().then(countries => {
+    countriesPromise = fetchCountries().then((countries) => {
       countriesCache = countries;
       return countries;
     });
@@ -43,11 +43,13 @@ export function getCountriesSync(): CountryMap {
 /**
  * Determines the country code for a given coordinate by checking which country's bounds contain it.
  * Returns the country code as a number, or 0 if no match is found.
- * 
+ *
  * @param coordinate - The coordinate to check
  * @returns The country code or 0 if not found
  */
-export async function getCountryCodeFromCoordinate(coordinate: Coordinate): Promise<number> {
+export async function getCountryCodeFromCoordinate(
+  coordinate: Coordinate,
+): Promise<number> {
   const countries = await getCountries();
   const lat = getLatitude(coordinate);
   const lon = getLongitude(coordinate);
@@ -60,7 +62,7 @@ export async function getCountryCodeFromCoordinate(coordinate: Coordinate): Prom
     const [minLon, minLat, maxLon, maxLat] = country.bounds;
 
     // Handle longitude wrapping (e.g., New Zealand spans the dateline)
-    let lonMatches = false;
+    let lonMatches: boolean;
     if (minLon > maxLon) {
       // Country spans the dateline (e.g., New Zealand: 166.724 to -180)
       lonMatches = lon >= minLon || lon <= maxLon;
@@ -81,22 +83,24 @@ export async function getCountryCodeFromCoordinate(coordinate: Coordinate): Prom
 /**
  * Gets the country code from a parkrun domain by looking it up in the countries map.
  * Extracts the domain from URLs like "www.parkrun.com.au" or "parkrun.ca"
- * 
+ *
  * @param domain - The parkrun domain (e.g., "com.au", "ca", "co.uk")
  * @returns The country code, or 0 if not found
  */
-export async function getCountryCodeFromDomain(domain: string): Promise<number> {
+export async function getCountryCodeFromDomain(
+  domain: string,
+): Promise<number> {
   const countries = await getCountries();
   // Normalize domain (remove www.parkrun. prefix if present)
-  const normalizedDomain = domain.replace(/^(www\.)?parkrun\./, '');
+  const normalizedDomain = domain.replace(/^(www\.)?parkrun\./, "");
 
   // Look up the domain in the countries map
   for (const [code, country] of Object.entries(countries)) {
     if (code === "0") continue; // Skip the default/unknown country
-    
+
     if (country.url) {
       // Extract domain from URL (e.g., "www.parkrun.com.au" -> "com.au")
-      const urlDomain = country.url.replace(/^www\.parkrun\./, '');
+      const urlDomain = country.url.replace(/^www\.parkrun\./, "");
       if (urlDomain === normalizedDomain) {
         return parseInt(code, 10);
       }
@@ -163,25 +167,25 @@ const COUNTRY_CODE_TO_ISO: Record<number, string> = {
 /**
  * Infers two-letter ISO 3166-1 alpha-2 country code from coordinates.
  * Returns uppercase ISO code (e.g., "AU", "GB").
- * 
+ *
  * @param coordinate - The coordinate to infer country from
  * @returns Two-letter ISO country code (e.g., "AU", "GB") or "Unknown" if inference fails
  */
 export async function inferCountryCodeFromCoordinates(
-  coordinate: Coordinate
+  coordinate: Coordinate,
 ): Promise<string> {
   const countryCode = await getCountryCodeFromCoordinate(coordinate);
-  
+
   if (countryCode === 0) {
     return "Unknown";
   }
-  
+
   // Check direct mapping first
   const isoCode = COUNTRY_CODE_TO_ISO[countryCode];
   if (isoCode) {
     return isoCode;
   }
-  
+
   // Fallback: try to derive from country URL TLD if available
   const countries = await getCountries();
   const country = countries[countryCode.toString()];
@@ -189,84 +193,84 @@ export async function inferCountryCodeFromCoordinates(
     // Extract TLD from parkrun URL
     // e.g., "www.parkrun.com.au" -> "au"
     //       "www.parkrun.co.uk" -> "uk"
-    const domain = country.url.replace(/^www\.parkrun\./, '');
-    const domainParts = domain.split('.');
+    const domain = country.url.replace(/^www\.parkrun\./, "");
+    const domainParts = domain.split(".");
     const tld = domainParts[domainParts.length - 1].toLowerCase();
-    
+
     // Map TLD to ISO code (uk -> gb, others map directly)
     // This allows for extensibility - new countries can be added without code changes
-    if (tld === 'uk') {
-      return 'GB'; // UK TLD maps to GB ISO code
+    if (tld === "uk") {
+      return "GB"; // UK TLD maps to GB ISO code
     }
-    
+
     // For other TLDs, use the TLD as ISO code (most TLDs match ISO codes)
     // Convert to uppercase for consistency
     return tld.toUpperCase() || "Unknown";
   }
-  
+
   return "Unknown";
 }
 
 /**
  * Infers country name string from coordinates.
  * Converts country code to a readable country name.
- * 
+ *
  * @param coordinate - The coordinate to infer country from
  * @returns Country name string (e.g., "Australia") or "Unknown" if inference fails
  */
 export async function inferCountryFromCoordinates(
-  coordinate: Coordinate
+  coordinate: Coordinate,
 ): Promise<string> {
   const countryCode = await getCountryCodeFromCoordinate(coordinate);
-  
+
   if (countryCode === 0) {
     return "Unknown";
   }
-  
+
   const countryName = COUNTRY_CODE_TO_NAME[countryCode];
   if (countryName) {
     return countryName;
   }
-  
+
   // Fallback: try to derive from country URL if available
   const countries = await getCountries();
   const country = countries[countryCode.toString()];
   if (country?.url) {
     // Extract domain and convert to readable name
     // e.g., "www.parkrun.com.au" -> "Australia"
-    const domain = country.url.replace(/^www\.parkrun\./, '');
-    const domainParts = domain.split('.');
+    const domain = country.url.replace(/^www\.parkrun\./, "");
+    const domainParts = domain.split(".");
     const lastPart = domainParts[domainParts.length - 1];
-    
+
     // Map TLD to country name
     // This allows for extensibility - new countries can be added by extending this mapping
     const tldToName: Record<string, string> = {
-      'au': 'Australia',
-      'uk': 'United Kingdom',
-      'ie': 'Ireland',
-      'nz': 'New Zealand',
-      'za': 'South Africa',
-      'us': 'United States',
-      'ca': 'Canada',
-      'it': 'Italy',
-      'pl': 'Poland',
-      'de': 'Germany',
-      'dk': 'Denmark',
-      'se': 'Sweden',
-      'no': 'Norway',
-      'fi': 'Finland',
-      'nl': 'Netherlands',
-      'fr': 'France',
-      'ru': 'Russia',
-      'jp': 'Japan',
-      'sg': 'Singapore',
-      'my': 'Malaysia',
-      'lt': 'Lithuania',
+      au: "Australia",
+      uk: "United Kingdom",
+      ie: "Ireland",
+      nz: "New Zealand",
+      za: "South Africa",
+      us: "United States",
+      ca: "Canada",
+      it: "Italy",
+      pl: "Poland",
+      de: "Germany",
+      dk: "Denmark",
+      se: "Sweden",
+      no: "Norway",
+      fi: "Finland",
+      nl: "Netherlands",
+      fr: "France",
+      ru: "Russia",
+      jp: "Japan",
+      sg: "Singapore",
+      my: "Malaysia",
+      lt: "Lithuania",
       // Add more countries as parkrun expands
     };
-    
+
     return tldToName[lastPart] || domain || "Unknown";
   }
-  
+
   return "Unknown";
 }

@@ -4,7 +4,10 @@ import { EventDetailsMap } from "@models/EventDetailsMap";
 import { EventDetails } from "@models/EventDetails";
 import { ReallocationSuggestion } from "@models/ReallocationSuggestion";
 import { Coordinate, toGeoJSONArray } from "@models/Coordinate";
-import { calculateGeographicProximityScore, findNeighboringEvents } from "./suggestReallocation";
+import {
+  calculateGeographicProximityScore,
+  findNeighboringEvents,
+} from "./suggestReallocation";
 import { loadCapacityLimits } from "./checkCapacity";
 import { getRegionalAmbassadorForEventAmbassador } from "@utils/regions";
 import { getCountryCodeFromCoordinate } from "@models/country";
@@ -17,7 +20,7 @@ export function suggestEventAllocation(
   eventName: string,
   eventAmbassadors: EventAmbassadorMap,
   eventDetails: EventDetailsMap,
-  regionalAmbassadors: RegionalAmbassadorMap
+  regionalAmbassadors: RegionalAmbassadorMap,
 ): ReallocationSuggestion[] {
   if (!eventDetails.has(eventName)) {
     throw new Error(`Event "${eventName}" not found in eventDetails`);
@@ -48,16 +51,20 @@ export function suggestEventAllocation(
       warnings.push("Would exceed capacity limit");
     }
 
-    let score = 0;
     let neighboringEvents: Array<{ name: string; distanceKm: number }> = [];
 
     if (eventCoords && recipient.events.length > 0) {
       const proximityScore = calculateGeographicProximityScore(
         recipient.events,
         [eventName],
-        eventDetails
+        eventDetails,
       );
-      neighboringEvents = findNeighboringEvents(recipient.events, [eventName], eventDetails, 50);
+      neighboringEvents = findNeighboringEvents(
+        recipient.events,
+        [eventName],
+        eventDetails,
+        50,
+      );
 
       if (proximityScore > 50) {
         reasons.push("Geographic proximity");
@@ -79,15 +86,17 @@ export function suggestEventAllocation(
       distanceBonus = Math.max(0, 100 - closestDistance);
     }
 
-    score = baseScore + distanceBonus;
+    const score = baseScore + distanceBonus;
 
     if (recipient.events.length + 1 > limits.eventAmbassadorMax) {
-      warnings.push(`Would exceed maximum capacity (${limits.eventAmbassadorMax})`);
+      warnings.push(
+        `Would exceed maximum capacity (${limits.eventAmbassadorMax})`,
+      );
     }
 
     const recipientRA = getRegionalAmbassadorForEventAmbassador(
       recipientName,
-      regionalAmbassadors
+      regionalAmbassadors,
     );
     if (recipientRA) {
       reasons.push(`REA: ${recipientRA}`);
@@ -103,7 +112,8 @@ export function suggestEventAllocation(
       allocationCount: totalAllocations,
       liveEventsCount,
       prospectEventsCount,
-      neighboringEvents: neighboringEvents.length > 0 ? neighboringEvents : undefined,
+      neighboringEvents:
+        neighboringEvents.length > 0 ? neighboringEvents : undefined,
     });
   });
 
@@ -113,7 +123,7 @@ export function suggestEventAllocation(
 /**
  * Generate EA allocation suggestions for a prospect based on coordinates.
  * Creates a temporary EventDetails entry to reuse existing allocation algorithm.
- * 
+ *
  * @param prospectName - Prospect name (used for temporary EventDetails entry)
  * @param coordinates - Prospect coordinates
  * @param eventAmbassadors - All EAs for suggestions
@@ -126,7 +136,7 @@ export async function generateProspectAllocationSuggestions(
   coordinates: Coordinate,
   eventAmbassadors: EventAmbassadorMap,
   eventDetails: EventDetailsMap,
-  regionalAmbassadors: RegionalAmbassadorMap
+  regionalAmbassadors: RegionalAmbassadorMap,
 ): Promise<ReallocationSuggestion[]> {
   if (eventAmbassadors.size === 0) {
     return [];
@@ -134,8 +144,8 @@ export async function generateProspectAllocationSuggestions(
 
   // Create temporary EventDetails entry for prospect
   const countryCode = await getCountryCodeFromCoordinate(coordinates);
-  const tempEventName = `prospect-${prospectName.toLowerCase().replace(/\s+/g, '-')}-${Date.now()}`;
-  
+  const tempEventName = `prospect-${prospectName.toLowerCase().replace(/\s+/g, "-")}-${Date.now()}`;
+
   const tempEventDetails: EventDetails = {
     id: tempEventName,
     type: "Feature",
@@ -144,7 +154,7 @@ export async function generateProspectAllocationSuggestions(
       coordinates: toGeoJSONArray(coordinates), // GeoJSON format: [longitude, latitude]
     },
     properties: {
-      eventname: prospectName.toLowerCase().replace(/\s+/g, ''),
+      eventname: prospectName.toLowerCase().replace(/\s+/g, ""),
       EventLongName: prospectName,
       EventShortName: prospectName,
       LocalisedEventLongName: null,
@@ -163,7 +173,7 @@ export async function generateProspectAllocationSuggestions(
       tempEventName,
       eventAmbassadors,
       eventDetails,
-      regionalAmbassadors
+      regionalAmbassadors,
     );
 
     return suggestions;

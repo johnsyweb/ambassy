@@ -4,7 +4,10 @@ export async function copyToClipboard(text: string): Promise<void> {
       await navigator.clipboard.writeText(text);
       return;
     } catch (error) {
-      throw new Error(`Clipboard write failed: ${error instanceof Error ? error.message : "Unknown error"}`);
+      throw new Error(
+        `Clipboard write failed: ${error instanceof Error ? error.message : "Unknown error"}`,
+        { cause: error },
+      );
     }
   }
 
@@ -25,6 +28,9 @@ export async function copyToClipboard(text: string): Promise<void> {
     }
   } catch (error) {
     document.body.removeChild(textarea);
-    throw new Error(`Clipboard copy failed: ${error instanceof Error ? error.message : "Unknown error"}`);
+    throw new Error(
+      `Clipboard copy failed: ${error instanceof Error ? error.message : "Unknown error"}`,
+      { cause: error },
+    );
   }
 }
