@@ -72,7 +72,7 @@ Ambassy features a clean, professional interface with:
 
 ## How it will work
 
-This project is written in TypeScript, has unit tests, and the map will be displayed in any modern web browser.
+This project is written in TypeScript, has unit tests, and the map will be displayed in any modern web browser. The production build updates `sitemap.xml`’s `<lastmod>` to the build date so search engines see an accurate last-modified time.
 
 ## State Persistence and Sharing
 

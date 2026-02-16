@@ -4,7 +4,7 @@
   "description": "For ambassador allocations",
   "main": "index.js",
   "scripts": {
-    "build": "webpack --config webpack.prod.js",
+    "build": "webpack --config webpack.prod.js && node script/update-sitemap-lastmod.js",
     "deploy": "gh-pages -d dist",
     "lint:fix": "eslint 'src/**/*.{ts,tsx}' --fix",
     "lint": "eslint 'src/**/*.{ts,tsx}'",
