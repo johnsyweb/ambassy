@@ -159,8 +159,8 @@
 - [x] T111 [P] Verify Australian English is used in all new user-facing text (Launch, Archive, matching messages)
 - [x] T112 [P] Ensure Launch/Archive actions are fully keyboard accessible from the Prospects table (Tab/Shift+Tab navigation, Enter/Space activation)
 - [x] T113 [P] Update `README.md` and `quickstart.md` to describe the end-of-lifecycle flows (Launch and Archive, including event allocation where applicable)
-- [x] T114 [P] Run full test suite (`npm test`) and ensure new tests pass
-- [x] T115 [P] Run linting (`npm run lint`) and fix any issues
+- [x] T114 [P] Run full test suite (`pnpm test`) and ensure new tests pass
+- [x] T115 [P] Run linting (`pnpm run lint`) and fix any issues
 - [x] T116 [P] Run TypeScript type-check (`tsc --noEmit` or equivalent) and fix any issues
 
 ---

@@ -116,9 +116,9 @@ sortTable('myTable', 3, 'date');
 
 Run unit tests:
 ```bash
-npm test -- tableSorting
-npm test -- sortComparators
-npm test -- TableSortState
+pnpm test -- tableSorting
+pnpm test -- sortComparators
+pnpm test -- TableSortState
 ```
 
 ## Troubleshooting

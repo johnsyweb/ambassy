@@ -147,7 +147,7 @@
 
 ## Dependencies
 
-- No new npm packages required
+- No new packages required
 - Browser APIs used: localStorage, File API, Blob API, URL.createObjectURL
 - Existing dependencies remain unchanged
 

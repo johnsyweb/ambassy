@@ -143,8 +143,8 @@
 - [x] T050 [P] Update README.md if needed to document new "Add Prospect" feature
 - [x] T051 Run quickstart.md validation to ensure all examples work correctly (verified implementation matches quickstart patterns)
 - [x] T052 [P] Code cleanup: Remove any commented-out code, ensure all imports use path aliases (@actions/*, @models/*, etc.)
-- [x] T053 [P] Verify all tests pass (npm test)
-- [x] T054 [P] Verify linting passes (npm run lint)
+- [x] T053 [P] Verify all tests pass (pnpm test)
+- [x] T054 [P] Verify linting passes (pnpm run lint)
 - [x] T055 [P] Verify TypeScript compilation passes (tsc --noEmit)
 
 ---

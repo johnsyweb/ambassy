@@ -229,7 +229,7 @@
 - [x] T108 [P] Review code for adherence to Single Responsibility Principle
 - [x] T109 [P] Perform final lint:fix and lint check
 - [x] T110 [P] Run TypeScript type checking (tsc --noEmit) - passes
-- [x] T111 [P] Run all tests (npm test) - 129 tests passing
+- [x] T111 [P] Run all tests (pnpm test) - 129 tests passing
 
 ---
 

@@ -74,11 +74,11 @@ The app is written in TypeScript with unit tests and runs in a modern web browse
 
 ## Local development
 
-- Install dependencies: `npm install`
-- Run the development server: `npm start`
-- Run tests: `npm test`
-- Lint: `npm run lint`
-- Production build (writes to `dist/`): `npm run build`
+- Install dependencies: `pnpm install`
+- Run the development server: `pnpm start`
+- Run tests: `pnpm test`
+- Lint: `pnpm run lint`
+- Production build (writes to `dist/`): `pnpm run build`
 
 ## Privacy and data sovereignty
 

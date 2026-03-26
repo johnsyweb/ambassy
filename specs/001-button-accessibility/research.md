@@ -77,7 +77,7 @@
 
 ## Dependencies
 
-- No new npm packages required
+- No new packages required
 - Uses existing DOM APIs
 - Uses existing data loading logic from `src/index.ts`
 

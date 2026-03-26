@@ -165,7 +165,7 @@
 
 ## Dependencies
 
-- No new npm packages required
+- No new packages required
 - Uses existing geographic data (EventDetails.coordinates)
 - Uses existing localStorage API
 - May implement Haversine formula directly (no external dependency)
