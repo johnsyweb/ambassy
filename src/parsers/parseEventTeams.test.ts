@@ -1,9 +1,9 @@
-import { parseEventTeams } from "./parseEventTeams";
+import { parseEventTeams, type EventTeamRow } from "./parseEventTeams";
 import { EventTeamMap } from "@models/EventTeamMap";
 
 describe("parseEventTeams", () => {
   it("should handle empty data", () => {
-    const data: Record<string, unknown>[] = [];
+    const data: EventTeamRow[] = [];
 
     const result: EventTeamMap = parseEventTeams(data);
 
@@ -11,7 +11,7 @@ describe("parseEventTeams", () => {
   });
 
   it("should parse event teams correctly", () => {
-    const data: Record<string, unknown>[] = [
+    const data: EventTeamRow[] = [
       {
         Event: "Erinsborough",
         "Event Ambassador": "Helen Daniels",
@@ -43,7 +43,7 @@ describe("parseEventTeams", () => {
   });
 
   it("should handle data with missing event directors", () => {
-    const data: Record<string, unknown>[] = [
+    const data: EventTeamRow[] = [
       {
         Event: "Erinsborough",
         "Event Ambassador": "Helen Daniels",
@@ -63,7 +63,7 @@ describe("parseEventTeams", () => {
   });
 
   it("should handle multiple directors for a single event", () => {
-    const data: Record<string, unknown>[] = [
+    const data: EventTeamRow[] = [
       {
         Event: "Erinsborough",
         "Event Ambassador": "Helen Daniels",
@@ -85,7 +85,7 @@ describe("parseEventTeams", () => {
   });
 
   it("should handle data with missing event names", () => {
-    const data: Record<string, unknown>[] = [
+    const data: EventTeamRow[] = [
       {
         Event: "",
         "Event Ambassador": "Helen Daniels",
@@ -97,12 +97,12 @@ describe("parseEventTeams", () => {
   });
 
   it("should ignore unknown columns on each row", () => {
-    const data: Record<string, unknown>[] = [
+    const data: EventTeamRow[] = [
       {
         Event: "Erinsborough",
         "Event Ambassador": "Helen Daniels",
         "Event Director/s": "Scott",
-        unused: "ignored",
+        unused_contact: "ignored",
       },
     ];
 

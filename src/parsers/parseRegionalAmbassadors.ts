@@ -2,14 +2,18 @@ import { RegionalAmbassador } from "@models/RegionalAmbassador";
 import { RegionalAmbassadorMap } from "@models/RegionalAmbassadorMap";
 import { csvStringCell } from "@utils/csvField";
 
+/**
+ * One row from the Regional Ambassadors CSV. Extra columns are ignored after pick.
+ */
 export interface RegionalAmbassadorRow {
   "RA Name": string;
   "RA State": string;
   "EA Name": string;
+  [key: string]: string | undefined;
 }
 
 function pickRegionalAmbassadorRow(
-  raw: Record<string, unknown>,
+  raw: RegionalAmbassadorRow,
 ): RegionalAmbassadorRow {
   return {
     "RA Name": csvStringCell(raw["RA Name"]),
@@ -19,7 +23,7 @@ function pickRegionalAmbassadorRow(
 }
 
 export function parseRegionalAmbassadors(
-  data: ReadonlyArray<Record<string, unknown>>,
+  data: ReadonlyArray<RegionalAmbassadorRow>,
 ): RegionalAmbassadorMap {
   const regionalAmbassadorsMap: RegionalAmbassadorMap = new Map<string, RegionalAmbassador>();
   let currentRA: RegionalAmbassador | null = null;

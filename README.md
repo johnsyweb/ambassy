@@ -2,18 +2,18 @@
 
 ## Introduction
 
-This is a project written by a parkrun Regional Event Ambassador (REA) to save some time and effort. A Regional Event Ambassador (REA) is a parkrun volunteer who supports more than one Event Ambassador (EA). An Event Ambassador is a parkrun volunteer who supports more than one Event Team. An Event Team is responsible for the care and delivery of a single parkrun Event an a weekly basis. An event team is comprised of one or two Event Directors (ED) plus some Run Directors (RD) -- these are also parkrun volunteers.
+This is a project written by a parkrun Regional Event Ambassador (REA) to save some time and effort. A Regional Event Ambassador (REA) is a parkrun volunteer who supports more than one Event Ambassador (EA). An Event Ambassador is a parkrun volunteer who supports more than one Event Team. An Event Team is responsible for the care and delivery of a single parkrun event on a weekly basis. An event team is comprised of one or two Event Directors (ED) plus some Run Directors (RD); these are also parkrun volunteers.
 
 parkrun has many _events_ around the world, which are listed at <http://images.parkrun.com/events.json>. Event Ambassadors may also support "prospects". A prospect is an event that has not yet started and is not yet listed by parkrun.
 
 We'll keep a table of these and their allocated Event Ambassadors in a CSV file.
 We'll keep a table of Event Ambassador event allocations in a separate CSV file.
 A third CSV file will keep a table of Regional Event Ambassadors and the Event Ambassadors they support.
-These CSV files will remain private and will be uploaded via the /upload page.
+These CSV files stay on your device until you load them in Ambassy using the file picker on the main page.
 
 We are not concerned with all parkrun events globally, just those within the care of the Regional Event Ambassadors listed.
 
-Some notes about parkrun volunteers. They each have a "home" parkrun Event (e.g. "Coburg"). An ED can also be an EA, but cannot support the Event Team of which they are a part.
+Some notes about parkrun volunteers. They each have a "home" parkrun event (for example "Coburg"). An ED can also be an EA, but cannot support the Event Team of which they are a part.
 
 ## A concept map of the entities described above
 
@@ -21,7 +21,7 @@ Some notes about parkrun volunteers. They each have a "home" parkrun Event (e.g.
 graph TD
     REA[Regional Event Ambassador] -->|supports| EA[Event Ambassador]
     EA -->|supports| ET[Event Team]
-    ET -->|responsible for| PE[parkrun Event]
+    ET -->|responsible for| PE[parkrun event]
     ET -->|comprised of| ED[Event Director]
     ET -->|comprised of| RD[Run Director]
     EA -->|supports| P[Prospect]
@@ -36,8 +36,8 @@ graph TD
     EA -->|listed in| CSV1
     EA -->|listed in| CSV2
 
-    subgraph parkrun Volunteers
-        PV1[Home parkrun Event]
+    subgraph vol[parkrun volunteers]
+        PV1[Home parkrun event]
     end
 
     PV1 -->|e.g.| Coburg
@@ -60,17 +60,25 @@ Ambassy features a clean, professional interface with:
 - **Responsive Design**: Adapts seamlessly to desktop, tablet, and mobile devices
   - Header buttons wrap appropriately on smaller screens
   - File input buttons match the styling of other buttons
-- **Parkrun colour palette**: Header and footer use the same palette as sibling microsites (eventuate, foretoken, pr-by-pt): aubergine background, apricot links, Atkinson Hyperlegible
+- **parkrun colour palette**: Header and footer use the same palette as sibling microsites (eventuate, foretoken, pr-by-pt): aubergine background, apricot links, Atkinson Hyperlegible
 
-## What this project will do
+## What Ambassy does
 
-- Render a map, showing the locations of each of the parkrun volunteers identified and their allocations
-- Make recommendations as to which EAs are best-placed to support local events and prospects
-- Make recommendations as to which REAs are best-placed to support local EAs
+- Renders a map showing the locations of parkrun volunteers you have loaded and their allocations
+- Suggests which EAs are well placed to support local events and prospects
+- Suggests which REAs are well placed to support local EAs
 
-## How it will work
+## How it is built
 
-This project is written in TypeScript, has unit tests, and the map will be displayed in any modern web browser. The production build updates `sitemap.xml`’s `<lastmod>` to the build date so search engines see an accurate last-modified time.
+The app is written in TypeScript with unit tests and runs in a modern web browser. A production build updates `sitemap.xml`’s `<lastmod>` to the build date so search engines see an accurate last-modified time.
+
+## Local development
+
+- Install dependencies: `npm install`
+- Run the development server: `npm start`
+- Run tests: `npm test`
+- Lint: `npm run lint`
+- Production build (writes to `dist/`): `npm run build`
 
 ## Privacy and data sovereignty
 

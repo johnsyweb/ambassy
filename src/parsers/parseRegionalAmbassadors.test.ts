@@ -1,9 +1,12 @@
-import { parseRegionalAmbassadors } from './parseRegionalAmbassadors';
+import {
+  parseRegionalAmbassadors,
+  type RegionalAmbassadorRow,
+} from './parseRegionalAmbassadors';
 import { RegionalAmbassadorMap } from '@models/RegionalAmbassadorMap';
 
 describe('parseRegionalAmbassadors', () => {
   it('should parse regional ambassadors correctly', () => {
-    const data: Record<string, unknown>[] = [
+    const data: RegionalAmbassadorRow[] = [
       { 'RA Name': 'John Doe', 'RA State': 'VIC', 'EA Name': 'Jane Smith' },
       { 'RA Name': '',         'RA State': '',    'EA Name': 'Bob Johnson' },
       { 'RA Name': 'Alice Brown', 'RA State': 'NSW', 'EA Name': 'Charlie Davis' }
@@ -27,7 +30,7 @@ describe('parseRegionalAmbassadors', () => {
   });
 
   it('should handle empty data', () => {
-    const data: Record<string, unknown>[] = [];
+    const data: RegionalAmbassadorRow[] = [];
 
     const result: RegionalAmbassadorMap = parseRegionalAmbassadors(data);
 
@@ -35,12 +38,12 @@ describe('parseRegionalAmbassadors', () => {
   });
 
   it('should ignore unknown columns on each row', () => {
-    const data: Record<string, unknown>[] = [
+    const data: RegionalAmbassadorRow[] = [
       {
         'RA Name': 'John Doe',
         'RA State': 'VIC',
         'EA Name': 'Jane Smith',
-        extra: 'ignored',
+        extra_notes: 'ignored',
       },
     ];
 

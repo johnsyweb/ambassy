@@ -69,7 +69,7 @@
 | Requirement | Implementation | Status |
 |-------------|----------------|--------|
 | Header contains breadcrumb, then title, then actions | Header has title + actions only | ⚠️ **Partial** (missing breadcrumb) |
-| Parkrun aubergine/white | Uses MD4 #0d2b33 and #ffffff | ❌ **Conflict** (colour only) |
+| parkrun aubergine/white | Uses MD4 #0d2b33 and #ffffff | ❌ **Conflict** (colour only) |
 | Flexbox, title left / actions right | Present | ✅ OK |
 | Responsive stack on mobile | Present at 768px | ✅ OK |
 
@@ -84,7 +84,7 @@
 | Single paragraph only | Two paragraphs (version/author/GitHub; then license) | ❌ **Conflict** |
 | Version, author, GitHub, license in one paragraph | Content present but split into two `<p>` | ❌ **Conflict** |
 | target="_blank" rel="noopener noreferrer" on external links | Present on footer links | ✅ OK |
-| Parkrun aubergine background, apricot links | MD4 #30403d, #3d9df2, #ffcc00 | ❌ **Conflict** |
+| parkrun aubergine background, apricot links | MD4 #30403d, #3d9df2, #ffcc00 | ❌ **Conflict** |
 
 **Action**: T010 (single paragraph with all content), T011 (links already have attributes), T012 (footer styles to parkrun variables).
 

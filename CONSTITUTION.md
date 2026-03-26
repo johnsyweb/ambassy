@@ -43,7 +43,7 @@ All coordinates MUST be serialised as named members:
 When calling external APIs, we MUST respect the API's coordinate format:
 
 - **Leaflet.js**: Uses `[latitude, longitude]` array format
-- **Parkrun API (GeoJSON)**: Uses `[longitude, latitude]` array format
+- **parkrun API (GeoJSON)**: Uses `[longitude, latitude]` array format
 - **Nominatim API**: Uses named `lat` and `lon` properties
 
 Conversion functions MUST be used at API boundaries to maintain internal consistency.

@@ -1,17 +1,20 @@
-import { parseEventAmbassadors } from "./parseEventAmbassadors";
+import {
+  parseEventAmbassadors,
+  type EventAmbassadorRow,
+} from "./parseEventAmbassadors";
 
 describe("parseEventAmbassadors", () => {
   it("should ignore unknown columns on each row", () => {
-    const data: Record<string, unknown>[] = [
+    const data: EventAmbassadorRow[] = [
       {
         "Event Ambassador": "Test EA",
         Events: "Some Event",
-        extra: "ignored",
+        extra_notes: "ignored",
       },
       {
         "Event Ambassador": "",
         Events: "Other Event",
-        notes: "also ignored",
+        other: "also ignored",
       },
     ];
 

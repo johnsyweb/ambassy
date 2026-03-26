@@ -9,7 +9,7 @@ Ambassy uses the same header and footer approach as eventuate, foretoken, and pr
 
 - **Header**: Skip link, breadcrumb (johnsy.com → parkrun utilities → Ambassy), app title, subtitle, and primary actions (e.g. Add Prospect).
 - **Footer**: Single paragraph with version (changelog link), author, GitHub, and license.
-- **Palette**: Parkrun colours via CSS variables (aubergine, apricot, white, etc.).
+- **Palette**: parkrun colours via CSS variables (aubergine, apricot, white, etc.).
 - **Typography**: Atkinson Hyperlegible with standard fallbacks.
 - **Layout**: Full-width breakout for header/footer when embedded; main content in `<main id="content">` for skip-link target.
 

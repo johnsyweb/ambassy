@@ -1,7 +1,16 @@
 import Papa from 'papaparse';
-import { parseEventTeams } from '@parsers/parseEventTeams';
-import { parseEventAmbassadors } from '@parsers/parseEventAmbassadors';
-import { parseRegionalAmbassadors } from '@parsers/parseRegionalAmbassadors';
+import {
+  parseEventTeams,
+  type EventTeamRow,
+} from '@parsers/parseEventTeams';
+import {
+  parseEventAmbassadors,
+  type EventAmbassadorRow,
+} from '@parsers/parseEventAmbassadors';
+import {
+  parseRegionalAmbassadors,
+  type RegionalAmbassadorRow,
+} from '@parsers/parseRegionalAmbassadors';
 import { FileUploadCallback } from "@localtypes/FileUploadCallback";
 import { persistEventAmbassadors } from './persistState';
 import { persistEventTeams } from './persistState';
@@ -15,12 +24,12 @@ export function handleFileUpload(file: File, callback: FileUploadCallback): void
       const data = results.data;
       if (file.name.includes('Event Ambassadors')) {
         const eventAmbassadors = parseEventAmbassadors(
-          data as Record<string, unknown>[],
+          data as EventAmbassadorRow[],
         );
         persistEventAmbassadors(eventAmbassadors);
         callback('Event Ambassadors');
       } else if (file.name.includes('Event Teams')) {
-        const eventTeams = parseEventTeams(data as Record<string, unknown>[]);
+        const eventTeams = parseEventTeams(data as EventTeamRow[]);
         persistEventTeams(eventTeams);
         callback('Event Teams');
       } else if (file.name.includes('Regional Ambassadors')) {
@@ -57,7 +66,7 @@ export function handleFileUpload(file: File, callback: FileUploadCallback): void
         
         try {
           const regionalAmbassadors = parseRegionalAmbassadors(
-            data as Record<string, unknown>[],
+            data as RegionalAmbassadorRow[],
           );
           persistRegionalAmbassadors(regionalAmbassadors);
           callback('Regional Ambassadors');

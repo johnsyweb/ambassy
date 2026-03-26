@@ -58,7 +58,10 @@ export function generateUrlFriendlyName(eventName: string): string {
 /**
  * Suggests a parkrun URL based on event name and country
  */
-export async function suggestParkrunUrl(eventName: string, countryCode: number = 0): Promise<string> {
+export async function suggestparkrunUrl(
+  eventName: string,
+  countryCode: number = 0,
+): Promise<string> {
   const urlName = generateUrlFriendlyName(eventName);
   const countries = await getCountries();
 

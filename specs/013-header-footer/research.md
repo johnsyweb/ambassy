@@ -97,7 +97,7 @@ In `public/style.css`, add `.breadcrumbs` styles matching eventuate/pr-by-pt (fl
 
 | Topic           | Decision                          | Source        |
 |----------------|------------------------------------|---------------|
-| Palette        | Parkrun CSS variables in `:root`   | Clarification |
+| Palette        | parkrun CSS variables in `:root`   | Clarification |
 | Breadcrumb     | Same structure + pill styling      | Spec + apps   |
 | Skip link      | Yes, same pattern as eventuate    | Clarification |
 | Full-width     | Yes, breakout CSS                  | Clarification |

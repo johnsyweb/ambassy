@@ -21,7 +21,7 @@
 
 ## Phase 1: Setup (Shared Infrastructure)
 
-**Purpose**: Parkrun palette available for all user stories
+**Purpose**: parkrun palette available for all user stories
 
 - [x] T001 Add parkrun `:root` CSS variables (--parkrun-aubergine, --parkrun-apricot, --parkrun-white, --parkrun-black, --parkrun-grey, --parkrun-light-grey) to public/style.css per spec and data-model.md
 

@@ -2,7 +2,7 @@ import { EventIssue } from "@models/EventIssue";
 import { resolveIssueWithAddress } from "./resolveIssue";
 import { EventDetailsMap } from "@models/EventDetailsMap";
 import { LogEntry } from "@models/LogEntry";
-import { suggestParkrunUrl } from "@utils/fuzzyMatch";
+import { suggestparkrunUrl } from "@utils/fuzzyMatch";
 
 export function showAddressDialog(
   issue: EventIssue,
@@ -53,7 +53,7 @@ export function showAddressDialog(
   urlInput.type = "url";
   urlInput.placeholder = "https://www.parkrun.com.au/example/";
   // Load suggested URL asynchronously
-  suggestParkrunUrl(issue.eventShortName).then(url => {
+  suggestparkrunUrl(issue.eventShortName).then(url => {
     urlInput.value = url;
   }).catch(() => {
     // Fallback if countries aren't loaded yet
