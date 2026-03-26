@@ -308,16 +308,20 @@
           allocate events.
         </p>
         <p>
-          The tool allows you to upload a CSV file containing the names of the
+          The tool allows you to upload CSV files containing the names of the
           Event Ambassadors you support and the events they support. These data
           are parsed in your browser and kept in local storage on your device;
           they are not uploaded to johnsy.com, logged by Ambassy, or stored on
           our servers. There is no analytics whatsoever: usage is not counted,
           adoption is not measured, and Ambassy is shared in goodwill, not to
-          boost traffic or prove how many people use it. Network use is limited
-          to OpenStreetMap map tiles and the public parkrun events catalogue.
-          When you geocode a place, the search text
-          you enter is sent to OpenStreetMap’s Nominatim to resolve coordinates,
+          boost traffic or prove how many people use it. The intent is close to
+          <a href="https://martinfowler.com/bliki/Datensparsamkeit.html">Datensparsamkeit</a>
+          (data minimisation): carry only what you need for the job. Network use
+          is limited to OpenStreetMap map tiles and the public parkrun events
+          catalogue. When you geocode a place, the search text you enter is
+          sent to OpenStreetMap’s
+          <a href="https://nominatim.org/release-docs/latest/">Nominatim</a>
+          to resolve coordinates,
           and that request does not include your CSV or ambassador names. Only
           the columns the tool uses are read from each file; any extra columns
           are ignored and never stored. Share
