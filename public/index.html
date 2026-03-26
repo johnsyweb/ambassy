@@ -5,7 +5,7 @@
     <meta http-equiv="Window-Target" content="_top" />
     <meta http-equiv="X-Clacks-Overhead" content="GNU Terry Pratchett" />
     <meta name="application-name" content="Ambassy" />
-    <meta name="description" content="A tool for parkrun Regional Event Ambassadors (REAs) to visualise and manage event allocations. Upload CSV files to display events on a map with Voronoi territories showing Regional Event Ambassador support areas. This microsite is committed to personal privacy: allocation data are processed in your browser, not on our servers; there is no analytics." />
+    <meta name="description" content="A tool for parkrun Regional Event Ambassadors (REAs) to visualise and manage event allocations. Upload comma-separated values (CSV) files to display events on a map with Voronoi territories showing Regional Event Ambassador support areas. This microsite is committed to personal privacy: allocation data are processed in your browser, not on our servers; there is no analytics." />
     <meta name="keywords" content="parkrun, ambassadors, regional event ambassadors, event ambassadors, parkrun volunteers, event allocation, parkrun management, running community" />
     <meta name="robots" content="index, follow" />
     <meta name="author" content="Pete Johns" />
@@ -47,7 +47,7 @@
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="Ambassy" />
     <meta property="og:title" content="Ambassy - A tool for parkrun ambassadors" />
-    <meta property="og:description" content="A tool for parkrun Regional Event Ambassadors (REAs) to visualise and manage event allocations. Upload CSV files to display events on a map with Voronoi territories showing Regional Event Ambassador support areas. This microsite is committed to personal privacy: allocation data are processed in your browser, not on our servers; there is no analytics." />
+    <meta property="og:description" content="A tool for parkrun Regional Event Ambassadors (REAs) to visualise and manage event allocations. Upload comma-separated values (CSV) files to display events on a map with Voronoi territories showing Regional Event Ambassador support areas. This microsite is committed to personal privacy: allocation data are processed in your browser, not on our servers; there is no analytics." />
     <meta property="og:url" content="https://www.johnsy.com/ambassy/" />
     <meta property="og:image" content="https://www.johnsy.com/ambassy/ambassy-social-preview.png" />
     <meta property="og:image:alt" content="Ambassy showing parkrun event allocations on a map with Regional Event Ambassador (REA) territories" />
@@ -240,7 +240,7 @@
           "@type": "WebApplication",
           "@id": "https://www.johnsy.com/ambassy/#app",
           "name": "Ambassy",
-          "description": "A tool for parkrun Regional Event Ambassadors (REAs) to visualise and manage event allocations. Upload CSV files to display events on a map with Voronoi territories showing Regional Event Ambassador support areas. Committed to personal privacy: allocation data are processed in the browser, not on our servers; there is no analytics.",
+          "description": "A tool for parkrun Regional Event Ambassadors (REAs) to visualise and manage event allocations. Upload comma-separated values (CSV) files to display events on a map with Voronoi territories showing Regional Event Ambassador support areas. Committed to personal privacy: allocation data are processed in the browser, not on our servers; there is no analytics.",
           "url": "https://www.johnsy.com/ambassy/",
           "applicationCategory": "UtilityApplication",
           "operatingSystem": ["Windows", "macOS", "Linux", "Android", "iOS"],
@@ -258,7 +258,7 @@
           "softwareRequirements": "Modern web browser with JavaScript enabled",
           "featureList": [
             "Committed to personal privacy: in-browser processing, no analytics, no server-side storage of your allocations on this site",
-            "Upload CSV files for Regional and Event Ambassadors",
+            "Upload comma-separated values (CSV) files for Regional and Event Ambassadors",
             "Visualise events on an interactive Leaflet map",
             "Voronoi territories for Regional Event Ambassadors",
             "Table views for events, ambassadors, prospects, issues, and changes",
@@ -309,8 +309,10 @@
           allocate events.
         </p>
         <p>
-          The tool allows you to upload CSV files containing the names of the
-          Event Ambassadors you support and the events they support. These data
+          The tool allows you to upload comma-separated values
+          (<abbr title="Comma-Separated Values">CSV</abbr>) files containing the
+          names of the Event Ambassadors you support and the events they support.
+          These data
           are parsed in your browser and kept in local storage on your device;
           they are not uploaded to johnsy.com, logged by Ambassy, or stored on
           our servers. There is no analytics whatsoever: usage is not counted,
@@ -323,12 +325,15 @@
           sent to OpenStreetMap’s
           <a href="https://nominatim.org/release-docs/latest/">Nominatim</a>
           to resolve coordinates,
-          and that request does not include your CSV or ambassador names. Only
+          and that request does not include your
+          <abbr title="Comma-Separated Values">CSV</abbr> or ambassador names.
+          Only
           the columns the tool uses are read from each file; any extra columns
           are ignored and never stored. Share
           and Open only move files when you deliberately exchange them; there is
           no central Ambassy service that stores what you are working on. You
-          may use aliases in your CSV if you prefer; the author uses real names
+          may use aliases in your
+          <abbr title="Comma-Separated Values">CSV</abbr> if you prefer; the author uses real names
           because it makes conflicts of interest between volunteers at different
           levels of the organisation easier to spot. The source code is available
           on
@@ -354,11 +359,12 @@
           </p>
 
         <div id="upload">
-          <h2>Upload CSV Files</h2>
+          <h2>Upload <abbr title="Comma-Separated Values">CSV</abbr> Files</h2>
           <h3 id="uploadPrompt">Please upload your files here.</h3>
           <div id="storageWarning" style="display: none; color: #d32f2f; margin-top: 1em; padding: 0.5em; background-color: #ffebee; border-radius: 4px;"></div>
           <p>
-            Sample CSV files are provided for you to download, inspect and populate:
+            Sample <abbr title="Comma-Separated Values">CSV</abbr> files are
+            provided for you to download, inspect and populate:
             <ul>
               <li><a download="Ambassadors - Regional Ambassadors.csv" href="./Ambassadors - Regional Ambassadors.csv">Regional Event Ambassador (REA)</a></li>
               <li><a download="Ambassadors - Event Ambassadors.csv" href="./Ambassadors - Event Ambassadors.csv"> Event Ambassador (EA)</a></li>
@@ -499,10 +505,10 @@
 
         <div id="prospectsTab" class="tab-content" role="tabpanel" aria-labelledby="prospectsTabButton" hidden>
           <div style="margin-bottom: 1em;">
-            <button type="button" id="importProspectsButton" title="Import Prospects CSV">📥 Import Prospects</button>
+            <button type="button" id="importProspectsButton" title="Import prospects from a comma-separated values (CSV) file">📥 Import Prospects</button>
             <input
               type="file"
-              title="upload prospects CSV"
+              title="Upload prospects comma-separated values (CSV) file"
               id="prospectsCsvFileInput"
               accept=".csv"
               style="display: none;"
