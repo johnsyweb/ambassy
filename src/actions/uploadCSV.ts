@@ -1,7 +1,7 @@
 import Papa from 'papaparse';
-import { parseEventTeams, EventTeamRow } from '@parsers/parseEventTeams';
-import { parseEventAmbassadors, EventAmbassadorRow } from '@parsers/parseEventAmbassadors';
-import { parseRegionalAmbassadors, RegionalAmbassadorRow } from '@parsers/parseRegionalAmbassadors';
+import { parseEventTeams } from '@parsers/parseEventTeams';
+import { parseEventAmbassadors } from '@parsers/parseEventAmbassadors';
+import { parseRegionalAmbassadors } from '@parsers/parseRegionalAmbassadors';
 import { FileUploadCallback } from "@localtypes/FileUploadCallback";
 import { persistEventAmbassadors } from './persistState';
 import { persistEventTeams } from './persistState';
@@ -14,11 +14,13 @@ export function handleFileUpload(file: File, callback: FileUploadCallback): void
     complete: (results) => {
       const data = results.data;
       if (file.name.includes('Event Ambassadors')) {
-        const eventAmbassadors = parseEventAmbassadors(data as EventAmbassadorRow[]);
+        const eventAmbassadors = parseEventAmbassadors(
+          data as Record<string, unknown>[],
+        );
         persistEventAmbassadors(eventAmbassadors);
         callback('Event Ambassadors');
       } else if (file.name.includes('Event Teams')) {
-        const eventTeams = parseEventTeams(data as EventTeamRow[]);
+        const eventTeams = parseEventTeams(data as Record<string, unknown>[]);
         persistEventTeams(eventTeams);
         callback('Event Teams');
       } else if (file.name.includes('Regional Ambassadors')) {
@@ -54,7 +56,9 @@ export function handleFileUpload(file: File, callback: FileUploadCallback): void
         }
         
         try {
-          const regionalAmbassadors = parseRegionalAmbassadors(data as RegionalAmbassadorRow[]);
+          const regionalAmbassadors = parseRegionalAmbassadors(
+            data as Record<string, unknown>[],
+          );
           persistRegionalAmbassadors(regionalAmbassadors);
           callback('Regional Ambassadors');
         } catch (error) {

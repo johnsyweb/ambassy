@@ -7,9 +7,9 @@ import { spawn, ChildProcess, execSync } from 'child_process';
 import { promisify } from 'util';
 import Papa from 'papaparse';
 import * as net from 'net';
-import { parseEventTeams, EventTeamRow } from '../src/parsers/parseEventTeams';
-import { parseEventAmbassadors, EventAmbassadorRow } from '../src/parsers/parseEventAmbassadors';
-import { parseRegionalAmbassadors, RegionalAmbassadorRow } from '../src/parsers/parseRegionalAmbassadors';
+import { parseEventTeams } from '../src/parsers/parseEventTeams';
+import { parseEventAmbassadors } from '../src/parsers/parseEventAmbassadors';
+import { parseRegionalAmbassadors } from '../src/parsers/parseRegionalAmbassadors';
 import { EventAmbassadorMap } from '../src/models/EventAmbassadorMap';
 import { EventTeamMap } from '../src/models/EventTeamMap';
 import { RegionalAmbassadorMap } from '../src/models/RegionalAmbassadorMap';
@@ -151,23 +151,31 @@ async function generateScreenshots(): Promise<void> {
     const eventTeamsData = fs.readFileSync(csvFiles.eventTeams, 'utf-8');
     const regionalAmbassadorsData = fs.readFileSync(csvFiles.regionalAmbassadors, 'utf-8');
 
-    const eventAmbassadorsParsed = Papa.parse<EventAmbassadorRow>(eventAmbassadorsData, {
+    const eventAmbassadorsParsed = Papa.parse<Record<string, unknown>>(
+      eventAmbassadorsData,
+      {
+        header: true,
+        skipEmptyLines: true,
+      },
+    );
+    const eventTeamsParsed = Papa.parse<Record<string, unknown>>(eventTeamsData, {
       header: true,
       skipEmptyLines: true,
     });
-    const eventTeamsParsed = Papa.parse<EventTeamRow>(eventTeamsData, {
-      header: true,
-      skipEmptyLines: true,
-    });
-    const regionalAmbassadorsParsed = Papa.parse<RegionalAmbassadorRow>(regionalAmbassadorsData, {
-      header: true,
-      skipEmptyLines: true,
-    });
+    const regionalAmbassadorsParsed = Papa.parse<Record<string, unknown>>(
+      regionalAmbassadorsData,
+      {
+        header: true,
+        skipEmptyLines: true,
+      },
+    );
 
     // Parse the data
     const eventAmbassadors = parseEventAmbassadors(eventAmbassadorsParsed.data);
     const eventTeams = parseEventTeams(eventTeamsParsed.data);
-    const regionalAmbassadors = parseRegionalAmbassadors(regionalAmbassadorsParsed.data);
+    const regionalAmbassadors = parseRegionalAmbassadors(
+      regionalAmbassadorsParsed.data,
+    );
 
     // Convert to arrays for localStorage
     const eventAmbassadorsArray = Array.from(eventAmbassadors.entries());

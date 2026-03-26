@@ -1,9 +1,9 @@
-import { parseRegionalAmbassadors, RegionalAmbassadorRow } from './parseRegionalAmbassadors';
+import { parseRegionalAmbassadors } from './parseRegionalAmbassadors';
 import { RegionalAmbassadorMap } from '@models/RegionalAmbassadorMap';
 
 describe('parseRegionalAmbassadors', () => {
   it('should parse regional ambassadors correctly', () => {
-    const data: RegionalAmbassadorRow[] = [
+    const data: Record<string, unknown>[] = [
       { 'RA Name': 'John Doe', 'RA State': 'VIC', 'EA Name': 'Jane Smith' },
       { 'RA Name': '',         'RA State': '',    'EA Name': 'Bob Johnson' },
       { 'RA Name': 'Alice Brown', 'RA State': 'NSW', 'EA Name': 'Charlie Davis' }
@@ -27,10 +27,25 @@ describe('parseRegionalAmbassadors', () => {
   });
 
   it('should handle empty data', () => {
-    const data: RegionalAmbassadorRow[] = [];
+    const data: Record<string, unknown>[] = [];
 
     const result: RegionalAmbassadorMap = parseRegionalAmbassadors(data);
 
     expect(result.size).toBe(0);
+  });
+
+  it('should ignore unknown columns on each row', () => {
+    const data: Record<string, unknown>[] = [
+      {
+        'RA Name': 'John Doe',
+        'RA State': 'VIC',
+        'EA Name': 'Jane Smith',
+        extra: 'ignored',
+      },
+    ];
+
+    const result = parseRegionalAmbassadors(data);
+
+    expect(result.get('John Doe')?.supportsEAs).toEqual(['Jane Smith']);
   });
 });

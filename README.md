@@ -13,7 +13,7 @@ These CSV files will remain private and will be uploaded via the /upload page.
 
 We are not concerned with all parkrun events globally, just those within the care of the Regional Event Ambassadors listed.
 
-Some notes about parkrun volunteers. They each have a "home" parkrun Event (e.g. "Coburg") and a parkrun ID, which is an "A" followed by a number (e.g. "A1001388"). We'll keep these next to their names in the spreadsheet. An ED can also be an EA, but cannot support the Event Team of which they are a part.
+Some notes about parkrun volunteers. They each have a "home" parkrun Event (e.g. "Coburg"). An ED can also be an EA, but cannot support the Event Team of which they are a part.
 
 ## A concept map of the entities described above
 
@@ -38,11 +38,9 @@ graph TD
 
     subgraph parkrun Volunteers
         PV1[Home parkrun Event]
-        PV2[parkrun ID]
     end
 
     PV1 -->|e.g.| Coburg
-    PV2 -->|e.g.| A1001388
     ED -->|can also be| EA
     ED -->|cannot support| ET
 ```
@@ -74,6 +72,10 @@ Ambassy features a clean, professional interface with:
 
 This project is written in TypeScript, has unit tests, and the map will be displayed in any modern web browser. The production build updates `sitemap.xml`’s `<lastmod>` to the build date so search engines see an accurate last-modified time.
 
+## Privacy and data sovereignty
+
+Uploaded CSV data are processed in the browser and persisted in local storage on your device. They are not uploaded to johnsy.com or stored on application servers. Only the columns Ambassy understands are read from each CSV; any other columns are ignored and never stored. There is no analytics whatsoever: usage is not counted, adoption is not measured, and Ambassy is shared in goodwill, not to boost traffic or prove how many people use it. Outbound requests are limited to OpenStreetMap map tiles and the public parkrun events catalogue. When you geocode a place, the search text you enter is sent to OpenStreetMap’s Nominatim, and that request does not include your CSV or ambassador names. Sharing state only happens when you explicitly export, copy, or open a file or link. You may use aliases in CSVs; using real names can make conflicts of interest across volunteer tiers easier to see.
+
 ## State Persistence and Sharing
 
 Ambassy automatically persists your uploaded CSV data to browser local storage, so you don't need to re-upload files every time you visit the application. Your data persists across browser sessions.
@@ -82,10 +84,10 @@ Ambassy automatically persists your uploaded CSV data to browser local storage, 
 
 Click the **"Share…"** button to share your current map and allocations with other ambassadors. You can choose from several sharing methods:
 
-- **Save to File**: Download a JSON file containing your state that you can send via email or file sharing
+- **Save to File**: Download a JSON file containing your state that you can pass to others by your usual file-transfer or messaging tools
 - **Copy Share Link**: Copy a link that automatically loads your state when opened (for smaller states)
 - **Copy State Text**: Copy the state data as text that can be pasted into Ambassy
-- **Share via Device**: Use your device's native share menu (mobile/desktop) to share via messaging apps, email, etc.
+- **Share via Device**: Use your device's native share sheet (mobile/desktop) to hand off the export through another app if you prefer
 
 **Note**: If your state is too large for link sharing, you'll be prompted to use file or text sharing instead.
 

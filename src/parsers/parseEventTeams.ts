@@ -1,18 +1,30 @@
 import { EventTeam } from '@models/EventTeam';
+import { csvStringCell } from '@utils/csvField';
 
 export interface EventTeamRow {
-  'Event': string;
+  Event: string;
   'Event Ambassador': string;
   'Event Director/s': string;
 }
 
 export type EventTeamMap = Map<string, EventTeam>;
 
-export function parseEventTeams(data: EventTeamRow[]): EventTeamMap {
+function pickEventTeamRow(raw: Record<string, unknown>): EventTeamRow {
+  return {
+    Event: csvStringCell(raw['Event']),
+    'Event Ambassador': csvStringCell(raw['Event Ambassador']),
+    'Event Director/s': csvStringCell(raw['Event Director/s']),
+  };
+}
+
+export function parseEventTeams(
+  data: ReadonlyArray<Record<string, unknown>>,
+): EventTeamMap {
   const eventTeamsMap = new Map<string, EventTeam>();
   let currentEventTeam: EventTeam | null = null;
 
-  data.forEach(row => {
+  data.forEach((raw) => {
+    const row = pickEventTeamRow(raw);
     const eventShortName = row['Event'];
     const eventAmbassador = row['Event Ambassador'];
     const eventDirector = row['Event Director/s'];

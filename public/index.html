@@ -309,9 +309,24 @@
         </p>
         <p>
           The tool allows you to upload a CSV file containing the names of the
-          Event Ambassadors you support and the events they support. These files
-          are processed in your browser and no data is sent to any servers. The
-          soure code is available on
+          Event Ambassadors you support and the events they support. These data
+          are parsed in your browser and kept in local storage on your device;
+          they are not uploaded to johnsy.com, logged by Ambassy, or stored on
+          our servers. There is no analytics whatsoever: usage is not counted,
+          adoption is not measured, and Ambassy is shared in goodwill, not to
+          boost traffic or prove how many people use it. Network use is limited
+          to OpenStreetMap map tiles and the public parkrun events catalogue.
+          When you geocode a place, the search text
+          you enter is sent to OpenStreetMap’s Nominatim to resolve coordinates,
+          and that request does not include your CSV or ambassador names. Only
+          the columns the tool uses are read from each file; any extra columns
+          are ignored and never stored. Share
+          and Open only move files when you deliberately exchange them; there is
+          no central Ambassy service that stores what you are working on. You
+          may use aliases in your CSV if you prefer; the author uses real names
+          because it makes conflicts of interest between volunteers at different
+          levels of the organisation easier to spot. The source code is available
+          on
           <a href="https://github.com/johnsyweb/ambassy">GitHub</a>
           for inspection (and improvements are welcome).
         </p>

@@ -1,16 +1,29 @@
 import { EventAmbassador } from '@models/EventAmbassador';
 import { EventAmbassadorMap } from '@models/EventAmbassadorMap';
+import { csvStringCell } from '@utils/csvField';
 
 export interface EventAmbassadorRow {
   'Event Ambassador': string;
   'Events': string;
-};
+}
 
-export function parseEventAmbassadors(data: EventAmbassadorRow[]): EventAmbassadorMap {
+function pickEventAmbassadorRow(
+  raw: Record<string, unknown>,
+): EventAmbassadorRow {
+  return {
+    'Event Ambassador': csvStringCell(raw['Event Ambassador']),
+    Events: csvStringCell(raw['Events']),
+  };
+}
+
+export function parseEventAmbassadors(
+  data: ReadonlyArray<Record<string, unknown>>,
+): EventAmbassadorMap {
   const eventAmbassadorsMap: EventAmbassadorMap = new Map<string, EventAmbassador>();
   let currentEA: EventAmbassador | null = null;
 
-  data.forEach(row => {
+  data.forEach((raw) => {
+    const row = pickEventAmbassadorRow(raw);
     const eaName = row['Event Ambassador'];
     const eventName = row['Events'];
 
