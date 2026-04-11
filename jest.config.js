@@ -2,6 +2,9 @@ module.exports = {
   preset: 'ts-jest',
   testEnvironment: 'jsdom',
   testMatch: ['**/?(*.)+(spec|test).[jt]s?(x)'],
+  transform: {
+    '^.+\\.tsx?$': ['ts-jest', { tsconfig: 'tsconfig.test.json' }],
+  },
   moduleNameMapper: {
     '^@actions/(.*)$': '<rootDir>/src/actions/$1',
     '^@models/(.*)$': '<rootDir>/src/models/$1',
