@@ -8,17 +8,15 @@
     "strict": true,
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
-    "moduleResolution": "node",
     "typeRoots": ["./node_modules/@types", "./types"],
-    "baseUrl": "./",
     "paths": {
-      "@actions/*": ["src/actions/*"],
-      "@models/*": ["src/models/*"],
-      "@localtypes/*": ["src/types/*"],
-      "@parsers/*": ["src/parsers/*"],
-      "@utils/*": ["src/utils/*"]
+      "@actions/*": ["./src/actions/*"],
+      "@models/*": ["./src/models/*"],
+      "@localtypes/*": ["./src/types/*"],
+      "@parsers/*": ["./src/parsers/*"],
+      "@utils/*": ["./src/utils/*"]
     }
   },
-  "include": ["src"],
+  "include": ["src", "types/**/*.d.ts"],
   "exclude": ["node_modules", "**/*.test.ts"]
 }
