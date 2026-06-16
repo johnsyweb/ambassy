@@ -151,3 +151,11 @@ _Avoid_: Share dialog, URL export, clipboard export
 **State import action**:
 Loading a state export file via the **Import** header control (system file picker) or by dragging a `.json` file onto the page. URL query parameters and clipboard paste are not supported for state import.
 _Avoid_: Open saved state, share URL, paste state JSON
+
+**App version**:
+The semver shown in the footer (e.g. `v1.2.3`), linked to that release’s changelog. Bumped automatically on `main` from conventional commits; not edited by hand in the UI.
+_Avoid_: Build number, package.json (implementation detail)
+
+**Changelog**:
+The version history of Ambassy changes, generated from conventional commits. Linked from the footer app version.
+_Avoid_: Release notes (GitHub-only), git log
