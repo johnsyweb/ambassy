@@ -1,6 +1,7 @@
 const path = require("path");
 const webpack = require("webpack");
 const CopyWebpackPlugin = require("copy-webpack-plugin");
+const { injectAppVersion } = require("./script/inject-app-version.cjs");
 
 module.exports = {
   mode: "development",
@@ -46,12 +47,25 @@ module.exports = {
       "process.env.NODE_ENV": JSON.stringify("development"),
     }),
     new CopyWebpackPlugin({
-      patterns: [{ from: "public", to: "" }],
+      patterns: [
+        {
+          from: "public/index.html",
+          to: "index.html",
+          transform(content) {
+            return injectAppVersion(content.toString());
+          },
+        },
+        {
+          from: "public",
+          to: "",
+          globOptions: { ignore: ["**/index.html"] },
+        },
+      ],
     }),
   ],
   devServer: {
     static: {
-      directory: path.join(__dirname, "public"),
+      directory: path.join(__dirname, "dist"),
     },
     compress: true,
     port: 8081,

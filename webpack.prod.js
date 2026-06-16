@@ -4,6 +4,7 @@ const { CleanWebpackPlugin } = require("clean-webpack-plugin");
 const CopyWebpackPlugin = require("copy-webpack-plugin");
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const TerserPlugin = require("terser-webpack-plugin");
+const { injectAppVersion } = require("./script/inject-app-version.cjs");
 
 module.exports = {
   mode: "production",
@@ -50,7 +51,20 @@ module.exports = {
     }),
     new CleanWebpackPlugin(),
     new CopyWebpackPlugin({
-      patterns: [{ from: "public", to: "" }],
+      patterns: [
+        {
+          from: "public/index.html",
+          to: "index.html",
+          transform(content) {
+            return injectAppVersion(content.toString());
+          },
+        },
+        {
+          from: "public",
+          to: "",
+          globOptions: { ignore: ["**/index.html"] },
+        },
+      ],
     }),
     new MiniCssExtractPlugin({
       filename: "[name].[contenthash].css",
