@@ -4,6 +4,9 @@ import {
   isEventMarkerVisibleOnMap,
   applyAmbassadorNameFilterToMap,
   getMarkerMap,
+  getUnallocatedMarkerMap,
+  getMap,
+  refreshViewportUnallocatedMarkersForTests,
 } from "./populateMap";
 
 jest.mock("d3-geo-voronoi", () => ({
@@ -412,6 +415,119 @@ describe("populateMap", () => {
       expect(isEventMarkerVisibleOnMap("event1")).toBe(true);
       expect(isEventMarkerVisibleOnMap("event2")).toBe(false);
       expect(isEventMarkerVisibleOnMap("unallocated")).toBe(false);
+    });
+  });
+
+  describe("Viewport unallocated markers", () => {
+    beforeEach(() => {
+      document.body.innerHTML = '<div id="mapContainer"></div>';
+      sessionStorage.clear();
+    });
+
+    afterEach(() => {
+      document.body.innerHTML = "";
+      sessionStorage.clear();
+    });
+
+    it("shows unallocated markers in the viewport and updates them on pan", () => {
+      const eventTeamsTableData = new Map();
+      eventTeamsTableData.set("event1", {
+        eventShortName: "event1",
+        eventDirectors: "Director1",
+        eventAmbassador: "EA1",
+        regionalAmbassador: "REA1",
+        eventCoordinates: "37.80000° S 144.90000° E",
+        eventSeries: 1,
+        eventCountryCode: 3,
+        eventCountry: "Australia",
+      });
+
+      const eventDetails = new Map();
+      eventDetails.set("event1", {
+        id: "1",
+        type: "Feature",
+        geometry: { type: "Point", coordinates: [144.9631, -37.8136] },
+        properties: {
+          eventname: "Event 1",
+          EventLongName: "Event 1 Long Name",
+          EventShortName: "event1",
+          LocalisedEventLongName: null,
+          countrycode: 0,
+          seriesid: 1,
+          EventLocation: "Location 1",
+        },
+      });
+      eventDetails.set("nearby-unallocated", {
+        id: "2",
+        type: "Feature",
+        geometry: { type: "Point", coordinates: [145.0, -37.9] },
+        properties: {
+          eventname: "Nearby Unallocated",
+          EventLongName: "Nearby Unallocated",
+          EventShortName: "nearby-unallocated",
+          LocalisedEventLongName: null,
+          countrycode: 0,
+          seriesid: 1,
+          EventLocation: "Location 2",
+        },
+      });
+      eventDetails.set("distant-unallocated", {
+        id: "3",
+        type: "Feature",
+        geometry: { type: "Point", coordinates: [0.1, 51.5] },
+        properties: {
+          eventname: "Distant Unallocated",
+          EventLongName: "Distant Unallocated",
+          EventShortName: "distant-unallocated",
+          LocalisedEventLongName: null,
+          countrycode: 0,
+          seriesid: 1,
+          EventLocation: "Location 3",
+        },
+      });
+
+      const eventAmbassadors = new Map();
+      eventAmbassadors.set("EA1", { name: "EA1", events: ["event1"] });
+
+      const regionalAmbassadors = new Map();
+      regionalAmbassadors.set("REA1", {
+        name: "REA1",
+        state: "VIC",
+        supportsEAs: ["EA1"],
+      });
+
+      populateMap(
+        eventTeamsTableData,
+        eventDetails,
+        eventAmbassadors,
+        regionalAmbassadors,
+      );
+
+      const map = getMap();
+      expect(map).not.toBeNull();
+
+      refreshViewportUnallocatedMarkersForTests({
+        minLongitude: 144.5,
+        maxLongitude: 145.5,
+        minLatitude: -38.5,
+        maxLatitude: -37.5,
+      });
+
+      expect(getMarkerMap().size).toBe(2);
+      expect(getUnallocatedMarkerMap().has("nearby-unallocated")).toBe(true);
+      expect(getUnallocatedMarkerMap().has("distant-unallocated")).toBe(false);
+      expect(isEventMarkerVisibleOnMap("nearby-unallocated")).toBe(true);
+
+      refreshViewportUnallocatedMarkersForTests({
+        minLongitude: -0.5,
+        maxLongitude: 0.5,
+        minLatitude: 51,
+        maxLatitude: 52,
+      });
+
+      expect(getUnallocatedMarkerMap().has("nearby-unallocated")).toBe(false);
+      expect(getUnallocatedMarkerMap().has("distant-unallocated")).toBe(true);
+      expect(isEventMarkerVisibleOnMap("distant-unallocated")).toBe(true);
     });
   });
 });

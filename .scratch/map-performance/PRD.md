@@ -22,7 +22,7 @@ Implement in order (highest impact first):
 | # | Issue | Status |
 |---|--------|--------|
 | 01 | Stop rendering global unallocated event markers | done |
-| 02 | Viewport-culled unallocated markers for map allocation | ready-for-agent |
+| 02 | Viewport-culled unallocated markers for map allocation | done |
 | 03 | Canvas renderer for mass markers | ready-for-agent |
 | 04 | Split table refresh from map refresh | ready-for-agent |
 | 05 | Skip `populateMap` when map inputs unchanged | ready-for-agent |

@@ -20,7 +20,9 @@ import {
   VoronoiSite,
   VoronoiTerritoryCache,
   viewportFromLeafletBounds,
+  ViewportBounds,
 } from "@utils/voronoiTerritories";
+import { findUnallocatedEventsInViewport } from "@utils/viewportUnallocatedMarkers";
 import { getEventTeamsTableDataByShortName } from "@models/EventDetailsMap";
 import {
   eventTeamRowMatchesAmbassadorNameFilter,
@@ -52,13 +54,16 @@ export function populateMap(
 
   // Calculate event bounds for map centering
   const eventBounds = calculateEventBounds(eventTeamsTableData, eventDetails);
-  const { map, markersLayer, polygonsLayer } = setupMapView(eventBounds);
+  const { map, markersLayer, polygonsLayer, isNewMap } =
+    setupMapView(eventBounds);
 
   markersLayer.clearLayers();
   polygonsLayer.clearLayers();
   _markerMap.clear();
+  _unallocatedMarkerMap.clear();
   _eventMarkerFilterState.clear();
   _prospectMarkers.clear();
+  _mapPopulationContext = { eventDetails, eventTeamsTableData };
 
   eventTeamsTableData.forEach((data, eventName) => {
     const event = eventDetails.get(eventName);
@@ -139,6 +144,13 @@ export function populateMap(
 
   // Add markersLayer to map
   markersLayer.addTo(map!);
+
+  refreshViewportUnallocatedMarkers();
+  if (isNewMap) {
+    map.once("moveend", () => {
+      refreshViewportUnallocatedMarkers();
+    });
+  }
 
   _currentVoronoiSites = buildVoronoiSites({
     eventDetails,
@@ -233,7 +245,13 @@ function calculateEventBounds(
   return hasBounds ? bounds : null;
 }
 
-function setupMapView(eventBounds: L.LatLngBounds | null) {
+function setupMapView(eventBounds: L.LatLngBounds | null): {
+  map: L.Map;
+  markersLayer: L.LayerGroup;
+  polygonsLayer: L.LayerGroup;
+  isNewMap: boolean;
+} {
+  const isNewMap = !_map;
   if (!_map) {
     _map = L.map("mapContainer");
     L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
@@ -255,6 +273,7 @@ function setupMapView(eventBounds: L.LatLngBounds | null) {
     map: _map,
     markersLayer: _markersLayer,
     polygonsLayer: _polygonsLayer,
+    isNewMap,
   };
 }
 
@@ -318,8 +337,124 @@ function ensureViewportClipListener(map: L.Map): void {
     if (_currentVoronoiSites && _polygonsLayer && _map) {
       drawClippedTerritoryPolygons(_map, _polygonsLayer, _currentVoronoiSites);
     }
+    refreshViewportUnallocatedMarkers();
   });
   _viewportClipListenerAttached = true;
+}
+
+function createUnallocatedEventMarker(
+  eventName: string,
+  latitude: number,
+  longitude: number,
+): L.CircleMarker {
+  const marker = L.circleMarker([latitude, longitude], {
+    radius: 4,
+    color: DEFAULT_EVENT_COLOUR,
+    fillColor: DEFAULT_EVENT_COLOUR,
+    fillOpacity: 0.6,
+    weight: 2,
+  });
+  marker.bindTooltip(`${eventName}<br><em>Click to allocate</em>`, {
+    permanent: false,
+    direction: "top",
+    offset: [0, -10],
+  });
+
+  marker.on("mouseover", () => {
+    marker.setStyle({
+      radius: 6,
+      fillOpacity: 0.8,
+      weight: 3,
+    });
+    const element = marker.getElement() as HTMLElement | null;
+    if (element) {
+      element.style.cursor = "pointer";
+    }
+  });
+  marker.on("mouseout", () => {
+    marker.setStyle({
+      radius: 4,
+      fillOpacity: 0.6,
+      weight: 2,
+    });
+    const element = marker.getElement() as HTMLElement | null;
+    if (element) {
+      element.style.cursor = "pointer";
+    }
+  });
+  marker.on("add", () => {
+    const element = marker.getElement() as HTMLElement | null;
+    if (element) {
+      element.style.cursor = "pointer";
+    }
+  });
+
+  if (_markerClickHandler) {
+    marker.on("click", () => {
+      _markerClickHandler!(eventName);
+    });
+  }
+
+  return marker;
+}
+
+function refreshViewportUnallocatedMarkers(
+  viewportOverride?: ViewportBounds,
+): void {
+  if (!_map || !_markersLayer || !_mapPopulationContext) {
+    return;
+  }
+
+  if (isAmbassadorNameFilterActive(getAmbassadorNameFilter())) {
+    for (const eventName of [..._unallocatedMarkerMap.keys()]) {
+      removeUnallocatedMarker(eventName);
+    }
+    return;
+  }
+
+  const viewport =
+    viewportOverride ?? viewportFromLeafletBounds(_map.getBounds());
+  const visibleUnallocated = findUnallocatedEventsInViewport(
+    _mapPopulationContext.eventDetails,
+    _mapPopulationContext.eventTeamsTableData,
+    viewport,
+  );
+  const visibleNames = new Set(
+    visibleUnallocated.map((event) => event.eventName),
+  );
+
+  for (const eventName of [..._unallocatedMarkerMap.keys()]) {
+    if (!visibleNames.has(eventName)) {
+      removeUnallocatedMarker(eventName);
+    }
+  }
+
+  for (const event of visibleUnallocated) {
+    if (_unallocatedMarkerMap.has(event.eventName)) {
+      continue;
+    }
+
+    _eventMarkerFilterState.set(event.eventName, { kind: "unallocated" });
+    const marker = createUnallocatedEventMarker(
+      event.eventName,
+      event.latitude,
+      event.longitude,
+    );
+    _markerMap.set(event.eventName, marker);
+    _unallocatedMarkerMap.set(event.eventName, marker);
+    _markersLayer.addLayer(marker);
+  }
+}
+
+function removeUnallocatedMarker(eventName: string): void {
+  const marker = _unallocatedMarkerMap.get(eventName);
+  if (marker && _markersLayer?.hasLayer(marker)) {
+    _markersLayer.removeLayer(marker);
+  }
+
+  _unallocatedMarkerMap.delete(eventName);
+  _markerMap.delete(eventName);
+  _eventMarkerFilterState.delete(eventName);
 }
 
 // Global variables
@@ -328,6 +463,7 @@ let _markersLayer: L.LayerGroup;
 let _polygonsLayer: L.LayerGroup;
 let _layersControl: L.Control.Layers | null = null;
 const _markerMap: Map<string, L.CircleMarker> = new Map();
+const _unallocatedMarkerMap: Map<string, L.CircleMarker> = new Map();
 let _highlightLayer: L.LayerGroup | null = null;
 let _markerClickHandler: ((eventShortName: string) => void) | null = null;
 const _voronoiTerritoryCache = new VoronoiTerritoryCache();
@@ -336,6 +472,10 @@ let _viewportClipListenerAttached = false;
 let _mapTerritoryFilterContext: {
   eventTeamsTableData: EventTeamsTableDataMap;
   filter: string;
+} | null = null;
+let _mapPopulationContext: {
+  eventDetails: EventDetailsMap;
+  eventTeamsTableData: EventTeamsTableDataMap;
 } | null = null;
 
 type EventMarkerFilterState =
@@ -430,6 +570,8 @@ export function applyAmbassadorNameFilterToMap(
   if (_currentVoronoiSites.length > 0) {
     drawClippedTerritoryPolygons(_map, _polygonsLayer, _currentVoronoiSites);
   }
+
+  refreshViewportUnallocatedMarkers();
 }
 
 export function isEventMarkerVisibleOnMap(eventName: string): boolean {
@@ -443,6 +585,27 @@ export function resetVoronoiTerritoryCacheForTests(): void {
   _viewportClipListenerAttached = false;
   _eventMarkerFilterState.clear();
   _prospectMarkers.clear();
+  _unallocatedMarkerMap.clear();
+  _mapPopulationContext = null;
+  _markerMap.clear();
+  if (_layersControl) {
+    _layersControl.remove();
+    _layersControl = null;
+  }
+  if (_map) {
+    _map.remove();
+    _map = null;
+  }
+}
+
+export function getUnallocatedMarkerMap(): Map<string, L.CircleMarker> {
+  return _unallocatedMarkerMap;
+}
+
+export function refreshViewportUnallocatedMarkersForTests(
+  viewport: ViewportBounds,
+): void {
+  refreshViewportUnallocatedMarkers(viewport);
 }
 
 export function getMarkerMap(): Map<string, L.CircleMarker> {

@@ -1,4 +1,4 @@
-Status: ready-for-agent
+Status: done
 
 # Viewport-culled unallocated markers for map allocation
 
@@ -8,11 +8,11 @@ Restore map-click allocation for unallocated parkruns without rendering the full
 
 ## Acceptance criteria
 
-- [ ] Unallocated markers appear only within viewport bounds
-- [ ] Pan/zoom updates visible unallocated markers without full `populateMap()` rebuild
-- [ ] Clicking a viewport unallocated marker still opens the allocation dialog
-- [ ] Marker count in viewport stays bounded at REA working zoom levels
-- [ ] Tests cover viewport add/remove behaviour
+- [x] Unallocated markers appear only within viewport bounds
+- [x] Pan/zoom updates visible unallocated markers without full `populateMap()` rebuild
+- [x] Clicking a viewport unallocated marker still opens the allocation dialog
+- [x] Marker count in viewport stays bounded at REA working zoom levels
+- [x] Tests cover viewport add/remove behaviour
 
 ## Blocked by
 
