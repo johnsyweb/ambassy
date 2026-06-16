@@ -158,7 +158,7 @@ Ambassy provides tools for managing ambassador capacity and lifecycle:
 
 ### Allocating Events from the Map
 
-- **Allocate unallocated events**: Pan the map to the area you care about, then click a small purple **unallocated** marker to allocate that live parkrun to an Event Ambassador. Only parkruns in the current map viewport (plus a small buffer) are shown — not the full global catalogue. **Event search** (keyboard shortcut) remains available for events outside the current view.
+- **Allocate unallocated events**: Pan the map to the area you care about, then click a small purple **unallocated** marker to allocate that live parkrun to an Event Ambassador. Only parkruns in the current map viewport (plus a small buffer) are shown — not the full global catalogue. **Event search** (keyboard shortcut) remains available for events outside the current view. Clear the **Ambassador name filter** if it is active — a filter hides unallocated markers on the map.
 - **Allocated events**: Click an allocated event marker to reallocate or inspect it. After allocation, the event appears in the Event Teams table with complete information (EA, REA, Event Directors if known), the map updates with the EA's colour, and the change is logged.
 
 ### Adding Prospects by Address
