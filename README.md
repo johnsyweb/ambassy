@@ -72,6 +72,14 @@ Ambassy features a clean, professional interface with:
 
 The app is written in TypeScript with unit tests and runs in a modern web browser. A production build updates `sitemap.xml`’s `<lastmod>` to the build date so search engines see an accurate last-modified time.
 
+## Releases and versioning
+
+Merges to `main` use [semantic-release](https://semantic-release.gitbook.io/) with [Conventional Commits](https://www.conventionalcommits.org/). Commit messages must follow the convention (`feat:`, `fix:`, `perf:`, etc.); commitlint runs locally (husky) and in CI.
+
+On each code release, CI generates `CHANGELOG.md`, bumps `package.json`, tags `vX.Y.Z`, publishes a GitHub Release, rebuilds with the new version injected into the footer, and deploys to GitHub Pages. The footer version links to that tag’s changelog. Docs-only changes (`docs/`, `specs/`, `CONTEXT.md`, `README.md`, `.github/`) skip versioning but still redeploy Pages.
+
+See [ADR 0008](docs/adr/0008-semantic-release-and-changelog.md) for the full release and deploy flow.
+
 ## Local development
 
 - Install dependencies: `pnpm install`
