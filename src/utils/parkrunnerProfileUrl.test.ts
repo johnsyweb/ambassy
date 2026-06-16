@@ -47,7 +47,7 @@ describe("parkrunnerProfileUrl", () => {
   it("uses the canonical Tampermonkey install URL in production", () => {
     expect(
       getTampermonkeyInstallUrl(
-        getFinishExportUserscriptUrl("https://johnsy.com/ambassy/"),
+        getFinishExportUserscriptUrl("https://www.johnsy.com/ambassy/"),
       ),
     ).toBe(
       `https://www.tampermonkey.net/script_installation.php#url=${encodeURIComponent(FINISH_EXPORT_USERSCRIPT_METADATA.downloadUrl)}`,

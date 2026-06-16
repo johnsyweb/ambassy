@@ -32,10 +32,10 @@ describe("finishExportUserscriptMetadata", () => {
     ]);
 
     expect(header).toContain(
-      "// @downloadURL  https://johnsy.com/ambassy/script/ambassy-finish-export.user.js",
+      "// @downloadURL  https://www.johnsy.com/ambassy/script/ambassy-finish-export.user.js",
     );
     expect(header).toContain(
-      "// @updateURL    https://johnsy.com/ambassy/script/ambassy-finish-export.user.js",
+      "// @updateURL    https://www.johnsy.com/ambassy/script/ambassy-finish-export.user.js",
     );
     expect(header).toContain("// @run-at       document-end");
     expect(header).toContain("// @tag          parkrun");
@@ -45,7 +45,7 @@ describe("finishExportUserscriptMetadata", () => {
 
   it("uses the canonical install URL outside local development", () => {
     expect(
-      getFinishExportUserscriptInstallUrl("https://johnsy.com/ambassy/"),
+      getFinishExportUserscriptInstallUrl("https://www.johnsy.com/ambassy/"),
     ).toBe(FINISH_EXPORT_USERSCRIPT_METADATA.downloadUrl);
   });
 

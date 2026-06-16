@@ -1,7 +1,7 @@
 export const PARKRUN_PROFILE_PATH_PATTERN = "/parkrunner/*/all*";
 
 export const FINISH_EXPORT_AMBASSY_ORIGIN_MATCHES = [
-  "https://johnsy.com/ambassy*",
+  "https://www.johnsy.com/ambassy*",
   "http://localhost:*/*",
   "http://127.0.0.1:*/*",
 ] as const;

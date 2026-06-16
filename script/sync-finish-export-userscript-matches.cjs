@@ -60,7 +60,7 @@ function buildParkrunnerProfileMatch(host) {
 }
 
 const AMBASSY_ORIGIN_MATCHES = [
-  "https://johnsy.com/ambassy*",
+  "https://www.johnsy.com/ambassy*",
   "http://localhost:*/*",
   "http://127.0.0.1:*/*",
 ];

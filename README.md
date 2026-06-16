@@ -128,7 +128,7 @@ Ambassy can show **last ambassador visit** on the Event Teams tab (who finished 
 
 ### Setup
 
-1. Open **Visit history** from the top bar and follow the instructions to add the finish export userscript to Tampermonkey. Tampermonkey checks the published script on [johnsy.com](https://johnsy.com/ambassy/script/ambassy-finish-export.user.js) for updates automatically.
+1. Open **Visit history** from the top bar and follow the instructions to add the finish export userscript to Tampermonkey. Tampermonkey checks the published script on [www.johnsy.com](https://www.johnsy.com/ambassy/script/ambassy-finish-export.user.js) for updates automatically.
 2. Set each ambassador's **parkrunner ID** (e.g. `A1001388`) on the Event Ambassadors or Regional Ambassadors tab, or via the optional `parkrunner ID` CSV column.
 
 ### Importing finishes

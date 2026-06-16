@@ -2,12 +2,12 @@
 // @name         Ambassy visit history export
 // @description  Export parkrun profile finishes for Ambassy last ambassador visit tracking.
 // @author       Pete Johns (@johnsyweb)
-// @downloadURL  https://johnsy.com/ambassy/script/ambassy-finish-export.user.js
+// @downloadURL  https://www.johnsy.com/ambassy/script/ambassy-finish-export.user.js
 // @grant        GM_setValue
 // @grant        GM_getValue
 // @grant        GM_setClipboard
 // @grant        GM_notification
-// @homepage     https://johnsy.com/ambassy/#finish-history
+// @homepage     https://www.johnsy.com/ambassy/#finish-history
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=parkrun.com.au
 // @license      MIT
 // @match        *://www.parkrun.ca/parkrunner/*/all*
@@ -30,7 +30,7 @@
 // @match        *://www.parkrun.se/parkrunner/*/all*
 // @match        *://www.parkrun.sg/parkrunner/*/all*
 // @match        *://www.parkrun.us/parkrunner/*/all*
-// @match        https://johnsy.com/ambassy*
+// @match        https://www.johnsy.com/ambassy*
 // @match        http://localhost:*/*
 // @match        http://127.0.0.1:*/*
 // @namespace    https://github.com/johnsyweb/ambassy
@@ -38,9 +38,10 @@
 // @supportURL   https://github.com/johnsyweb/ambassy/issues/
 // @tag          parkrun
 // @tag          ambassy
-// @updateURL    https://johnsy.com/ambassy/script/ambassy-finish-export.user.js
-// @version      1.2.0
+// @updateURL    https://www.johnsy.com/ambassy/script/ambassy-finish-export.user.js
+// @version      1.2.1
 // ==/UserScript==
+
 
 
 

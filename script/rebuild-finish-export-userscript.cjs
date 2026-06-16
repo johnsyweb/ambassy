@@ -18,22 +18,22 @@ const METADATA = {
     "Export parkrun profile finishes for Ambassy last ambassador visit tracking.",
   author: "Pete Johns (@johnsyweb)",
   downloadUrl:
-    "https://johnsy.com/ambassy/script/ambassy-finish-export.user.js",
+    "https://www.johnsy.com/ambassy/script/ambassy-finish-export.user.js",
   updateUrl:
-    "https://johnsy.com/ambassy/script/ambassy-finish-export.user.js",
-  homepage: "https://johnsy.com/ambassy/#finish-history",
+    "https://www.johnsy.com/ambassy/script/ambassy-finish-export.user.js",
+  homepage: "https://www.johnsy.com/ambassy/#finish-history",
   icon: "https://www.google.com/s2/favicons?sz=64&domain=parkrun.com.au",
   license: "MIT",
   namespace: "https://github.com/johnsyweb/ambassy",
   runAt: "document-end",
   supportUrl: "https://github.com/johnsyweb/ambassy/issues/",
   tags: ["parkrun", "ambassy"],
-  version: "1.2.0",
+  version: "1.2.1",
   grants: ["GM_setValue", "GM_getValue", "GM_setClipboard", "GM_notification"],
 };
 
 const AMBASSY_ORIGIN_MATCHES = [
-  "https://johnsy.com/ambassy*",
+  "https://www.johnsy.com/ambassy*",
   "http://localhost:*/*",
   "http://127.0.0.1:*/*",
 ];

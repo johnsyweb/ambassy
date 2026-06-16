@@ -77,7 +77,7 @@ describe("finishExportUserscriptMatches", () => {
 
   it("includes the Ambassy production origin match", () => {
     expect(FINISH_EXPORT_AMBASSY_ORIGIN_MATCHES).toContain(
-      "https://johnsy.com/ambassy*",
+      "https://www.johnsy.com/ambassy*",
     );
   });
 
