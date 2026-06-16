@@ -1,4 +1,4 @@
-import { CountryCode } from './CountryCode';
+import { CountryCode } from "./CountryCode";
 
 export interface EventTeamsTableData {
   eventShortName: string;
@@ -9,29 +9,35 @@ export interface EventTeamsTableData {
   eventSeries: number;
   eventCountryCode: number;
   eventCountry: CountryCode | string; // Two-letter country code, or fallback string if invalid
+  lastAmbassadorVisit?: string;
 }
 
 export type EventTeamsTableDataMap = Map<string, EventTeamsTableData>;
 
 export function eventAmbassadorsFrom(data: EventTeamsTableDataMap): string[] {
-  return [...new Set(
-    Array.from(data.values())
-    .map(data => data.eventAmbassador)
-    .sort((a, b) => a.localeCompare(b))
-  )];
+  return [
+    ...new Set(
+      Array.from(data.values())
+        .map((data) => data.eventAmbassador)
+        .sort((a, b) => a.localeCompare(b)),
+    ),
+  ];
 }
 
-export function regionalAmbassadorsFrom(data: EventTeamsTableDataMap): string[] {
-  return [...new Set(
-    Array.from(data.values())
-    .map(data => data.regionalAmbassador)
-    .sort((a, b) => a.localeCompare(b))
-  )];
+export function regionalAmbassadorsFrom(
+  data: EventTeamsTableDataMap,
+): string[] {
+  return [
+    ...new Set(
+      Array.from(data.values())
+        .map((data) => data.regionalAmbassador)
+        .sort((a, b) => a.localeCompare(b)),
+    ),
+  ];
 }
 
 export function ambassadorNamesFrom(data: EventTeamsTableDataMap): string[] {
-  return Array.from(new Set([
-    ...eventAmbassadorsFrom(data),
-    ...regionalAmbassadorsFrom(data)
-  ])).sort((a, b) => a.localeCompare(b));
+  return Array.from(
+    new Set([...eventAmbassadorsFrom(data), ...regionalAmbassadorsFrom(data)]),
+  ).sort((a, b) => a.localeCompare(b));
 }
