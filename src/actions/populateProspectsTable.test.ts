@@ -1,4 +1,7 @@
-import { populateProspectsTable } from "./populateProspectsTable";
+import {
+  populateProspectsTable,
+  setProspectReallocationRefreshCallback,
+} from "./populateProspectsTable";
 import { ProspectiveEventList } from "@models/ProspectiveEventList";
 import { EventAmbassadorMap } from "@models/EventAmbassadorMap";
 import { RegionalAmbassadorMap } from "@models/RegionalAmbassadorMap";
@@ -142,11 +145,7 @@ describe("populateProspectsTable", () => {
     const { launchProspect } = jest.requireMock("./launchProspect");
     const refreshCallback = jest.fn();
 
-    // Set up refresh callback - import the actual module for the callback setter
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
-    const {
-      setProspectReallocationRefreshCallback,
-    } = require("./populateProspectsTable");
+    // Set up refresh callback
     setProspectReallocationRefreshCallback(refreshCallback);
 
     populateProspectsTable(

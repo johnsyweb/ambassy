@@ -95,13 +95,17 @@ describe("Coordinate", () => {
     });
 
     it("should return false for non-number values", () => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       expect(
-        isValidCoordinate({ latitude: "invalid" as any, longitude: 0 }),
+        isValidCoordinate({
+          latitude: "invalid",
+          longitude: 0,
+        } as unknown as Coordinate),
       ).toBe(false);
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       expect(
-        isValidCoordinate({ latitude: 0, longitude: "invalid" as any }),
+        isValidCoordinate({
+          latitude: 0,
+          longitude: "invalid",
+        } as unknown as Coordinate),
       ).toBe(false);
     });
   });
