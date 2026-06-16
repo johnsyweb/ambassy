@@ -201,30 +201,50 @@ export function registerFinishImportListener(handler: () => void): () => void {
   return () => window.removeEventListener(FINISH_IMPORT_READY_EVENT, handler);
 }
 
-export function registerFinishImportActivation(handler: () => void): () => void {
+export function registerFinishImportActivation(
+  handler: () => void,
+): () => void {
+  const FINISH_IMPORT_ACTIVATION_DEBOUNCE_MS = 100;
+  let debounceTimer: ReturnType<typeof setTimeout> | null = null;
+
+  const scheduleHandler = (): void => {
+    if (debounceTimer) {
+      clearTimeout(debounceTimer);
+    }
+
+    debounceTimer = setTimeout(() => {
+      debounceTimer = null;
+      handler();
+    }, FINISH_IMPORT_ACTIVATION_DEBOUNCE_MS);
+  };
+
   const storageListener = (event: StorageEvent) => {
     if (
       event.key === `${STORAGE_PREFIX}${PENDING_FINISH_IMPORT_STORAGE_KEY}` &&
       event.newValue
     ) {
-      handler();
+      scheduleHandler();
     }
   };
 
   const visibilityListener = () => {
     if (document.visibilityState === "visible") {
-      handler();
+      scheduleHandler();
     }
   };
 
   window.addEventListener("storage", storageListener);
   document.addEventListener("visibilitychange", visibilityListener);
-  window.addEventListener("focus", handler);
+  window.addEventListener("focus", scheduleHandler);
 
   return () => {
+    if (debounceTimer) {
+      clearTimeout(debounceTimer);
+      debounceTimer = null;
+    }
     window.removeEventListener("storage", storageListener);
     document.removeEventListener("visibilitychange", visibilityListener);
-    window.removeEventListener("focus", handler);
+    window.removeEventListener("focus", scheduleHandler);
   };
 }
 

@@ -3,13 +3,18 @@ import {
   getPendingFinishImport,
   isFinishImportAutoPromptSuppressed,
   processPendingFinishImport,
+  registerFinishImportActivation,
+  registerFinishImportListener,
   storePendingFinishImport,
 } from "./processPendingFinishImport";
 import { EventAmbassadorMap } from "@models/EventAmbassadorMap";
 import { RegionalAmbassadorMap } from "@models/RegionalAmbassadorMap";
 import { EventDetailsMap } from "@models/EventDetailsMap";
 import { LogEntry } from "@models/LogEntry";
-import { FinishImportPayload } from "@models/FinishImportPayload";
+import {
+  FINISH_IMPORT_READY_EVENT,
+  FinishImportPayload,
+} from "@models/FinishImportPayload";
 
 function samplePayload(): FinishImportPayload {
   return {
@@ -49,9 +54,7 @@ describe("processPendingFinishImport", () => {
       onComplete,
     );
 
-    const cancelButton = document.querySelector<HTMLButtonElement>(
-      "button",
-    );
+    const cancelButton = document.querySelector<HTMLButtonElement>("button");
     cancelButton?.click();
     const processed = await importPromise;
 
@@ -117,5 +120,43 @@ describe("processPendingFinishImport", () => {
 
     document.querySelector<HTMLButtonElement>("button")?.click();
     await resumeImport;
+  });
+});
+
+describe("registerFinishImportActivation", () => {
+  beforeEach(() => {
+    jest.useFakeTimers();
+  });
+
+  afterEach(() => {
+    jest.useRealTimers();
+  });
+
+  it("debounces rapid focus events into one handler call", () => {
+    const handler = jest.fn();
+    const unregister = registerFinishImportActivation(handler);
+
+    window.dispatchEvent(new Event("focus"));
+    window.dispatchEvent(new Event("focus"));
+    window.dispatchEvent(new Event("focus"));
+
+    expect(handler).not.toHaveBeenCalled();
+
+    jest.advanceTimersByTime(100);
+    expect(handler).toHaveBeenCalledTimes(1);
+
+    unregister();
+  });
+});
+
+describe("registerFinishImportListener", () => {
+  it("invokes handler immediately when finish import is ready", () => {
+    const handler = jest.fn();
+    const unregister = registerFinishImportListener(handler);
+
+    window.dispatchEvent(new CustomEvent(FINISH_IMPORT_READY_EVENT));
+    expect(handler).toHaveBeenCalledTimes(1);
+
+    unregister();
   });
 });
