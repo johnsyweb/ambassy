@@ -79,6 +79,51 @@ describe("buildVoronoiSites", () => {
     });
   });
 
+  it("treats an allocated event as visible when apostrophes differ from events.json", () => {
+    const eventsJsonName = "O\u2019Connors Beach";
+    const csvName = "O'Connors Beach";
+    const eventDetails: EventDetailsMap = new Map([
+      [
+        eventsJsonName,
+        createEvent(eventsJsonName, [148.274083, -41.338567]),
+      ],
+      ["Albany", createEvent("Albany", [117.883, -35.027])],
+    ]);
+    const eventTeamsTableData: EventTeamsTableDataMap = new Map([
+      [
+        csvName,
+        {
+          eventShortName: csvName,
+          eventDirectors: "Director",
+          eventAmbassador: "EA1",
+          regionalAmbassador: "REA1",
+          eventCoordinates: "41.33857° S 148.27408° E",
+          eventSeries: 1,
+          eventCountryCode: 3,
+          eventCountry: "au",
+        },
+      ],
+    ]);
+
+    const sites = buildVoronoiSites({
+      eventDetails,
+      eventTeamsTableData,
+      styleForAllocatedEvent: () => ({
+        raColor: "#ff0066",
+        tooltip: eventsJsonName,
+      }),
+    });
+
+    expect(sites.find((site) => site.id === eventsJsonName)).toEqual({
+      id: eventsJsonName,
+      longitude: 148.274083,
+      latitude: -41.338567,
+      role: "visible",
+      raColor: "#ff0066",
+      tooltip: eventsJsonName,
+    });
+  });
+
   it("includes an unallocated parkrun as a constraining Voronoi site", () => {
     const eventDetails: EventDetailsMap = new Map([
       ["Mt Clarence", createEvent("Mt Clarence", [117.916528, -35.025659])],
@@ -411,6 +456,18 @@ describe("d3-geo-voronoi integration", () => {
     const scriptPath = path.join(
       __dirname,
       "../../script/verify-hamilton-island-voronoi.cjs",
+    );
+
+    execFileSync("node", [scriptPath], {
+      stdio: "pipe",
+      cwd: path.join(__dirname, "../.."),
+    });
+  });
+
+  it("draws a local O'Connors Beach REA territory when CSV apostrophe differs", () => {
+    const scriptPath = path.join(
+      __dirname,
+      "../../script/verify-oconnors-beach-voronoi.cjs",
     );
 
     execFileSync("node", [scriptPath], {

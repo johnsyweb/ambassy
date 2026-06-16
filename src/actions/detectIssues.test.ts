@@ -99,6 +99,43 @@ describe("detectIssues", () => {
     expect(issues).toHaveLength(0);
   });
 
+  it("should not flag missing coordinates when apostrophes differ from events.json", () => {
+    const eventsJsonName = "O\u2019Connors Beach";
+    const csvName = "O'Connors Beach";
+
+    eventAmbassadors.set("EA1", {
+      name: "EA1",
+      events: [csvName],
+    });
+
+    eventDetails.set(eventsJsonName, {
+      id: eventsJsonName,
+      type: "Feature",
+      geometry: {
+        type: "Point",
+        coordinates: [148.274083, -41.338567],
+      },
+      properties: {
+        eventname: "oconnorsbeach",
+        EventLongName: "O'Connors Beach parkrun",
+        EventShortName: eventsJsonName,
+        LocalisedEventLongName: null,
+        countrycode: 3,
+        seriesid: 1,
+        EventLocation: "Tasmania",
+      },
+    });
+
+    const issues = detectIssues(
+      eventTeams,
+      eventDetails,
+      eventAmbassadors,
+      regionalAmbassadors,
+    );
+
+    expect(issues).toHaveLength(0);
+  });
+
   it("should detect events without coordinates", () => {
     const issues = detectIssues(
       eventTeams,
