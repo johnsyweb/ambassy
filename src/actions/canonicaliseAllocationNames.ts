@@ -3,6 +3,10 @@ import { EventAmbassadorMap } from "@models/EventAmbassadorMap";
 import { EventDetailsMap } from "@models/EventDetailsMap";
 import { EventTeamMap } from "@models/EventTeamMap";
 import { LogEntry } from "@models/LogEntry";
+import {
+  CanonicalEventIndex,
+  getCanonicalEventIndex,
+} from "@utils/canonicalEventIndex";
 import { findCanonicalEventShortName } from "@utils/findCanonicalEventShortName";
 
 export function canonicaliseAllocationNames(
@@ -11,6 +15,11 @@ export function canonicaliseAllocationNames(
   eventDetails: EventDetailsMap,
   log: LogEntry[],
 ): boolean {
+  if (allocationDataLooksCanonical(eventAmbassadors, eventTeams, eventDetails)) {
+    return false;
+  }
+
+  const index = getCanonicalEventIndex(eventDetails);
   let changed = false;
 
   changed =
@@ -18,6 +27,7 @@ export function canonicaliseAllocationNames(
       eventAmbassadors,
       eventDetails,
       log,
+      index,
     ) || changed;
   changed =
     canonicaliseEventTeamAllocations(
@@ -25,15 +35,44 @@ export function canonicaliseAllocationNames(
       eventTeams,
       eventDetails,
       log,
+      index,
     ) || changed;
 
   return changed;
+}
+
+function allocationDataLooksCanonical(
+  eventAmbassadors: EventAmbassadorMap,
+  eventTeams: EventTeamMap,
+  eventDetails: EventDetailsMap,
+): boolean {
+  for (const ambassador of eventAmbassadors.values()) {
+    const seen = new Set<string>();
+    for (const eventName of ambassador.events) {
+      if (!eventDetails.has(eventName)) {
+        return false;
+      }
+      if (seen.has(eventName)) {
+        return false;
+      }
+      seen.add(eventName);
+    }
+  }
+
+  for (const eventName of eventTeams.keys()) {
+    if (!eventDetails.has(eventName)) {
+      return false;
+    }
+  }
+
+  return true;
 }
 
 function canonicaliseEventAmbassadorAllocations(
   eventAmbassadors: EventAmbassadorMap,
   eventDetails: EventDetailsMap,
   log: LogEntry[],
+  index: CanonicalEventIndex,
 ): boolean {
   let changed = false;
 
@@ -41,10 +80,9 @@ function canonicaliseEventAmbassadorAllocations(
     const rewrittenEvents: string[] = [];
 
     for (const eventName of ambassador.events) {
-      const canonicalName = findCanonicalEventShortName(
-        eventName,
-        eventDetails,
-      );
+      const canonicalName = eventDetails.has(eventName)
+        ? undefined
+        : findCanonicalEventShortName(eventName, eventDetails, index);
       const resolvedName = canonicalName ?? eventName;
 
       if (canonicalName && canonicalName !== eventName) {
@@ -74,6 +112,7 @@ function canonicaliseEventTeamAllocations(
   eventTeams: EventTeamMap,
   eventDetails: EventDetailsMap,
   log: LogEntry[],
+  index: CanonicalEventIndex,
 ): boolean {
   if (eventTeams.size === 0) {
     return false;
@@ -83,7 +122,9 @@ function canonicaliseEventTeamAllocations(
   const canonicalTeams = new Map<string, EventTeam>();
 
   for (const [eventName, team] of eventTeams) {
-    const canonicalName = findCanonicalEventShortName(eventName, eventDetails);
+    const canonicalName = eventDetails.has(eventName)
+      ? undefined
+      : findCanonicalEventShortName(eventName, eventDetails, index);
     const resolvedName = canonicalName ?? eventName;
 
     if (canonicalName && canonicalName !== eventName) {
@@ -118,12 +159,16 @@ function canonicaliseEventTeamAllocations(
     });
   }
 
+  if (!changed) {
+    return false;
+  }
+
   eventTeams.clear();
   for (const [name, team] of canonicalTeams) {
     eventTeams.set(name, team);
   }
 
-  return changed;
+  return true;
 }
 
 function mergeEventTeamDirectors(target: EventTeam, source: EventTeam): void {

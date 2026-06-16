@@ -223,4 +223,43 @@ describe("canonicaliseAllocationNames", () => {
 
     expect(issues).toHaveLength(0);
   });
+
+  it("returns false on repeat load when allocation names are already canonical", () => {
+    const eventAmbassadors: EventAmbassadorMap = new Map([
+      [
+        "Susan Kennedy",
+        {
+          name: "Susan Kennedy",
+          events: ["Albert Melbourne"],
+        },
+      ],
+    ]);
+    const eventTeams: EventTeamMap = new Map([
+      [
+        "Albert Melbourne",
+        {
+          eventShortName: "Albert Melbourne",
+          eventAmbassador: "Susan Kennedy",
+          eventDirectors: ["Director One"],
+        },
+      ],
+    ]);
+    const eventDetails: EventDetailsMap = new Map([
+      ["Albert Melbourne", albertMelbourneEvent()],
+    ]);
+    const log: LogEntry[] = [];
+
+    const changed = canonicaliseAllocationNames(
+      eventAmbassadors,
+      eventTeams,
+      eventDetails,
+      log,
+    );
+
+    expect(changed).toBe(false);
+    expect(log).toHaveLength(0);
+    expect(eventTeams.get("Albert Melbourne")?.eventDirectors).toEqual([
+      "Director One",
+    ]);
+  });
 });
