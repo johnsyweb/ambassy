@@ -1,7 +1,10 @@
 import { getCountries } from "@models/country";
 
+const APOSTROPHE_LIKE_CHARACTERS = /[\u0027\u0060\u2018\u2019\u201B]/g;
+
 export function normalizeEventName(name: string): string {
   return name
+    .replace(APOSTROPHE_LIKE_CHARACTERS, "'")
     .toLowerCase()
     .replace(/\([^)]*\)/g, "")
     .trim()

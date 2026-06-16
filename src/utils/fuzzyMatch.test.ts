@@ -24,6 +24,12 @@ describe("normalizeEventName", () => {
   it("should handle empty string", () => {
     expect(normalizeEventName("")).toBe("");
   });
+
+  it("should treat curly and straight apostrophes as equivalent", () => {
+    expect(normalizeEventName("O\u2019Connors Beach")).toBe(
+      normalizeEventName("O'Connors Beach"),
+    );
+  });
 });
 
 describe("levenshteinDistance", () => {
