@@ -1,6 +1,17 @@
 import { RegionalAmbassador } from "@models/RegionalAmbassador";
 import { RegionalAmbassadorMap } from "@models/RegionalAmbassadorMap";
 import { csvStringCell } from "@utils/csvField";
+import { normalizeParkrunnerIdForStorage } from "@utils/parkrunnerProfileUrl";
+
+function parseOptionalParkrunnerId(
+  value: string | undefined,
+): string | undefined {
+  if (!value) {
+    return undefined;
+  }
+
+  return normalizeParkrunnerIdForStorage(value);
+}
 
 /**
  * One row from the Regional Ambassadors CSV. Extra columns are ignored after pick.
@@ -9,6 +20,8 @@ export interface RegionalAmbassadorRow {
   "RA Name": string;
   "RA State": string;
   "EA Name": string;
+  "parkrunner ID"?: string;
+  "Parkrunner ID"?: string;
   [key: string]: string | undefined;
 }
 
@@ -19,13 +32,19 @@ function pickRegionalAmbassadorRow(
     "RA Name": csvStringCell(raw["RA Name"]),
     "RA State": csvStringCell(raw["RA State"]),
     "EA Name": csvStringCell(raw["EA Name"]),
+    "parkrunner ID": csvStringCell(
+      raw["parkrunner ID"] ?? raw["Parkrunner ID"],
+    ),
   };
 }
 
 export function parseRegionalAmbassadors(
   data: ReadonlyArray<RegionalAmbassadorRow>,
 ): RegionalAmbassadorMap {
-  const regionalAmbassadorsMap: RegionalAmbassadorMap = new Map<string, RegionalAmbassador>();
+  const regionalAmbassadorsMap: RegionalAmbassadorMap = new Map<
+    string,
+    RegionalAmbassador
+  >();
   let currentRA: RegionalAmbassador | null = null;
 
   data.forEach((raw) => {
@@ -42,6 +61,9 @@ export function parseRegionalAmbassadors(
         name: raName,
         state: raState,
         supportsEAs: [],
+        ...(row["parkrunner ID"]
+          ? { parkrunnerId: parseOptionalParkrunnerId(row["parkrunner ID"]) }
+          : {}),
       };
     }
 

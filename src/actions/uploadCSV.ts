@@ -13,13 +13,23 @@ import { persistEventAmbassadors } from "./persistState";
 import { persistEventTeams } from "./persistState";
 import { persistRegionalAmbassadors } from "./persistState";
 import { mergePreservedHomeParkruns } from "./setEventAmbassadorHomeParkrun";
+import { mergePreservedParkrunnerIds } from "./setAmbassadorParkrunnerId";
 import { loadFromStorage } from "@utils/storage";
 import { EventAmbassador } from "@models/EventAmbassador";
 import { EventAmbassadorMap } from "@models/EventAmbassadorMap";
+import { RegionalAmbassador } from "@models/RegionalAmbassador";
+import { RegionalAmbassadorMap } from "@models/RegionalAmbassadorMap";
 
 function getExistingEventAmbassadors(): EventAmbassadorMap {
   const stored =
     loadFromStorage<Array<[string, EventAmbassador]>>("eventAmbassadors");
+  return stored ? new Map(stored) : new Map();
+}
+
+function getExistingRegionalAmbassadors(): RegionalAmbassadorMap {
+  const stored = loadFromStorage<Array<[string, RegionalAmbassador]>>(
+    "regionalAmbassadors",
+  );
   return stored ? new Map(stored) : new Map();
 }
 
@@ -39,6 +49,12 @@ export function handleFileUpload(
         mergePreservedHomeParkruns(
           eventAmbassadors,
           getExistingEventAmbassadors(),
+        );
+        mergePreservedParkrunnerIds(
+          eventAmbassadors,
+          getExistingEventAmbassadors(),
+          new Map(),
+          new Map(),
         );
         persistEventAmbassadors(eventAmbassadors);
         callback("Event Ambassadors");
@@ -83,6 +99,12 @@ export function handleFileUpload(
         try {
           const regionalAmbassadors = parseRegionalAmbassadors(
             data as RegionalAmbassadorRow[],
+          );
+          mergePreservedParkrunnerIds(
+            new Map(),
+            new Map(),
+            regionalAmbassadors,
+            getExistingRegionalAmbassadors(),
           );
           persistRegionalAmbassadors(regionalAmbassadors);
           callback("Regional Ambassadors");

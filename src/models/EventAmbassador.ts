@@ -4,6 +4,7 @@ export interface EventAmbassador {
   name: string;
   events: string[];
   homeParkrun?: string;
+  parkrunnerId?: string;
   prospectiveEvents?: string[]; // IDs of prospective events assigned to this EA
   capacityStatus?: CapacityStatus;
   conflicts?: string[];
