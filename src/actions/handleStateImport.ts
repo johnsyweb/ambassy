@@ -1,70 +1,60 @@
 import {
   validateStateFile,
-  validateStateFromUrl,
-  validateStateFromClipboard,
   importApplicationState,
   InvalidFileFormatError,
   MissingFieldError,
   VersionMismatchError,
   InvalidDataError,
 } from "./importState";
+import { hasUnsavedChanges } from "./trackChanges";
+
+function hasExistingApplicationData(): boolean {
+  return (
+    localStorage.getItem("ambassy:eventAmbassadors") !== null ||
+    localStorage.getItem("ambassy:eventTeams") !== null ||
+    localStorage.getItem("ambassy:regionalAmbassadors") !== null
+  );
+}
 
 export async function handleStateImport(
-  file?: File,
-  url?: string,
-  clipboardText?: string,
+  file: File,
 ): Promise<{ success: boolean; message: string }> {
   try {
-    const hasExistingData =
-      localStorage.getItem("ambassy:eventAmbassadors") !== null ||
-      localStorage.getItem("ambassy:eventTeams") !== null ||
-      localStorage.getItem("ambassy:regionalAmbassadors") !== null;
-
-    if (hasExistingData) {
+    if (hasExistingApplicationData() || hasUnsavedChanges()) {
       const confirmed = confirm(
-        "Opening this saved state will replace your current data. Do you want to continue?",
+        "Importing this file will replace your current Ambassy data on this device. Do you want to continue?",
       );
       if (!confirmed) {
-        return { success: false, message: "Open cancelled" };
+        return { success: false, message: "Import cancelled" };
       }
     }
 
-    let state;
-    if (file) {
-      state = await validateStateFile(file);
-    } else if (url) {
-      state = await validateStateFromUrl(url);
-    } else if (clipboardText) {
-      state = await validateStateFromClipboard(clipboardText);
-    } else {
-      return { success: false, message: "No saved state source provided" };
-    }
-
+    const state = await validateStateFile(file);
     importApplicationState(state);
 
     const eventCount = state.data.eventTeams.length;
     const ambassadorCount = state.data.eventAmbassadors.length;
     return {
       success: true,
-      message: `Saved state opened successfully! Loaded ${eventCount} event${
+      message: `State imported successfully. Loaded ${eventCount} event${
         eventCount !== 1 ? "s" : ""
       } and ${ambassadorCount} ambassador${ambassadorCount !== 1 ? "s" : ""}.`,
     };
   } catch (error) {
-    let errorMessage = "Unable to open the saved state. ";
+    let errorMessage = "Unable to import the state file. ";
     if (error instanceof InvalidFileFormatError) {
       errorMessage +=
-        "The format is not recognised. Please make sure you're opening a file that was saved from Ambassy.";
+        "The format is not recognised. Please make sure you are importing a file that was exported from Ambassy.";
     } else if (error instanceof MissingFieldError) {
       errorMessage +=
-        "The file appears to be incomplete. Please ask your colleague to share again.";
+        "The file appears to be incomplete. Please ask your colleague to export again.";
     } else if (error instanceof VersionMismatchError) {
-      const versionMatch = error.message.match(/version (\d+\.\d+\.\d+)/);
+      const versionMatch = error.message.match(/version (\S+)/);
       const version = versionMatch ? versionMatch[1] : "unknown";
-      errorMessage += `This file was created with a different version of Ambassy (version ${version}). Please ask your colleague to share using the current version.`;
+      errorMessage += `This file was created with a different version of Ambassy (version ${version}). Please ask your colleague to export using the current version.`;
     } else if (error instanceof InvalidDataError) {
       errorMessage +=
-        "The file data is not valid. Please make sure it hasn't been modified or corrupted.";
+        "The file data is not valid. Please make sure it has not been modified or corrupted.";
     } else {
       errorMessage +=
         error instanceof Error

@@ -1,12 +1,18 @@
-import { ApplicationState } from "@models/ApplicationState";
+import {
+  ApplicationState,
+  SUPPORTED_APPLICATION_STATE_VERSIONS,
+} from "@models/ApplicationState";
+import { ProspectiveEvent } from "@models/ProspectiveEvent";
+import { AmbassadorFinishHistoryMap } from "@models/AmbassadorFinishHistory";
 import { saveToStorage } from "@utils/storage";
 import {
   saveCapacityLimits,
   validateCapacityLimits,
 } from "./configureCapacityLimits";
-import { parseDataUrl } from "@utils/urlSharing";
 import { markDataImported } from "./showImportGuidance";
 import { invalidateEventsCatalogueMemoryCache } from "./fetchEvents";
+import { saveProspectiveEvents } from "./persistProspectiveEvents";
+import { persistAmbassadorFinishHistories } from "./persistAmbassadorFinishHistory";
 
 export class InvalidFileFormatError extends Error {
   constructor(message: string) {
@@ -62,6 +68,17 @@ export async function validateStateFile(file: File): Promise<ApplicationState> {
   });
 }
 
+function restoreProspectiveEventDates(
+  events: ProspectiveEvent[],
+): ProspectiveEvent[] {
+  return events.map((event) => ({
+    ...event,
+    dateMadeContact: event.dateMadeContact
+      ? new Date(event.dateMadeContact)
+      : null,
+  }));
+}
+
 export function importApplicationState(state: ApplicationState): void {
   saveToStorage("eventAmbassadors", state.data.eventAmbassadors);
   saveToStorage("eventTeams", state.data.eventTeams);
@@ -75,7 +92,11 @@ export function importApplicationState(state: ApplicationState): void {
     saveCapacityLimits(state.data.capacityLimits);
   }
 
-  // Restore resolved eventDetails to cache
+  saveProspectiveEvents(
+    restoreProspectiveEventDates(state.data.prospectiveEvents ?? []),
+  );
+  persistAmbassadorFinishHistories(state.data.ambassadorFinishHistories ?? {});
+
   if (
     state.data.resolvedEventDetails &&
     state.data.resolvedEventDetails.length > 0
@@ -98,12 +119,10 @@ export function importApplicationState(state: ApplicationState): void {
       }
     }
 
-    // Merge resolved eventDetails into the map
     state.data.resolvedEventDetails.forEach(([key, eventDetails]) => {
       eventDetailsMap.set(key, eventDetails);
     });
 
-    // Save merged eventDetails back to cache
     localStorage.setItem(
       CACHE_KEY,
       JSON.stringify({
@@ -117,35 +136,6 @@ export function importApplicationState(state: ApplicationState): void {
   markDataImported();
 }
 
-export async function validateStateFromUrl(
-  dataUrl: string,
-): Promise<ApplicationState> {
-  try {
-    const jsonString = parseDataUrl(dataUrl);
-    const parsed = JSON.parse(jsonString);
-    return validateApplicationState(parsed);
-  } catch (error) {
-    if (error instanceof SyntaxError) {
-      throw new InvalidFileFormatError("URL does not contain valid JSON data");
-    }
-    throw error;
-  }
-}
-
-export async function validateStateFromClipboard(
-  text: string,
-): Promise<ApplicationState> {
-  try {
-    const parsed = JSON.parse(text);
-    return validateApplicationState(parsed);
-  } catch (error) {
-    if (error instanceof SyntaxError) {
-      throw new InvalidFileFormatError("Clipboard data is not valid JSON");
-    }
-    throw error;
-  }
-}
-
 function validateApplicationState(parsed: unknown): ApplicationState {
   if (!parsed || typeof parsed !== "object") {
     throw new InvalidFileFormatError("Invalid state format");
@@ -157,9 +147,14 @@ function validateApplicationState(parsed: unknown): ApplicationState {
     throw new MissingFieldError("File is missing required 'version' field");
   }
 
-  if (state.version !== "1.0.0") {
+  if (
+    typeof state.version !== "string" ||
+    !SUPPORTED_APPLICATION_STATE_VERSIONS.includes(
+      state.version as (typeof SUPPORTED_APPLICATION_STATE_VERSIONS)[number],
+    )
+  ) {
     throw new VersionMismatchError(
-      `File version ${state.version} is incompatible. Expected version 1.0.0`,
+      `File version ${String(state.version)} is incompatible. Expected version ${SUPPORTED_APPLICATION_STATE_VERSIONS.join(" or ")}`,
     );
   }
 
@@ -197,7 +192,6 @@ function validateApplicationState(parsed: unknown): ApplicationState {
     throw new InvalidDataError("File data.changesLog must be an array");
   }
 
-  // resolvedEventDetails is optional
   if (
     dataObj.resolvedEventDetails !== undefined &&
     !Array.isArray(dataObj.resolvedEventDetails)
@@ -207,5 +201,46 @@ function validateApplicationState(parsed: unknown): ApplicationState {
     );
   }
 
-  return state as unknown as ApplicationState;
+  if (
+    dataObj.prospectiveEvents !== undefined &&
+    !Array.isArray(dataObj.prospectiveEvents)
+  ) {
+    throw new InvalidDataError(
+      "File data.prospectiveEvents must be an array if present",
+    );
+  }
+
+  if (
+    dataObj.ambassadorFinishHistories !== undefined &&
+    (typeof dataObj.ambassadorFinishHistories !== "object" ||
+      dataObj.ambassadorFinishHistories === null ||
+      Array.isArray(dataObj.ambassadorFinishHistories))
+  ) {
+    throw new InvalidDataError(
+      "File data.ambassadorFinishHistories must be an object if present",
+    );
+  }
+
+  return {
+    version: state.version as string,
+    exportedAt: state.exportedAt as string,
+    data: {
+      eventAmbassadors:
+        dataObj.eventAmbassadors as ApplicationState["data"]["eventAmbassadors"],
+      eventTeams: dataObj.eventTeams as ApplicationState["data"]["eventTeams"],
+      regionalAmbassadors:
+        dataObj.regionalAmbassadors as ApplicationState["data"]["regionalAmbassadors"],
+      changesLog: dataObj.changesLog as ApplicationState["data"]["changesLog"],
+      capacityLimits:
+        dataObj.capacityLimits as ApplicationState["data"]["capacityLimits"],
+      resolvedEventDetails:
+        dataObj.resolvedEventDetails as ApplicationState["data"]["resolvedEventDetails"],
+      prospectiveEvents:
+        (dataObj.prospectiveEvents as ProspectiveEvent[] | undefined) ?? [],
+      ambassadorFinishHistories:
+        (dataObj.ambassadorFinishHistories as
+          | AmbassadorFinishHistoryMap
+          | undefined) ?? {},
+    },
+  };
 }

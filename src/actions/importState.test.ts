@@ -2,8 +2,12 @@ import { validateStateFile, importApplicationState } from "./importState";
 import { ApplicationState } from "@models/ApplicationState";
 import { EventDetails } from "@models/EventDetails";
 import { saveToStorage } from "@utils/storage";
+import { saveProspectiveEvents } from "./persistProspectiveEvents";
+import { persistAmbassadorFinishHistories } from "./persistAmbassadorFinishHistory";
 
 jest.mock("@utils/storage");
+jest.mock("./persistProspectiveEvents");
+jest.mock("./persistAmbassadorFinishHistory");
 
 describe("importState", () => {
   const mockLocalStorage = {
@@ -51,7 +55,45 @@ describe("importState", () => {
       });
 
       const result = await validateStateFile(file);
-      expect(result).toEqual(validState);
+      expect(result).toEqual({
+        ...validState,
+        data: {
+          ...validState.data,
+          prospectiveEvents: [],
+          ambassadorFinishHistories: {},
+        },
+      });
+    });
+
+    it("should accept version 2.0.0", async () => {
+      const validState: ApplicationState = {
+        version: "2.0.0",
+        exportedAt: "2026-01-07T12:00:00Z",
+        data: {
+          eventAmbassadors: [["EA1", { name: "Test EA", events: [] }]],
+          eventTeams: [
+            [
+              "Event1",
+              {
+                eventShortName: "Event1",
+                eventAmbassador: "EA1",
+                eventDirectors: [],
+              },
+            ],
+          ],
+          regionalAmbassadors: [
+            ["REA1", { name: "Test REA", state: "VIC", supportsEAs: [] }],
+          ],
+          changesLog: [],
+        },
+      };
+
+      const file = new File([JSON.stringify(validState)], "test.json", {
+        type: "application/json",
+      });
+
+      const result = await validateStateFile(file);
+      expect(result.version).toBe("2.0.0");
     });
 
     it("should throw error for invalid JSON", async () => {
@@ -80,9 +122,9 @@ describe("importState", () => {
       await expect(validateStateFile(file)).rejects.toThrow();
     });
 
-    it("should throw error for version mismatch", async () => {
+    it("should throw error for unsupported version", async () => {
       const invalidState: ApplicationState = {
-        version: "2.0.0",
+        version: "3.0.0",
         exportedAt: "2026-01-07T12:00:00Z",
         data: {
           eventAmbassadors: [],
@@ -158,6 +200,8 @@ describe("importState", () => {
         "changesLog",
         state.data.changesLog,
       );
+      expect(saveProspectiveEvents).toHaveBeenCalledWith([]);
+      expect(persistAmbassadorFinishHistories).toHaveBeenCalledWith({});
     });
 
     it("should restore resolved eventDetails to cache", () => {
