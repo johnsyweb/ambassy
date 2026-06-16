@@ -1,4 +1,4 @@
-Status: ready-for-agent
+Status: done
 
 # Split table refresh from map refresh
 
@@ -8,10 +8,10 @@ Decompose `refreshUI()` so operations that only change ambassador metadata, logs
 
 ## Acceptance criteria
 
-- [ ] Parkrunner ID edits, changes log updates, and similar paths skip `populateMap()` when allocations unchanged
-- [ ] Allocation, prospect, and filter changes still refresh the map
-- [ ] Public refresh entry points document which subsystems they invalidate
-- [ ] Tests prove map is not rebuilt when only log/metadata changes
+- [x] Parkrunner ID edits, changes log updates, and similar paths skip `populateMap()` when allocations unchanged
+- [x] Allocation, prospect, and filter changes still refresh the map
+- [x] Public refresh entry points document which subsystems they invalidate
+- [x] Tests prove map is not rebuilt when only log/metadata changes
 
 ## Blocked by
 

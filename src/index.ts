@@ -14,7 +14,7 @@ import { extractEventTeamsTableData } from "./models/EventTeamsTable";
 import { getEventTeamsFromSession } from "@parsers/parseEventTeams";
 import { LogEntry } from "@models/LogEntry";
 import { EventTeamsTableData } from "@models/EventTeamsTableData";
-import { refreshUI } from "./actions/refreshUI";
+import { refreshUI, REFRESH_TABLES_ONLY } from "./actions/refreshUI";
 import {
   initializeAmbassadorNameFilter,
   updateAmbassadorNameFilterStatus,
@@ -1140,6 +1140,7 @@ function setupOffboardingButtons(): void {
               log,
               eventAmbassadors,
               getRegionalAmbassadorsFromSession(),
+              REFRESH_TABLES_ONLY,
             );
           }
         },
@@ -1159,6 +1160,7 @@ function setupOffboardingButtons(): void {
           log,
           eventAmbassadors,
           getRegionalAmbassadorsFromSession(),
+          REFRESH_TABLES_ONLY,
         );
       }
     },
@@ -1198,6 +1200,7 @@ function setupOffboardingButtons(): void {
           log,
           eventAmbassadors,
           regionalAmbassadors,
+          REFRESH_TABLES_ONLY,
         );
       }
     },
@@ -1220,6 +1223,7 @@ function setupOffboardingButtons(): void {
           log,
           eventAmbassadors,
           regionalAmbassadors,
+          REFRESH_TABLES_ONLY,
         );
       }
     },
@@ -1242,6 +1246,7 @@ function onFinishImportComplete(): void {
       log,
       getEventAmbassadorsFromSession(),
       getRegionalAmbassadorsFromSession(),
+      REFRESH_TABLES_ONLY,
     );
   }
   syncFinishImportPendingBannerControls();
@@ -1507,6 +1512,7 @@ async function ambassy() {
           log,
           getEventAmbassadorsFromSession(),
           getRegionalAmbassadorsFromSession(),
+          REFRESH_TABLES_ONLY,
         );
       }
     };

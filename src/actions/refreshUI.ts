@@ -20,19 +20,44 @@ import { updateAmbassadorNameFilterStatus } from "./ambassadorNameFilterUI";
 import { applyAmbassadorNameFilterToTables } from "@utils/ambassadorNameFilter";
 import { applyAmbassadorNameFilterToMap } from "./populateMap";
 
-export function refreshUI(
-  eventDetails: EventDetailsMap,
-  eventTeamsTableData: EventTeamsTableDataMap,
-  log: LogEntry[],
+/**
+ * Which UI subsystems `refreshUI` rebuilds. Omitted flags default to `true`.
+ *
+ * - `tables` — event teams, ambassadors, prospects, and changes log tables
+ * - `map` — Leaflet markers, Voronoi territories, and prospect markers
+ */
+export type RefreshScope = {
+  map?: boolean;
+  tables?: boolean;
+};
+
+/** Rebuild tables and map (default). */
+export const REFRESH_ALL: RefreshScope = { map: true, tables: true };
+
+/** Ambassador metadata, finish history, or log-only updates — skip map rebuild. */
+export const REFRESH_TABLES_ONLY: RefreshScope = { map: false, tables: true };
+
+function resolveRefreshScope(scope?: RefreshScope): Required<RefreshScope> {
+  return {
+    map: scope?.map !== false,
+    tables: scope?.tables !== false,
+  };
+}
+
+type RefreshContext = {
+  eventDetails: EventDetailsMap;
+  eventTeamsTableData: EventTeamsTableDataMap;
+  log: LogEntry[];
+  eventAmbassadors: EventAmbassadorMap;
+  regionalAmbassadors: RegionalAmbassadorMap;
+  prospectiveEvents: ReturnType<typeof loadProspectiveEvents>;
+  prospectsList: ProspectiveEventList;
+};
+
+function loadAmbassadors(
   eventAmbassadors?: EventAmbassadorMap,
   regionalAmbassadors?: RegionalAmbassadorMap,
-) {
-  if (!eventDetails || !eventTeamsTableData) {
-    console.error("Event details are not available");
-    return;
-  }
-
-  // Load ambassadors from storage if not provided
+): Pick<RefreshContext, "eventAmbassadors" | "regionalAmbassadors"> {
   const eventAmbassadorsToUse =
     eventAmbassadors ??
     (() => {
@@ -54,51 +79,109 @@ export function refreshUI(
         : new Map<string, RegionalAmbassador>();
     })();
 
+  return {
+    eventAmbassadors: eventAmbassadorsToUse,
+    regionalAmbassadors: regionalAmbassadorsToUse,
+  };
+}
+
+function buildRefreshContext(
+  eventDetails: EventDetailsMap,
+  eventTeamsTableData: EventTeamsTableDataMap,
+  log: LogEntry[],
+  eventAmbassadors?: EventAmbassadorMap,
+  regionalAmbassadors?: RegionalAmbassadorMap,
+): RefreshContext {
+  const ambassadors = loadAmbassadors(eventAmbassadors, regionalAmbassadors);
   const prospectiveEvents = loadProspectiveEvents();
-  const prospectsList = new ProspectiveEventList(prospectiveEvents);
+
+  return {
+    eventDetails,
+    eventTeamsTableData,
+    log,
+    ...ambassadors,
+    prospectiveEvents,
+    prospectsList: new ProspectiveEventList(prospectiveEvents),
+  };
+}
+
+function refreshTables(context: RefreshContext): void {
   const finishHistories = loadAmbassadorFinishHistories();
 
   enrichEventTeamsWithLastAmbassadorVisit(
-    eventTeamsTableData,
-    eventAmbassadorsToUse,
-    regionalAmbassadorsToUse,
+    context.eventTeamsTableData,
+    context.eventAmbassadors,
+    context.regionalAmbassadors,
     finishHistories,
   );
 
-  populateEventTeamsTable(eventTeamsTableData);
-  populateMap(
-    eventTeamsTableData,
-    eventDetails,
-    eventAmbassadorsToUse,
-    regionalAmbassadorsToUse,
-    prospectiveEvents,
-  );
+  populateEventTeamsTable(context.eventTeamsTableData);
 
-  // Get countries synchronously (should already be cached)
   const countries = getCountriesSync();
 
   populateAmbassadorsTable(
-    eventAmbassadorsToUse,
-    regionalAmbassadorsToUse,
-    eventTeamsTableData,
-    eventDetails,
+    context.eventAmbassadors,
+    context.regionalAmbassadors,
+    context.eventTeamsTableData,
+    context.eventDetails,
     countries,
   );
   populateProspectsTable(
-    prospectsList,
-    eventAmbassadorsToUse,
-    regionalAmbassadorsToUse,
-    log,
-    eventDetails,
+    context.prospectsList,
+    context.eventAmbassadors,
+    context.regionalAmbassadors,
+    context.log,
+    context.eventDetails,
   );
-  populateChangesLogTable(log, eventDetails, countries);
+  populateChangesLogTable(context.log, context.eventDetails, countries);
 
   applyAmbassadorNameFilterToTables();
-  applyAmbassadorNameFilterToMap(eventTeamsTableData);
   updateAmbassadorNameFilterStatus({
-    eventTeamsTableData,
-    eventAmbassadors: eventAmbassadorsToUse,
-    regionalAmbassadors: regionalAmbassadorsToUse,
-    prospects: prospectsList,
+    eventTeamsTableData: context.eventTeamsTableData,
+    eventAmbassadors: context.eventAmbassadors,
+    regionalAmbassadors: context.regionalAmbassadors,
+    prospects: context.prospectsList,
   });
+}
+
+function refreshMap(context: RefreshContext): void {
+  populateMap(
+    context.eventTeamsTableData,
+    context.eventDetails,
+    context.eventAmbassadors,
+    context.regionalAmbassadors,
+    context.prospectiveEvents,
+  );
+  applyAmbassadorNameFilterToMap(context.eventTeamsTableData);
+}
+
+export function refreshUI(
+  eventDetails: EventDetailsMap,
+  eventTeamsTableData: EventTeamsTableDataMap,
+  log: LogEntry[],
+  eventAmbassadors?: EventAmbassadorMap,
+  regionalAmbassadors?: RegionalAmbassadorMap,
+  scope: RefreshScope = REFRESH_ALL,
+) {
+  if (!eventDetails || !eventTeamsTableData) {
+    console.error("Event details are not available");
+    return;
+  }
+
+  const resolvedScope = resolveRefreshScope(scope);
+  const context = buildRefreshContext(
+    eventDetails,
+    eventTeamsTableData,
+    log,
+    eventAmbassadors,
+    regionalAmbassadors,
+  );
+
+  if (resolvedScope.tables) {
+    refreshTables(context);
+  }
+
+  if (resolvedScope.map) {
+    refreshMap(context);
+  }
 }
