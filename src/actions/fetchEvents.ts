@@ -3,10 +3,41 @@ import { EventDetails } from "@models/EventDetails";
 import { EventDetailsMap } from "@models/EventDetailsMap";
 import { CountryMap } from "@models/country";
 
-const CACHE_KEY = "parkrun events";
+export const EVENTS_CATALOGUE_CACHE_KEY = "parkrun events";
 const COUNTRIES_CACHE_KEY = "parkrun countries";
 const CACHE_DURATION = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
 const PARKRUN_EVENTS_URL = "https://images.parkrun.com/events.json";
+
+let eventsCatalogueMemoryCache: EventDetailsMap | null = null;
+
+export function invalidateEventsCatalogueMemoryCache(): void {
+  eventsCatalogueMemoryCache = null;
+}
+
+export function setEventsCatalogueMemoryCache(
+  eventDetailsMap: EventDetailsMap,
+): void {
+  eventsCatalogueMemoryCache = eventDetailsMap;
+}
+
+function readValidEventsCatalogueFromLocalStorage(): EventDetailsMap | null {
+  const cache = localStorage.getItem(EVENTS_CATALOGUE_CACHE_KEY);
+  if (!cache) {
+    return null;
+  }
+
+  try {
+    const parsedCache = JSON.parse(cache);
+    const cacheAge = Date.now() - (parsedCache.timestamp || 0);
+    if (cacheAge < CACHE_DURATION && parsedCache.eventDetailsMap) {
+      return new Map<string, EventDetails>(parsedCache.eventDetailsMap);
+    }
+  } catch {
+    return null;
+  }
+
+  return null;
+}
 
 async function fetchEvents(): Promise<void> {
   try {
@@ -20,7 +51,7 @@ async function fetchEvents(): Promise<void> {
     });
 
     // Preserve manually resolved events from existing cache
-    const existingCache = localStorage.getItem(CACHE_KEY);
+    const existingCache = localStorage.getItem(EVENTS_CATALOGUE_CACHE_KEY);
     if (existingCache) {
       try {
         const parsedCache = JSON.parse(existingCache);
@@ -42,12 +73,13 @@ async function fetchEvents(): Promise<void> {
 
     // Save the merged events to localStorage
     localStorage.setItem(
-      CACHE_KEY,
+      EVENTS_CATALOGUE_CACHE_KEY,
       JSON.stringify({
         timestamp: Date.now(),
         eventDetailsMap: Array.from(eventDetailsMap.entries()),
       }),
     );
+    invalidateEventsCatalogueMemoryCache();
 
     // Save countries to localStorage
     if (countriesData) {
@@ -65,33 +97,21 @@ async function fetchEvents(): Promise<void> {
 }
 
 export async function getEvents(): Promise<EventDetailsMap> {
-  const cache = localStorage.getItem(CACHE_KEY);
-  if (cache) {
-    try {
-      const parsedCache = JSON.parse(cache);
-      const cacheAge = Date.now() - (parsedCache.timestamp || 0);
-      if (cacheAge < CACHE_DURATION && parsedCache.eventDetailsMap) {
-        return new Map<string, EventDetails>(parsedCache.eventDetailsMap);
-      }
-    } catch {
-      // Cache is corrupted, refetch
-    }
+  if (eventsCatalogueMemoryCache) {
+    return eventsCatalogueMemoryCache;
   }
 
-  // Cache doesn't exist or is expired/corrupted
-  await fetchEvents();
-  const freshCache = localStorage.getItem(CACHE_KEY);
-  if (freshCache) {
-    try {
-      const parsedCache = JSON.parse(freshCache);
-      if (parsedCache.eventDetailsMap) {
-        return new Map<string, EventDetails>(parsedCache.eventDetailsMap);
-      }
-    } catch {
-      // Ignore
-    }
+  const fromStorage = readValidEventsCatalogueFromLocalStorage();
+  if (fromStorage) {
+    eventsCatalogueMemoryCache = fromStorage;
+    return eventsCatalogueMemoryCache;
   }
-  return new Map<string, EventDetails>();
+
+  await fetchEvents();
+  eventsCatalogueMemoryCache =
+    readValidEventsCatalogueFromLocalStorage() ??
+    new Map<string, EventDetails>();
+  return eventsCatalogueMemoryCache;
 }
 
 export async function getCountries(): Promise<CountryMap> {

@@ -6,6 +6,7 @@ import {
 } from "./configureCapacityLimits";
 import { parseDataUrl } from "@utils/urlSharing";
 import { markDataImported } from "./showImportGuidance";
+import { invalidateEventsCatalogueMemoryCache } from "./fetchEvents";
 
 export class InvalidFileFormatError extends Error {
   constructor(message: string) {
@@ -110,6 +111,7 @@ export function importApplicationState(state: ApplicationState): void {
         eventDetailsMap: Array.from(eventDetailsMap.entries()),
       }),
     );
+    invalidateEventsCatalogueMemoryCache();
   }
 
   markDataImported();

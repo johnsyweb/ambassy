@@ -1,4 +1,4 @@
-Status: ready-for-agent
+Status: done
 
 # Keep parsed events catalogue in memory
 
@@ -8,9 +8,9 @@ After first `getEvents()` parse of the `localStorage` cache, hold the `EventDeta
 
 ## Acceptance criteria
 
-- [ ] Second `getEvents()` call returns cached map without `JSON.parse` of full catalogue
-- [ ] Cache invalidates when `fetchEvents()` refreshes data or `persistEventDetails()` updates
-- [ ] Tests cover cache hit and invalidation
+- [x] Second `getEvents()` call returns cached map without `JSON.parse` of full catalogue
+- [x] Cache invalidates when `fetchEvents()` refreshes data or `persistEventDetails()` updates
+- [x] Tests cover cache hit and invalidation
 
 ## Blocked by
 

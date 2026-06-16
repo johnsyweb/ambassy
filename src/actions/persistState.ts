@@ -11,6 +11,10 @@ import {
 } from "@utils/storage";
 import { EventAmbassador } from "@models/EventAmbassador";
 import { RegionalAmbassador } from "@models/RegionalAmbassador";
+import {
+  EVENTS_CATALOGUE_CACHE_KEY,
+  setEventsCatalogueMemoryCache,
+} from "./fetchEvents";
 
 export function persistEventAmbassadors(
   eventAmbassadors: EventAmbassadorMap,
@@ -36,16 +40,14 @@ export function persistChangesLog(changesLog: LogEntry[]): void {
 }
 
 export function persistEventDetails(eventDetailsMap: EventDetailsMap): void {
-  const CACHE_KEY = "parkrun events";
-
-  // Always update the cache with fresh timestamp and current eventDetailsMap
   localStorage.setItem(
-    CACHE_KEY,
+    EVENTS_CATALOGUE_CACHE_KEY,
     JSON.stringify({
       timestamp: Date.now(),
       eventDetailsMap: Array.from(eventDetailsMap.entries()),
     }),
   );
+  setEventsCatalogueMemoryCache(eventDetailsMap);
 }
 
 /**
