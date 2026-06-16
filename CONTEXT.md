@@ -21,7 +21,7 @@ The `EventShortName` from `events.json` used as the allocation key once an impor
 _Avoid_: Normalised name (too vague), official name
 
 **Event name canonicalisation**:
-Rewriting an allocation's event name to the canonical event name when it matches exactly one live parkrun in `events.json` under exact or strict normalised equality (e.g. comma vs space variants). Substring or fuzzy matches do not qualify. Logged in the Changes log; does not apply to prospective events or names with no unambiguous match.
+Rewriting an allocation's event name to the canonical event name when it matches exactly one live parkrun in `events.json` under exact or strict normalised equality (e.g. comma vs space variants, macron differences, trailing ` parkrun` suffix, or `EventShortName, location` CSV disambiguation). Substring or fuzzy matches do not qualify. Logged in the Changes log; does not apply to prospective events or names with no unambiguous match.
 _Avoid_: Auto-resolve (implies manual issue workflow), alias entry
 
 **REA territory polygon**:

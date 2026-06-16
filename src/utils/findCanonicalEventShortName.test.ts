@@ -71,4 +71,87 @@ describe("findCanonicalEventShortName", () => {
       findCanonicalEventShortName("Foo  Bar", eventDetails),
     ).toBeUndefined();
   });
+
+  it("returns the canonical name when the CSV adds a location after a comma", () => {
+    const eventDetails: EventDetailsMap = new Map([
+      [
+        "Hamilton Park",
+        {
+          ...albertMelbourneEvent(),
+          properties: {
+            ...albertMelbourneEvent().properties,
+            EventShortName: "Hamilton Park",
+            EventLongName: "Hamilton Park parkrun, Gore",
+          },
+        },
+      ],
+    ]);
+
+    expect(
+      findCanonicalEventShortName("Hamilton Park, Gore", eventDetails),
+    ).toBe("Hamilton Park");
+  });
+
+  it("returns the canonical name when the CSV includes a parkrun suffix", () => {
+    const eventDetails: EventDetailsMap = new Map([
+      [
+        "Ōamaru Public Gardens",
+        {
+          ...albertMelbourneEvent(),
+          properties: {
+            ...albertMelbourneEvent().properties,
+            EventShortName: "Ōamaru Public Gardens",
+            EventLongName: "Ōamaru Public Gardens parkrun",
+          },
+        },
+      ],
+    ]);
+
+    expect(
+      findCanonicalEventShortName(
+        "Ōamaru Public Gardens parkrun",
+        eventDetails,
+      ),
+    ).toBe("Ōamaru Public Gardens");
+  });
+
+  it("returns the canonical name when macrons differ from events.json", () => {
+    const eventDetails: EventDetailsMap = new Map([
+      [
+        "Ōpaheke Park",
+        {
+          ...albertMelbourneEvent(),
+          properties: {
+            ...albertMelbourneEvent().properties,
+            EventShortName: "Ōpaheke Park",
+            EventLongName: "Ōpaheke Park parkrun",
+          },
+        },
+      ],
+    ]);
+
+    expect(findCanonicalEventShortName("Opaheke Park", eventDetails)).toBe(
+      "Ōpaheke Park",
+    );
+  });
+
+  it("prefers a full-name match over a comma-prefix match", () => {
+    const eventDetails: EventDetailsMap = new Map([
+      ["Albert", albertMelbourneEvent()],
+      [
+        "Albert Melbourne",
+        {
+          ...albertMelbourneEvent(),
+          properties: {
+            ...albertMelbourneEvent().properties,
+            EventShortName: "Albert Melbourne",
+          },
+        },
+      ],
+    ]);
+
+    expect(findCanonicalEventShortName("Albert, Melbourne", eventDetails)).toBe(
+      "Albert Melbourne",
+    );
+  });
 });

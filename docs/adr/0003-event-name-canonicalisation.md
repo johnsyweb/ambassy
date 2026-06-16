@@ -12,7 +12,7 @@ We **rewrite allocation names to the canonical `EventShortName` from `events.jso
 
 1. **Mechanism:** rewrite names in Event Ambassadors (`events[]`) and Event Teams (map keys) to the matched canonical `EventShortName`. Do **not** add alias entries to `eventDetailsMap`.
 2. **When:** CSV import and session load — before `detectIssues` and derived table data.
-3. **Match rule:** exact case-insensitive match, or strict normalised equality after enhanced normalisation (apostrophes, parentheticals, whitespace, comma↔space). **No** fuzzy or substring matching.
+3. **Match rule:** exact case-insensitive match, or strict normalised equality after enhanced normalisation (apostrophes, parentheticals, whitespace, comma↔space, diacritic folding, trailing ` parkrun` suffix). When the full name does not match, try the segment before the first comma (location disambiguation, e.g. `Hamilton Park, Gore` → `Hamilton Park`). **No** fuzzy or substring matching.
 4. **Ambiguity:** canonicalise only when exactly one live parkrun in `events.json` matches. Prospective names, closed events, and typos with no single match stay as unresolved issues for manual 🔧 Resolve.
 5. **Logging:** one Changes log entry per rename; separate log entry when deduplicating duplicate allocations on the same EA after canonicalisation.
 6. **Event Teams collision:** when two map keys collapse to one canonical name, merge `eventDirectors` (deduped). For conflicting `eventAmbassador` values, prefer the owner from the Event Ambassadors CSV.
@@ -37,7 +37,7 @@ Duplicate removal after canonicalisation is logged so REAs can audit spreadsheet
 
 ## Consequences
 
-- Implement `findCanonicalEventShortName()` and `canonicaliseAllocationNames()`; extend `normalizeEventName()` for comma↔space equivalence.
+- Implement `findCanonicalEventShortName()` and `canonicaliseAllocationNames()`; extend `normalizeEventName()` for comma↔space equivalence, diacritic folding, and trailing ` parkrun` suffix stripping; comma-prefix fallback in `findCanonicalEventShortName()`.
 - Wire into `uploadCSV` and app startup before `extractEventTeamsTableData`.
 - Add tests for comma variants (Albert Melbourne), dedupe logging, Event Teams director merge, and idempotent second load.
 - Manual resolve for `found_in_events_json` remains for names that fail strict canonicalisation (typos, genuine missing events).

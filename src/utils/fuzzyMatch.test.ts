@@ -38,6 +38,18 @@ describe("normalizeEventName", () => {
       normalizeEventName("Albert Melbourne"),
     );
   });
+
+  it("should fold diacritics for matching", () => {
+    expect(normalizeEventName("Opaheke Park")).toBe(
+      normalizeEventName("Ōpaheke Park"),
+    );
+  });
+
+  it("should ignore a trailing parkrun suffix", () => {
+    expect(normalizeEventName("Ōamaru Public Gardens parkrun")).toBe(
+      normalizeEventName("Ōamaru Public Gardens"),
+    );
+  });
 });
 
 describe("levenshteinDistance", () => {

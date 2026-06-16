@@ -1,15 +1,23 @@
 import { getCountries } from "@models/country";
 
 const APOSTROPHE_LIKE_CHARACTERS = /[\u0027\u0060\u2018\u2019\u201B]/g;
+const COMBINING_MARKS = /[\u0300-\u036f]/g;
+
+function foldDiacritics(value: string): string {
+  return value.normalize("NFD").replace(COMBINING_MARKS, "");
+}
 
 export function normalizeEventName(name: string): string {
-  return name
-    .replace(APOSTROPHE_LIKE_CHARACTERS, "'")
-    .toLowerCase()
-    .replace(/\([^)]*\)/g, "")
-    .replace(/,/g, " ")
-    .trim()
-    .replace(/\s+/g, " ");
+  return foldDiacritics(
+    name
+      .replace(APOSTROPHE_LIKE_CHARACTERS, "'")
+      .toLowerCase()
+      .replace(/\([^)]*\)/g, "")
+      .replace(/,/g, " ")
+      .replace(/\s+parkrun\s*$/i, "")
+      .trim()
+      .replace(/\s+/g, " "),
+  );
 }
 
 export function levenshteinDistance(str1: string, str2: string): number {
