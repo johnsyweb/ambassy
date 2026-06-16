@@ -68,7 +68,7 @@ export function importAmbassadorFinishHistory(
   persistAmbassadorFinishHistories(histories);
 
   log.push({
-    type: "Finish History Imported",
+    type: "Visit History Imported",
     event: ambassador.name,
     oldValue: formatParkrunnerIdForDisplay(payload.parkrunnerId),
     newValue: `${matchedFinishes.importedEventCount} events (${matchedFinishes.discardedEventCount} discarded)`,

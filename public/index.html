@@ -7,7 +7,7 @@
     <meta name="application-name" content="Ambassy" />
     <meta
       name="description"
-      content="A tool for parkrun Regional Event Ambassadors (REAs) to visualise and manage event allocations. Your allocation and optional finish history data are processed in your browser, not on our servers; there is no analytics."
+      content="A tool for parkrun Regional Event Ambassadors (REAs) to visualise and manage event allocations. Your allocation and optional visit history data are processed in your browser, not on our servers; there is no analytics."
     />
     <meta
       name="keywords"
@@ -58,7 +58,7 @@
     />
     <meta
       property="og:description"
-      content="A tool for parkrun Regional Event Ambassadors (REAs) to visualise and manage event allocations. Your allocation and optional finish history data are processed in your browser, not on our servers; there is no analytics."
+      content="A tool for parkrun Regional Event Ambassadors (REAs) to visualise and manage event allocations. Your allocation and optional visit history data are processed in your browser, not on our servers; there is no analytics."
     />
     <meta property="og:url" content="https://www.johnsy.com/ambassy/" />
     <meta
@@ -86,7 +86,7 @@
     />
     <meta
       name="twitter:description"
-      content="A tool for parkrun Regional Event Ambassadors (REAs) to visualise and manage event allocations. In-browser processing; optional finish history stays on your device; no analytics."
+      content="A tool for parkrun Regional Event Ambassadors (REAs) to visualise and manage event allocations. In-browser processing; optional visit history stays on your device; no analytics."
     />
     <meta
       name="twitter:image"
@@ -105,7 +105,7 @@
     />
     <meta
       name="bluesky:description"
-      content="A tool for parkrun Regional Event Ambassadors (REAs) to visualise and manage event allocations. In-browser processing; optional finish history stays on your device; no analytics."
+      content="A tool for parkrun Regional Event Ambassadors (REAs) to visualise and manage event allocations. In-browser processing; optional visit history stays on your device; no analytics."
     />
     <meta
       name="bluesky:image"
@@ -247,7 +247,7 @@
             "@id": "https://www.johnsy.com/ambassy/#website",
             "url": "https://www.johnsy.com/ambassy/",
             "name": "Ambassy",
-            "description": "A tool for parkrun Regional Event Ambassadors (REAs) to visualise and manage event allocations. Allocation and optional finish history data are processed in the browser, not on our servers; there is no analytics.",
+            "description": "A tool for parkrun Regional Event Ambassadors (REAs) to visualise and manage event allocations. Allocation and optional visit history data are processed in the browser, not on our servers; there is no analytics.",
             "inLanguage": "en",
             "publisher": { "@id": "https://www.johnsy.com/#person" },
             "potentialAction": {
@@ -265,7 +265,7 @@
             "url": "https://www.johnsy.com/ambassy/",
             "name": "Ambassy - A tool for parkrun ambassadors",
             "isPartOf": { "@id": "https://www.johnsy.com/ambassy/#website" },
-            "description": "A tool for parkrun Regional Event Ambassadors (REAs) to visualise and manage event allocations. Allocation and optional finish history data are processed in the browser, not on our servers; there is no analytics.",
+            "description": "A tool for parkrun Regional Event Ambassadors (REAs) to visualise and manage event allocations. Allocation and optional visit history data are processed in the browser, not on our servers; there is no analytics.",
             "inLanguage": "en",
             "datePublished": "2024-01-01",
             "dateModified": "2026-06-16",
@@ -297,7 +297,7 @@
             "@type": "WebApplication",
             "@id": "https://www.johnsy.com/ambassy/#app",
             "name": "Ambassy",
-            "description": "A tool for parkrun Regional Event Ambassadors (REAs) to visualise and manage event allocations. Upload comma-separated values (CSV) files to display events on a map with Voronoi territories showing Regional Event Ambassador support areas. Allocation and optional finish history data are processed in the browser, not on our servers; there is no analytics.",
+            "description": "A tool for parkrun Regional Event Ambassadors (REAs) to visualise and manage event allocations. Upload comma-separated values (CSV) files to display events on a map with Voronoi territories showing Regional Event Ambassador support areas. Allocation and optional visit history data are processed in the browser, not on our servers; there is no analytics.",
             "url": "https://www.johnsy.com/ambassy/",
             "applicationCategory": "UtilityApplication",
             "operatingSystem": ["Windows", "macOS", "Linux", "Android", "iOS"],
@@ -316,7 +316,7 @@
             "featureList": [
               "Committed to personal privacy: in-browser processing, no analytics, no server-side storage of your data on this site",
               "Upload comma-separated values (CSV) files for Regional and Event Ambassadors",
-              "Optional finish history import from parkrun profiles via userscript; stored locally on your device",
+              "Optional visit history import from parkrun profiles via userscript; stored locally on your device",
               "Visualise events on an interactive Leaflet map",
               "Voronoi territories for Regional Event Ambassadors",
               "Table views for events, ambassadors, prospects, issues, and changes",
@@ -345,7 +345,7 @@
         <span aria-hidden="true" id="breadcrumbFinishHistorySeparator" hidden
           >/</span
         >
-        <span id="breadcrumbFinishHistory" hidden>Finish history</span>
+        <span id="breadcrumbFinishHistory" hidden>Visit history</span>
       </nav>
       <div class="header-content">
         <div class="header-title">
@@ -357,9 +357,9 @@
             href="#finish-history"
             id="finishHistoryNavLink"
             class="header-nav-link"
-            title="Import ambassador finish history from parkrun profiles"
+            title="Import ambassador visit history from parkrun profiles"
           >
-            Finish history
+            Visit history
           </a>
           <button
             type="button"
@@ -578,7 +578,7 @@
         </div>
 
         <div id="finishHistoryPage" class="finish-history-page" hidden>
-          <h2>Ambassador finish history</h2>
+          <h2>Ambassador visit history</h2>
 
           <section aria-labelledby="finish-history-why-heading">
             <h3 id="finish-history-why-heading">Why this exists</h3>
@@ -591,7 +591,7 @@
             <p>
               Ambassy runs entirely in your browser. parkrun profiles live on
               per-country websites with bot protection, so Ambassy cannot fetch
-              finish history directly. The finish export userscript runs on
+              visit history directly. The finish export userscript runs on
               parkrun profile pages you already have permission to view, extracts
               finish dates from the <code>/all/</code> table, and hands the data
               back to Ambassy on your device.
@@ -605,7 +605,7 @@
           <section aria-labelledby="finish-history-privacy-heading">
             <h3 id="finish-history-privacy-heading">Privacy</h3>
             <p>
-              Finish history is imported only when you choose to. It is parsed in
+              Visit history is imported only when you choose to. It is parsed in
               your browser from parkrun profile pages you already have permission
               to view, then stored in local storage with your other Ambassy data.
               It is not uploaded to johnsy.com or stored on our servers.
@@ -670,13 +670,13 @@
               <li>
                 If you cancel ambassador assignment, use <strong>Resume</strong>
                 on the main page banner or
-                <strong>Import finish history from clipboard</strong> below.
+                <strong>Import visit history from clipboard</strong> below.
               </li>
             </ol>
             <p>
               <strong>Clipboard fallback:</strong> copy the JSON from the
               userscript notification, then use
-              <strong>Import finish history from clipboard</strong> below.
+              <strong>Import visit history from clipboard</strong> below.
             </p>
           </section>
 
@@ -696,7 +696,7 @@
               >View userscript source</a
             >
             <button type="button" id="importFinishHistoryButton">
-              Import finish history from clipboard
+              Import visit history from clipboard
             </button>
           </div>
 

@@ -77,7 +77,7 @@ describe("importAmbassadorFinishHistory", () => {
     });
     expect(log[0]).toEqual(
       expect.objectContaining({
-        type: "Finish History Imported",
+        type: "Visit History Imported",
         newValue: "1 events (1 discarded)",
       }),
     );

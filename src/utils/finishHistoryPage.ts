@@ -25,7 +25,7 @@ export function showFinishHistoryPage(): void {
   }
 
   updateFinishHistoryBreadcrumb(true);
-  document.title = "Ambassador finish history — Ambassy";
+  document.title = "Ambassador visit history — Ambassy";
 }
 
 export function hideFinishHistoryPage(): void {

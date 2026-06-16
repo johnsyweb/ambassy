@@ -13,7 +13,7 @@ const USERSCRIPT_PATHS = [
 
 // Keep METADATA in sync with src/utils/finishExportUserscriptMetadata.ts
 const METADATA = {
-  name: "Ambassy finish history export",
+  name: "Ambassy visit history export",
   description:
     "Export parkrun profile finishes for Ambassy last ambassador visit tracking.",
   author: "Pete Johns (@johnsyweb)",

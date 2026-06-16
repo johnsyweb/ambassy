@@ -199,7 +199,7 @@ function appendParkrunnerIdCell(
   const setButton = document.createElement("button");
   setButton.type = "button";
   setButton.textContent = parkrunnerId ? "Change" : "Set";
-  setButton.title = "Set parkrunner ID for finish history import";
+  setButton.title = "Set parkrunner ID for visit history import";
   setButton.setAttribute(
     "aria-label",
     `${parkrunnerId ? "Change" : "Set"} parkrunner ID for ${name}`,

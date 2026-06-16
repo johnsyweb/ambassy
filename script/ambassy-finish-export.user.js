@@ -1,5 +1,5 @@
 // ==UserScript==
-// @name         Ambassy finish history export
+// @name         Ambassy visit history export
 // @description  Export parkrun profile finishes for Ambassy last ambassador visit tracking.
 // @author       Pete Johns (@johnsyweb)
 // @downloadURL  https://johnsy.com/ambassy/script/ambassy-finish-export.user.js

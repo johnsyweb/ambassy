@@ -1316,7 +1316,7 @@ async function importFinishHistoryFromClipboard(): Promise<void> {
     syncFinishImportPendingBannerControls();
   } catch (error) {
     alert(
-      `Could not import finish history: ${error instanceof Error ? error.message : "Unknown error"}`,
+      `Could not import visit history: ${error instanceof Error ? error.message : "Unknown error"}`,
     );
   }
 }

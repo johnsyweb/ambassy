@@ -60,7 +60,7 @@ export function showAssignParkrunnerImportDialog(
     dialog.appendChild(title);
 
     const description = document.createElement("p");
-    description.textContent = `Finish history is for parkrunner ID ${formatParkrunnerIdForDisplay(parkrunnerId)}. Choose the ambassador to assign it to before importing.`;
+    description.textContent = `Visit history is for parkrunner ID ${formatParkrunnerIdForDisplay(parkrunnerId)}. Choose the ambassador to assign it to before importing.`;
     dialog.appendChild(description);
 
     const profileDisplayName = hints?.parkrunProfileDisplayName?.trim();

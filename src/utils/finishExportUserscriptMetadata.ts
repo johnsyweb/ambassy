@@ -1,5 +1,5 @@
 export const FINISH_EXPORT_USERSCRIPT_METADATA = {
-  name: "Ambassy finish history export",
+  name: "Ambassy visit history export",
   description:
     "Export parkrun profile finishes for Ambassy last ambassador visit tracking.",
   author: "Pete Johns (@johnsyweb)",

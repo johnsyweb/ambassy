@@ -34,7 +34,7 @@ export type RefreshScope = {
 /** Rebuild tables and map (default). */
 export const REFRESH_ALL: RefreshScope = { map: true, tables: true };
 
-/** Ambassador metadata, finish history, or log-only updates — skip map rebuild. */
+/** Ambassador metadata, visit history, or log-only updates — skip map rebuild. */
 export const REFRESH_TABLES_ONLY: RefreshScope = { map: false, tables: true };
 
 function resolveRefreshScope(scope?: RefreshScope): Required<RefreshScope> {

@@ -15,7 +15,7 @@ function createAmbassyDom(): void {
     <nav class="breadcrumbs">
       <span id="breadcrumbCurrentPage" aria-current="page">Ambassy</span>
       <span id="breadcrumbFinishHistorySeparator" hidden>/</span>
-      <span id="breadcrumbFinishHistory" hidden>Finish history</span>
+      <span id="breadcrumbFinishHistory" hidden>Visit history</span>
     </nav>
     <div id="introduction"></div>
     <div id="ambassy"></div>
@@ -54,7 +54,7 @@ describe("finishHistoryPage", () => {
     expect(introduction.style.display).toBe("none");
     expect(ambassy.style.display).toBe("none");
     expect(document.getElementById("finishHistoryPage")?.hidden).toBe(false);
-    expect(document.title).toBe("Ambassador finish history — Ambassy");
+    expect(document.title).toBe("Ambassador visit history — Ambassy");
   });
 
   it("restores the map view when data is loaded", () => {
