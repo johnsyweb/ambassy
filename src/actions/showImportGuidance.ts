@@ -37,7 +37,7 @@ export function showImportGuidance(): void {
 
   const title = document.createElement("h2");
   title.id = "importGuidanceTitle";
-  title.textContent = "Open Shared State";
+  title.textContent = "Import Ambassy state";
   title.style.marginTop = "0";
   title.style.marginBottom = "1em";
   guidance.appendChild(title);
@@ -45,15 +45,15 @@ export function showImportGuidance(): void {
   const instructions = document.createElement("div");
   instructions.innerHTML = `
     <p style="margin-bottom: 1em;">
-      <strong>Have you received shared data from a colleague?</strong> You can open it here to see their changes.
+      <strong>Have you received an Ambassy export file from a colleague?</strong> You can import it here to see their data.
     </p>
     <ol style="margin-left: 1.5em; margin-bottom: 1em;">
-      <li style="margin-bottom: 0.5em;">Click the <strong>📂 Open Saved State</strong> button above</li>
-      <li style="margin-bottom: 0.5em;">Select the shared file you received, or paste a shared URL or clipboard data</li>
-      <li style="margin-bottom: 0.5em;">Your colleague's data will be loaded and displayed</li>
+      <li style="margin-bottom: 0.5em;">Click the <strong>📥 Import</strong> button above</li>
+      <li style="margin-bottom: 0.5em;">Select the export file you received</li>
+      <li style="margin-bottom: 0.5em;">Your colleague's data will replace your current Ambassy data on this device</li>
     </ol>
     <p style="margin-bottom: 1em; color: #666;">
-      <strong>Tip:</strong> You can also drag and drop the shared file directly onto this page.
+      <strong>Tip:</strong> You can also drag and drop the export file directly onto this page.
     </p>
   `;
   guidance.appendChild(instructions);

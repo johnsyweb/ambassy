@@ -364,16 +364,16 @@
           <button
             type="button"
             id="exportButtonMap"
-            title="Share your current map and allocations with another ambassador"
+            title="Download your current Ambassy data as a JSON file"
           >
-            📤 Share
+            📤 Export
           </button>
           <button
             type="button"
             id="importButtonMap"
-            title="Open a saved Ambassy file from a colleague"
+            title="Import an Ambassy export file from a colleague"
           >
-            📂 Open
+            📥 Import
           </button>
           <button
             type="button"
@@ -429,11 +429,11 @@
               title="Comma-Separated Values"
               >CSV</abbr
             >) files containing the names of the Event Ambassadors you support
-            and the events they support. These allocation data are parsed in your
-            browser and kept in local storage on your device; they are not
+            and the events they support. These allocation data are parsed in
+            your browser and kept in local storage on your device; they are not
             uploaded to johnsy.com, logged by Ambassy, or stored on our servers.
             Optional <strong>parkrunner IDs</strong> and imported
-            <strong>finish histories</strong> are stored the same way. There is
+            <strong>visit histories</strong> are stored the same way. There is
             no analytics whatsoever: usage is not counted, adoption is not
             measured, and Ambassy is shared in goodwill, not to boost traffic or
             prove how many people use it. The intent is close to
@@ -445,18 +445,18 @@
             catalogue, and — if you install the finish export userscript —
             fetching that script from johnsy.com for installation and updates.
             That script request does not include your allocation or finish data.
-            Visiting parkrun profile pages to import finishes is ordinary browsing
-            on parkrun's own sites. When you geocode a place, the search text you
-            enter is sent to OpenStreetMap’s
+            Visiting parkrun profile pages to import finishes is ordinary
+            browsing on parkrun's own sites. When you geocode a place, the
+            search text you enter is sent to OpenStreetMap’s
             <a href="https://nominatim.org/release-docs/latest/">Nominatim</a>
             to resolve coordinates, and that request does not include your
             <abbr title="Comma-Separated Values">CSV</abbr> or ambassador names.
             Only the columns the tool uses are read from each file; any extra
-            columns are ignored and never stored. Share and Open only move files
-            when you deliberately exchange them; exported state includes
-            allocations, ambassadors, and related settings but not imported finish
-            histories. Finish import may copy JSON to your clipboard if you use
-            that fallback, or pass through
+            columns are ignored and never stored. Export and Import only move
+            files when you deliberately exchange them; exported state includes
+            allocations, ambassadors, prospective events, visit histories, and
+            related settings. Finish import may copy JSON to your clipboard if
+            you use that fallback, or pass through
             <a
               href="https://www.tampermonkey.net/"
               target="_blank"
@@ -465,8 +465,9 @@
             >
             on your device when moving from a parkrun profile tab to Ambassy.
             There is no central Ambassy service that stores what you are working
-            on. You may use aliases in your <abbr title="Comma-Separated Values">CSV</abbr> if you prefer;
-            the author uses real names because it makes conflicts of interest
+            on. You may use aliases in your
+            <abbr title="Comma-Separated Values">CSV</abbr> if you prefer; the
+            author uses real names because it makes conflicts of interest
             between volunteers at different levels of the organisation easier to
             spot. The source code is available on
             <a href="https://github.com/johnsyweb/ambassy">GitHub</a>
@@ -583,18 +584,19 @@
           <section aria-labelledby="finish-history-why-heading">
             <h3 id="finish-history-why-heading">Why this exists</h3>
             <p>
-              The Event Teams tab can show <strong>last ambassador visit</strong>
-              — who finished at an event most recently, and when. That helps REAs
-              see oversight visits by ambassadors who are not allocated to the
-              event.
+              The Event Teams tab can show
+              <strong>last ambassador visit</strong>
+              — who finished at an event most recently, and when. That helps
+              REAs see oversight visits by ambassadors who are not allocated to
+              the event.
             </p>
             <p>
               Ambassy runs entirely in your browser. parkrun profiles live on
               per-country websites with bot protection, so Ambassy cannot fetch
               visit history directly. The finish export userscript runs on
-              parkrun profile pages you already have permission to view, extracts
-              finish dates from the <code>/all/</code> table, and hands the data
-              back to Ambassy on your device.
+              parkrun profile pages you already have permission to view,
+              extracts finish dates from the <code>/all/</code> table, and hands
+              the data back to Ambassy on your device.
             </p>
             <p>
               Only finishes that match live events in the parkrun catalogue are
@@ -606,22 +608,23 @@
             <h3 id="finish-history-privacy-heading">Privacy</h3>
             <p>
               Visit history is imported only when you choose to. It is parsed in
-              your browser from parkrun profile pages you already have permission
-              to view, then stored in local storage with your other Ambassy data.
-              It is not uploaded to johnsy.com or stored on our servers.
+              your browser from parkrun profile pages you already have
+              permission to view, then stored in local storage with your other
+              Ambassy data. It is not uploaded to johnsy.com or stored on our
+              servers.
             </p>
             <p>
-              The userscript may use Tampermonkey to hand off data between tabs on
-              your device. Clipboard import is available if you prefer not to use
-              that bridge. Installing or updating the userscript fetches the
+              The userscript may use Tampermonkey to hand off data between tabs
+              on your device. Clipboard import is available if you prefer not to
+              use that bridge. Installing or updating the userscript fetches the
               script from johnsy.com; that request does not include your
               allocation or finish data.
             </p>
             <p>
-              <strong>Share</strong> and <strong>Open</strong> exports include
-              allocations, ambassadors, and related settings (including parkrunner
-              IDs when set) but not imported finish histories — those stay on the
-              device where you imported them.
+              <strong>Export</strong> and <strong>Import</strong> move a single
+              JSON file containing allocations, ambassadors, prospective events,
+              visit histories, and related settings (including parkrunner IDs
+              when set).
             </p>
           </section>
 
@@ -644,9 +647,9 @@
                 installation. Tampermonkey will check for updates automatically.
               </li>
               <li>
-                Set each ambassador's <strong>parkrunner ID</strong> on the Event
-                Ambassadors or Regional Ambassadors tab, or via the optional
-                <code>parkrunner ID</code> column in your CSV.
+                Set each ambassador's <strong>parkrunner ID</strong> on the
+                Event Ambassadors or Regional Ambassadors tab, or via the
+                optional <code>parkrunner ID</code> column in your CSV.
               </li>
             </ol>
           </section>
@@ -656,8 +659,8 @@
             <ol>
               <li>
                 Open the ambassador's parkrun profile
-                <code>/all/</code> page (use the link on their parkrunner ID when
-                set).
+                <code>/all/</code> page (use the link on their parkrunner ID
+                when set).
               </li>
               <li>
                 Click <strong>Export finishes to Ambassy</strong> on that page.
@@ -884,9 +887,7 @@
             aria-describedby="ambassadorNameFilterStatus"
             placeholder="Filter by ambassador name"
           />
-          <button type="button" id="ambassadorNameFilterClear">
-            Clear
-          </button>
+          <button type="button" id="ambassadorNameFilterClear">Clear</button>
           <span
             id="ambassadorNameFilterStatus"
             class="ambassador-name-filter-status"

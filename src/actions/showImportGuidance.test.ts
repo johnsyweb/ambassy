@@ -59,8 +59,8 @@ describe("showImportGuidance", () => {
       showImportGuidance();
 
       const introduction = document.getElementById("introduction");
-      expect(introduction?.innerHTML).toContain("import");
-      expect(introduction?.innerHTML).toContain("shared");
+      expect(introduction?.innerHTML).toContain("Import");
+      expect(introduction?.innerHTML).toContain("export file");
     });
 
     it("should update lastGuidanceShown timestamp", () => {

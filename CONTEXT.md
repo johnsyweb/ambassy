@@ -127,3 +127,27 @@ _Avoid_: Search (too generic), table search
 **Filtered map view**:
 The map presentation when an ambassador name filter is active. Allocated event markers and prospect markers follow the same matching rules as Event Teams and Prospects respectively; unallocated parkrun markers are hidden. REA territory polygons are drawn only for Regional Event Ambassadors with at least one visible allocated event. The Voronoi diagram is not recomputed — only which markers and polygons are shown changes.
 _Avoid_: Map search, clipped Voronoi
+
+**State export**:
+A single JSON file containing all Ambassy data that cannot be recovered from parkrun alone: allocations, ambassadors, prospective events, capacity limits, changes log, manually resolved event coordinates, parkrunner IDs, and visit histories.
+_Avoid_: Share, backup, partial export
+
+**State export exclusions**:
+Data deliberately omitted from a state export because it is re-fetchable or ephemeral: the `events.json` catalogue cache, pending visit import payloads, and session-only UI state (e.g. ambassador name filter).
+_Avoid_: Optional export, slim export
+
+**State import**:
+Loading a state export file to replace all persisted Ambassy data in the export scope on this device. If local data exists or there are unsaved changes, the user must confirm before the replace proceeds.
+_Avoid_: Open saved state, merge import, partial import
+
+**State export schema**:
+The JSON `version` field on a state export file. New exports use `2.0.0` (full local state). Import accepts `2.0.0` and legacy `1.0.0`; missing fields in older files default to empty.
+_Avoid_: Share format, URL-encoded state
+
+**State export action**:
+A single header control that immediately downloads the current state as a JSON file (e.g. `ambassy-state-2026-06-16.json`) with no intermediate dialog. Successful export marks local state as saved for the unsaved-changes reminder.
+_Avoid_: Share dialog, URL export, clipboard export
+
+**State import action**:
+Loading a state export file via the **Import** header control (system file picker) or by dragging a `.json` file onto the page. URL query parameters and clipboard paste are not supported for state import.
+_Avoid_: Open saved state, share URL, paste state JSON

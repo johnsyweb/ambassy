@@ -26,6 +26,6 @@ REAs need to focus on one ambassador across tables and map without retyping on e
 
 ## Consequences
 
-- Filter state is separate from Share/Open exports.
+- Filter state is separate from state export/import (see ADR 0007).
 - Map redraw logic must respect filter without touching Voronoi cache invalidation rules.
 - Changes log and Issues remain unfiltered until a future need is established.

@@ -54,7 +54,7 @@ Ambassy features a clean, professional interface with:
   - All action buttons are consolidated in the header for easy access
   - Buttons that require loaded data (Add EA, Add REA, Add Prospect, Configure, Purge) are automatically hidden when no data is loaded
   - Import and Keyboard Shortcuts buttons remain visible at all times
-  - Share button appears when data is loaded and map view is visible
+  - Export button appears when data is loaded and map view is visible
   - All buttons have consistent height and styling
 - **Footer**: Single paragraph with version (changelog link), author, GitHub, and license
 - **Responsive Design**: Adapts seamlessly to desktop, tablet, and mobile devices
@@ -102,38 +102,25 @@ Uploaded CSV data are processed in the browser and persisted in local storage on
 
 Outbound requests are limited to OpenStreetMap map tiles, the public parkrun events catalogue, and — if you install the finish export userscript — fetching that script from johnsy.com for installation and updates. That script request does not include your allocation or finish data. Visiting parkrun profile pages to import finishes is ordinary browsing on parkrun's own sites. When you geocode a place, the search text you enter is sent to OpenStreetMap’s [Nominatim](https://nominatim.org/release-docs/latest/), and that request does not include your CSV or ambassador names.
 
-Sharing state only happens when you explicitly export, copy, or open a file or link. Exported state includes allocations, ambassadors, and related settings (including parkrunner IDs when set) but **not** imported finish histories — those stay on the device where you imported them. Finish import may copy JSON to your clipboard if you use that fallback, or pass through [Tampermonkey](https://www.tampermonkey.net/) on your device when moving from a parkrun profile tab to Ambassy. You may use aliases in CSVs; using real names can make conflicts of interest across volunteer tiers easier to see.
+Sharing state only happens when you explicitly export or import a file. Exported state includes allocations, ambassadors, prospective events, visit histories, and related settings (including parkrunner IDs when set). The parkrun events catalogue cache is not included — Ambassy re-fetches it. Finish import may copy JSON to your clipboard if you use that fallback, or pass through [Tampermonkey](https://www.tampermonkey.net/) on your device when moving from a parkrun profile tab to Ambassy. You may use aliases in CSVs; using real names can make conflicts of interest across volunteer tiers easier to see.
 
-## State Persistence and Sharing
+## State persistence, export, and import
 
-Ambassy automatically persists your uploaded CSV data, parkrunner IDs, and imported finish histories to browser local storage, so you do not need to re-upload files every time you visit the application. Your data persist across browser sessions.
+Ambassy automatically persists your uploaded CSV data, parkrunner IDs, prospective events, and imported visit histories to browser local storage, so you do not need to re-upload files every time you visit the application. Your data persist across browser sessions.
 
-### Sharing Your State
+### Export
 
-Click the **"Share…"** button to share your current map and allocations with other ambassadors. You can choose from several sharing methods:
+Click **Export** to immediately download a JSON file (`ambassy-state-YYYY-MM-DD.json`) containing all Ambassy data on this device that cannot be recovered from parkrun alone. Pass the file to colleagues by your usual file-transfer or messaging tools.
 
-- **Save to File**: Download a JSON file containing your state that you can pass to others by your usual file-transfer or messaging tools
-- **Copy Share Link**: Copy a link that automatically loads your state when opened (for smaller states)
-- **Copy State Text**: Copy the state data as text that can be pasted into Ambassy
-- **Share via Device**: Use your device's native share sheet (mobile/desktop) to hand off the export through another app if you prefer
+### Import
 
-**Note**: If your state is too large for link sharing, you'll be prompted to use file or text sharing instead.
+Click **Import** to load an export file from another ambassador, or drag and drop a `.json` file onto the page. Import replaces all persisted Ambassy data in the export scope on this device. You will be asked to confirm if you already have local data or unsaved changes.
 
-**Note**: Shared exports do not include imported finish histories. Re-import finish history on each device where you need it.
+Legacy `1.0.0` export files (without prospective events or visit histories) are still accepted; missing fields default to empty.
 
-### Opening Shared State
+### Export reminders
 
-Click the **"Open Saved State"** button to load state shared by another ambassador. You can:
-
-- Select a shared file you received
-- Paste a shared link or data URL
-- Drag and drop a shared file directly onto the page
-
-**Note**: Opening shared state will replace your current data. You'll be asked to confirm before opening if you have existing data.
-
-### Export Reminders
-
-If you've made changes since your last export, Ambassy will remind you to share your state before closing the browser window. This helps ensure your changes aren't lost.
+If you've made changes since your last export, Ambassy will remind you to export your state before closing the browser window. This helps ensure your changes aren't lost.
 
 ## Ambassador visit history
 
