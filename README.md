@@ -80,6 +80,18 @@ The app is written in TypeScript with unit tests and runs in a modern web browse
 - Lint: `pnpm run lint`
 - Production build (writes to `dist/`): `pnpm run build`
 
+### Voronoi performance timings (development)
+
+When running `pnpm start`, a global Voronoi recompute (after allocations or catalogue changes, not on pan/zoom) records a `performance.measure` named `ambassy:voronoi-compute` and logs a `console.debug` line with duration, site count, and visible territory count.
+
+To inspect timings in browser devtools:
+
+1. Open the **Performance** panel (or **Performance insights** in Chromium).
+2. Reload with CSVs loaded, or trigger a change that invalidates Voronoi sites (for example allocate an event).
+3. Look for the user timing **`ambassy:voronoi-compute`**, or filter the console to **Verbose** to see the debug line.
+
+Pan and zoom only re-clip cached rings; they do not emit this measure.
+
 ## Privacy and data sovereignty
 
 Uploaded CSV data are processed in the browser and persisted in local storage on your device. Optional **parkrunner IDs** and imported **finish histories** are stored the same way. Nothing is uploaded to johnsy.com or stored on application servers. Only the columns Ambassy understands are read from each CSV; any other columns are ignored and never stored. There is no analytics whatsoever: usage is not counted, adoption is not measured, and Ambassy is shared in goodwill, not to boost traffic or prove how many people use it. The intent is close to [Datensparsamkeit](https://martinfowler.com/bliki/Datensparsamkeit.html) (data minimisation): carry only what you need for the job.
@@ -218,6 +230,7 @@ Ambassy provides tools for managing ambassador capacity and lifecycle:
 ### Capacity Checking
 
 The system automatically checks ambassador capacity against configurable limits:
+
 - **Event Ambassadors**: Preferred range is 2-9 events (configurable)
 - **Regional Ambassadors**: Preferred range is 3-10 Event Ambassadors (configurable)
 - Capacity status is displayed with emoji indicators:
@@ -241,6 +254,7 @@ Ambassadors can transition between Event Ambassador and Regional Ambassador role
 ### Offboarding Ambassadors
 
 When an ambassador leaves or changes roles:
+
 - Click the "🚪 Offboard" button next to their name in the ambassador tables
 - The system suggests reallocation recipients based on:
   - Available capacity

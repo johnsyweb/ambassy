@@ -27,7 +27,7 @@ Implement in order (highest impact first):
 | 04 | Split table refresh from map refresh | done |
 | 05 | Skip `populateMap` when map inputs unchanged | done |
 | 06 | Draw territory polygons for viewport-visible allocations only | done |
-| 07 | Instrument Voronoi first-compute cost | ready-for-agent |
+| 07 | Instrument Voronoi first-compute cost | done |
 | 08 | Tune webpack dev config for faster local dev | ready-for-agent |
 | 09 | Debounce finish-import activation handlers | ready-for-agent |
 | 10 | Keep parsed events catalogue in memory | ready-for-agent |

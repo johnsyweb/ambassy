@@ -8,6 +8,7 @@ import { isValidCoordinate, toGeoJSONArray } from "@models/Coordinate";
 import { ProspectiveEvent } from "@models/ProspectiveEvent";
 import { Feature, Polygon } from "geojson";
 import L from "leaflet";
+import { measureVoronoiRingComputation } from "@utils/voronoiPerformanceInstrumentation";
 
 export type VoronoiSiteRole = "visible" | "constraining";
 
@@ -722,7 +723,11 @@ export class VoronoiTerritoryCache {
   getRings(sites: VoronoiSite[], geoVoronoiFn: GeoVoronoiFn): TerritoryRing[] {
     const nextFingerprint = fingerprintVoronoiSites(sites);
     if (nextFingerprint !== this.fingerprint) {
-      this.rings = computeVisibleTerritoryRings(sites, geoVoronoiFn);
+      this.rings = measureVoronoiRingComputation(
+        sites.length,
+        () => computeVisibleTerritoryRings(sites, geoVoronoiFn),
+        (rings) => `${rings.length} visible territories`,
+      );
       this.fingerprint = nextFingerprint;
     }
 

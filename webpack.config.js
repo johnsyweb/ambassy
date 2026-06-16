@@ -1,35 +1,36 @@
-const path = require('path');
-const CopyWebpackPlugin = require('copy-webpack-plugin');
+const path = require("path");
+const webpack = require("webpack");
+const CopyWebpackPlugin = require("copy-webpack-plugin");
 
 module.exports = {
-  mode: 'development',
-  stats: { 
+  mode: "development",
+  stats: {
     errorDetails: true,
   },
-  entry: './src/index.ts',
+  entry: "./src/index.ts",
   output: {
-    filename: 'bundle.js',
-    path: path.resolve(__dirname, 'dist'),
+    filename: "bundle.js",
+    path: path.resolve(__dirname, "dist"),
   },
   resolve: {
-    extensions: ['.ts', '.tsx', '.js'],
+    extensions: [".ts", ".tsx", ".js"],
     fallback: {
-      "path": require.resolve("path-browserify")
+      path: require.resolve("path-browserify"),
     },
     alias: {
-      '@actions': path.resolve(__dirname, 'src/actions/'),
-      '@models': path.resolve(__dirname, 'src/models/'),
-      '@localtypes': path.resolve(__dirname, 'src/types/'),
-      '@parsers': path.resolve(__dirname, 'src/parsers/'),
-      '@utils': path.resolve(__dirname, 'src/utils/'),
-    }
+      "@actions": path.resolve(__dirname, "src/actions/"),
+      "@models": path.resolve(__dirname, "src/models/"),
+      "@localtypes": path.resolve(__dirname, "src/types/"),
+      "@parsers": path.resolve(__dirname, "src/parsers/"),
+      "@utils": path.resolve(__dirname, "src/utils/"),
+    },
   },
   module: {
     rules: [
       {
         test: /\.ts$/,
         use: {
-          loader: 'ts-loader',
+          loader: "ts-loader",
           options: {
             transpileOnly: false,
           },
@@ -40,16 +41,17 @@ module.exports = {
   },
   cache: false,
   plugins: [
+    new webpack.DefinePlugin({
+      "process.env.NODE_ENV": JSON.stringify("development"),
+    }),
     new CopyWebpackPlugin({
-      patterns: [
-        { from: 'public', to: '' },
-      ],
+      patterns: [{ from: "public", to: "" }],
     }),
   ],
-  devtool: 'source-map',
+  devtool: "source-map",
   devServer: {
     static: {
-      directory: path.join(__dirname, 'public'),
+      directory: path.join(__dirname, "public"),
     },
     compress: true,
     port: 8081,

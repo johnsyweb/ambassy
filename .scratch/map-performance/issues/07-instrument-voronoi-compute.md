@@ -1,4 +1,4 @@
-Status: ready-for-agent
+Status: done
 
 # Instrument Voronoi first-compute cost
 
@@ -8,10 +8,10 @@ Add dev-only `performance.mark` / `measure` around global Voronoi ring computati
 
 ## Acceptance criteria
 
-- [ ] Marks surround `computeVisibleTerritoryRings` / cache miss path
-- [ ] Measures logged once per cache invalidation (not every pan/zoom)
-- [ ] Document how to read timings in browser devtools
-- [ ] No production console noise (guard behind dev flag or `console.debug`)
+- [x] Marks surround `computeVisibleTerritoryRings` / cache miss path
+- [x] Measures logged once per cache invalidation (not every pan/zoom)
+- [x] Document how to read timings in browser devtools
+- [x] No production console noise (guard behind dev flag or `console.debug`)
 
 ## Blocked by
 
