@@ -21,6 +21,7 @@ describe("populateAmbassadorsTable", () => {
             <th>Regional Ambassador</th>
             <th>Name</th>
             <th>State</th>
+            <th>Home parkrun</th>
             <th>Number of Allocations</th>
             <th>Events Assigned</th>
             <th>Actions</th>
@@ -314,7 +315,7 @@ describe("populateAmbassadorsTable", () => {
         return nameCell?.textContent?.includes("EA 1");
       });
       expect(ea1Row).toBeTruthy();
-      const eventsCell = ea1Row!.querySelector("td:nth-child(5)") as HTMLTableCellElement;
+      const eventsCell = ea1Row!.querySelector("td:nth-child(6)") as HTMLTableCellElement;
 
       const links = eventsCell.querySelectorAll("a");
       expect(links.length).toBeGreaterThan(0);
@@ -335,7 +336,7 @@ describe("populateAmbassadorsTable", () => {
         return nameCell?.textContent?.includes("EA 1");
       });
       expect(ea1Row).toBeTruthy();
-      const eventsCell = ea1Row!.querySelector("td:nth-child(5)") as HTMLTableCellElement;
+      const eventsCell = ea1Row!.querySelector("td:nth-child(6)") as HTMLTableCellElement;
       const links = eventsCell.querySelectorAll("a");
 
       links.forEach((link) => {
@@ -356,7 +357,7 @@ describe("populateAmbassadorsTable", () => {
         return nameCell?.textContent?.includes("EA 1");
       });
       expect(ea1Row).toBeTruthy();
-      const eventsCell = ea1Row!.querySelector("td:nth-child(5)") as HTMLTableCellElement;
+      const eventsCell = ea1Row!.querySelector("td:nth-child(6)") as HTMLTableCellElement;
       const firstLink = eventsCell.querySelector("a") as HTMLAnchorElement;
 
       expect(firstLink).not.toBeNull();
@@ -383,7 +384,7 @@ describe("populateAmbassadorsTable", () => {
         return nameCell?.textContent?.includes("EA 1");
       });
       expect(ea1Row).toBeTruthy();
-      const eventsCell = ea1Row!.querySelector("td:nth-child(5)") as HTMLTableCellElement;
+      const eventsCell = ea1Row!.querySelector("td:nth-child(6)") as HTMLTableCellElement;
 
       const links = eventsCell.querySelectorAll("a");
       expect(links.length).toBe(0);
@@ -407,7 +408,7 @@ describe("populateAmbassadorsTable", () => {
         return nameCell?.textContent?.includes("EA 1");
       });
       expect(ea1Row).toBeTruthy();
-      const eventsCell = ea1Row!.querySelector("td:nth-child(5)") as HTMLTableCellElement;
+      const eventsCell = ea1Row!.querySelector("td:nth-child(6)") as HTMLTableCellElement;
 
       const spans = eventsCell.querySelectorAll("span");
       if (spans.length > 0) {

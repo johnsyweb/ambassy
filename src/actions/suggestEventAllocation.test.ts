@@ -2,69 +2,139 @@
  * Event Allocation Suggestion Tests
  */
 
-import { generateProspectAllocationSuggestions } from './suggestEventAllocation';
-import { EventAmbassadorMap } from '@models/EventAmbassadorMap';
-import { RegionalAmbassadorMap } from '@models/RegionalAmbassadorMap';
-import { EventDetailsMap } from '@models/EventDetailsMap';
-import { createCoordinate } from '@models/Coordinate';
-import { getCountryCodeFromCoordinate } from '@models/country';
+import {
+  generateProspectAllocationSuggestions,
+  suggestEventAllocation,
+} from "./suggestEventAllocation";
+import { EventAmbassadorMap } from "@models/EventAmbassadorMap";
+import { RegionalAmbassadorMap } from "@models/RegionalAmbassadorMap";
+import { EventDetailsMap } from "@models/EventDetailsMap";
+import { createCoordinate } from "@models/Coordinate";
+import { getCountryCodeFromCoordinate } from "@models/country";
 
-jest.mock('./checkCapacity', () => ({
+jest.mock("./checkCapacity", () => ({
   loadCapacityLimits: jest.fn(() => ({
     eventAmbassadorMin: 0,
     eventAmbassadorMax: 10,
   })),
 }));
 
-jest.mock('@utils/regions', () => ({
+jest.mock("@utils/regions", () => ({
   getRegionalAmbassadorForEventAmbassador: jest.fn(() => null),
 }));
 
-jest.mock('@models/country', () => ({
+jest.mock("@models/country", () => ({
   getCountryCodeFromCoordinate: jest.fn(),
 }));
 
-describe('generateProspectAllocationSuggestions', () => {
+function eventAt(
+  shortName: string,
+  coordinates: [number, number],
+): import("@models/EventDetails").EventDetails {
+  return {
+    id: shortName,
+    type: "Feature",
+    geometry: { type: "Point", coordinates },
+    properties: {
+      eventname: shortName.toLowerCase().replace(/\s+/g, ""),
+      EventLongName: `${shortName} parkrun`,
+      EventShortName: shortName,
+      LocalisedEventLongName: null,
+      countrycode: 3,
+      seriesid: 1,
+      EventLocation: "",
+    },
+  };
+}
+
+describe("suggestEventAllocation", () => {
+  it("ranks an EA with a nearby home parkrun above an EA who holds the nearby allocation", () => {
+    const eventDetails: EventDetailsMap = new Map([
+      ["Near Jamestown", eventAt("Near Jamestown", [138.57, -33.23])],
+      [
+        "Jamestown Golf Course",
+        eventAt("Jamestown Golf Course", [138.561957, -33.228546]),
+      ],
+      ["Christies Beach", eventAt("Christies Beach", [138.46916, -35.135628])],
+      ["Carisbrooke", eventAt("Carisbrooke", [138.677757, -34.754627])],
+      ["Meningie", eventAt("Meningie", [139.338438, -35.68627])],
+    ]);
+
+    const eventAmbassadors: EventAmbassadorMap = new Map([
+      [
+        "David",
+        {
+          name: "David",
+          events: ["Christies Beach", "Carisbrooke"],
+          homeParkrun: "Jamestown Golf Course",
+        },
+      ],
+      [
+        "Edna",
+        {
+          name: "Edna",
+          events: ["Jamestown Golf Course", "Meningie"],
+        },
+      ],
+    ]);
+
+    const suggestions = suggestEventAllocation(
+      "Near Jamestown",
+      eventAmbassadors,
+      eventDetails,
+      new Map(),
+    );
+
+    expect(suggestions[0]?.toAmbassador).toBe("David");
+    expect(suggestions[0]?.reasons).toEqual(
+      expect.arrayContaining([
+        expect.stringMatching(/^Home parkrun: Jamestown Golf Course/),
+      ]),
+    );
+  });
+});
+
+describe("generateProspectAllocationSuggestions", () => {
   let eventAmbassadors: EventAmbassadorMap;
   let regionalAmbassadors: RegionalAmbassadorMap;
   let eventDetails: EventDetailsMap;
 
   beforeEach(() => {
     eventAmbassadors = new Map();
-    eventAmbassadors.set('EA 1', {
-      name: 'EA 1',
-      events: ['event1'],
+    eventAmbassadors.set("EA 1", {
+      name: "EA 1",
+      events: ["event1"],
       prospectiveEvents: [],
     });
-    eventAmbassadors.set('EA 2', {
-      name: 'EA 2',
+    eventAmbassadors.set("EA 2", {
+      name: "EA 2",
       events: [],
       prospectiveEvents: [],
     });
 
     regionalAmbassadors = new Map();
-    regionalAmbassadors.set('REA 1', {
-      name: 'REA 1',
-      state: 'VIC',
-      supportsEAs: ['EA 1', 'EA 2'],
+    regionalAmbassadors.set("REA 1", {
+      name: "REA 1",
+      state: "VIC",
+      supportsEAs: ["EA 1", "EA 2"],
     });
 
     eventDetails = new Map();
-    eventDetails.set('event1', {
-      id: '1',
-      type: 'Feature',
+    eventDetails.set("event1", {
+      id: "1",
+      type: "Feature",
       geometry: {
-        type: 'Point',
+        type: "Point",
         coordinates: [144.9631, -37.8136], // GeoJSON: [lng, lat]
       },
       properties: {
-        eventname: 'event1',
-        EventLongName: 'Event 1',
-        EventShortName: 'event1',
+        eventname: "event1",
+        EventLongName: "Event 1",
+        EventShortName: "event1",
         LocalisedEventLongName: null,
         countrycode: 3,
         seriesid: 1,
-        EventLocation: 'Melbourne',
+        EventLocation: "Melbourne",
       },
     });
 
@@ -75,8 +145,8 @@ describe('generateProspectAllocationSuggestions', () => {
     jest.clearAllMocks();
   });
 
-  it('should generate suggestions for prospect using temporary EventDetails entry', async () => {
-    const prospectName = 'New Prospect';
+  it("should generate suggestions for prospect using temporary EventDetails entry", async () => {
+    const prospectName = "New Prospect";
     const coordinates = createCoordinate(-37.8136, 144.9631); // Melbourne
 
     const suggestions = await generateProspectAllocationSuggestions(
@@ -84,21 +154,23 @@ describe('generateProspectAllocationSuggestions', () => {
       coordinates,
       eventAmbassadors,
       eventDetails,
-      regionalAmbassadors
+      regionalAmbassadors,
     );
 
     expect(suggestions).toBeDefined();
     expect(Array.isArray(suggestions)).toBe(true);
     expect(suggestions.length).toBeGreaterThan(0);
-    
+
     // Verify temporary entry was cleaned up
-    const hasTempEntry = Array.from(eventDetails.keys()).some(key => key.startsWith('prospect-'));
+    const hasTempEntry = Array.from(eventDetails.keys()).some((key) =>
+      key.startsWith("prospect-"),
+    );
     expect(hasTempEntry).toBe(false);
   });
 
-  it('should return empty array when no EAs available', async () => {
+  it("should return empty array when no EAs available", async () => {
     const emptyEAs = new Map();
-    const prospectName = 'New Prospect';
+    const prospectName = "New Prospect";
     const coordinates = createCoordinate(-37.8136, 144.9631);
 
     const suggestions = await generateProspectAllocationSuggestions(
@@ -106,14 +178,14 @@ describe('generateProspectAllocationSuggestions', () => {
       coordinates,
       emptyEAs,
       eventDetails,
-      regionalAmbassadors
+      regionalAmbassadors,
     );
 
     expect(suggestions).toEqual([]);
   });
 
-  it('should create temporary EventDetails with correct coordinates', async () => {
-    const prospectName = 'Test Prospect';
+  it("should create temporary EventDetails with correct coordinates", async () => {
+    const prospectName = "Test Prospect";
     const coordinates = createCoordinate(-37.8136, 144.9631);
 
     const suggestions = await generateProspectAllocationSuggestions(
@@ -121,26 +193,28 @@ describe('generateProspectAllocationSuggestions', () => {
       coordinates,
       eventAmbassadors,
       eventDetails,
-      regionalAmbassadors
+      regionalAmbassadors,
     );
 
     // Verify suggestions were generated (indicates temp entry was created)
     expect(suggestions.length).toBeGreaterThan(0);
-    
+
     // Verify each suggestion has correct structure
-    suggestions.forEach(suggestion => {
+    suggestions.forEach((suggestion) => {
       expect(suggestion.toAmbassador).toBeDefined();
       expect(Array.isArray(suggestion.items)).toBe(true);
       // Check if any item matches the pattern (temp entry was used)
-      const hasTempEntry = suggestion.items.some(item => /^prospect-test-prospect-/.test(item));
+      const hasTempEntry = suggestion.items.some((item) =>
+        /^prospect-test-prospect-/.test(item),
+      );
       expect(hasTempEntry).toBe(true);
       expect(suggestion.score).toBeGreaterThanOrEqual(0);
     });
   });
 
-  it('should clean up temporary EventDetails entry after generating suggestions', async () => {
+  it("should clean up temporary EventDetails entry after generating suggestions", async () => {
     const initialSize = eventDetails.size;
-    const prospectName = 'Cleanup Test';
+    const prospectName = "Cleanup Test";
     const coordinates = createCoordinate(-37.8136, 144.9631);
 
     await generateProspectAllocationSuggestions(
@@ -148,11 +222,13 @@ describe('generateProspectAllocationSuggestions', () => {
       coordinates,
       eventAmbassadors,
       eventDetails,
-      regionalAmbassadors
+      regionalAmbassadors,
     );
 
     // Verify no temporary entries remain
-    const tempEntries = Array.from(eventDetails.keys()).filter(key => key.startsWith('prospect-'));
+    const tempEntries = Array.from(eventDetails.keys()).filter((key) =>
+      key.startsWith("prospect-"),
+    );
     expect(tempEntries.length).toBe(0);
     expect(eventDetails.size).toBe(initialSize);
   });

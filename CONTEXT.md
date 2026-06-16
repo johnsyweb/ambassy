@@ -12,6 +12,10 @@ _Avoid_: Regional Ambassador, RA
 The ambassador allocated to support one or more live parkrun events.
 _Avoid_: Ambassador (alone, when EA is meant)
 
+**Home parkrun**:
+The live parkrun where an Event Ambassador regularly volunteers in a personal capacity. At most one per EA; optional. Does not need to be one of their allocated events. Must be a live parkrun in `events.json` with valid coordinates to influence allocation recommendations. Set by the REA via the Event Ambassadors UI or CSV.
+_Avoid_: Home event (ambiguous), base event
+
 **Allocation**:
 The assignment of a live parkrun event to an Event Ambassador (and, by hierarchy, a Regional Event Ambassador).
 _Avoid_: Assignment (except in UI copy where already established)
@@ -42,10 +46,11 @@ _Avoid_: Prospect (alone in map context)
 
 **Voronoi site**:
 Any point that competes in the REA territory Voronoi diagram. Site types:
+
 - **Allocated live events** — visible REA territory polygons
 - **Unallocated parkruns** — constraining sites only (any series in `events.json`, valid coordinates)
 - **Prospective events** — visible REA territory polygons when assigned to an EA and coordinates are valid; excluded otherwise
-_Avoid_: Voronoi point, diagram node
+  _Avoid_: Voronoi point, diagram node
 
 **Voronoi scope**:
 Global and static. All allocated events and all unallocated parkruns in `events.json` are Voronoi sites. The diagram is computed once per allocation change, not per pan or zoom.

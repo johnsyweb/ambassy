@@ -7,19 +7,26 @@ export function showEventSearchDialog(
   events: EventDetailsMap,
   onSelect: (event: EventDetails) => void,
   onCancel: () => void,
-  onSwitchToAddress?: () => void
+  onSwitchToAddress?: () => void,
+  dialogTitle?: string,
 ): void {
   const dialog = document.getElementById("reallocationDialog") as HTMLElement;
-  const title = document.getElementById("reallocationDialogTitle") as HTMLElement;
-  const content = document.getElementById("reallocationDialogContent") as HTMLElement;
-  const cancelButton = document.getElementById("reallocationDialogCancel") as HTMLButtonElement;
+  const title = document.getElementById(
+    "reallocationDialogTitle",
+  ) as HTMLElement;
+  const content = document.getElementById(
+    "reallocationDialogContent",
+  ) as HTMLElement;
+  const cancelButton = document.getElementById(
+    "reallocationDialogCancel",
+  ) as HTMLButtonElement;
 
   if (!dialog || !title || !content || !cancelButton) {
     console.error("Dialog elements not found");
     return;
   }
 
-  title.textContent = `Search Events for: ${issueEventName}`;
+  title.textContent = dialogTitle ?? `Search Events for: ${issueEventName}`;
   content.innerHTML = "";
 
   const searchContainer = document.createElement("div");
@@ -73,13 +80,13 @@ export function showEventSearchDialog(
       const noResultsContainer = document.createElement("div");
       noResultsContainer.style.textAlign = "center";
       noResultsContainer.style.padding = "1em";
-      
+
       const noResults = document.createElement("p");
       noResults.textContent = "No events found. Try a different search term.";
       noResults.style.color = "#666";
       noResults.style.marginBottom = "0.5em";
       noResultsContainer.appendChild(noResults);
-      
+
       if (onSwitchToAddress) {
         const switchButton = document.createElement("button");
         switchButton.type = "button";
@@ -99,7 +106,7 @@ export function showEventSearchDialog(
         });
         noResultsContainer.appendChild(switchButton);
       }
-      
+
       resultsContainer.appendChild(noResultsContainer);
       return;
     }
@@ -119,13 +126,15 @@ export function showEventSearchDialog(
 
       const eventName = document.createElement("div");
       eventName.style.fontWeight = "bold";
-      eventName.textContent = event.properties.EventLongName || event.properties.EventShortName;
+      eventName.textContent =
+        event.properties.EventLongName || event.properties.EventShortName;
       resultButton.appendChild(eventName);
 
       const eventLocation = document.createElement("div");
       eventLocation.style.fontSize = "0.9em";
       eventLocation.style.color = "#666";
-      eventLocation.textContent = event.properties.EventLocation || "Location not specified";
+      eventLocation.textContent =
+        event.properties.EventLocation || "Location not specified";
       resultButton.appendChild(eventLocation);
 
       const coordinates = document.createElement("div");
@@ -186,13 +195,13 @@ export function showEventSearchDialog(
     switchContainer.style.paddingTop = "1em";
     switchContainer.style.borderTop = "1px solid #ccc";
     switchContainer.style.textAlign = "center";
-    
+
     const switchText = document.createElement("span");
     switchText.textContent = "Can't find the event? ";
     switchText.style.color = "#666";
     switchText.style.marginRight = "0.5em";
     switchContainer.appendChild(switchText);
-    
+
     const switchLink = document.createElement("button");
     switchLink.type = "button";
     switchLink.textContent = "📍 Enter Address Instead";
@@ -210,7 +219,7 @@ export function showEventSearchDialog(
       onSwitchToAddress();
     });
     switchContainer.appendChild(switchLink);
-    
+
     content.appendChild(switchContainer);
   }
 

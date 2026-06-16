@@ -24,4 +24,22 @@ describe("parseEventAmbassadors", () => {
     const ea = result.get("Test EA");
     expect(ea?.events).toEqual(["Some Event", "Other Event"]);
   });
+
+  it("should parse home parkrun from the first row for each EA", () => {
+    const data: EventAmbassadorRow[] = [
+      {
+        "Event Ambassador": "David",
+        Events: "Christies Beach",
+        "EA's Home parkrun": "Jamestown Golf Course",
+      },
+      {
+        "Event Ambassador": "",
+        Events: "Carisbrooke",
+      },
+    ];
+
+    const result = parseEventAmbassadors(data);
+
+    expect(result.get("David")?.homeParkrun).toBe("Jamestown Golf Course");
+  });
 });

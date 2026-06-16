@@ -55,8 +55,13 @@ import {
 import {
   setOffboardingHandlers,
   setEAReallocateHandler,
+  setHomeParkrunHandlers,
   setTransitionHandlers,
 } from "./actions/populateAmbassadorsTable";
+import {
+  setEventAmbassadorHomeParkrun,
+  canonicaliseEventAmbassadorHomeParkruns,
+} from "./actions/setEventAmbassadorHomeParkrun";
 import {
   transitionEventAmbassadorToRegional,
   transitionRegionalAmbassadorToEvent,
@@ -1053,6 +1058,57 @@ function setupOffboardingButtons(): void {
       );
     }
   });
+
+  setHomeParkrunHandlers(
+    (eaName: string) => {
+      if (!eventDetails) {
+        alert("Event details are not loaded yet.");
+        return;
+      }
+
+      const details = eventDetails;
+      const eventAmbassadors = getEventAmbassadorsFromSession();
+      showEventSearchDialog(
+        eaName,
+        details,
+        (selectedEvent) => {
+          setEventAmbassadorHomeParkrun(
+            eaName,
+            selectedEvent.properties.EventShortName,
+            eventAmbassadors,
+            log,
+          );
+          persistChangesLog(log);
+          if (eventTeamsTableData) {
+            refreshUI(
+              details,
+              eventTeamsTableData,
+              log,
+              eventAmbassadors,
+              getRegionalAmbassadorsFromSession(),
+            );
+          }
+        },
+        () => {},
+        undefined,
+        `Set home parkrun for ${eaName}`,
+      );
+    },
+    (eaName: string) => {
+      const eventAmbassadors = getEventAmbassadorsFromSession();
+      setEventAmbassadorHomeParkrun(eaName, undefined, eventAmbassadors, log);
+      persistChangesLog(log);
+      if (eventDetails && eventTeamsTableData) {
+        refreshUI(
+          eventDetails,
+          eventTeamsTableData,
+          log,
+          eventAmbassadors,
+          getRegionalAmbassadorsFromSession(),
+        );
+      }
+    },
+  );
 }
 
 setupOffboardingButtons();
@@ -1148,6 +1204,17 @@ async function ambassy() {
     ) {
       persistEventAmbassadors(eventAmbassadors);
       persistEventTeams(eventTeams);
+      persistChangesLog(log);
+    }
+
+    if (
+      canonicaliseEventAmbassadorHomeParkruns(
+        eventAmbassadors,
+        eventDetails,
+        log,
+      )
+    ) {
+      persistEventAmbassadors(eventAmbassadors);
       persistChangesLog(log);
     }
 

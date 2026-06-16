@@ -11,6 +11,7 @@ import {
 import { loadCapacityLimits } from "./checkCapacity";
 import { getRegionalAmbassadorForEventAmbassador } from "@utils/regions";
 import { getCountryCodeFromCoordinate } from "@models/country";
+import { applyHomeParkrunBonus } from "@utils/homeParkrunBonus";
 
 /**
  * Generate allocation suggestions for an unallocated event.
@@ -86,7 +87,14 @@ export function suggestEventAllocation(
       distanceBonus = Math.max(0, 100 - closestDistance);
     }
 
-    const score = baseScore + distanceBonus;
+    let score = baseScore + distanceBonus;
+    score = applyHomeParkrunBonus(
+      score,
+      recipient.homeParkrun,
+      [eventName],
+      eventDetails,
+      reasons,
+    );
 
     if (recipient.events.length + 1 > limits.eventAmbassadorMax) {
       warnings.push(

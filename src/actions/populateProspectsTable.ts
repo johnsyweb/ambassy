@@ -12,16 +12,21 @@ import { CapacityStatus } from "@models/CapacityStatus";
 import { ReallocationSuggestion } from "@models/ReallocationSuggestion";
 import { geocodeAddress } from "@utils/geography";
 import { saveProspectiveEvents } from "./persistProspectiveEvents";
-import { formatCoordinate, Coordinate, createCoordinate } from "@models/Coordinate";
+import {
+  formatCoordinate,
+  Coordinate,
+  createCoordinate,
+} from "@models/Coordinate";
 import { persistChangesLog } from "./persistState";
 import { launchProspect } from "./launchProspect";
 import { archiveProspect } from "./archiveProspect";
 import { showLaunchDialog } from "./showLaunchDialog";
 import { EventDetailsMap } from "@models/EventDetailsMap";
 import { calculateDistance } from "@utils/geography";
+import { applyHomeParkrunBonusFromCoordinate } from "@utils/homeParkrunBonus";
 import { ProspectiveEvent } from "@models/ProspectiveEvent";
 import { EventAmbassador } from "@models/EventAmbassador";
-import { initializeTableSorting } from './tableSorting';
+import { initializeTableSorting } from "./tableSorting";
 
 type AmbassadorWithCounts = {
   name: string;
@@ -34,7 +39,9 @@ type AmbassadorWithCounts = {
 // Forward declaration - will be set by index.ts
 let refreshUIAfterReallocation: (() => void) | null = null;
 
-export function setProspectReallocationRefreshCallback(callback: () => void): void {
+export function setProspectReallocationRefreshCallback(
+  callback: () => void,
+): void {
   refreshUIAfterReallocation = callback;
 }
 
@@ -46,29 +53,32 @@ export function populateProspectsTable(
   eventAmbassadors: EventAmbassadorMap,
   regionalAmbassadors: RegionalAmbassadorMap,
   log?: LogEntry[],
-  eventDetails?: EventDetailsMap
+  eventDetails?: EventDetailsMap,
 ): void {
-  const tableBody = document.querySelector<HTMLTableSectionElement>('#prospectsTable tbody');
+  const tableBody = document.querySelector<HTMLTableSectionElement>(
+    "#prospectsTable tbody",
+  );
   if (!tableBody) {
-    console.error('Prospects table body not found');
+    console.error("Prospects table body not found");
     return;
   }
 
   // Clear existing rows
-  tableBody.innerHTML = '';
+  tableBody.innerHTML = "";
 
   const prospectEvents = prospects.getAll();
 
   if (prospectEvents.length === 0) {
     // Show empty state
-    const emptyRow = document.createElement('tr');
-    const emptyCell = document.createElement('td');
+    const emptyRow = document.createElement("tr");
+    const emptyCell = document.createElement("td");
     emptyCell.colSpan = 13;
-    emptyCell.textContent = 'No prospective events. Import a Prospects CSV file to get started.';
-    emptyCell.style.textAlign = 'center';
-    emptyCell.style.padding = '2em';
-    emptyCell.style.fontStyle = 'italic';
-    emptyCell.style.color = '#666';
+    emptyCell.textContent =
+      "No prospective events. Import a Prospects CSV file to get started.";
+    emptyCell.style.textAlign = "center";
+    emptyCell.style.padding = "2em";
+    emptyCell.style.fontStyle = "italic";
+    emptyCell.style.color = "#666";
     emptyRow.appendChild(emptyCell);
     tableBody.appendChild(emptyRow);
     return;
@@ -78,14 +88,21 @@ export function populateProspectsTable(
   prospectEvents.sort((a, b) => a.prospectEvent.localeCompare(b.prospectEvent));
 
   prospectEvents.forEach((prospect) => {
-    const row = createProspectRow(prospect, eventAmbassadors, regionalAmbassadors, prospects, log, eventDetails);
+    const row = createProspectRow(
+      prospect,
+      eventAmbassadors,
+      regionalAmbassadors,
+      prospects,
+      log,
+      eventDetails,
+    );
     tableBody.appendChild(row);
   });
 
   // Initialize sorting with default: Prospect Event (column 0) ascending
   // Only initialize if we have prospects (not empty state)
   if (prospectEvents.length > 0) {
-    initializeTableSorting('prospectsTable', 0, 'asc');
+    initializeTableSorting("prospectsTable", 0, "asc");
   }
 }
 
@@ -98,118 +115,118 @@ function createProspectRow(
   regionalAmbassadors: RegionalAmbassadorMap,
   prospects: ProspectiveEventList,
   log?: LogEntry[],
-  eventDetails?: EventDetailsMap
+  eventDetails?: EventDetailsMap,
 ): HTMLTableRowElement {
-  const row = document.createElement('tr');
-  row.setAttribute('data-prospect-id', prospect.id);
+  const row = document.createElement("tr");
+  row.setAttribute("data-prospect-id", prospect.id);
 
   // Prospect Event
-  const prospectEventCell = document.createElement('td');
+  const prospectEventCell = document.createElement("td");
   prospectEventCell.textContent = prospect.prospectEvent;
   row.appendChild(prospectEventCell);
 
   // Country
-  const countryCell = document.createElement('td');
+  const countryCell = document.createElement("td");
   countryCell.textContent = prospect.country;
   row.appendChild(countryCell);
 
   // State
-  const stateCell = document.createElement('td');
+  const stateCell = document.createElement("td");
   stateCell.textContent = prospect.state;
   row.appendChild(stateCell);
 
   // Prospect ED/s
-  const edsCell = document.createElement('td');
-  edsCell.textContent = prospect.prospectEDs || '';
+  const edsCell = document.createElement("td");
+  edsCell.textContent = prospect.prospectEDs || "";
   row.appendChild(edsCell);
 
   // Event Ambassador
-  const eaCell = document.createElement('td');
+  const eaCell = document.createElement("td");
   eaCell.textContent = prospect.eventAmbassador;
   row.appendChild(eaCell);
 
   // Date Made Contact
-  const dateCell = document.createElement('td');
+  const dateCell = document.createElement("td");
   if (prospect.dateMadeContact) {
     dateCell.textContent = prospect.dateMadeContact.toLocaleDateString();
   } else {
-    dateCell.textContent = '';
+    dateCell.textContent = "";
   }
   row.appendChild(dateCell);
 
   // Course Found
-  const courseCell = document.createElement('td');
-  courseCell.textContent = prospect.courseFound ? '✅' : '❌';
+  const courseCell = document.createElement("td");
+  courseCell.textContent = prospect.courseFound ? "✅" : "❌";
   row.appendChild(courseCell);
 
   // Landowner Permission
-  const landownerCell = document.createElement('td');
-  landownerCell.textContent = prospect.landownerPermission ? '✅' : '❌';
+  const landownerCell = document.createElement("td");
+  landownerCell.textContent = prospect.landownerPermission ? "✅" : "❌";
   row.appendChild(landownerCell);
 
   // Funding Confirmed
-  const fundingCell = document.createElement('td');
-  fundingCell.textContent = prospect.fundingConfirmed ? '✅' : '❌';
+  const fundingCell = document.createElement("td");
+  fundingCell.textContent = prospect.fundingConfirmed ? "✅" : "❌";
   row.appendChild(fundingCell);
 
   // Geocoding Status
-  const geocodingCell = document.createElement('td');
+  const geocodingCell = document.createElement("td");
   geocodingCell.textContent = getStatusText(prospect.geocodingStatus);
-  geocodingCell.style.textAlign = 'center';
+  geocodingCell.style.textAlign = "center";
   row.appendChild(geocodingCell);
 
   // Coordinates
-  const coordinatesCell = document.createElement('td');
+  const coordinatesCell = document.createElement("td");
   if (prospect.coordinates) {
     coordinatesCell.textContent = formatCoordinate(prospect.coordinates);
     coordinatesCell.title = formatCoordinate(prospect.coordinates);
   } else {
-    coordinatesCell.textContent = '';
+    coordinatesCell.textContent = "";
   }
-  coordinatesCell.style.fontFamily = 'monospace';
-  coordinatesCell.style.fontSize = '0.9em';
+  coordinatesCell.style.fontFamily = "monospace";
+  coordinatesCell.style.fontSize = "0.9em";
   row.appendChild(coordinatesCell);
 
   // Ambassador Match
-  const matchCell = document.createElement('td');
+  const matchCell = document.createElement("td");
   matchCell.textContent = getStatusText(prospect.ambassadorMatchStatus);
-  matchCell.style.textAlign = 'center';
+  matchCell.style.textAlign = "center";
   row.appendChild(matchCell);
 
   // Actions
-  const actionsCell = document.createElement('td');
-  actionsCell.style.textAlign = 'center';
+  const actionsCell = document.createElement("td");
+  actionsCell.style.textAlign = "center";
 
-  const buttonContainer = document.createElement('div');
-  buttonContainer.style.display = 'flex';
-  buttonContainer.style.flexWrap = 'wrap';
-  buttonContainer.style.gap = '0.25em';
-  buttonContainer.style.justifyContent = 'center';
+  const buttonContainer = document.createElement("div");
+  buttonContainer.style.display = "flex";
+  buttonContainer.style.flexWrap = "wrap";
+  buttonContainer.style.gap = "0.25em";
+  buttonContainer.style.justifyContent = "center";
 
   // Reallocate button
-  const reallocateButton = document.createElement('button');
-  reallocateButton.type = 'button';
-  reallocateButton.title = 'Reallocate to different Event Ambassador';
-  reallocateButton.textContent = '🤝 Reallocate';
-  reallocateButton.addEventListener('click', () => {
+  const reallocateButton = document.createElement("button");
+  reallocateButton.type = "button";
+  reallocateButton.title = "Reallocate to different Event Ambassador";
+  reallocateButton.textContent = "🤝 Reallocate";
+  reallocateButton.addEventListener("click", () => {
     if (!log) {
-      console.error('Cannot reallocate prospect: log not available');
+      console.error("Cannot reallocate prospect: log not available");
       return;
     }
 
     // Get reallocation suggestions based on EA capacity
     const suggestions = generateProspectReallocationSuggestions(
-      prospect.eventAmbassador || '',
+      prospect.eventAmbassador || "",
       prospect,
       eventAmbassadors,
       eventDetails,
-      prospects
+      prospects,
     );
 
     // Show reallocation dialog
     showReallocationDialog(
       prospect.prospectEvent,
-      prospect.eventAmbassador || 'Unassigned',
+      prospect.eventAmbassador || "Unassigned",
       suggestions,
       eventAmbassadors,
       regionalAmbassadors,
@@ -218,12 +235,12 @@ function createProspectRow(
         try {
           reallocateProspect(
             prospect.id,
-            prospect.eventAmbassador || '',
+            prospect.eventAmbassador || "",
             newAmbassador,
             prospects,
             eventAmbassadors,
             log,
-            regionalAmbassadors
+            regionalAmbassadors,
           );
 
           // Refresh the UI after reallocation
@@ -231,42 +248,46 @@ function createProspectRow(
             refreshUIAfterReallocation();
           }
         } catch (error) {
-          console.error('Failed to reallocate prospect:', error);
-          alert(`Failed to reallocate prospect: ${error instanceof Error ? error.message : 'Unknown error'}`);
+          console.error("Failed to reallocate prospect:", error);
+          alert(
+            `Failed to reallocate prospect: ${error instanceof Error ? error.message : "Unknown error"}`,
+          );
         }
       },
       () => {
         // Cancel - do nothing
       },
       eventDetails,
-      prospects
+      prospects,
     );
   });
   buttonContainer.appendChild(reallocateButton);
 
   // Reset Location button
-  const resetLocationButton = document.createElement('button');
-  resetLocationButton.type = 'button';
-  resetLocationButton.title = 'Reset prospect location';
-  resetLocationButton.textContent = '📍 Reset Location';
-  resetLocationButton.addEventListener('click', () => {
+  const resetLocationButton = document.createElement("button");
+  resetLocationButton.type = "button";
+  resetLocationButton.title = "Reset prospect location";
+  resetLocationButton.textContent = "📍 Reset Location";
+  resetLocationButton.addEventListener("click", () => {
     showProspectLocationDialog(prospect, prospects);
   });
   buttonContainer.appendChild(resetLocationButton);
 
   // Launch button
-  const launchButton = document.createElement('button');
-  launchButton.type = 'button';
-  launchButton.title = 'Mark this prospect as launched';
-  launchButton.textContent = '🚀 Launch';
+  const launchButton = document.createElement("button");
+  launchButton.type = "button";
+  launchButton.title = "Mark this prospect as launched";
+  launchButton.textContent = "🚀 Launch";
   launchButton.setAttribute(
-    'aria-label',
-    `Mark prospect ${prospect.prospectEvent} as launched`
+    "aria-label",
+    `Mark prospect ${prospect.prospectEvent} as launched`,
   );
   const handleLaunch = (e: Event) => {
     e.stopPropagation();
     if (!eventDetails) {
-      alert("Event details are not available. Cannot launch prospect with event matching.");
+      alert(
+        "Event details are not available. Cannot launch prospect with event matching.",
+      );
       return;
     }
     showLaunchDialog(
@@ -306,9 +327,9 @@ function createProspectRow(
       },
     );
   };
-  launchButton.addEventListener('click', handleLaunch);
-  launchButton.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter' || e.key === ' ') {
+  launchButton.addEventListener("click", handleLaunch);
+  launchButton.addEventListener("keydown", (e) => {
+    if (e.key === "Enter" || e.key === " ") {
       e.preventDefault();
       handleLaunch(e);
     }
@@ -316,13 +337,13 @@ function createProspectRow(
   buttonContainer.appendChild(launchButton);
 
   // Archive button
-  const archiveButton = document.createElement('button');
-  archiveButton.type = 'button';
-  archiveButton.title = 'Archive this prospect as not viable';
-  archiveButton.textContent = '📦 Archive';
+  const archiveButton = document.createElement("button");
+  archiveButton.type = "button";
+  archiveButton.title = "Archive this prospect as not viable";
+  archiveButton.textContent = "📦 Archive";
   archiveButton.setAttribute(
-    'aria-label',
-    `Archive prospect ${prospect.prospectEvent} as not viable`
+    "aria-label",
+    `Archive prospect ${prospect.prospectEvent} as not viable`,
   );
   const handleArchive = (e: Event) => {
     e.stopPropagation();
@@ -332,13 +353,13 @@ function createProspectRow(
       eventAmbassadors,
       regionalAmbassadors,
       log,
-      'archived',
-      eventDetails
+      "archived",
+      eventDetails,
     );
   };
-  archiveButton.addEventListener('click', handleArchive);
-  archiveButton.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter' || e.key === ' ') {
+  archiveButton.addEventListener("click", handleArchive);
+  archiveButton.addEventListener("keydown", (e) => {
+    if (e.key === "Enter" || e.key === " ") {
       e.preventDefault();
       handleArchive(e);
     }
@@ -350,12 +371,16 @@ function createProspectRow(
   row.appendChild(actionsCell);
 
   // Add click handler for map navigation (only if prospect has coordinates)
-  if (_prospectRowClickHandler && prospect.coordinates && prospect.geocodingStatus === 'success') {
-    row.addEventListener('click', () => {
+  if (
+    _prospectRowClickHandler &&
+    prospect.coordinates &&
+    prospect.geocodingStatus === "success"
+  ) {
+    row.addEventListener("click", () => {
       _prospectRowClickHandler!(prospect.id);
     });
-    row.style.cursor = 'pointer';
-    row.title = 'Click to view on map';
+    row.style.cursor = "pointer";
+    row.title = "Click to view on map";
   }
 
   return row;
@@ -369,17 +394,23 @@ function generateProspectReallocationSuggestions(
   prospect: ProspectiveEvent,
   eventAmbassadors: EventAmbassadorMap,
   eventDetails?: EventDetailsMap,
-  prospects?: ProspectiveEventList
+  prospects?: ProspectiveEventList,
 ): ReallocationSuggestion[] {
   const suggestions: ReallocationSuggestion[] = [];
 
   // Get prospect coordinates for distance calculation
-  const prospectCoords = prospect.coordinates && prospect.geocodingStatus === 'success'
-    ? { lat: prospect.coordinates.latitude, lon: prospect.coordinates.longitude }
-    : null;
+  const prospectCoords =
+    prospect.coordinates && prospect.geocodingStatus === "success"
+      ? {
+          lat: prospect.coordinates.latitude,
+          lon: prospect.coordinates.longitude,
+        }
+      : null;
 
   // Calculate current allocation counts including prospective events
-  const ambassadorsWithCounts: AmbassadorWithCounts[] = Array.from(eventAmbassadors.entries()).map(([name, ambassador]) => {
+  const ambassadorsWithCounts: AmbassadorWithCounts[] = Array.from(
+    eventAmbassadors.entries(),
+  ).map(([name, ambassador]) => {
     const liveCount = ambassador.events.length;
     const prospectCount = ambassador.prospectiveEvents?.length ?? 0;
     const totalCount = liveCount + prospectCount;
@@ -387,7 +418,10 @@ function generateProspectReallocationSuggestions(
   });
 
   // Sort by available capacity (ascending - those with least allocation first)
-  ambassadorsWithCounts.sort((a: AmbassadorWithCounts, b: AmbassadorWithCounts) => a.totalCount - b.totalCount);
+  ambassadorsWithCounts.sort(
+    (a: AmbassadorWithCounts, b: AmbassadorWithCounts) =>
+      a.totalCount - b.totalCount,
+  );
 
   // Generate suggestions
   for (const item of ambassadorsWithCounts) {
@@ -395,17 +429,22 @@ function generateProspectReallocationSuggestions(
     if (name === currentAmbassador) continue; // Skip current ambassador
 
     const capacityStatus = ambassador.capacityStatus || CapacityStatus.WITHIN;
-    
+
     // Primary ordering: total allocation count (fewer = higher priority, 0 = highest)
-    const baseScore = Math.max(0, 1000 - (totalCount * 10));
-    
+    const baseScore = Math.max(0, 1000 - totalCount * 10);
+
     // Calculate distance to nearest event (live or prospect) as tiebreaker
     let distanceBonus = 0;
     let neighboringEvents: Array<{ name: string; distanceKm: number }> = [];
-    
-    if (prospectCoords && (ambassador.events.length > 0 || (ambassador.prospectiveEvents && ambassador.prospectiveEvents.length > 0))) {
+
+    if (
+      prospectCoords &&
+      (ambassador.events.length > 0 ||
+        (ambassador.prospectiveEvents &&
+          ambassador.prospectiveEvents.length > 0))
+    ) {
       const allEvents: Array<{ name: string; lat: number; lon: number }> = [];
-      
+
       // Add live events
       if (eventDetails) {
         for (const eventName of ambassador.events) {
@@ -416,34 +455,42 @@ function generateProspectReallocationSuggestions(
           }
         }
       }
-      
+
       // Add prospect events
       if (prospects && ambassador.prospectiveEvents) {
         for (const prospectId of ambassador.prospectiveEvents) {
           const prospectEvent = prospects.findById(prospectId);
-          if (prospectEvent?.coordinates && prospectEvent.geocodingStatus === 'success') {
+          if (
+            prospectEvent?.coordinates &&
+            prospectEvent.geocodingStatus === "success"
+          ) {
             allEvents.push({
               name: prospectEvent.prospectEvent,
               lat: prospectEvent.coordinates.latitude,
-              lon: prospectEvent.coordinates.longitude
+              lon: prospectEvent.coordinates.longitude,
             });
           }
         }
       }
-      
+
       // Find nearest event (live or prospect)
       if (allEvents.length > 0) {
         let nearestDistance = Infinity;
         let nearestEvent: { name: string; distanceKm: number } | null = null;
-        
+
         for (const event of allEvents) {
-          const distance = calculateDistance(prospectCoords.lat, prospectCoords.lon, event.lat, event.lon);
+          const distance = calculateDistance(
+            prospectCoords.lat,
+            prospectCoords.lon,
+            event.lat,
+            event.lon,
+          );
           if (distance < nearestDistance) {
             nearestDistance = distance;
             nearestEvent = { name: event.name, distanceKm: distance };
           }
         }
-        
+
         if (nearestEvent && nearestDistance <= 50) {
           neighboringEvents = [nearestEvent];
           // Distance bonus: closer = higher bonus (inverse relationship)
@@ -451,22 +498,35 @@ function generateProspectReallocationSuggestions(
         }
       }
     }
-    
-    const score = baseScore + distanceBonus;
-    
+
+    let score = baseScore + distanceBonus;
+
     const reasons: string[] = [`Currently has ${totalCount} total allocations`];
-    
+
+    if (prospectCoords && eventDetails) {
+      score = applyHomeParkrunBonusFromCoordinate(
+        score,
+        ambassador.homeParkrun,
+        prospectCoords.lat,
+        prospectCoords.lon,
+        eventDetails,
+        reasons,
+      );
+    }
+
     // Adjust reasons based on capacity status
     if (capacityStatus === CapacityStatus.UNDER) {
-      reasons.push('Has available capacity');
+      reasons.push("Has available capacity");
     } else if (capacityStatus === CapacityStatus.OVER) {
-      reasons.push('Currently over capacity');
+      reasons.push("Currently over capacity");
     } else {
-      reasons.push('Within capacity limits');
+      reasons.push("Within capacity limits");
     }
-    
+
     if (neighboringEvents.length > 0) {
-      const eventList = neighboringEvents.map(e => `${e.name} (${e.distanceKm.toFixed(1)}km)`).join(', ');
+      const eventList = neighboringEvents
+        .map((e) => `${e.name} (${e.distanceKm.toFixed(1)}km)`)
+        .join(", ");
       reasons.push(`Nearby events: ${eventList}`);
     }
 
@@ -479,7 +539,8 @@ function generateProspectReallocationSuggestions(
       allocationCount: totalCount,
       liveEventsCount: liveCount,
       prospectEventsCount: prospectCount,
-      neighboringEvents: neighboringEvents.length > 0 ? neighboringEvents : undefined
+      neighboringEvents:
+        neighboringEvents.length > 0 ? neighboringEvents : undefined,
     });
   }
 
@@ -487,110 +548,113 @@ function generateProspectReallocationSuggestions(
   return suggestions.sort((a, b) => b.score - a.score);
 }
 
-function showProspectLocationDialog(prospect: ProspectiveEvent, prospects: ProspectiveEventList): void {
-  const dialog = document.createElement('div');
-  dialog.style.position = 'fixed';
-  dialog.style.top = '0';
-  dialog.style.left = '0';
-  dialog.style.width = '100%';
-  dialog.style.height = '100%';
-  dialog.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';
-  dialog.style.display = 'flex';
-  dialog.style.alignItems = 'center';
-  dialog.style.justifyContent = 'center';
-  dialog.style.zIndex = '1000';
+function showProspectLocationDialog(
+  prospect: ProspectiveEvent,
+  prospects: ProspectiveEventList,
+): void {
+  const dialog = document.createElement("div");
+  dialog.style.position = "fixed";
+  dialog.style.top = "0";
+  dialog.style.left = "0";
+  dialog.style.width = "100%";
+  dialog.style.height = "100%";
+  dialog.style.backgroundColor = "rgba(0, 0, 0, 0.5)";
+  dialog.style.display = "flex";
+  dialog.style.alignItems = "center";
+  dialog.style.justifyContent = "center";
+  dialog.style.zIndex = "1000";
 
-  const dialogContent = document.createElement('div');
-  dialogContent.style.backgroundColor = 'white';
-  dialogContent.style.padding = '2em';
-  dialogContent.style.borderRadius = '8px';
-  dialogContent.style.maxWidth = '500px';
-  dialogContent.style.width = '90%';
-  dialogContent.style.boxShadow = '0 4px 6px rgba(0, 0, 0, 0.1)';
+  const dialogContent = document.createElement("div");
+  dialogContent.style.backgroundColor = "white";
+  dialogContent.style.padding = "2em";
+  dialogContent.style.borderRadius = "8px";
+  dialogContent.style.maxWidth = "500px";
+  dialogContent.style.width = "90%";
+  dialogContent.style.boxShadow = "0 4px 6px rgba(0, 0, 0, 0.1)";
 
-  const title = document.createElement('h2');
+  const title = document.createElement("h2");
   title.textContent = `Reset Location for ${prospect.prospectEvent}`;
-  title.style.marginTop = '0';
+  title.style.marginTop = "0";
   dialogContent.appendChild(title);
 
-  const currentLocation = document.createElement('p');
+  const currentLocation = document.createElement("p");
   currentLocation.textContent = prospect.coordinates
     ? `Current coordinates: ${formatCoordinate(prospect.coordinates)}`
-    : 'No coordinates set';
-  currentLocation.style.fontSize = '0.9em';
-  currentLocation.style.color = '#666';
+    : "No coordinates set";
+  currentLocation.style.fontSize = "0.9em";
+  currentLocation.style.color = "#666";
   dialogContent.appendChild(currentLocation);
 
-  const instructions = document.createElement('p');
-  instructions.textContent = 'Choose how to set the new location:';
+  const instructions = document.createElement("p");
+  instructions.textContent = "Choose how to set the new location:";
   dialogContent.appendChild(instructions);
 
   // Address input option
-  const addressContainer = document.createElement('div');
-  addressContainer.style.marginBottom = '1em';
+  const addressContainer = document.createElement("div");
+  addressContainer.style.marginBottom = "1em";
 
-  const addressLabel = document.createElement('label');
-  addressLabel.textContent = 'Enter Address:';
-  addressLabel.style.display = 'block';
-  addressLabel.style.marginBottom = '0.5em';
-  addressLabel.style.fontWeight = 'bold';
+  const addressLabel = document.createElement("label");
+  addressLabel.textContent = "Enter Address:";
+  addressLabel.style.display = "block";
+  addressLabel.style.marginBottom = "0.5em";
+  addressLabel.style.fontWeight = "bold";
   addressContainer.appendChild(addressLabel);
 
-  const addressInput = document.createElement('input');
-  addressInput.type = 'text';
-  addressInput.placeholder = 'e.g., 123 Main St, Melbourne, VIC, Australia';
-  addressInput.style.width = '100%';
-  addressInput.style.padding = '0.5em';
-  addressInput.style.border = '1px solid #ccc';
-  addressInput.style.borderRadius = '4px';
+  const addressInput = document.createElement("input");
+  addressInput.type = "text";
+  addressInput.placeholder = "e.g., 123 Main St, Melbourne, VIC, Australia";
+  addressInput.style.width = "100%";
+  addressInput.style.padding = "0.5em";
+  addressInput.style.border = "1px solid #ccc";
+  addressInput.style.borderRadius = "4px";
   addressContainer.appendChild(addressInput);
 
-  const geocodeButton = document.createElement('button');
-  geocodeButton.textContent = 'Geocode Address';
-  geocodeButton.style.marginTop = '0.5em';
-  geocodeButton.style.padding = '0.5em 1em';
-  geocodeButton.style.backgroundColor = '#007bff';
-  geocodeButton.style.color = 'white';
-  geocodeButton.style.border = 'none';
-  geocodeButton.style.borderRadius = '4px';
-  geocodeButton.style.cursor = 'pointer';
+  const geocodeButton = document.createElement("button");
+  geocodeButton.textContent = "Geocode Address";
+  geocodeButton.style.marginTop = "0.5em";
+  geocodeButton.style.padding = "0.5em 1em";
+  geocodeButton.style.backgroundColor = "#007bff";
+  geocodeButton.style.color = "white";
+  geocodeButton.style.border = "none";
+  geocodeButton.style.borderRadius = "4px";
+  geocodeButton.style.cursor = "pointer";
   addressContainer.appendChild(geocodeButton);
 
   dialogContent.appendChild(addressContainer);
 
   // Geolocation option
-  const geolocationContainer = document.createElement('div');
-  geolocationContainer.style.marginBottom = '1em';
+  const geolocationContainer = document.createElement("div");
+  geolocationContainer.style.marginBottom = "1em";
 
-  const geolocationButton = document.createElement('button');
-  geolocationButton.textContent = '📍 Use Current Location';
-  geolocationButton.style.padding = '0.5em 1em';
-  geolocationButton.style.backgroundColor = '#28a745';
-  geolocationButton.style.color = 'white';
-  geolocationButton.style.border = 'none';
-  geolocationButton.style.borderRadius = '4px';
-  geolocationButton.style.cursor = 'pointer';
-  geolocationButton.title = 'Use browser geolocation to set coordinates';
+  const geolocationButton = document.createElement("button");
+  geolocationButton.textContent = "📍 Use Current Location";
+  geolocationButton.style.padding = "0.5em 1em";
+  geolocationButton.style.backgroundColor = "#28a745";
+  geolocationButton.style.color = "white";
+  geolocationButton.style.border = "none";
+  geolocationButton.style.borderRadius = "4px";
+  geolocationButton.style.cursor = "pointer";
+  geolocationButton.title = "Use browser geolocation to set coordinates";
   geolocationContainer.appendChild(geolocationButton);
 
   dialogContent.appendChild(geolocationContainer);
 
   // Buttons
-  const buttonContainer = document.createElement('div');
-  buttonContainer.style.display = 'flex';
-  buttonContainer.style.gap = '1em';
-  buttonContainer.style.justifyContent = 'flex-end';
-  buttonContainer.style.marginTop = '1em';
+  const buttonContainer = document.createElement("div");
+  buttonContainer.style.display = "flex";
+  buttonContainer.style.gap = "1em";
+  buttonContainer.style.justifyContent = "flex-end";
+  buttonContainer.style.marginTop = "1em";
 
-  const cancelButton = document.createElement('button');
-  cancelButton.textContent = 'Cancel';
-  cancelButton.style.padding = '0.5em 1em';
-  cancelButton.style.backgroundColor = '#6c757d';
-  cancelButton.style.color = 'white';
-  cancelButton.style.border = 'none';
-  cancelButton.style.borderRadius = '4px';
-  cancelButton.style.cursor = 'pointer';
-  cancelButton.addEventListener('click', () => {
+  const cancelButton = document.createElement("button");
+  cancelButton.textContent = "Cancel";
+  cancelButton.style.padding = "0.5em 1em";
+  cancelButton.style.backgroundColor = "#6c757d";
+  cancelButton.style.color = "white";
+  cancelButton.style.border = "none";
+  cancelButton.style.borderRadius = "4px";
+  cancelButton.style.cursor = "pointer";
+  cancelButton.addEventListener("click", () => {
     document.body.removeChild(dialog);
   });
   buttonContainer.appendChild(cancelButton);
@@ -600,69 +664,84 @@ function showProspectLocationDialog(prospect: ProspectiveEvent, prospects: Prosp
   document.body.appendChild(dialog);
 
   // Event handlers
-  geocodeButton.addEventListener('click', async () => {
+  geocodeButton.addEventListener("click", async () => {
     const address = addressInput.value.trim();
     if (!address) {
-      alert('Please enter an address');
+      alert("Please enter an address");
       return;
     }
 
     geocodeButton.disabled = true;
-    geocodeButton.textContent = 'Geocoding...';
+    geocodeButton.textContent = "Geocoding...";
 
     try {
       const result = await geocodeAddress(address);
       if (result.success && result.coordinates) {
-        updateProspectLocation(prospect, prospects, result.coordinates, `Geocoded from address: ${address}`);
+        updateProspectLocation(
+          prospect,
+          prospects,
+          result.coordinates,
+          `Geocoded from address: ${address}`,
+        );
         document.body.removeChild(dialog);
       } else {
-        alert(`Geocoding failed: ${result.error || 'Unknown error'}`);
+        alert(`Geocoding failed: ${result.error || "Unknown error"}`);
       }
     } catch (error) {
-      alert(`Geocoding error: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      alert(
+        `Geocoding error: ${error instanceof Error ? error.message : "Unknown error"}`,
+      );
     } finally {
       geocodeButton.disabled = false;
-      geocodeButton.textContent = 'Geocode Address';
+      geocodeButton.textContent = "Geocode Address";
     }
   });
 
-  geolocationButton.addEventListener('click', () => {
+  geolocationButton.addEventListener("click", () => {
     if (!navigator.geolocation) {
-      alert('Geolocation is not supported by this browser');
+      alert("Geolocation is not supported by this browser");
       return;
     }
 
     geolocationButton.disabled = true;
-    geolocationButton.textContent = 'Getting Location...';
+    geolocationButton.textContent = "Getting Location...";
 
     navigator.geolocation.getCurrentPosition(
       (position) => {
-        const coordinates = createCoordinate(position.coords.latitude, position.coords.longitude);
-        updateProspectLocation(prospect, prospects, coordinates, 'Set from browser geolocation');
+        const coordinates = createCoordinate(
+          position.coords.latitude,
+          position.coords.longitude,
+        );
+        updateProspectLocation(
+          prospect,
+          prospects,
+          coordinates,
+          "Set from browser geolocation",
+        );
         document.body.removeChild(dialog);
       },
       (error) => {
-        let errorMessage = 'Unknown geolocation error';
+        let errorMessage = "Unknown geolocation error";
         switch (error.code) {
           case error.PERMISSION_DENIED:
-            errorMessage = 'Location access denied by user';
+            errorMessage = "Location access denied by user";
             break;
           case error.POSITION_UNAVAILABLE:
-            errorMessage = 'Location information unavailable';
+            errorMessage = "Location information unavailable";
             break;
           case error.TIMEOUT:
-            errorMessage = 'Location request timed out';
+            errorMessage = "Location request timed out";
             break;
         }
         alert(`Geolocation failed: ${errorMessage}`);
         geolocationButton.disabled = false;
-        geolocationButton.textContent = '📍 Use Current Location';
+        geolocationButton.textContent = "📍 Use Current Location";
       },
       {
         enableHighAccuracy: true,
         timeout: 10000,
-        maximumAge: 300000 // 5 minutes
-      }
+        maximumAge: 300000, // 5 minutes
+      },
     );
   });
 }
@@ -671,12 +750,12 @@ function updateProspectLocation(
   prospect: ProspectiveEvent,
   prospects: ProspectiveEventList,
   coordinates: Coordinate,
-  source: string
+  source: string,
 ): void {
   prospects.update({
     ...prospect,
     coordinates,
-    geocodingStatus: 'manual'
+    geocodingStatus: "manual",
   });
 
   saveProspectiveEvents(prospects.getAll());
@@ -751,16 +830,16 @@ function handleProspectLifecycleChange(
 
 function getStatusText(status: string): string {
   switch (status) {
-    case 'pending':
-      return '⏳ Pending';
-    case 'success':
-    case 'matched':
-      return '✅ Success';
-    case 'failed':
-    case 'unmatched':
-      return '❌ Failed';
-    case 'manual':
-      return '📍 Manual';
+    case "pending":
+      return "⏳ Pending";
+    case "success":
+    case "matched":
+      return "✅ Success";
+    case "failed":
+    case "unmatched":
+      return "❌ Failed";
+    case "manual":
+      return "📍 Manual";
     default:
       return status;
   }
@@ -769,6 +848,8 @@ function getStatusText(status: string): string {
 // Global row click handler for prospects
 let _prospectRowClickHandler: ((prospectId: string) => void) | null = null;
 
-export function setProspectRowClickHandler(handler: (prospectId: string) => void): void {
+export function setProspectRowClickHandler(
+  handler: (prospectId: string) => void,
+): void {
   _prospectRowClickHandler = handler;
 }
