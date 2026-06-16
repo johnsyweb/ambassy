@@ -23,7 +23,6 @@ describe("exportState", () => {
   });
 
   describe("exportApplicationState", () => {
-
     it("should create ApplicationState blob from localStorage data", () => {
       const mockData = {
         eventAmbassadors: [["EA1", { name: "Test EA", events: [] }]],
@@ -103,7 +102,9 @@ describe("exportState", () => {
 
     it("should include resolved eventDetails in export", async () => {
       const mockData = {
-        eventAmbassadors: [["EA1", { name: "Test EA", events: ["ResolvedEvent"] }]],
+        eventAmbassadors: [
+          ["EA1", { name: "Test EA", events: ["ResolvedEvent"] }],
+        ],
         eventTeams: [
           [
             "Event1",
@@ -120,7 +121,9 @@ describe("exportState", () => {
         changesLog: [],
       };
 
-      const resolvedEventDetails: EventDetails & { manualCoordinates?: boolean } = {
+      const resolvedEventDetails: EventDetails & {
+        manualCoordinates?: boolean;
+      } = {
         id: "manual-ResolvedEvent",
         type: "Feature",
         geometry: {
@@ -143,20 +146,23 @@ describe("exportState", () => {
         timestamp: Date.now(),
         eventDetailsMap: [
           ["ResolvedEvent", resolvedEventDetails],
-          ["NormalEvent", {
-            id: "normal-event-id",
-            type: "Feature",
-            geometry: { type: "Point", coordinates: [144.9631, -37.8136] },
-            properties: {
-              eventname: "normalevent",
-              EventLongName: "Normal Event",
-              EventShortName: "NormalEvent",
-              LocalisedEventLongName: null,
-              countrycode: 13,
-              seriesid: 1,
-              EventLocation: "",
+          [
+            "NormalEvent",
+            {
+              id: "normal-event-id",
+              type: "Feature",
+              geometry: { type: "Point", coordinates: [144.9631, -37.8136] },
+              properties: {
+                eventname: "normalevent",
+                EventLongName: "Normal Event",
+                EventShortName: "NormalEvent",
+                LocalisedEventLongName: null,
+                countrycode: 13,
+                seriesid: 1,
+                EventLocation: "",
+              },
             },
-          }],
+          ],
         ],
       });
 
@@ -174,7 +180,7 @@ describe("exportState", () => {
       });
 
       const blob = exportApplicationState();
-      
+
       // Read blob using FileReader
       const jsonString = await new Promise<string>((resolve, reject) => {
         const reader = new FileReader();
@@ -182,14 +188,20 @@ describe("exportState", () => {
         reader.onerror = () => reject(new Error("Failed to read blob"));
         reader.readAsText(blob);
       });
-      
+
       const exportedState = JSON.parse(jsonString);
 
       expect(exportedState.data.resolvedEventDetails).toBeDefined();
       expect(exportedState.data.resolvedEventDetails).toHaveLength(1);
-      expect(exportedState.data.resolvedEventDetails[0][0]).toBe("ResolvedEvent");
-      expect(exportedState.data.resolvedEventDetails[0][1].id).toBe("manual-ResolvedEvent");
-      expect(exportedState.data.resolvedEventDetails[0][1].manualCoordinates).toBe(true);
+      expect(exportedState.data.resolvedEventDetails[0][0]).toBe(
+        "ResolvedEvent",
+      );
+      expect(exportedState.data.resolvedEventDetails[0][1].id).toBe(
+        "manual-ResolvedEvent",
+      );
+      expect(
+        exportedState.data.resolvedEventDetails[0][1].manualCoordinates,
+      ).toBe(true);
     });
 
     it("should not include resolvedEventDetails if none exist", () => {

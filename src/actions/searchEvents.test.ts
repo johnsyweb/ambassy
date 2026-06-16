@@ -110,21 +110,27 @@ describe("searchEvents", () => {
   it("should handle normalized matching (remove parentheses)", () => {
     const results = searchEvents("Event Two not currently operating", events);
     expect(results.length).toBeGreaterThan(0);
-    const event2Result = results.find((r) => r.properties.EventShortName === "event2");
+    const event2Result = results.find(
+      (r) => r.properties.EventShortName === "event2",
+    );
     expect(event2Result).toBeDefined();
   });
 
   it("should find fuzzy matches for typos", () => {
     const results = searchEvents("evnt1", events);
     expect(results.length).toBeGreaterThan(0);
-    const event1Result = results.find((r) => r.properties.EventShortName === "event1");
+    const event1Result = results.find(
+      (r) => r.properties.EventShortName === "event1",
+    );
     expect(event1Result).toBeDefined();
   });
 
   it("should return results sorted by match quality (exact first)", () => {
     const results = searchEvents("event", events);
     expect(results.length).toBeGreaterThan(1);
-    const exactMatch = results.find((r) => r.properties.EventShortName === "event1");
+    const exactMatch = results.find(
+      (r) => r.properties.EventShortName === "event1",
+    );
     expect(exactMatch).toBeDefined();
     expect(results[0].properties.EventShortName).toBe("event1");
   });
@@ -159,7 +165,9 @@ describe("searchEvents", () => {
   it("should handle partial matches", () => {
     const results = searchEvents("One", events);
     expect(results.length).toBeGreaterThan(0);
-    const event1Result = results.find((r) => r.properties.EventShortName === "event1");
+    const event1Result = results.find(
+      (r) => r.properties.EventShortName === "event1",
+    );
     expect(event1Result).toBeDefined();
   });
 });

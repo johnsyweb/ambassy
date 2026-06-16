@@ -17,12 +17,18 @@ export function showEventAllocationDialog(
   eventTeams: EventTeamMap,
   onSelect: (eaName: string) => void,
   onCancel: () => void,
-  suggestions?: ReallocationSuggestion[]
+  suggestions?: ReallocationSuggestion[],
 ): void {
   const dialog = document.getElementById("reallocationDialog") as HTMLElement;
-  const title = document.getElementById("reallocationDialogTitle") as HTMLElement;
-  const content = document.getElementById("reallocationDialogContent") as HTMLElement;
-  const cancelButton = document.getElementById("reallocationDialogCancel") as HTMLButtonElement;
+  const title = document.getElementById(
+    "reallocationDialogTitle",
+  ) as HTMLElement;
+  const content = document.getElementById(
+    "reallocationDialogContent",
+  ) as HTMLElement;
+  const cancelButton = document.getElementById(
+    "reallocationDialogCancel",
+  ) as HTMLButtonElement;
 
   if (!dialog || !title || !content || !cancelButton) {
     console.error("Reallocation dialog elements not found");
@@ -78,7 +84,13 @@ export function showEventAllocationDialog(
   content.appendChild(eventInfoDiv);
 
   const suggestionsToUse =
-    suggestions || suggestEventAllocation(eventName, eventAmbassadors, eventDetails, regionalAmbassadors);
+    suggestions ||
+    suggestEventAllocation(
+      eventName,
+      eventAmbassadors,
+      eventDetails,
+      regionalAmbassadors,
+    );
   const topSuggestions = suggestionsToUse.slice(0, 5);
   const suggestionsContainer = document.createElement("div");
   suggestionsContainer.style.marginBottom = "1em";
@@ -125,7 +137,8 @@ export function showEventAllocationDialog(
 
       const liveCount = suggestion.liveEventsCount ?? 0;
       const prospectCount = suggestion.prospectEventsCount ?? 0;
-      const totalCount = suggestion.allocationCount ?? liveCount + prospectCount;
+      const totalCount =
+        suggestion.allocationCount ?? liveCount + prospectCount;
 
       const allocationInfo = document.createElement("div");
       allocationInfo.textContent = `${liveCount} live, ${prospectCount} prospect, ${totalCount} total`;
@@ -144,7 +157,10 @@ export function showEventAllocationDialog(
         contextDiv.appendChild(reaInfo);
       }
 
-      if (suggestion.neighboringEvents && suggestion.neighboringEvents.length > 0) {
+      if (
+        suggestion.neighboringEvents &&
+        suggestion.neighboringEvents.length > 0
+      ) {
         const nearestEvent = suggestion.neighboringEvents[0];
         const distanceInfo = document.createElement("div");
         distanceInfo.textContent = `${nearestEvent.distanceKm.toFixed(1)} km to ${nearestEvent.name}`;
@@ -186,7 +202,9 @@ export function showEventAllocationDialog(
           onSelect(suggestion.toAmbassador);
         } else if (e.key === "ArrowDown") {
           e.preventDefault();
-          const buttons = Array.from(buttonsContainer.querySelectorAll("button.suggestion-button")) as HTMLButtonElement[];
+          const buttons = Array.from(
+            buttonsContainer.querySelectorAll("button.suggestion-button"),
+          ) as HTMLButtonElement[];
           const currentIndex = buttons.indexOf(button);
           const nextButton = buttons[currentIndex + 1];
           if (nextButton) {
@@ -194,7 +212,9 @@ export function showEventAllocationDialog(
             nextButton.setAttribute("tabindex", "0");
             nextButton.focus();
           } else {
-            const dropdown = content.querySelector("select#otherRecipientSelect") as HTMLSelectElement;
+            const dropdown = content.querySelector(
+              "select#otherRecipientSelect",
+            ) as HTMLSelectElement;
             if (dropdown) {
               button.setAttribute("tabindex", "-1");
               dropdown.setAttribute("tabindex", "0");
@@ -203,7 +223,9 @@ export function showEventAllocationDialog(
           }
         } else if (e.key === "ArrowUp") {
           e.preventDefault();
-          const buttons = Array.from(buttonsContainer.querySelectorAll("button.suggestion-button")) as HTMLButtonElement[];
+          const buttons = Array.from(
+            buttonsContainer.querySelectorAll("button.suggestion-button"),
+          ) as HTMLButtonElement[];
           const currentIndex = buttons.indexOf(button);
           const prevButton = buttons[currentIndex - 1];
           if (prevButton) {

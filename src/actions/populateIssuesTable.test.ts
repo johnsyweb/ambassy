@@ -34,12 +34,7 @@ describe("populateIssuesTable", () => {
   });
 
   it("should display empty state when no issues", () => {
-    populateIssuesTable(
-      [],
-      issuesState,
-      onIssueSelect,
-      onResolve
-    );
+    populateIssuesTable([], issuesState, onIssueSelect, onResolve);
 
     const row = tableBody.querySelector("tr");
     expect(row).not.toBeNull();
@@ -66,12 +61,7 @@ describe("populateIssuesTable", () => {
       },
     ];
 
-    populateIssuesTable(
-      issues,
-      issuesState,
-      onIssueSelect,
-      onResolve
-    );
+    populateIssuesTable(issues, issuesState, onIssueSelect, onResolve);
 
     const rows = tableBody.querySelectorAll("tr");
     expect(rows.length).toBe(2);
@@ -88,12 +78,7 @@ describe("populateIssuesTable", () => {
       },
     ];
 
-    populateIssuesTable(
-      issues,
-      issuesState,
-      onIssueSelect,
-      onResolve
-    );
+    populateIssuesTable(issues, issuesState, onIssueSelect, onResolve);
 
     const row = tableBody.querySelector("tr");
     const cells = row?.querySelectorAll("td");
@@ -114,12 +99,7 @@ describe("populateIssuesTable", () => {
       },
     ];
 
-    populateIssuesTable(
-      issues,
-      issuesState,
-      onIssueSelect,
-      onResolve
-    );
+    populateIssuesTable(issues, issuesState, onIssueSelect, onResolve);
 
     const row = tableBody.querySelector("tr");
     const cells = row?.querySelectorAll("td");
@@ -146,12 +126,7 @@ describe("populateIssuesTable", () => {
       },
     ];
 
-    populateIssuesTable(
-      issues,
-      issuesState,
-      onIssueSelect,
-      onResolve
-    );
+    populateIssuesTable(issues, issuesState, onIssueSelect, onResolve);
 
     const rows = tableBody.querySelectorAll("tr");
     expect(rows.length).toBe(1);
@@ -169,12 +144,7 @@ describe("populateIssuesTable", () => {
       },
     ];
 
-    populateIssuesTable(
-      issues,
-      issuesState,
-      onIssueSelect,
-      onResolve
-    );
+    populateIssuesTable(issues, issuesState, onIssueSelect, onResolve);
 
     const row = tableBody.querySelector("tr");
     row?.dispatchEvent(new MouseEvent("click"));
@@ -193,15 +163,12 @@ describe("populateIssuesTable", () => {
       },
     ];
 
-    populateIssuesTable(
-      issues,
-      issuesState,
-      onIssueSelect,
-      onResolve
-    );
+    populateIssuesTable(issues, issuesState, onIssueSelect, onResolve);
 
     const buttons = Array.from(tableBody.querySelectorAll("button"));
-    const resolveBtn = buttons.find((btn) => btn.textContent?.includes("Resolve"));
+    const resolveBtn = buttons.find((btn) =>
+      btn.textContent?.includes("Resolve"),
+    );
 
     resolveBtn?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
 
@@ -219,17 +186,14 @@ describe("populateIssuesTable", () => {
       },
     ];
 
-    populateIssuesTable(
-      issues,
-      issuesState,
-      onIssueSelect,
-      onResolve
-    );
+    populateIssuesTable(issues, issuesState, onIssueSelect, onResolve);
 
     const buttons = Array.from(tableBody.querySelectorAll("button"));
     expect(buttons.length).toBe(1);
     expect(buttons[0].textContent).toBe("🔧 Resolve");
-    expect(buttons[0].getAttribute("aria-label")).toContain("Resolve issue for event1");
+    expect(buttons[0].getAttribute("aria-label")).toContain(
+      "Resolve issue for event1",
+    );
   });
 
   it("should add selected class to row when issue is selected", () => {
@@ -245,12 +209,7 @@ describe("populateIssuesTable", () => {
 
     issuesState.selectedIssue = "event1";
 
-    populateIssuesTable(
-      issues,
-      issuesState,
-      onIssueSelect,
-      onResolve
-    );
+    populateIssuesTable(issues, issuesState, onIssueSelect, onResolve);
 
     // After sorting, find the row by data attribute
     const row = tableBody.querySelector("tr[data-issue-event-name='event1']");

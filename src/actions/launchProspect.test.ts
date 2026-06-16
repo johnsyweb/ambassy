@@ -109,10 +109,13 @@ describe("launchProspect", () => {
     expect(prospects.findById("p1")).toBeUndefined();
     expect(eventAmbassadors.get("EA1")?.prospectiveEvents).toEqual([]);
 
-    const { calculateAllCapacityStatuses } = jest.requireMock("./checkCapacity");
+    const { calculateAllCapacityStatuses } =
+      jest.requireMock("./checkCapacity");
     expect(calculateAllCapacityStatuses).toHaveBeenCalled();
 
-    const { saveProspectiveEvents } = jest.requireMock("./persistProspectiveEvents");
+    const { saveProspectiveEvents } = jest.requireMock(
+      "./persistProspectiveEvents",
+    );
     expect(saveProspectiveEvents).toHaveBeenCalled();
 
     const { persistEventAmbassadors } = jest.requireMock("./persistState");
@@ -134,7 +137,9 @@ describe("launchProspect", () => {
       "EA2",
     );
 
-    const { assignEventToAmbassador } = jest.requireMock("./assignEventToAmbassador");
+    const { assignEventToAmbassador } = jest.requireMock(
+      "./assignEventToAmbassador",
+    );
     expect(assignEventToAmbassador).toHaveBeenCalledWith(
       "Event A",
       "",

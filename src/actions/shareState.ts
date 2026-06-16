@@ -100,7 +100,8 @@ export async function shareStateViaNativeShare(): Promise<ShareStateResult> {
       return {
         method: "native",
         success: false,
-        error: "Native sharing is not available in this browser. Please use another sharing method.",
+        error:
+          "Native sharing is not available in this browser. Please use another sharing method.",
         timestamp: Date.now(),
       };
     }

@@ -161,7 +161,9 @@ describe("importState", () => {
     });
 
     it("should restore resolved eventDetails to cache", () => {
-      const resolvedEventDetails: EventDetails & { manualCoordinates?: boolean } = {
+      const resolvedEventDetails: EventDetails & {
+        manualCoordinates?: boolean;
+      } = {
         id: "manual-ResolvedEvent",
         type: "Feature",
         geometry: {
@@ -209,11 +211,13 @@ describe("importState", () => {
         "parkrun events",
         expect.stringContaining("ResolvedEvent"),
       );
-      
+
       const setItemCalls = (mockLocalStorage.setItem as jest.Mock).mock.calls;
-      const parkrunEventsCall = setItemCalls.find((call) => call[0] === "parkrun events");
+      const parkrunEventsCall = setItemCalls.find(
+        (call) => call[0] === "parkrun events",
+      );
       expect(parkrunEventsCall).toBeDefined();
-      
+
       const cachedData = JSON.parse(parkrunEventsCall[1]);
       expect(cachedData.eventDetailsMap).toBeDefined();
       expect(cachedData.eventDetailsMap).toHaveLength(1);
@@ -240,7 +244,9 @@ describe("importState", () => {
         },
       };
 
-      const resolvedEventDetails: EventDetails & { manualCoordinates?: boolean } = {
+      const resolvedEventDetails: EventDetails & {
+        manualCoordinates?: boolean;
+      } = {
         id: "manual-ResolvedEvent",
         type: "Feature",
         geometry: {
@@ -292,13 +298,17 @@ describe("importState", () => {
       importApplicationState(state);
 
       const setItemCalls = (mockLocalStorage.setItem as jest.Mock).mock.calls;
-      const parkrunEventsCall = setItemCalls.find((call) => call[0] === "parkrun events");
+      const parkrunEventsCall = setItemCalls.find(
+        (call) => call[0] === "parkrun events",
+      );
       expect(parkrunEventsCall).toBeDefined();
-      
+
       const cachedData = JSON.parse(parkrunEventsCall[1]);
       expect(cachedData.eventDetailsMap).toHaveLength(2);
-      
-      const eventMap = new Map<string, EventDetails>(cachedData.eventDetailsMap);
+
+      const eventMap = new Map<string, EventDetails>(
+        cachedData.eventDetailsMap,
+      );
       expect(eventMap.has("ExistingEvent")).toBe(true);
       expect(eventMap.has("ResolvedEvent")).toBe(true);
       const resolvedEvent = eventMap.get("ResolvedEvent");
@@ -333,7 +343,9 @@ describe("importState", () => {
 
       // Should not call setItem for parkrun events if no resolvedEventDetails
       const setItemCalls = (mockLocalStorage.setItem as jest.Mock).mock.calls;
-      const parkrunEventsCall = setItemCalls.find((call) => call[0] === "parkrun events");
+      const parkrunEventsCall = setItemCalls.find(
+        (call) => call[0] === "parkrun events",
+      );
       expect(parkrunEventsCall).toBeUndefined();
     });
   });

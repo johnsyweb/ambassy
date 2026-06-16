@@ -16,6 +16,9 @@ export function clearSelectedIssue(state: IssuesState): void {
   state.selectedIssue = null;
 }
 
-export function setSelectedIssue(state: IssuesState, eventShortName: string): void {
+export function setSelectedIssue(
+  state: IssuesState,
+  eventShortName: string,
+): void {
   state.selectedIssue = eventShortName;
 }

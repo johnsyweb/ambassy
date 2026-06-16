@@ -80,9 +80,9 @@ describe("tableMapNavigation", () => {
         </table>
       </div>
     `;
-    
+
     // Mock scrollIntoView for all rows
-    document.querySelectorAll('tr').forEach((row) => {
+    document.querySelectorAll("tr").forEach((row) => {
       (row as HTMLElement).scrollIntoView = jest.fn();
     });
   });
@@ -94,7 +94,15 @@ describe("tableMapNavigation", () => {
 
   describe("selectEventTeamRow", () => {
     it("should update selection state when event exists", () => {
-      selectEventTeamRow(selectionState, "event1", eventTeamsTableData, markerMap, highlightLayer, eventDetails, map);
+      selectEventTeamRow(
+        selectionState,
+        "event1",
+        eventTeamsTableData,
+        markerMap,
+        highlightLayer,
+        eventDetails,
+        map,
+      );
 
       expect(selectionState.selectedEventShortName).toBe("event1");
       expect(selectionState.highlightedEvents.has("event1")).toBe(true);
@@ -105,7 +113,15 @@ describe("tableMapNavigation", () => {
 
     it("should throw error when event does not exist", () => {
       expect(() => {
-        selectEventTeamRow(selectionState, "nonexistent", eventTeamsTableData, markerMap, highlightLayer, eventDetails, map);
+        selectEventTeamRow(
+          selectionState,
+          "nonexistent",
+          eventTeamsTableData,
+          markerMap,
+          highlightLayer,
+          eventDetails,
+          map,
+        );
       }).toThrow();
     });
 
@@ -114,7 +130,15 @@ describe("tableMapNavigation", () => {
       selectionState.selectedRegionalAmbassador = "REA1";
       selectionState.highlightedEvents.add("other");
 
-      selectEventTeamRow(selectionState, "event1", eventTeamsTableData, markerMap, highlightLayer, eventDetails, map);
+      selectEventTeamRow(
+        selectionState,
+        "event1",
+        eventTeamsTableData,
+        markerMap,
+        highlightLayer,
+        eventDetails,
+        map,
+      );
 
       expect(selectionState.selectedEventAmbassador).toBeNull();
       expect(selectionState.selectedRegionalAmbassador).toBeNull();
@@ -124,7 +148,14 @@ describe("tableMapNavigation", () => {
 
   describe("selectMapEvent", () => {
     it("should update selection state for allocated event", () => {
-      selectMapEvent(selectionState, "event1", markerMap, highlightLayer, eventDetails, map);
+      selectMapEvent(
+        selectionState,
+        "event1",
+        markerMap,
+        highlightLayer,
+        eventDetails,
+        map,
+      );
 
       expect(selectionState.selectedEventShortName).toBe("event1");
       expect(selectionState.highlightedEvents.has("event1")).toBe(true);
@@ -138,7 +169,14 @@ describe("tableMapNavigation", () => {
       selectionState.selectedRegionalAmbassador = "REA1";
       selectionState.highlightedEvents.add("other");
 
-      selectMapEvent(selectionState, "event1", markerMap, highlightLayer, eventDetails, map);
+      selectMapEvent(
+        selectionState,
+        "event1",
+        markerMap,
+        highlightLayer,
+        eventDetails,
+        map,
+      );
 
       expect(selectionState.selectedEventAmbassador).toBeNull();
       expect(selectionState.selectedRegionalAmbassador).toBeNull();
@@ -188,7 +226,7 @@ describe("tableMapNavigation", () => {
         eventAmbassadors,
         regionalAmbassadors,
         eventTeams,
-        onAllocate
+        onAllocate,
       );
 
       expect(selectionState.selectedEventShortName).toBe("unallocatedEvent");
@@ -211,7 +249,7 @@ describe("tableMapNavigation", () => {
         undefined,
         undefined,
         undefined,
-        onReallocate
+        onReallocate,
       );
 
       expect(onReallocate).toHaveBeenCalledWith("event1");
@@ -232,7 +270,7 @@ describe("tableMapNavigation", () => {
         undefined,
         undefined,
         undefined,
-        onReallocate
+        onReallocate,
       );
 
       expect(onReallocate).not.toHaveBeenCalled();
@@ -242,7 +280,7 @@ describe("tableMapNavigation", () => {
   describe("highlightTableRow", () => {
     it("should add selected class to row", () => {
       const row = document.querySelector(
-        'tr[data-event-short-name="event1"]'
+        'tr[data-event-short-name="event1"]',
       ) as HTMLTableRowElement;
 
       highlightTableRow("eventTeamsTable", "event1", true);
@@ -253,10 +291,10 @@ describe("tableMapNavigation", () => {
 
     it("should clear previous selection in same table", () => {
       const row1 = document.querySelector(
-        'tr[data-event-short-name="event1"]'
+        'tr[data-event-short-name="event1"]',
       ) as HTMLTableRowElement;
       const row2 = document.querySelector(
-        'tr[data-event-short-name="event2"]'
+        'tr[data-event-short-name="event2"]',
       ) as HTMLTableRowElement;
 
       highlightTableRow("eventTeamsTable", "event1", true);
@@ -268,7 +306,7 @@ describe("tableMapNavigation", () => {
 
     it("should remove selected class when isSelected is false", () => {
       const row = document.querySelector(
-        'tr[data-event-short-name="event1"]'
+        'tr[data-event-short-name="event1"]',
       ) as HTMLTableRowElement;
 
       highlightTableRow("eventTeamsTable", "event1", true);
@@ -288,7 +326,7 @@ describe("tableMapNavigation", () => {
   describe("scrollToTableRow", () => {
     it("should scroll to row", () => {
       const row = document.querySelector(
-        'tr[data-event-short-name="event1"]'
+        'tr[data-event-short-name="event1"]',
       ) as HTMLTableRowElement;
       const scrollIntoViewSpy = jest.fn();
       row.scrollIntoView = scrollIntoViewSpy;
@@ -310,7 +348,15 @@ describe("tableMapNavigation", () => {
 
   describe("integration tests", () => {
     it("should highlight map when table row is selected", () => {
-      selectEventTeamRow(selectionState, "event1", eventTeamsTableData, markerMap, highlightLayer, eventDetails, map);
+      selectEventTeamRow(
+        selectionState,
+        "event1",
+        eventTeamsTableData,
+        markerMap,
+        highlightLayer,
+        eventDetails,
+        map,
+      );
 
       expect(selectionState.highlightedEvents.has("event1")).toBe(true);
     });
@@ -321,10 +367,17 @@ describe("tableMapNavigation", () => {
         eventTeamsTab.hidden = false;
       }
 
-      selectMapEvent(selectionState, "event1", markerMap, highlightLayer, eventDetails, map);
+      selectMapEvent(
+        selectionState,
+        "event1",
+        markerMap,
+        highlightLayer,
+        eventDetails,
+        map,
+      );
 
       const row = document.querySelector(
-        'tr[data-event-short-name="event1"]'
+        'tr[data-event-short-name="event1"]',
       ) as HTMLTableRowElement;
 
       expect(row.classList.contains("selected")).toBe(true);
@@ -337,7 +390,7 @@ describe("tableMapNavigation", () => {
       if (eventTeamsTab) {
         eventTeamsTab.hidden = false;
         expect(isEventTeamsTabVisible()).toBe(true);
-        
+
         eventTeamsTab.hidden = true;
         expect(isEventTeamsTabVisible()).toBe(false);
       }
@@ -349,10 +402,17 @@ describe("tableMapNavigation", () => {
         eventTeamsTab.hidden = true;
       }
 
-      selectMapEvent(selectionState, "event1", markerMap, highlightLayer, eventDetails, map);
+      selectMapEvent(
+        selectionState,
+        "event1",
+        markerMap,
+        highlightLayer,
+        eventDetails,
+        map,
+      );
 
       const row = document.querySelector(
-        'tr[data-event-short-name="event1"]'
+        'tr[data-event-short-name="event1"]',
       ) as HTMLTableRowElement;
 
       expect(row.classList.contains("selected")).toBe(false);
@@ -365,10 +425,17 @@ describe("tableMapNavigation", () => {
         eventTeamsTab.hidden = false;
       }
 
-      selectMapEvent(selectionState, "event1", markerMap, highlightLayer, eventDetails, map);
+      selectMapEvent(
+        selectionState,
+        "event1",
+        markerMap,
+        highlightLayer,
+        eventDetails,
+        map,
+      );
 
       const row = document.querySelector(
-        'tr[data-event-short-name="event1"]'
+        'tr[data-event-short-name="event1"]',
       ) as HTMLTableRowElement;
 
       expect(row.classList.contains("selected")).toBe(true);
@@ -380,7 +447,14 @@ describe("tableMapNavigation", () => {
         eventTeamsTab.hidden = true;
       }
 
-      selectMapEvent(selectionState, "event1", markerMap, highlightLayer, eventDetails, map);
+      selectMapEvent(
+        selectionState,
+        "event1",
+        markerMap,
+        highlightLayer,
+        eventDetails,
+        map,
+      );
 
       if (eventTeamsTab) {
         eventTeamsTab.hidden = false;
@@ -389,7 +463,7 @@ describe("tableMapNavigation", () => {
       applyDeferredTableSelection(selectionState, eventTeamsTableData);
 
       const row = document.querySelector(
-        'tr[data-event-short-name="event1"]'
+        'tr[data-event-short-name="event1"]',
       ) as HTMLTableRowElement;
 
       expect(row.classList.contains("selected")).toBe(true);
@@ -406,7 +480,7 @@ describe("tableMapNavigation", () => {
       applyDeferredTableSelection(selectionState, eventTeamsTableData);
 
       const row = document.querySelector(
-        'tr[data-event-short-name="event1"]'
+        'tr[data-event-short-name="event1"]',
       ) as HTMLTableRowElement;
 
       expect(row?.classList.contains("selected")).toBe(false);
@@ -423,11 +497,10 @@ describe("tableMapNavigation", () => {
       applyDeferredTableSelection(selectionState, eventTeamsTableData);
 
       const row = document.querySelector(
-        'tr[data-event-short-name="event1"]'
+        'tr[data-event-short-name="event1"]',
       ) as HTMLTableRowElement;
 
       expect(row?.classList.contains("selected")).toBe(false);
     });
   });
 });
-

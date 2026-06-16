@@ -3,7 +3,7 @@
  *
  * Defines TypeScript types for two-letter country codes based on TLDs (Top Level Domains)
  * used in parkrun URLs. These map to ISO 3166-1 alpha-2 codes where applicable.
- * 
+ *
  * Note: "uk" is used as the TLD (parkrun.co.uk) but maps to ISO code "gb" (United Kingdom).
  */
 
@@ -12,54 +12,54 @@
  * Most map directly to ISO 3166-1 alpha-2 codes, except "uk" which maps to "gb"
  */
 export type CountryCode =
-  | 'au' // Australia
-  | 'uk' // United Kingdom (TLD, maps to ISO "gb")
-  | 'ie' // Ireland
-  | 'nz' // New Zealand
-  | 'za' // South Africa
-  | 'us' // United States
-  | 'ca' // Canada
-  | 'it' // Italy
-  | 'pl' // Poland
-  | 'de' // Germany
-  | 'dk' // Denmark
-  | 'se' // Sweden
-  | 'no' // Norway
-  | 'fi' // Finland
-  | 'nl' // Netherlands
-  | 'fr' // France
-  | 'ru' // Russia
-  | 'jp' // Japan
-  | 'sg' // Singapore
-  | 'my' // Malaysia
-  | 'lt'; // Lithuania (and other future countries)
+  | "au" // Australia
+  | "uk" // United Kingdom (TLD, maps to ISO "gb")
+  | "ie" // Ireland
+  | "nz" // New Zealand
+  | "za" // South Africa
+  | "us" // United States
+  | "ca" // Canada
+  | "it" // Italy
+  | "pl" // Poland
+  | "de" // Germany
+  | "dk" // Denmark
+  | "se" // Sweden
+  | "no" // Norway
+  | "fi" // Finland
+  | "nl" // Netherlands
+  | "fr" // France
+  | "ru" // Russia
+  | "jp" // Japan
+  | "sg" // Singapore
+  | "my" // Malaysia
+  | "lt"; // Lithuania (and other future countries)
 
 /**
  * Mapping from TLD (as used in parkrun URLs) to ISO 3166-1 alpha-2 code
  * Most TLDs map directly, but "uk" maps to "gb" (United Kingdom)
  */
 const TLD_TO_ISO: ReadonlyMap<string, string> = new Map([
-  ['au', 'au'],
-  ['uk', 'gb'], // UK TLD maps to GB ISO code
-  ['ie', 'ie'],
-  ['nz', 'nz'],
-  ['za', 'za'],
-  ['us', 'us'],
-  ['ca', 'ca'],
-  ['it', 'it'],
-  ['pl', 'pl'],
-  ['de', 'de'],
-  ['dk', 'dk'],
-  ['se', 'se'],
-  ['no', 'no'],
-  ['fi', 'fi'],
-  ['nl', 'nl'],
-  ['fr', 'fr'],
-  ['ru', 'ru'],
-  ['jp', 'jp'],
-  ['sg', 'sg'],
-  ['my', 'my'],
-  ['lt', 'lt'], // Lithuania
+  ["au", "au"],
+  ["uk", "gb"], // UK TLD maps to GB ISO code
+  ["ie", "ie"],
+  ["nz", "nz"],
+  ["za", "za"],
+  ["us", "us"],
+  ["ca", "ca"],
+  ["it", "it"],
+  ["pl", "pl"],
+  ["de", "de"],
+  ["dk", "dk"],
+  ["se", "se"],
+  ["no", "no"],
+  ["fi", "fi"],
+  ["nl", "nl"],
+  ["fr", "fr"],
+  ["ru", "ru"],
+  ["jp", "jp"],
+  ["sg", "sg"],
+  ["my", "my"],
+  ["lt", "lt"], // Lithuania
   // Add more countries as parkrun expands
 ]);
 
@@ -69,27 +69,27 @@ const TLD_TO_ISO: ReadonlyMap<string, string> = new Map([
  * if they follow the pattern of using their TLD as the country code
  */
 const VALID_COUNTRY_CODES: ReadonlySet<CountryCode> = new Set([
-  'au',
-  'uk',
-  'ie',
-  'nz',
-  'za',
-  'us',
-  'ca',
-  'it',
-  'pl',
-  'de',
-  'dk',
-  'se',
-  'no',
-  'fi',
-  'nl',
-  'fr',
-  'ru',
-  'jp',
-  'sg',
-  'my',
-  'lt',
+  "au",
+  "uk",
+  "ie",
+  "nz",
+  "za",
+  "us",
+  "ca",
+  "it",
+  "pl",
+  "de",
+  "dk",
+  "se",
+  "no",
+  "fi",
+  "nl",
+  "fr",
+  "ru",
+  "jp",
+  "sg",
+  "my",
+  "lt",
 ]);
 
 /**
@@ -109,7 +109,7 @@ export function isValidCountryCode(code: string): code is CountryCode {
  * @returns True if the value is a valid CountryCode
  */
 export function isCountryCode(code: unknown): code is CountryCode {
-  return typeof code === 'string' && isValidCountryCode(code);
+  return typeof code === "string" && isValidCountryCode(code);
 }
 
 /**
@@ -121,7 +121,9 @@ export function isCountryCode(code: unknown): code is CountryCode {
  */
 export function toCountryCode(code: string): CountryCode {
   if (!isValidCountryCode(code)) {
-    throw new Error(`Invalid country code: "${code}". Must be a valid two-letter ISO 3166-1 alpha-2 code.`);
+    throw new Error(
+      `Invalid country code: "${code}". Must be a valid two-letter ISO 3166-1 alpha-2 code.`,
+    );
   }
   return code;
 }
@@ -147,10 +149,10 @@ export function tryCountryCode(code: string): CountryCode | null {
  */
 export function extractCountryCodeFromUrl(url: string): CountryCode | null {
   // Remove www.parkrun. prefix if present
-  const domain = url.replace(/^www\.parkrun\./, '');
-  const domainParts = domain.split('.');
+  const domain = url.replace(/^www\.parkrun\./, "");
+  const domainParts = domain.split(".");
   const lastPart = domainParts[domainParts.length - 1].toLowerCase();
-  
+
   return tryCountryCode(lastPart);
 }
 

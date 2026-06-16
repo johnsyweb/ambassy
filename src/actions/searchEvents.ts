@@ -12,7 +12,10 @@ const MAX_RESULTS = 10; // Limit results as per original spec
 const FUZZY_THRESHOLD_SHORT = 1; // Allow small typos for short strings
 const FUZZY_THRESHOLD_LONG = 2; // Allow small typos for long strings
 
-export function searchEvents(query: string, events: EventDetailsMap): EventDetails[] {
+export function searchEvents(
+  query: string,
+  events: EventDetailsMap,
+): EventDetails[] {
   if (!query || query.trim() === "") {
     return [];
   }
@@ -24,10 +27,14 @@ export function searchEvents(query: string, events: EventDetailsMap): EventDetai
   events.forEach((event) => {
     if (processedEvents.has(event.properties.EventShortName)) return;
 
-    if (event.properties.EventShortName.toLowerCase() === query.toLowerCase() ||
-        event.properties.EventLongName.toLowerCase() === query.toLowerCase() ||
-        event.properties.eventname.toLowerCase() === query.toLowerCase() ||
-        (event.properties.LocalisedEventLongName && event.properties.LocalisedEventLongName.toLowerCase() === query.toLowerCase())) {
+    if (
+      event.properties.EventShortName.toLowerCase() === query.toLowerCase() ||
+      event.properties.EventLongName.toLowerCase() === query.toLowerCase() ||
+      event.properties.eventname.toLowerCase() === query.toLowerCase() ||
+      (event.properties.LocalisedEventLongName &&
+        event.properties.LocalisedEventLongName.toLowerCase() ===
+          query.toLowerCase())
+    ) {
       matches.push({
         event,
         score: 0,
@@ -44,22 +51,35 @@ export function searchEvents(query: string, events: EventDetailsMap): EventDetai
       if (processedEvents.has(event.properties.EventShortName)) return;
 
       const fields = [
-        { name: event.properties.EventShortName, normalized: normalizeEventName(event.properties.EventShortName) },
-        { name: event.properties.EventLongName, normalized: normalizeEventName(event.properties.EventLongName) },
-        { name: event.properties.eventname, normalized: normalizeEventName(event.properties.eventname) },
+        {
+          name: event.properties.EventShortName,
+          normalized: normalizeEventName(event.properties.EventShortName),
+        },
+        {
+          name: event.properties.EventLongName,
+          normalized: normalizeEventName(event.properties.EventLongName),
+        },
+        {
+          name: event.properties.eventname,
+          normalized: normalizeEventName(event.properties.eventname),
+        },
       ];
 
       if (event.properties.LocalisedEventLongName) {
         fields.push({
           name: event.properties.LocalisedEventLongName,
-          normalized: normalizeEventName(event.properties.LocalisedEventLongName),
+          normalized: normalizeEventName(
+            event.properties.LocalisedEventLongName,
+          ),
         });
       }
 
       for (const field of fields) {
-        if (field.normalized === normalizedQuery ||
-            normalizedQuery.includes(field.normalized) ||
-            field.normalized.includes(normalizedQuery)) {
+        if (
+          field.normalized === normalizedQuery ||
+          normalizedQuery.includes(field.normalized) ||
+          field.normalized.includes(normalizedQuery)
+        ) {
           matches.push({
             event,
             score: 1,
@@ -81,15 +101,26 @@ export function searchEvents(query: string, events: EventDetailsMap): EventDetai
       if (processedEvents.has(event.properties.EventShortName)) return;
 
       const fields = [
-        { name: event.properties.EventShortName, normalized: normalizeEventName(event.properties.EventShortName) },
-        { name: event.properties.EventLongName, normalized: normalizeEventName(event.properties.EventLongName) },
-        { name: event.properties.eventname, normalized: normalizeEventName(event.properties.eventname) },
+        {
+          name: event.properties.EventShortName,
+          normalized: normalizeEventName(event.properties.EventShortName),
+        },
+        {
+          name: event.properties.EventLongName,
+          normalized: normalizeEventName(event.properties.EventLongName),
+        },
+        {
+          name: event.properties.eventname,
+          normalized: normalizeEventName(event.properties.eventname),
+        },
       ];
 
       if (event.properties.LocalisedEventLongName) {
         fields.push({
           name: event.properties.LocalisedEventLongName,
-          normalized: normalizeEventName(event.properties.LocalisedEventLongName),
+          normalized: normalizeEventName(
+            event.properties.LocalisedEventLongName,
+          ),
         });
       }
 
@@ -109,8 +140,13 @@ export function searchEvents(query: string, events: EventDetailsMap): EventDetai
       if (bestScore > 2) {
         for (const field of fields) {
           const threshold =
-            field.normalized.length < 10 ? FUZZY_THRESHOLD_SHORT : FUZZY_THRESHOLD_LONG;
-          const distance = levenshteinDistance(field.normalized, normalizedQuery);
+            field.normalized.length < 10
+              ? FUZZY_THRESHOLD_SHORT
+              : FUZZY_THRESHOLD_LONG;
+          const distance = levenshteinDistance(
+            field.normalized,
+            normalizedQuery,
+          );
 
           if (distance <= threshold && distance > 0) {
             const fuzzyScore = 100 + distance;

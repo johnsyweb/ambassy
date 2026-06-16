@@ -12,7 +12,7 @@ import {
 export async function handleStateImport(
   file?: File,
   url?: string,
-  clipboardText?: string
+  clipboardText?: string,
 ): Promise<{ success: boolean; message: string }> {
   try {
     const hasExistingData =
@@ -20,14 +20,14 @@ export async function handleStateImport(
       localStorage.getItem("ambassy:eventTeams") !== null ||
       localStorage.getItem("ambassy:regionalAmbassadors") !== null;
 
-      if (hasExistingData) {
-        const confirmed = confirm(
-          "Opening this saved state will replace your current data. Do you want to continue?"
-        );
-        if (!confirmed) {
-          return { success: false, message: "Open cancelled" };
-        }
+    if (hasExistingData) {
+      const confirmed = confirm(
+        "Opening this saved state will replace your current data. Do you want to continue?",
+      );
+      if (!confirmed) {
+        return { success: false, message: "Open cancelled" };
       }
+    }
 
     let state;
     if (file) {
@@ -48,9 +48,7 @@ export async function handleStateImport(
       success: true,
       message: `Saved state opened successfully! Loaded ${eventCount} event${
         eventCount !== 1 ? "s" : ""
-      } and ${ambassadorCount} ambassador${
-        ambassadorCount !== 1 ? "s" : ""
-      }.`,
+      } and ${ambassadorCount} ambassador${ambassadorCount !== 1 ? "s" : ""}.`,
     };
   } catch (error) {
     let errorMessage = "Unable to open the saved state. ";
@@ -69,7 +67,9 @@ export async function handleStateImport(
         "The file data is not valid. Please make sure it hasn't been modified or corrupted.";
     } else {
       errorMessage +=
-        error instanceof Error ? error.message : "An unexpected error occurred.";
+        error instanceof Error
+          ? error.message
+          : "An unexpected error occurred.";
     }
     return { success: false, message: errorMessage };
   }

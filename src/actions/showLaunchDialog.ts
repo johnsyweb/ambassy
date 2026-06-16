@@ -20,9 +20,15 @@ export function showLaunchDialog(
   onCancel: () => void,
 ): void {
   const dialog = document.getElementById("reallocationDialog") as HTMLElement;
-  const title = document.getElementById("reallocationDialogTitle") as HTMLElement;
-  const content = document.getElementById("reallocationDialogContent") as HTMLElement;
-  const cancelButton = document.getElementById("reallocationDialogCancel") as HTMLButtonElement;
+  const title = document.getElementById(
+    "reallocationDialogTitle",
+  ) as HTMLElement;
+  const content = document.getElementById(
+    "reallocationDialogContent",
+  ) as HTMLElement;
+  const cancelButton = document.getElementById(
+    "reallocationDialogCancel",
+  ) as HTMLButtonElement;
 
   if (!dialog || !title || !content || !cancelButton) {
     console.error("Reallocation dialog elements not found");
@@ -210,7 +216,10 @@ export function showLaunchDialog(
         buttonsContainer.style.gap = "0.5em";
         buttonsContainer.style.marginBottom = "1em";
         buttonsContainer.setAttribute("role", "group");
-        buttonsContainer.setAttribute("aria-label", "Suggested Event Ambassadors");
+        buttonsContainer.setAttribute(
+          "aria-label",
+          "Suggested Event Ambassadors",
+        );
 
         topSuggestions.forEach((suggestion) => {
           const button = document.createElement("button");
@@ -238,7 +247,8 @@ export function showLaunchDialog(
 
           const liveCount = suggestion.liveEventsCount ?? 0;
           const prospectCount = suggestion.prospectEventsCount ?? 0;
-          const totalCount = suggestion.allocationCount ?? liveCount + prospectCount;
+          const totalCount =
+            suggestion.allocationCount ?? liveCount + prospectCount;
 
           const allocationInfo = document.createElement("div");
           allocationInfo.textContent = `${liveCount} live, ${prospectCount} prospect, ${totalCount} total`;
@@ -257,7 +267,10 @@ export function showLaunchDialog(
             contextDiv.appendChild(reaInfo);
           }
 
-          if (suggestion.neighboringEvents && suggestion.neighboringEvents.length > 0) {
+          if (
+            suggestion.neighboringEvents &&
+            suggestion.neighboringEvents.length > 0
+          ) {
             const nearestEvent = suggestion.neighboringEvents[0];
             const distanceInfo = document.createElement("div");
             distanceInfo.textContent = `${nearestEvent.distanceKm.toFixed(1)} km to ${nearestEvent.name}`;
@@ -330,7 +343,8 @@ export function showLaunchDialog(
 
       if (!selectedEA) {
         const selectEALabel = document.createElement("p");
-        selectEALabel.textContent = "Select an Event Ambassador to allocate this event, or launch without allocation:";
+        selectEALabel.textContent =
+          "Select an Event Ambassador to allocate this event, or launch without allocation:";
         selectEALabel.style.marginTop = "0.5em";
         selectEALabel.style.marginBottom = "0.5em";
         content.appendChild(selectEALabel);

@@ -6,7 +6,7 @@ export function populateIssuesTable(
   issues: EventIssue[],
   issuesState: IssuesState,
   onIssueSelect: (issue: EventIssue) => void,
-  onResolve: (issue: EventIssue) => void
+  onResolve: (issue: EventIssue) => void,
 ): void {
   const tableBody = document.querySelector("#issuesTable tbody");
   if (!tableBody) {
@@ -27,7 +27,9 @@ export function populateIssuesTable(
     return;
   }
 
-  const unresolvedIssues = issues.filter((issue) => issue.status === "unresolved");
+  const unresolvedIssues = issues.filter(
+    (issue) => issue.status === "unresolved",
+  );
 
   unresolvedIssues.forEach((issue) => {
     const row = document.createElement("tr");
@@ -56,8 +58,12 @@ export function populateIssuesTable(
     const resolveButton = document.createElement("button");
     resolveButton.textContent = "🔧 Resolve";
     resolveButton.type = "button";
-    resolveButton.title = "Resolve this issue by searching events or entering an address";
-    resolveButton.setAttribute("aria-label", `Resolve issue for ${issue.eventShortName}`);
+    resolveButton.title =
+      "Resolve this issue by searching events or entering an address";
+    resolveButton.setAttribute(
+      "aria-label",
+      `Resolve issue for ${issue.eventShortName}`,
+    );
     resolveButton.style.padding = "2px 8px";
     resolveButton.style.fontSize = "0.85em";
     resolveButton.style.cursor = "pointer";
@@ -86,11 +92,13 @@ export function populateIssuesTable(
   // Initialize sorting with default: Event Name (column 0) ascending
   // Only initialize if we have unresolved issues (not empty state)
   if (unresolvedIssues.length > 0) {
-    initializeTableSorting('issuesTable', 0, 'asc');
-    
+    initializeTableSorting("issuesTable", 0, "asc");
+
     // Apply selection after sorting (sorting may have reordered rows)
     if (issuesState.selectedIssue) {
-      const selectedRow = tableBody.querySelector(`tr[data-issue-event-name="${issuesState.selectedIssue}"]`);
+      const selectedRow = tableBody.querySelector(
+        `tr[data-issue-event-name="${issuesState.selectedIssue}"]`,
+      );
       if (selectedRow) {
         selectedRow.classList.add("selected");
         selectedRow.setAttribute("aria-selected", "true");

@@ -7,10 +7,7 @@ import { EventAmbassadorMap } from "@models/EventAmbassadorMap";
 import { RegionalAmbassadorMap } from "@models/RegionalAmbassadorMap";
 import { EventTeamMap } from "@models/EventTeamMap";
 import { EventAmbassador } from "@models/EventAmbassador";
-import {
-  CapacityLimits,
-  defaultCapacityLimits,
-} from "@models/CapacityLimits";
+import { CapacityLimits, defaultCapacityLimits } from "@models/CapacityLimits";
 import {
   persistEventAmbassadors,
   persistRegionalAmbassadors,

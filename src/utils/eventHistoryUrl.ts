@@ -2,7 +2,7 @@ import { CountryMap } from "@models/country";
 
 /**
  * Builds the event history URL for a parkrun event
- * 
+ *
  * @param eventname - The event's eventname property or any human-readable variant
  *                    (e.g., "kirkdalereserve", "Albertonascot parkrun")
  * @param countrycode - The event's country code (e.g., 3 for Australia)
@@ -12,7 +12,7 @@ import { CountryMap } from "@models/country";
 export function buildEventHistoryUrl(
   eventname: string,
   countrycode: number,
-  countries: CountryMap
+  countries: CountryMap,
 ): string | null {
   // Validate eventname
   if (!eventname || !eventname.trim()) {

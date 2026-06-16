@@ -22,4 +22,3 @@ export function clearSelection(state: SelectionState): void {
   state.selectedRegionalAmbassador = null;
   state.highlightedEvents.clear();
 }
-

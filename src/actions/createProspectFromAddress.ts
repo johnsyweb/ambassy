@@ -23,15 +23,21 @@ export interface ProspectCreationData {
   courseFound?: boolean;
   landownerPermission?: boolean;
   fundingConfirmed?: boolean;
-  geocodingStatus?: 'success' | 'manual';
+  geocodingStatus?: "success" | "manual";
 }
 
 /**
  * Generate a unique ID for a prospective event
  * Duplicated from parseProspectiveEvents.ts since it's not exported
  */
-function generateProspectiveEventId(prospectEvent: string, country: string, state: string): string {
-  const base = `${prospectEvent}-${country}-${state}`.toLowerCase().replace(/[^a-z0-9]/g, '-');
+function generateProspectiveEventId(
+  prospectEvent: string,
+  country: string,
+  state: string,
+): string {
+  const base = `${prospectEvent}-${country}-${state}`
+    .toLowerCase()
+    .replace(/[^a-z0-9]/g, "-");
   const timestamp = Date.now();
   const random = Math.random().toString(36).substring(2, 8);
   return `${base}-${timestamp}-${random}`;
@@ -52,7 +58,7 @@ export function createProspectFromAddress(
   prospectData: ProspectCreationData,
   eventAmbassadors: EventAmbassadorMap,
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  regionalAmbassadors: RegionalAmbassadorMap
+  regionalAmbassadors: RegionalAmbassadorMap,
 ): ProspectiveEvent {
   // Validate required fields
   if (!prospectData.prospectEvent?.trim()) {
@@ -88,18 +94,20 @@ export function createProspectFromAddress(
   // Validate EA exists
   const ea = eventAmbassadors.get(prospectData.eventAmbassador);
   if (!ea) {
-    throw new Error(`Event Ambassador "${prospectData.eventAmbassador}" not found`);
+    throw new Error(
+      `Event Ambassador "${prospectData.eventAmbassador}" not found`,
+    );
   }
 
   // Generate unique ID
   const id = generateProspectiveEventId(
     prospectData.prospectEvent,
     prospectData.country,
-    prospectData.state
+    prospectData.state,
   );
 
   // Determine geocoding status (default to 'success' if not specified)
-  const geocodingStatus = prospectData.geocodingStatus || 'success';
+  const geocodingStatus = prospectData.geocodingStatus || "success";
 
   // Create ProspectiveEvent with all provided data and defaults
   const prospect: ProspectiveEvent = {
@@ -115,7 +123,7 @@ export function createProspectFromAddress(
     dateMadeContact: prospectData.dateMadeContact || null,
     coordinates: prospectData.coordinates,
     geocodingStatus,
-    ambassadorMatchStatus: 'matched', // EA is assigned during creation
+    ambassadorMatchStatus: "matched", // EA is assigned during creation
     importTimestamp: Date.now(),
     sourceRow: -1, // Indicates manual creation (not from CSV)
   };
@@ -123,7 +131,7 @@ export function createProspectFromAddress(
   // Validate the complete prospect
   const validation = validateProspectiveEvent(prospect);
   if (!validation.isValid) {
-    const errorMessages = validation.errors.map(e => e.message).join(', ');
+    const errorMessages = validation.errors.map((e) => e.message).join(", ");
     throw new Error(`Validation failed: ${errorMessages}`);
   }
 

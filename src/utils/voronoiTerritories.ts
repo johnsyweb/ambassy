@@ -1,5 +1,8 @@
 import { eventDetailsToCoordinate } from "@models/EventDetailsMap";
-import { EventDetailsMap, getEventTeamsTableDataByShortName } from "@models/EventDetailsMap";
+import {
+  EventDetailsMap,
+  getEventTeamsTableDataByShortName,
+} from "@models/EventDetailsMap";
 import { EventTeamsTableDataMap } from "@models/EventTeamsTableData";
 import { isValidCoordinate, toGeoJSONArray } from "@models/Coordinate";
 import { ProspectiveEvent } from "@models/ProspectiveEvent";
@@ -31,9 +34,7 @@ export interface ViewportBounds {
   maxLatitude: number;
 }
 
-export type GeoVoronoiFn = (
-  points: [number, number][],
-) => {
+export type GeoVoronoiFn = (points: [number, number][]) => {
   polygons(): { features: Feature<Polygon>[] };
 };
 
@@ -47,12 +48,14 @@ export interface BuildVoronoiSitesInput {
   eventDetails: EventDetailsMap;
   eventTeamsTableData: EventTeamsTableDataMap;
   prospectiveEvents?: ProspectiveEvent[];
-  styleForAllocatedEvent: (
-    eventShortName: string,
-  ) => { raColor: string; tooltip: string };
-  styleForProspect?: (
-    prospect: ProspectiveEvent,
-  ) => { raColor: string; tooltip: string };
+  styleForAllocatedEvent: (eventShortName: string) => {
+    raColor: string;
+    tooltip: string;
+  };
+  styleForProspect?: (prospect: ProspectiveEvent) => {
+    raColor: string;
+    tooltip: string;
+  };
 }
 
 function coordinateFromEventDetails(
@@ -76,7 +79,9 @@ function coordinateFromEventDetails(
   }
 }
 
-export function buildVoronoiSites(input: BuildVoronoiSitesInput): VoronoiSite[] {
+export function buildVoronoiSites(
+  input: BuildVoronoiSitesInput,
+): VoronoiSite[] {
   const sites: VoronoiSite[] = [];
 
   input.eventDetails.forEach((_event, eventShortName) => {
@@ -88,7 +93,12 @@ export function buildVoronoiSites(input: BuildVoronoiSitesInput): VoronoiSite[] 
       return;
     }
 
-    if (getEventTeamsTableDataByShortName(input.eventTeamsTableData, eventShortName)) {
+    if (
+      getEventTeamsTableDataByShortName(
+        input.eventTeamsTableData,
+        eventShortName,
+      )
+    ) {
       const style = input.styleForAllocatedEvent(eventShortName);
       sites.push({
         id: eventShortName,
@@ -215,7 +225,8 @@ export function pointInTerritoryRing(
     if (
       crossesLatitude &&
       siteLongitude <
-        ((previousLongitude - vertexLongitude) * (siteLatitude - vertexLatitude)) /
+        ((previousLongitude - vertexLongitude) *
+          (siteLatitude - vertexLatitude)) /
           (previousLatitude - vertexLatitude) +
           vertexLongitude
     ) {
@@ -396,7 +407,8 @@ export function boundaryLatitudeAtLongitude(
       continue;
     }
 
-    const ratio = (longitude - startLongitude) / (endLongitude - startLongitude);
+    const ratio =
+      (longitude - startLongitude) / (endLongitude - startLongitude);
     crossings.push(startLatitude + ratio * (endLatitude - startLatitude));
   }
 
@@ -404,9 +416,7 @@ export function boundaryLatitudeAtLongitude(
     return null;
   }
 
-  return boundary === "south"
-    ? Math.min(...crossings)
-    : Math.max(...crossings);
+  return boundary === "south" ? Math.min(...crossings) : Math.max(...crossings);
 }
 
 function findSiteForPolygonFeature(
@@ -664,7 +674,9 @@ export class VoronoiTerritoryCache {
   }
 }
 
-export function viewportFromLeafletBounds(bounds: L.LatLngBounds): ViewportBounds {
+export function viewportFromLeafletBounds(
+  bounds: L.LatLngBounds,
+): ViewportBounds {
   const southWest = bounds.getSouthWest();
   const northEast = bounds.getNorthEast();
 

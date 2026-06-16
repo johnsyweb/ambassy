@@ -10,13 +10,20 @@ jest.mock("./checkCapacity");
 jest.mock("./persistState");
 jest.mock("./trackChanges");
 
-const mockLoadCapacityLimits = jest.requireMock("./checkCapacity").loadCapacityLimits;
+const mockLoadCapacityLimits =
+  jest.requireMock("./checkCapacity").loadCapacityLimits;
 
-const mockSaveProspectiveEvents = jest.requireMock("./persistProspectiveEvents").saveProspectiveEvents;
-const mockCalculateAllCapacityStatuses = jest.requireMock("./checkCapacity").calculateAllCapacityStatuses;
-const mockPersistEventAmbassadors = jest.requireMock("./persistState").persistEventAmbassadors;
-const mockPersistChangesLog = jest.requireMock("./persistState").persistChangesLog;
-const mockTrackStateChange = jest.requireMock("./trackChanges").trackStateChange;
+const mockSaveProspectiveEvents = jest.requireMock(
+  "./persistProspectiveEvents",
+).saveProspectiveEvents;
+const mockCalculateAllCapacityStatuses =
+  jest.requireMock("./checkCapacity").calculateAllCapacityStatuses;
+const mockPersistEventAmbassadors =
+  jest.requireMock("./persistState").persistEventAmbassadors;
+const mockPersistChangesLog =
+  jest.requireMock("./persistState").persistChangesLog;
+const mockTrackStateChange =
+  jest.requireMock("./trackChanges").trackStateChange;
 
 describe("reallocateProspect", () => {
   let prospects: ProspectiveEventList;
@@ -31,7 +38,7 @@ describe("reallocateProspect", () => {
       eventAmbassadorMin: 2,
       eventAmbassadorMax: 9,
       regionalAmbassadorMin: 3,
-      regionalAmbassadorMax: 10
+      regionalAmbassadorMax: 10,
     });
 
     prospects = new ProspectiveEventList([
@@ -49,37 +56,43 @@ describe("reallocateProspect", () => {
         geocodingStatus: "success",
         ambassadorMatchStatus: "matched",
         importTimestamp: Date.now(),
-        sourceRow: 1
-      }
+        sourceRow: 1,
+      },
     ]);
 
     eventAmbassadors = new Map([
-      ["Old EA", {
-        name: "Old EA",
-        events: ["Some Event"],
-        prospectiveEvents: ["test-prospect-1"],
-        capacityStatus: CapacityStatus.WITHIN
-      }],
-      ["New EA", {
-        name: "New EA",
-        events: [],
-        prospectiveEvents: [],
-        capacityStatus: CapacityStatus.WITHIN
-      }]
+      [
+        "Old EA",
+        {
+          name: "Old EA",
+          events: ["Some Event"],
+          prospectiveEvents: ["test-prospect-1"],
+          capacityStatus: CapacityStatus.WITHIN,
+        },
+      ],
+      [
+        "New EA",
+        {
+          name: "New EA",
+          events: [],
+          prospectiveEvents: [],
+          capacityStatus: CapacityStatus.WITHIN,
+        },
+      ],
     ]);
 
     log = [];
   });
 
   it("should reallocate a prospect from one EA to another", () => {
-      reallocateProspect(
-        "test-prospect-1",
-        "Old EA",
-        "New EA",
-        prospects,
-        eventAmbassadors,
-        log
-      );
+    reallocateProspect(
+      "test-prospect-1",
+      "Old EA",
+      "New EA",
+      prospects,
+      eventAmbassadors,
+      log,
+    );
 
     // Check prospect was updated
     const updatedProspect = prospects.findById("test-prospect-1");
@@ -102,8 +115,8 @@ describe("reallocateProspect", () => {
         eventAmbassadorMin: 2,
         eventAmbassadorMax: 9,
         regionalAmbassadorMin: 3,
-        regionalAmbassadorMax: 10
-      }
+        regionalAmbassadorMax: 10,
+      },
     );
 
     // Check event ambassadors were persisted
@@ -133,7 +146,7 @@ describe("reallocateProspect", () => {
       "",
       prospects,
       eventAmbassadors,
-      log
+      log,
     );
 
     const updatedProspect = prospects.findById("test-prospect-1");
@@ -152,7 +165,7 @@ describe("reallocateProspect", () => {
         "New EA",
         prospects,
         eventAmbassadors,
-        log
+        log,
       );
     }).toThrow("Prospect with ID 'non-existent-id' not found");
   });
@@ -165,8 +178,10 @@ describe("reallocateProspect", () => {
         "New EA",
         prospects,
         eventAmbassadors,
-        log
+        log,
       );
-    }).toThrow("Prospect 'Test Prospect' is not currently assigned to 'Wrong EA'");
+    }).toThrow(
+      "Prospect 'Test Prospect' is not currently assigned to 'Wrong EA'",
+    );
   });
 });

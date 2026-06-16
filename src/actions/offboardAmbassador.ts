@@ -116,7 +116,7 @@ export function offboardEventAmbassador(
   });
 
   persistChangesLog(log);
-  
+
   // Track state change after all persistence operations complete
   trackStateChange();
 }
@@ -208,7 +208,7 @@ export function offboardRegionalAmbassador(
   });
 
   persistChangesLog(log);
-  
+
   // Track state change after all persistence operations complete
   trackStateChange();
 }

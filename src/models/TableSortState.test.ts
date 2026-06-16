@@ -1,7 +1,4 @@
-import {
-  createTableSortState,
-  resetToDefault,
-} from "./TableSortState";
+import { createTableSortState, resetToDefault } from "./TableSortState";
 
 describe("TableSortState", () => {
   describe("createTableSortState", () => {

@@ -14,7 +14,10 @@ import { createCoordinate } from "@models/Coordinate";
 import { inferCountryCodeFromCoordinates } from "@models/country";
 import { generateProspectAllocationSuggestions } from "./suggestEventAllocation";
 import { createProspectFromAddress } from "./createProspectFromAddress";
-import { saveProspectiveEvents, loadProspectiveEvents } from "./persistProspectiveEvents";
+import {
+  saveProspectiveEvents,
+  loadProspectiveEvents,
+} from "./persistProspectiveEvents";
 import { LogEntry } from "@models/LogEntry";
 import { ProspectiveEventList } from "@models/ProspectiveEventList";
 
@@ -24,12 +27,18 @@ export function showAddProspectDialog(
   eventDetails: EventDetailsMap,
   onSuccess: () => void,
   onCancel: () => void,
-  log?: LogEntry[]
+  log?: LogEntry[],
 ): void {
   const dialog = document.getElementById("reallocationDialog") as HTMLElement;
-  const title = document.getElementById("reallocationDialogTitle") as HTMLElement;
-  const content = document.getElementById("reallocationDialogContent") as HTMLElement;
-  const cancelButton = document.getElementById("reallocationDialogCancel") as HTMLButtonElement;
+  const title = document.getElementById(
+    "reallocationDialogTitle",
+  ) as HTMLElement;
+  const content = document.getElementById(
+    "reallocationDialogContent",
+  ) as HTMLElement;
+  const cancelButton = document.getElementById(
+    "reallocationDialogCancel",
+  ) as HTMLButtonElement;
 
   if (!dialog || !title || !content || !cancelButton) {
     console.error("Dialog elements not found");
@@ -150,7 +159,7 @@ export function showAddProspectDialog(
   dateMadeContactInput.type = "date";
   // Set default value to today's date (YYYY-MM-DD format)
   const today = new Date();
-  const todayString = today.toISOString().split('T')[0];
+  const todayString = today.toISOString().split("T")[0];
   dateMadeContactInput.value = todayString;
   dateMadeContactInput.style.width = "100%";
   dateMadeContactInput.style.padding = "0.5em";
@@ -182,7 +191,9 @@ export function showAddProspectDialog(
   const landownerPermissionCheckbox = document.createElement("input");
   landownerPermissionCheckbox.type = "checkbox";
   landownerPermissionLabel.appendChild(landownerPermissionCheckbox);
-  landownerPermissionLabel.appendChild(document.createTextNode("Landowner Permission"));
+  landownerPermissionLabel.appendChild(
+    document.createTextNode("Landowner Permission"),
+  );
   statusFlagsContainer.appendChild(landownerPermissionLabel);
 
   const fundingConfirmedLabel = document.createElement("label");
@@ -192,7 +203,9 @@ export function showAddProspectDialog(
   const fundingConfirmedCheckbox = document.createElement("input");
   fundingConfirmedCheckbox.type = "checkbox";
   fundingConfirmedLabel.appendChild(fundingConfirmedCheckbox);
-  fundingConfirmedLabel.appendChild(document.createTextNode("Funding Confirmed"));
+  fundingConfirmedLabel.appendChild(
+    document.createTextNode("Funding Confirmed"),
+  );
   statusFlagsContainer.appendChild(fundingConfirmedLabel);
 
   container.appendChild(statusFlagsContainer);
@@ -328,20 +341,22 @@ export function showAddProspectDialog(
       currentGeocodeAbort = new AbortController();
       const { lat, lng } = await geocodeAddress(address);
       const coordinates = createCoordinate(lat, lng);
-      
+
       geocodedCoordinates = { lat, lng };
-      
+
       // Infer country code (two-letter format like "AU" to match CSV imports)
       inferredCountry = await inferCountryCodeFromCoordinates(coordinates);
-      
+
       // Handle country inference failure
       if (!inferredCountry || inferredCountry === "Unknown") {
-        throw new Error("Could not determine country from coordinates. Please verify the address or enter coordinates manually.");
+        throw new Error(
+          "Could not determine country from coordinates. Please verify the address or enter coordinates manually.",
+        );
       }
-      
+
       // Check for duplicate name now that we have country
       checkDuplicateName();
-      
+
       // Generate allocation suggestions
       const prospectName = prospectNameInput.value.trim() || "New Prospect";
       allocationSuggestions = await generateProspectAllocationSuggestions(
@@ -349,7 +364,7 @@ export function showAddProspectDialog(
         coordinates,
         eventAmbassadors,
         eventDetails,
-        regionalAmbassadors
+        regionalAmbassadors,
       );
 
       // Hide loading, show suggestions
@@ -371,12 +386,14 @@ export function showAddProspectDialog(
       geocodedCoordinates = null;
       inferredCountry = null;
       allocationSuggestions = [];
-      
+
       // Show manual coordinate entry option
       manualCoordinatesContainer.style.display = "block";
-      
+
       // Add retry button handler
-      const retryButton = errorMessage.querySelector("#retryGeocodingButton") as HTMLButtonElement;
+      const retryButton = errorMessage.querySelector(
+        "#retryGeocodingButton",
+      ) as HTMLButtonElement;
       if (retryButton) {
         retryButton.addEventListener("click", () => {
           errorMessage.style.display = "none";
@@ -401,9 +418,10 @@ export function showAddProspectDialog(
     }
 
     // Parse coordinates (format: "lat, lng" or "lat,lng")
-    const parts = coordinatesStr.split(',').map(p => p.trim());
+    const parts = coordinatesStr.split(",").map((p) => p.trim());
     if (parts.length !== 2) {
-      manualCoordinatesError.textContent = "Invalid format. Please use: latitude, longitude (e.g., -37.8136, 144.9631)";
+      manualCoordinatesError.textContent =
+        "Invalid format. Please use: latitude, longitude (e.g., -37.8136, 144.9631)";
       manualCoordinatesError.style.display = "block";
       return;
     }
@@ -412,7 +430,8 @@ export function showAddProspectDialog(
     const lng = parseFloat(parts[1]);
 
     if (isNaN(lat) || isNaN(lng)) {
-      manualCoordinatesError.textContent = "Invalid coordinates. Please enter valid numbers.";
+      manualCoordinatesError.textContent =
+        "Invalid coordinates. Please enter valid numbers.";
       manualCoordinatesError.style.display = "block";
       return;
     }
@@ -424,11 +443,12 @@ export function showAddProspectDialog(
       // Infer country code
       inferredCountry = await inferCountryCodeFromCoordinates(coordinates);
       if (!inferredCountry || inferredCountry === "Unknown") {
-        manualCoordinatesError.textContent = "Could not determine country from coordinates. Please verify coordinates are correct or try a different location.";
+        manualCoordinatesError.textContent =
+          "Could not determine country from coordinates. Please verify coordinates are correct or try a different location.";
         manualCoordinatesError.style.display = "block";
         return;
       }
-      
+
       // Check for duplicate name now that we have country
       checkDuplicateName();
 
@@ -439,7 +459,7 @@ export function showAddProspectDialog(
         coordinates,
         eventAmbassadors,
         eventDetails,
-        regionalAmbassadors
+        regionalAmbassadors,
       );
 
       // Hide manual entry, show suggestions
@@ -449,7 +469,8 @@ export function showAddProspectDialog(
       coordinatesEnteredManually = true;
       displayAllocationSuggestions();
     } catch (error) {
-      manualCoordinatesError.textContent = error instanceof Error ? error.message : "Invalid coordinates";
+      manualCoordinatesError.textContent =
+        error instanceof Error ? error.message : "Invalid coordinates";
       manualCoordinatesError.style.display = "block";
       geocodedCoordinates = null;
       inferredCountry = null;
@@ -467,7 +488,8 @@ export function showAddProspectDialog(
   // Display allocation suggestions
   const displayAllocationSuggestions = () => {
     if (allocationSuggestions.length === 0) {
-      suggestionsContainer.innerHTML = '<p style="color: #666;">No allocation suggestions available.</p>';
+      suggestionsContainer.innerHTML =
+        '<p style="color: #666;">No allocation suggestions available.</p>';
       suggestionsContainer.style.display = "block";
       return;
     }
@@ -491,10 +513,10 @@ export function showAddProspectDialog(
       const button = document.createElement("button");
       button.type = "button";
       button.className = "suggestion-button";
-      
+
       const buttonText = document.createElement("div");
       buttonText.style.textAlign = "left";
-      
+
       const nameSpan = document.createElement("span");
       nameSpan.style.fontWeight = "bold";
       nameSpan.textContent = suggestion.toAmbassador;
@@ -510,13 +532,17 @@ export function showAddProspectDialog(
 
       const liveCount = suggestion.liveEventsCount ?? 0;
       const prospectCount = suggestion.prospectEventsCount ?? 0;
-      const totalCount = suggestion.allocationCount ?? (liveCount + prospectCount);
+      const totalCount =
+        suggestion.allocationCount ?? liveCount + prospectCount;
 
       const allocationInfo = document.createElement("div");
       allocationInfo.textContent = `${liveCount} live, ${prospectCount} prospect, ${totalCount} total`;
       contextDiv.appendChild(allocationInfo);
 
-      if (suggestion.neighboringEvents && suggestion.neighboringEvents.length > 0) {
+      if (
+        suggestion.neighboringEvents &&
+        suggestion.neighboringEvents.length > 0
+      ) {
         const nearestEvent = suggestion.neighboringEvents[0];
         const distanceInfo = document.createElement("div");
         distanceInfo.textContent = `${nearestEvent.distanceKm.toFixed(1)} km to ${nearestEvent.name}`;
@@ -541,7 +567,10 @@ export function showAddProspectDialog(
       button.appendChild(buttonText);
       button.style.padding = "0.75em 1em";
       button.style.textAlign = "left";
-      button.style.border = suggestion.warnings && suggestion.warnings.length > 0 ? "2px solid #ff9800" : "1px solid #333";
+      button.style.border =
+        suggestion.warnings && suggestion.warnings.length > 0
+          ? "2px solid #ff9800"
+          : "1px solid #333";
       button.style.borderRadius = "4px";
       button.style.backgroundColor = index === 0 ? "#e3f2fd" : "white";
       button.style.cursor = "pointer";
@@ -584,7 +613,7 @@ export function showAddProspectDialog(
     emptyOption.textContent = "Select an Event Ambassador";
     dropdown.appendChild(emptyOption);
 
-    Array.from(eventAmbassadors.keys()).forEach(eaName => {
+    Array.from(eventAmbassadors.keys()).forEach((eaName) => {
       const option = document.createElement("option");
       option.value = eaName;
       option.textContent = eaName;
@@ -617,13 +646,15 @@ export function showAddProspectDialog(
     }
 
     if (!geocodedCoordinates) {
-      errorMessage.textContent = "Please geocode an address or enter coordinates manually";
+      errorMessage.textContent =
+        "Please geocode an address or enter coordinates manually";
       errorMessage.style.display = "block";
       return;
     }
 
     if (!inferredCountry) {
-      errorMessage.textContent = "Country could not be inferred. Please try a different address.";
+      errorMessage.textContent =
+        "Country could not be inferred. Please try a different address.";
       errorMessage.style.display = "block";
       return;
     }
@@ -633,21 +664,28 @@ export function showAddProspectDialog(
         prospectEvent: prospectNameInput.value.trim(),
         address: addressInput.value.trim(),
         state: stateInput.value.trim(),
-        coordinates: createCoordinate(geocodedCoordinates.lat, geocodedCoordinates.lng),
+        coordinates: createCoordinate(
+          geocodedCoordinates.lat,
+          geocodedCoordinates.lng,
+        ),
         country: inferredCountry,
         eventAmbassador: eaName,
         prospectEDs: prospectEDsInput.value.trim() || undefined,
-        dateMadeContact: dateMadeContactInput.value ? new Date(dateMadeContactInput.value) : null,
+        dateMadeContact: dateMadeContactInput.value
+          ? new Date(dateMadeContactInput.value)
+          : null,
         courseFound: courseFoundCheckbox.checked,
         landownerPermission: landownerPermissionCheckbox.checked,
         fundingConfirmed: fundingConfirmedCheckbox.checked,
-        geocodingStatus: coordinatesEnteredManually ? "manual" as const : "success" as const,
+        geocodingStatus: coordinatesEnteredManually
+          ? ("manual" as const)
+          : ("success" as const),
       };
 
       const prospect = createProspectFromAddress(
         prospectData,
         eventAmbassadors,
-        regionalAmbassadors
+        regionalAmbassadors,
       );
 
       // Persist prospect
@@ -672,7 +710,8 @@ export function showAddProspectDialog(
       cleanup();
       onSuccess();
     } catch (error) {
-      errorMessage.textContent = error instanceof Error ? error.message : "Failed to create prospect";
+      errorMessage.textContent =
+        error instanceof Error ? error.message : "Failed to create prospect";
       errorMessage.style.display = "block";
     }
   };
@@ -736,12 +775,12 @@ export function showAddProspectDialog(
   const checkDuplicateName = () => {
     const prospectName = prospectNameInput.value.trim();
     const state = stateInput.value.trim();
-    
+
     if (!prospectName || !state) {
       duplicateWarning.style.display = "none";
       return;
     }
-    
+
     // Only check for duplicates if we have a valid country (either from geocoding or manual entry)
     if (!inferredCountry || inferredCountry === "Unknown") {
       duplicateWarning.style.display = "none";
@@ -750,14 +789,17 @@ export function showAddProspectDialog(
 
     const existing = loadProspectiveEvents();
     const existingList = new ProspectiveEventList(existing);
-    
+
     // Check for duplicates based on prospectEvent, country, and state (same logic as import)
     const countryToCheck = inferredCountry;
-    const duplicate = existingList.getAll().find(event => 
-      event.prospectEvent.toLowerCase() === prospectName.toLowerCase() &&
-      event.country.toUpperCase() === countryToCheck.toUpperCase() &&
-      event.state.toUpperCase() === state.toUpperCase()
-    );
+    const duplicate = existingList
+      .getAll()
+      .find(
+        (event) =>
+          event.prospectEvent.toLowerCase() === prospectName.toLowerCase() &&
+          event.country.toUpperCase() === countryToCheck.toUpperCase() &&
+          event.state.toUpperCase() === state.toUpperCase(),
+      );
 
     if (duplicate) {
       duplicateWarning.innerHTML = `
@@ -774,7 +816,7 @@ export function showAddProspectDialog(
   prospectNameInput.addEventListener("input", () => {
     checkDuplicateName();
   });
-  
+
   stateInput.addEventListener("input", () => {
     checkDuplicateName();
   });
@@ -791,7 +833,9 @@ export function showAddProspectDialog(
       const suggestionsVisible = suggestionsContainer.style.display !== "none";
       if (suggestionsVisible && allocationSuggestions.length > 0) {
         event.preventDefault();
-        const firstButton = content.querySelector('button.suggestion-button') as HTMLButtonElement;
+        const firstButton = content.querySelector(
+          "button.suggestion-button",
+        ) as HTMLButtonElement;
         if (firstButton) {
           firstButton.focus();
           firstButton.click();
@@ -812,10 +856,10 @@ export function showAddProspectDialog(
 
   // Focus management: focus first input when dialog opens
   prospectNameInput.focus();
-  
+
   // Store original focus element to restore on close
   const originalActiveElement = document.activeElement as HTMLElement;
-  
+
   // Enhanced cleanup to restore focus
   const originalCleanup = cleanup;
   cleanup = () => {

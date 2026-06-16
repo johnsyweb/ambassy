@@ -61,7 +61,9 @@ describe("allocateEventFromMap", () => {
 
     log = [];
 
-    (getRegionalAmbassadorForEventAmbassador as jest.Mock).mockReturnValue("REA1");
+    (getRegionalAmbassadorForEventAmbassador as jest.Mock).mockReturnValue(
+      "REA1",
+    );
   });
 
   afterEach(() => {
@@ -76,7 +78,7 @@ describe("allocateEventFromMap", () => {
       regionalAmbassadors,
       eventTeams,
       eventDetails,
-      log
+      log,
     );
 
     expect(assignEventToAmbassador).toHaveBeenCalledWith(
@@ -85,7 +87,7 @@ describe("allocateEventFromMap", () => {
       "EA1",
       eventAmbassadors,
       log,
-      regionalAmbassadors
+      regionalAmbassadors,
     );
   });
 
@@ -98,7 +100,7 @@ describe("allocateEventFromMap", () => {
         regionalAmbassadors,
         eventTeams,
         eventDetails,
-        log
+        log,
       );
     }).toThrow('Event Ambassador "NonExistentEA" not found');
   });
@@ -112,7 +114,7 @@ describe("allocateEventFromMap", () => {
         regionalAmbassadors,
         eventTeams,
         eventDetails,
-        log
+        log,
       );
     }).toThrow('Event "NonExistentEvent" not found in eventDetails');
   });
@@ -125,12 +127,12 @@ describe("allocateEventFromMap", () => {
       regionalAmbassadors,
       eventTeams,
       eventDetails,
-      log
+      log,
     );
 
     expect(getRegionalAmbassadorForEventAmbassador).toHaveBeenCalledWith(
       "EA1",
-      regionalAmbassadors
+      regionalAmbassadors,
     );
   });
 
@@ -142,7 +144,7 @@ describe("allocateEventFromMap", () => {
       regionalAmbassadors,
       eventTeams,
       eventDetails,
-      log
+      log,
     );
 
     expect(assignEventToAmbassador).toHaveBeenCalled();

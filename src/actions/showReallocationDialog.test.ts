@@ -34,7 +34,9 @@ describe("showReallocationDialog", () => {
     dialog = document.getElementById("reallocationDialog")!;
     title = document.getElementById("reallocationDialogTitle")!;
     content = document.getElementById("reallocationDialogContent")!;
-    cancelButton = document.getElementById("reallocationDialogCancel") as HTMLButtonElement;
+    cancelButton = document.getElementById(
+      "reallocationDialogCancel",
+    ) as HTMLButtonElement;
 
     onSelect = jest.fn();
     onCancel = jest.fn();
@@ -66,14 +68,30 @@ describe("showReallocationDialog", () => {
   });
 
   it("should display dialog with suggestions", () => {
-    showReallocationDialog("test-event", "Current EA", suggestions, eventAmbassadors, undefined, onSelect, onCancel);
+    showReallocationDialog(
+      "test-event",
+      "Current EA",
+      suggestions,
+      eventAmbassadors,
+      undefined,
+      onSelect,
+      onCancel,
+    );
 
     expect(dialog.style.display).not.toBe("none");
     expect(title.textContent).toContain("test-event");
   });
 
   it("should create suggestion buttons for top suggestions", () => {
-    showReallocationDialog("test-event", "Current EA", suggestions, eventAmbassadors, undefined, onSelect, onCancel);
+    showReallocationDialog(
+      "test-event",
+      "Current EA",
+      suggestions,
+      eventAmbassadors,
+      undefined,
+      onSelect,
+      onCancel,
+    );
 
     const buttons = content.querySelectorAll("button.suggestion-button");
     expect(buttons.length).toBeGreaterThan(0);
@@ -81,75 +99,140 @@ describe("showReallocationDialog", () => {
   });
 
   it("should display ambassador name and score on suggestion buttons", () => {
-    showReallocationDialog("test-event", "Current EA", suggestions, eventAmbassadors, undefined, onSelect, onCancel);
+    showReallocationDialog(
+      "test-event",
+      "Current EA",
+      suggestions,
+      eventAmbassadors,
+      undefined,
+      onSelect,
+      onCancel,
+    );
 
-    const firstButton = content.querySelector("button.suggestion-button") as HTMLButtonElement;
+    const firstButton = content.querySelector(
+      "button.suggestion-button",
+    ) as HTMLButtonElement;
     expect(firstButton).not.toBeNull();
     expect(firstButton.textContent).toContain("EA 1");
     expect(firstButton.textContent).toContain("85");
   });
 
   it("should display reasons for suggestions", () => {
-    showReallocationDialog("test-event", "Current EA", suggestions, eventAmbassadors, undefined, onSelect, onCancel);
+    showReallocationDialog(
+      "test-event",
+      "Current EA",
+      suggestions,
+      eventAmbassadors,
+      undefined,
+      onSelect,
+      onCancel,
+    );
 
-    const firstButton = content.querySelector("button.suggestion-button") as HTMLButtonElement;
+    const firstButton = content.querySelector(
+      "button.suggestion-button",
+    ) as HTMLButtonElement;
     const reasonsText = firstButton.textContent || "";
     expect(reasonsText).toContain("Has available capacity");
     expect(reasonsText).toContain("Geographic proximity");
   });
 
   it("should display warnings for suggestions", () => {
-    showReallocationDialog("test-event", "Current EA", suggestions, eventAmbassadors, undefined, onSelect, onCancel);
+    showReallocationDialog(
+      "test-event",
+      "Current EA",
+      suggestions,
+      eventAmbassadors,
+      undefined,
+      onSelect,
+      onCancel,
+    );
 
-    const buttons = Array.from(content.querySelectorAll("button.suggestion-button")) as HTMLButtonElement[];
-    const buttonWithWarning = buttons.find((btn) => btn.textContent?.includes("Would exceed capacity limit"));
+    const buttons = Array.from(
+      content.querySelectorAll("button.suggestion-button"),
+    ) as HTMLButtonElement[];
+    const buttonWithWarning = buttons.find((btn) =>
+      btn.textContent?.includes("Would exceed capacity limit"),
+    );
     expect(buttonWithWarning).not.toBeUndefined();
   });
 
   it("should create Other dropdown with all ambassadors", () => {
-    showReallocationDialog("test-event", "Current EA", suggestions, eventAmbassadors, undefined, onSelect, onCancel);
+    showReallocationDialog(
+      "test-event",
+      "Current EA",
+      suggestions,
+      eventAmbassadors,
+      undefined,
+      onSelect,
+      onCancel,
+    );
 
-    const dropdown = content.querySelector("select#otherRecipientSelect") as HTMLSelectElement;
+    const dropdown = content.querySelector(
+      "select#otherRecipientSelect",
+    ) as HTMLSelectElement;
     expect(dropdown).not.toBeNull();
   });
 
   it("should display short form format in Other dropdown with live+prospect counts", () => {
-    eventAmbassadors.set("EA 1", { name: "EA 1", events: ["Event1", "Event2"], prospectiveEvents: ["prospect1"] });
+    eventAmbassadors.set("EA 1", {
+      name: "EA 1",
+      events: ["Event1", "Event2"],
+      prospectiveEvents: ["prospect1"],
+    });
     const eventDetails: EventDetailsMap = new Map([
-      ["test-event", {
-        id: "test",
-        type: "Feature",
-        geometry: { type: "Point", coordinates: [-37.8136, 144.9631] },
-        properties: {
-          eventname: "test-event",
-          EventLongName: "Test Event",
-          EventShortName: "test-event",
-          LocalisedEventLongName: null,
-          countrycode: 13,
-          seriesid: 1,
-          EventLocation: "Melbourne",
+      [
+        "test-event",
+        {
+          id: "test",
+          type: "Feature",
+          geometry: { type: "Point", coordinates: [-37.8136, 144.9631] },
+          properties: {
+            eventname: "test-event",
+            EventLongName: "Test Event",
+            EventShortName: "test-event",
+            LocalisedEventLongName: null,
+            countrycode: 13,
+            seriesid: 1,
+            EventLocation: "Melbourne",
+          },
         },
-      }],
-      ["Event1", {
-        id: "1",
-        type: "Feature",
-        geometry: { type: "Point", coordinates: [-37.82, 144.97] },
-        properties: {
-          eventname: "Event1",
-          EventLongName: "Event 1",
-          EventShortName: "Event1",
-          LocalisedEventLongName: null,
-          countrycode: 13,
-          seriesid: 1,
-          EventLocation: "Melbourne",
+      ],
+      [
+        "Event1",
+        {
+          id: "1",
+          type: "Feature",
+          geometry: { type: "Point", coordinates: [-37.82, 144.97] },
+          properties: {
+            eventname: "Event1",
+            EventLongName: "Event 1",
+            EventShortName: "Event1",
+            LocalisedEventLongName: null,
+            countrycode: 13,
+            seriesid: 1,
+            EventLocation: "Melbourne",
+          },
         },
-      }],
+      ],
     ]);
 
-    showReallocationDialog("test-event", "Current EA", suggestions, eventAmbassadors, undefined, onSelect, onCancel, eventDetails);
+    showReallocationDialog(
+      "test-event",
+      "Current EA",
+      suggestions,
+      eventAmbassadors,
+      undefined,
+      onSelect,
+      onCancel,
+      eventDetails,
+    );
 
-    const dropdown = content.querySelector("select#otherRecipientSelect") as HTMLSelectElement;
-    const ea1Option = Array.from(dropdown.options).find(opt => opt.value === "EA 1");
+    const dropdown = content.querySelector(
+      "select#otherRecipientSelect",
+    ) as HTMLSelectElement;
+    const ea1Option = Array.from(dropdown.options).find(
+      (opt) => opt.value === "EA 1",
+    );
     expect(ea1Option).toBeDefined();
     expect(ea1Option?.textContent).toContain("EA 1");
     expect(ea1Option?.textContent).toContain("2+1=3 allocations");
@@ -161,10 +244,22 @@ describe("showReallocationDialog", () => {
     ]);
     eventAmbassadors.set("EA 1", { name: "EA 1", events: ["Event1"] });
 
-    showReallocationDialog("test-event", "Current EA", suggestions, eventAmbassadors, regionalAmbassadors, onSelect, onCancel);
+    showReallocationDialog(
+      "test-event",
+      "Current EA",
+      suggestions,
+      eventAmbassadors,
+      regionalAmbassadors,
+      onSelect,
+      onCancel,
+    );
 
-    const dropdown = content.querySelector("select#otherRecipientSelect") as HTMLSelectElement;
-    const ea1Option = Array.from(dropdown.options).find(opt => opt.value === "EA 1");
+    const dropdown = content.querySelector(
+      "select#otherRecipientSelect",
+    ) as HTMLSelectElement;
+    const ea1Option = Array.from(dropdown.options).find(
+      (opt) => opt.value === "EA 1",
+    );
     expect(ea1Option).toBeDefined();
     expect(ea1Option?.textContent).toContain("[REA 1]");
   });
@@ -172,10 +267,22 @@ describe("showReallocationDialog", () => {
   it("should display 'Unassigned' for REA in Other dropdown when missing", () => {
     eventAmbassadors.set("EA 1", { name: "EA 1", events: ["Event1"] });
 
-    showReallocationDialog("test-event", "Current EA", suggestions, eventAmbassadors, undefined, onSelect, onCancel);
+    showReallocationDialog(
+      "test-event",
+      "Current EA",
+      suggestions,
+      eventAmbassadors,
+      undefined,
+      onSelect,
+      onCancel,
+    );
 
-    const dropdown = content.querySelector("select#otherRecipientSelect") as HTMLSelectElement;
-    const ea1Option = Array.from(dropdown.options).find(opt => opt.value === "EA 1");
+    const dropdown = content.querySelector(
+      "select#otherRecipientSelect",
+    ) as HTMLSelectElement;
+    const ea1Option = Array.from(dropdown.options).find(
+      (opt) => opt.value === "EA 1",
+    );
     expect(ea1Option).toBeDefined();
     expect(ea1Option?.textContent).toContain("[Unassigned]");
   });
@@ -183,40 +290,59 @@ describe("showReallocationDialog", () => {
   it("should display distance in Other dropdown when eventDetails available", () => {
     eventAmbassadors.set("EA 1", { name: "EA 1", events: ["Event1"] });
     const eventDetails: EventDetailsMap = new Map([
-      ["test-event", {
-        id: "test",
-        type: "Feature",
-        geometry: { type: "Point", coordinates: [-37.8136, 144.9631] },
-        properties: {
-          eventname: "test-event",
-          EventLongName: "Test Event",
-          EventShortName: "test-event",
-          LocalisedEventLongName: null,
-          countrycode: 13,
-          seriesid: 1,
-          EventLocation: "Melbourne",
+      [
+        "test-event",
+        {
+          id: "test",
+          type: "Feature",
+          geometry: { type: "Point", coordinates: [-37.8136, 144.9631] },
+          properties: {
+            eventname: "test-event",
+            EventLongName: "Test Event",
+            EventShortName: "test-event",
+            LocalisedEventLongName: null,
+            countrycode: 13,
+            seriesid: 1,
+            EventLocation: "Melbourne",
+          },
         },
-      }],
-      ["Event1", {
-        id: "1",
-        type: "Feature",
-        geometry: { type: "Point", coordinates: [-37.82, 144.97] },
-        properties: {
-          eventname: "Event1",
-          EventLongName: "Event 1",
-          EventShortName: "Event1",
-          LocalisedEventLongName: null,
-          countrycode: 13,
-          seriesid: 1,
-          EventLocation: "Melbourne",
+      ],
+      [
+        "Event1",
+        {
+          id: "1",
+          type: "Feature",
+          geometry: { type: "Point", coordinates: [-37.82, 144.97] },
+          properties: {
+            eventname: "Event1",
+            EventLongName: "Event 1",
+            EventShortName: "Event1",
+            LocalisedEventLongName: null,
+            countrycode: 13,
+            seriesid: 1,
+            EventLocation: "Melbourne",
+          },
         },
-      }],
+      ],
     ]);
 
-    showReallocationDialog("test-event", "Current EA", suggestions, eventAmbassadors, undefined, onSelect, onCancel, eventDetails);
+    showReallocationDialog(
+      "test-event",
+      "Current EA",
+      suggestions,
+      eventAmbassadors,
+      undefined,
+      onSelect,
+      onCancel,
+      eventDetails,
+    );
 
-    const dropdown = content.querySelector("select#otherRecipientSelect") as HTMLSelectElement;
-    const ea1Option = Array.from(dropdown.options).find(opt => opt.value === "EA 1");
+    const dropdown = content.querySelector(
+      "select#otherRecipientSelect",
+    ) as HTMLSelectElement;
+    const ea1Option = Array.from(dropdown.options).find(
+      (opt) => opt.value === "EA 1",
+    );
     expect(ea1Option).toBeDefined();
     expect(ea1Option?.textContent).toMatch(/\d+\.\d+ km to Event1/);
   });
@@ -224,44 +350,80 @@ describe("showReallocationDialog", () => {
   it("should omit distance in Other dropdown when EA has no events", () => {
     eventAmbassadors.set("EA 1", { name: "EA 1", events: [] });
     const eventDetails: EventDetailsMap = new Map([
-      ["test-event", {
-        id: "test",
-        type: "Feature",
-        geometry: { type: "Point", coordinates: [-37.8136, 144.9631] },
-        properties: {
-          eventname: "test-event",
-          EventLongName: "Test Event",
-          EventShortName: "test-event",
-          LocalisedEventLongName: null,
-          countrycode: 13,
-          seriesid: 1,
-          EventLocation: "Melbourne",
+      [
+        "test-event",
+        {
+          id: "test",
+          type: "Feature",
+          geometry: { type: "Point", coordinates: [-37.8136, 144.9631] },
+          properties: {
+            eventname: "test-event",
+            EventLongName: "Test Event",
+            EventShortName: "test-event",
+            LocalisedEventLongName: null,
+            countrycode: 13,
+            seriesid: 1,
+            EventLocation: "Melbourne",
+          },
         },
-      }],
+      ],
     ]);
 
-    showReallocationDialog("test-event", "Current EA", suggestions, eventAmbassadors, undefined, onSelect, onCancel, eventDetails);
+    showReallocationDialog(
+      "test-event",
+      "Current EA",
+      suggestions,
+      eventAmbassadors,
+      undefined,
+      onSelect,
+      onCancel,
+      eventDetails,
+    );
 
-    const dropdown = content.querySelector("select#otherRecipientSelect") as HTMLSelectElement;
-    const ea1Option = Array.from(dropdown.options).find(opt => opt.value === "EA 1");
+    const dropdown = content.querySelector(
+      "select#otherRecipientSelect",
+    ) as HTMLSelectElement;
+    const ea1Option = Array.from(dropdown.options).find(
+      (opt) => opt.value === "EA 1",
+    );
     expect(ea1Option).toBeDefined();
     expect(ea1Option?.textContent).toContain("0+0=0 allocations");
     expect(ea1Option?.textContent).not.toContain("km to");
   });
 
   it("should call onSelect when suggestion button is clicked", () => {
-    showReallocationDialog("test-event", "Current EA", suggestions, eventAmbassadors, undefined, onSelect, onCancel);
+    showReallocationDialog(
+      "test-event",
+      "Current EA",
+      suggestions,
+      eventAmbassadors,
+      undefined,
+      onSelect,
+      onCancel,
+    );
 
-    const firstButton = content.querySelector("button.suggestion-button") as HTMLButtonElement;
+    const firstButton = content.querySelector(
+      "button.suggestion-button",
+    ) as HTMLButtonElement;
     firstButton.click();
 
     expect(onSelect).toHaveBeenCalledWith("EA 1");
   });
 
   it("should call onSelect when Other dropdown option is selected", () => {
-    showReallocationDialog("test-event", "Current EA", suggestions, eventAmbassadors, undefined, onSelect, onCancel);
+    showReallocationDialog(
+      "test-event",
+      "Current EA",
+      suggestions,
+      eventAmbassadors,
+      undefined,
+      onSelect,
+      onCancel,
+    );
 
-    const dropdown = content.querySelector("select#otherRecipientSelect") as HTMLSelectElement;
+    const dropdown = content.querySelector(
+      "select#otherRecipientSelect",
+    ) as HTMLSelectElement;
     dropdown.value = "EA 4";
     dropdown.dispatchEvent(new Event("change"));
 
@@ -269,7 +431,15 @@ describe("showReallocationDialog", () => {
   });
 
   it("should call onCancel when Cancel button is clicked", () => {
-    showReallocationDialog("test-event", "Current EA", suggestions, eventAmbassadors, undefined, onSelect, onCancel);
+    showReallocationDialog(
+      "test-event",
+      "Current EA",
+      suggestions,
+      eventAmbassadors,
+      undefined,
+      onSelect,
+      onCancel,
+    );
 
     cancelButton.click();
 
@@ -277,7 +447,15 @@ describe("showReallocationDialog", () => {
   });
 
   it("should call onCancel when Escape key is pressed", () => {
-    showReallocationDialog("test-event", "Current EA", suggestions, eventAmbassadors, undefined, onSelect, onCancel);
+    showReallocationDialog(
+      "test-event",
+      "Current EA",
+      suggestions,
+      eventAmbassadors,
+      undefined,
+      onSelect,
+      onCancel,
+    );
 
     const escapeEvent = new KeyboardEvent("keydown", { key: "Escape" });
     document.dispatchEvent(escapeEvent);
@@ -286,36 +464,76 @@ describe("showReallocationDialog", () => {
   });
 
   it("should move focus to first suggestion button when dialog opens", () => {
-    showReallocationDialog("test-event", "Current EA", suggestions, eventAmbassadors, undefined, onSelect, onCancel);
+    showReallocationDialog(
+      "test-event",
+      "Current EA",
+      suggestions,
+      eventAmbassadors,
+      undefined,
+      onSelect,
+      onCancel,
+    );
 
-    const firstButton = content.querySelector("button.suggestion-button") as HTMLButtonElement;
+    const firstButton = content.querySelector(
+      "button.suggestion-button",
+    ) as HTMLButtonElement;
     expect(document.activeElement).toBe(firstButton);
   });
 
   it("should handle Arrow key navigation between buttons", () => {
-    showReallocationDialog("test-event", "Current EA", suggestions, eventAmbassadors, undefined, onSelect, onCancel);
+    showReallocationDialog(
+      "test-event",
+      "Current EA",
+      suggestions,
+      eventAmbassadors,
+      undefined,
+      onSelect,
+      onCancel,
+    );
 
-    const firstButton = content.querySelector("button.suggestion-button") as HTMLButtonElement;
+    const firstButton = content.querySelector(
+      "button.suggestion-button",
+    ) as HTMLButtonElement;
     firstButton.focus();
 
     const arrowDownEvent = new KeyboardEvent("keydown", { key: "ArrowDown" });
     firstButton.dispatchEvent(arrowDownEvent);
 
-    const secondButton = content.querySelectorAll("button.suggestion-button")[1] as HTMLButtonElement;
+    const secondButton = content.querySelectorAll(
+      "button.suggestion-button",
+    )[1] as HTMLButtonElement;
     expect(document.activeElement).toBe(secondButton);
   });
 
   it("should close dialog after selection", () => {
-    showReallocationDialog("test-event", "Current EA", suggestions, eventAmbassadors, undefined, onSelect, onCancel);
+    showReallocationDialog(
+      "test-event",
+      "Current EA",
+      suggestions,
+      eventAmbassadors,
+      undefined,
+      onSelect,
+      onCancel,
+    );
 
-    const firstButton = content.querySelector("button.suggestion-button") as HTMLButtonElement;
+    const firstButton = content.querySelector(
+      "button.suggestion-button",
+    ) as HTMLButtonElement;
     firstButton.click();
 
     expect(dialog.style.display).toBe("none");
   });
 
   it("should close dialog after cancel", () => {
-    showReallocationDialog("test-event", "Current EA", suggestions, eventAmbassadors, undefined, onSelect, onCancel);
+    showReallocationDialog(
+      "test-event",
+      "Current EA",
+      suggestions,
+      eventAmbassadors,
+      undefined,
+      onSelect,
+      onCancel,
+    );
 
     cancelButton.click();
 
@@ -337,9 +555,19 @@ describe("showReallocationDialog", () => {
         },
       ];
 
-      showReallocationDialog("test-event", "Current EA", enhancedSuggestions, eventAmbassadors, undefined, onSelect, onCancel);
+      showReallocationDialog(
+        "test-event",
+        "Current EA",
+        enhancedSuggestions,
+        eventAmbassadors,
+        undefined,
+        onSelect,
+        onCancel,
+      );
 
-      const firstButton = content.querySelector("button.suggestion-button") as HTMLButtonElement;
+      const firstButton = content.querySelector(
+        "button.suggestion-button",
+      ) as HTMLButtonElement;
       expect(firstButton.textContent).toContain("2 live");
       expect(firstButton.textContent).toContain("1 prospect");
       expect(firstButton.textContent).toContain("3 total");
@@ -362,9 +590,19 @@ describe("showReallocationDialog", () => {
         },
       ];
 
-      showReallocationDialog("test-event", "Current EA", enhancedSuggestions, eventAmbassadors, regionalAmbassadors, onSelect, onCancel);
+      showReallocationDialog(
+        "test-event",
+        "Current EA",
+        enhancedSuggestions,
+        eventAmbassadors,
+        regionalAmbassadors,
+        onSelect,
+        onCancel,
+      );
 
-      const firstButton = content.querySelector("button.suggestion-button") as HTMLButtonElement;
+      const firstButton = content.querySelector(
+        "button.suggestion-button",
+      ) as HTMLButtonElement;
       expect(firstButton.textContent).toContain("REA: REA 1");
     });
 
@@ -383,9 +621,19 @@ describe("showReallocationDialog", () => {
         },
       ];
 
-      showReallocationDialog("test-event", "Current EA", enhancedSuggestions, eventAmbassadors, regionalAmbassadors, onSelect, onCancel);
+      showReallocationDialog(
+        "test-event",
+        "Current EA",
+        enhancedSuggestions,
+        eventAmbassadors,
+        regionalAmbassadors,
+        onSelect,
+        onCancel,
+      );
 
-      const firstButton = content.querySelector("button.suggestion-button") as HTMLButtonElement;
+      const firstButton = content.querySelector(
+        "button.suggestion-button",
+      ) as HTMLButtonElement;
       expect(firstButton.textContent).toContain("REA: Unassigned");
     });
 
@@ -399,15 +647,23 @@ describe("showReallocationDialog", () => {
           liveEventsCount: 2,
           prospectEventsCount: 0,
           allocationCount: 2,
-          neighboringEvents: [
-            { name: "Armstrong Creek", distanceKm: 5.2 },
-          ],
+          neighboringEvents: [{ name: "Armstrong Creek", distanceKm: 5.2 }],
         },
       ];
 
-      showReallocationDialog("test-event", "Current EA", enhancedSuggestions, eventAmbassadors, undefined, onSelect, onCancel);
+      showReallocationDialog(
+        "test-event",
+        "Current EA",
+        enhancedSuggestions,
+        eventAmbassadors,
+        undefined,
+        onSelect,
+        onCancel,
+      );
 
-      const firstButton = content.querySelector("button.suggestion-button") as HTMLButtonElement;
+      const firstButton = content.querySelector(
+        "button.suggestion-button",
+      ) as HTMLButtonElement;
       expect(firstButton.textContent).toContain("5.2 km to Armstrong Creek");
     });
 
@@ -424,9 +680,19 @@ describe("showReallocationDialog", () => {
         },
       ];
 
-      showReallocationDialog("test-event", "Current EA", enhancedSuggestions, eventAmbassadors, undefined, onSelect, onCancel);
+      showReallocationDialog(
+        "test-event",
+        "Current EA",
+        enhancedSuggestions,
+        eventAmbassadors,
+        undefined,
+        onSelect,
+        onCancel,
+      );
 
-      const firstButton = content.querySelector("button.suggestion-button") as HTMLButtonElement;
+      const firstButton = content.querySelector(
+        "button.suggestion-button",
+      ) as HTMLButtonElement;
       expect(firstButton.textContent).toContain("No events assigned");
     });
 
@@ -444,16 +710,24 @@ describe("showReallocationDialog", () => {
           liveEventsCount: 2,
           prospectEventsCount: 1,
           allocationCount: 3,
-          neighboringEvents: [
-            { name: "Armstrong Creek", distanceKm: 5.2 },
-          ],
+          neighboringEvents: [{ name: "Armstrong Creek", distanceKm: 5.2 }],
           reasons: ["Has available capacity"],
         },
       ];
 
-      showReallocationDialog("test-event", "Current EA", enhancedSuggestions, eventAmbassadors, regionalAmbassadors, onSelect, onCancel);
+      showReallocationDialog(
+        "test-event",
+        "Current EA",
+        enhancedSuggestions,
+        eventAmbassadors,
+        regionalAmbassadors,
+        onSelect,
+        onCancel,
+      );
 
-      const firstButton = content.querySelector("button.suggestion-button") as HTMLButtonElement;
+      const firstButton = content.querySelector(
+        "button.suggestion-button",
+      ) as HTMLButtonElement;
       const ariaLabel = firstButton.getAttribute("aria-label");
       expect(ariaLabel).toContain("2 live events");
       expect(ariaLabel).toContain("1 prospect events");

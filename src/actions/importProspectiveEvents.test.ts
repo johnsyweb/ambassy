@@ -245,10 +245,14 @@ describe("importProspectiveEvents", () => {
       const saveCall = mockSaveProspectiveEvents.mock.calls[0][0];
       expect(saveCall).toHaveLength(2);
       expect(
-        saveCall.some((p: ProspectiveEvent) => p.prospectEvent === "Existing Event"),
+        saveCall.some(
+          (p: ProspectiveEvent) => p.prospectEvent === "Existing Event",
+        ),
       ).toBe(true);
       expect(
-        saveCall.some((p: ProspectiveEvent) => p.prospectEvent === "Botanical Gardens"),
+        saveCall.some(
+          (p: ProspectiveEvent) => p.prospectEvent === "Botanical Gardens",
+        ),
       ).toBe(true);
     });
 

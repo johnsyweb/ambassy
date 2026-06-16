@@ -4,4 +4,3 @@ export enum Region {
   REGION_3 = "REGION_3",
   UNKNOWN = "UNKNOWN",
 }
-

@@ -1,9 +1,6 @@
 import { SelectionState } from "@models/SelectionState";
 import { EventTeamsTableDataMap } from "@models/EventTeamsTableData";
-import {
-  highlightEventsOnMap,
-  centerMapOnEvents,
-} from "@utils/mapNavigation";
+import { highlightEventsOnMap, centerMapOnEvents } from "@utils/mapNavigation";
 import { EventDetailsMap } from "@models/EventDetailsMap";
 import { updateReallocateButtonStates } from "./populateEventTeamsTable";
 import { ProspectiveEventList } from "@models/ProspectiveEventList";

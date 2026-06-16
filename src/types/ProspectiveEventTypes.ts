@@ -80,12 +80,12 @@ export interface ProspectsTabOptions {
   showResolved?: boolean;
   showUnresolved?: boolean;
   filterByAmbassador?: string;
-  sortBy?: 'name' | 'date' | 'status';
+  sortBy?: "name" | "date" | "status";
 }
 
 export interface MapLayerOptions {
   showProspects?: boolean;
-  prospectStyle?: 'default' | 'status' | 'ambassador';
+  prospectStyle?: "default" | "status" | "ambassador";
   clusterProspects?: boolean;
 }
 
@@ -114,34 +114,40 @@ export class ProspectiveEventsError extends Error {
   constructor(
     message: string,
     public readonly code: string,
-    public readonly event?: ProspectiveEvent
+    public readonly event?: ProspectiveEvent,
   ) {
     super(message);
-    this.name = 'ProspectiveEventsError';
+    this.name = "ProspectiveEventsError";
   }
 }
 
-
-
 export class GeocodingError extends ProspectiveEventsError {
   constructor(message: string, event: ProspectiveEvent) {
-    super(message, 'GEOCODING_ERROR', event);
-    this.name = 'GeocodingError';
+    super(message, "GEOCODING_ERROR", event);
+    this.name = "GeocodingError";
   }
 }
 
 export class AllocationError extends ProspectiveEventsError {
   constructor(message: string, event: ProspectiveEvent) {
-    super(message, 'ALLOCATION_ERROR', event);
-    this.name = 'AllocationError';
+    super(message, "ALLOCATION_ERROR", event);
+    this.name = "AllocationError";
   }
 }
 
 // Contract Types for Function Signatures
-export type ProspectMatcher = (events: ProspectiveEvent[], existingEAs: string[]) => Promise<AmbassadorMatchResult>;
+export type ProspectMatcher = (
+  events: ProspectiveEvent[],
+  existingEAs: string[],
+) => Promise<AmbassadorMatchResult>;
 
-export type ProspectAllocator = (prospectId: string, ambassadorId: string) => Promise<AllocationResult>;
+export type ProspectAllocator = (
+  prospectId: string,
+  ambassadorId: string,
+) => Promise<AllocationResult>;
 
-export type ProspectGeocoder = (events: ProspectiveEvent[]) => Promise<GeocodeResult>;
+export type ProspectGeocoder = (
+  events: ProspectiveEvent[],
+) => Promise<GeocodeResult>;
 
 export type ProspectValidator = (event: ProspectiveEvent) => ValidationResult;

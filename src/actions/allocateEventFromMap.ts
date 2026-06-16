@@ -17,7 +17,7 @@ export function allocateEventFromMap(
   regionalAmbassadors: RegionalAmbassadorMap,
   eventTeams: EventTeamMap,
   eventDetails: EventDetailsMap,
-  log: LogEntry[]
+  log: LogEntry[],
 ): void {
   if (!eventDetails.has(eventName)) {
     throw new Error(`Event "${eventName}" not found in eventDetails`);
@@ -34,11 +34,14 @@ export function allocateEventFromMap(
     selectedEA,
     eventAmbassadors,
     log,
-    regionalAmbassadors
+    regionalAmbassadors,
   );
 
-  const rea = getRegionalAmbassadorForEventAmbassador(selectedEA, regionalAmbassadors);
-  
+  const rea = getRegionalAmbassadorForEventAmbassador(
+    selectedEA,
+    regionalAmbassadors,
+  );
+
   log.push({
     type: "allocate event from map",
     event: eventName,

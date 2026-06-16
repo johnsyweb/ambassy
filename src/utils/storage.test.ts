@@ -55,7 +55,9 @@ describe("storage", () => {
     });
 
     it("should return null when JSON is invalid", () => {
-      const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+      const consoleErrorSpy = jest
+        .spyOn(console, "error")
+        .mockImplementation(() => {});
       localStorage.setItem("ambassy:invalid", "not json");
       const result = loadFromStorage("invalid");
       expect(result).toBeNull();
@@ -66,7 +68,10 @@ describe("storage", () => {
   describe("migrateFromSessionStorage", () => {
     it("should migrate data from sessionStorage to localStorage", () => {
       const testData = { test: "data" };
-      sessionStorage.setItem("ambassy:Event Ambassadors", JSON.stringify(testData));
+      sessionStorage.setItem(
+        "ambassy:Event Ambassadors",
+        JSON.stringify(testData),
+      );
       migrateFromSessionStorage();
       const migrated = localStorage.getItem("ambassy:Event Ambassadors");
       expect(migrated).toBeTruthy();
@@ -76,8 +81,14 @@ describe("storage", () => {
     it("should not overwrite existing localStorage data", () => {
       const localData = { local: "data" };
       const sessionData = { session: "data" };
-      localStorage.setItem("ambassy:Event Ambassadors", JSON.stringify(localData));
-      sessionStorage.setItem("ambassy:Event Ambassadors", JSON.stringify(sessionData));
+      localStorage.setItem(
+        "ambassy:Event Ambassadors",
+        JSON.stringify(localData),
+      );
+      sessionStorage.setItem(
+        "ambassy:Event Ambassadors",
+        JSON.stringify(sessionData),
+      );
       migrateFromSessionStorage();
       const migrated = localStorage.getItem("ambassy:Event Ambassadors");
       expect(JSON.parse(migrated || "{}")).toEqual(localData);
@@ -89,7 +100,10 @@ describe("storage", () => {
         throw new DOMException("QuotaExceededError", "QuotaExceededError");
       };
 
-      sessionStorage.setItem("ambassy:Event Ambassadors", JSON.stringify({ test: "data" }));
+      sessionStorage.setItem(
+        "ambassy:Event Ambassadors",
+        JSON.stringify({ test: "data" }),
+      );
       migrateFromSessionStorage();
       expect(sessionStorage.getItem("ambassy:Event Ambassadors")).toBeTruthy();
 
@@ -97,4 +111,3 @@ describe("storage", () => {
     });
   });
 });
-

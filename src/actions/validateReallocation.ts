@@ -14,7 +14,7 @@ export function validateReallocation(
   eventShortName: string,
   newAmbassador: string,
   eventAmbassadors: EventAmbassadorMap,
-  eventTeamsTableData: EventTeamsTableDataMap
+  eventTeamsTableData: EventTeamsTableDataMap,
 ): ValidationResult {
   const eventData = eventTeamsTableData.get(eventShortName);
 

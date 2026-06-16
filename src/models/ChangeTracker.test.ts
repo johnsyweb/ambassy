@@ -1,4 +1,8 @@
-import { createChangeTracker, hasUnsavedChanges, ChangeTracker } from "./ChangeTracker";
+import {
+  createChangeTracker,
+  hasUnsavedChanges,
+  ChangeTracker,
+} from "./ChangeTracker";
 
 describe("ChangeTracker", () => {
   describe("createChangeTracker", () => {

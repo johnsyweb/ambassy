@@ -1,15 +1,20 @@
 import { loadFromStorage, saveToStorage } from "@utils/storage";
-import { ChangeTracker, createChangeTracker, hasUnsavedChanges as checkUnsavedChanges } from "@models/ChangeTracker";
+import {
+  ChangeTracker,
+  createChangeTracker,
+  hasUnsavedChanges as checkUnsavedChanges,
+} from "@models/ChangeTracker";
 
 const STORAGE_KEY = "changeTracker";
 
 let beforeUnloadHandler: ((event: BeforeUnloadEvent) => void) | null = null;
 
 export function trackStateChange(): void {
-  const tracker = loadFromStorage<ChangeTracker>(STORAGE_KEY) || createChangeTracker();
+  const tracker =
+    loadFromStorage<ChangeTracker>(STORAGE_KEY) || createChangeTracker();
   const now = Date.now();
   tracker.lastChangeTimestamp = now;
-  
+
   // Ensure lastExportTimestamp is not greater than lastChangeTimestamp
   // This can happen if markStateExported was called after trackStateChange in the same millisecond
   // or if there's a timing issue. We want to ensure changes are always tracked.
@@ -18,7 +23,7 @@ export function trackStateChange(): void {
     // This ensures hasUnsavedChanges() will return true
     tracker.lastExportTimestamp = tracker.lastChangeTimestamp - 1;
   }
-  
+
   saveToStorage(STORAGE_KEY, tracker);
 }
 
@@ -35,7 +40,8 @@ export function hasUnsavedChanges(): boolean {
 }
 
 export function markStateExported(): void {
-  const tracker = loadFromStorage<ChangeTracker>(STORAGE_KEY) || createChangeTracker();
+  const tracker =
+    loadFromStorage<ChangeTracker>(STORAGE_KEY) || createChangeTracker();
   tracker.lastExportTimestamp = Date.now();
   saveToStorage(STORAGE_KEY, tracker);
 }
@@ -60,7 +66,7 @@ export function removeExportReminder(): void {
 export function initializeChangeTrackerForLoadedData(): void {
   const tracker = loadFromStorage<ChangeTracker>(STORAGE_KEY);
   const now = Date.now();
-  
+
   // If tracker doesn't exist, initialize it with current timestamp as "exported"
   // This treats loaded data as "already saved" until user makes changes
   if (!tracker) {
@@ -77,7 +83,10 @@ export function initializeChangeTrackerForLoadedData(): void {
       tracker.lastExportTimestamp = now;
       tracker.lastChangeTimestamp = 0;
       saveToStorage(STORAGE_KEY, tracker);
-    } else if (tracker.lastChangeTimestamp === 0 && tracker.lastExportTimestamp === 0) {
+    } else if (
+      tracker.lastChangeTimestamp === 0 &&
+      tracker.lastExportTimestamp === 0
+    ) {
       // Uninitialized tracker - treat loaded data as "already saved"
       tracker.lastExportTimestamp = now;
       saveToStorage(STORAGE_KEY, tracker);

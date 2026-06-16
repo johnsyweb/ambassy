@@ -1,4 +1,8 @@
-import { Coordinate, fromNominatimFormat, createCoordinate } from "@models/Coordinate";
+import {
+  Coordinate,
+  fromNominatimFormat,
+  createCoordinate,
+} from "@models/Coordinate";
 
 /**
  * Calculate the distance between two points on Earth using the Haversine formula.
@@ -12,7 +16,7 @@ export function calculateDistance(
   lat1: number,
   lon1: number,
   lat2: number,
-  lon2: number
+  lon2: number,
 ): number {
   const R = 6371; // Earth's radius in kilometres
   const dLat = toRadians(lat2 - lat1);
@@ -46,14 +50,14 @@ function toRadians(degrees: number): number {
 export function calculateAverageDistance(
   lat: number,
   lon: number,
-  points: Array<[number, number]>
+  points: Array<[number, number]>,
 ): number | null {
   if (points.length === 0) {
     return null;
   }
 
   const distances = points.map(([pointLat, pointLon]) =>
-    calculateDistance(lat, lon, pointLat, pointLon)
+    calculateDistance(lat, lon, pointLat, pointLon),
   );
 
   const sum = distances.reduce((acc, dist) => acc + dist, 0);
@@ -63,9 +67,7 @@ export function calculateAverageDistance(
 /**
  * Geocode an address using Nominatim API
  */
-export async function geocodeAddress(
-  address: string
-): Promise<{
+export async function geocodeAddress(address: string): Promise<{
   success: boolean;
   coordinates?: Coordinate;
   error?: string;
@@ -78,15 +80,15 @@ export async function geocodeAddress(
       `https://nominatim.openstreetmap.org/search?format=json&q=${encodedQuery}&limit=1`,
       {
         headers: {
-          'User-Agent': 'Ambassy-Prospective-Events/1.0'
-        }
-      }
+          "User-Agent": "Ambassy-Prospective-Events/1.0",
+        },
+      },
     );
 
     if (!response.ok) {
       return {
         success: false,
-        error: `Geocoding service returned ${response.status}`
+        error: `Geocoding service returned ${response.status}`,
       };
     }
 
@@ -95,7 +97,7 @@ export async function geocodeAddress(
     if (results.length === 0) {
       return {
         success: false,
-        error: `No location found for "${address}"`
+        error: `No location found for "${address}"`,
       };
     }
 
@@ -106,7 +108,7 @@ export async function geocodeAddress(
     if (isNaN(lat) || isNaN(lon)) {
       return {
         success: false,
-        error: 'Invalid coordinates returned from geocoding service'
+        error: "Invalid coordinates returned from geocoding service",
       };
     }
 
@@ -115,19 +117,22 @@ export async function geocodeAddress(
       const coord = createCoordinate(lat, lon);
       return {
         success: true,
-        coordinates: coord
+        coordinates: coord,
       };
     } catch (error) {
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Coordinates out of valid range'
+        error:
+          error instanceof Error
+            ? error.message
+            : "Coordinates out of valid range",
       };
     }
-
   } catch (error) {
     return {
       success: false,
-      error: error instanceof Error ? error.message : 'Geocoding request failed'
+      error:
+        error instanceof Error ? error.message : "Geocoding request failed",
     };
   }
 }
@@ -138,7 +143,7 @@ export async function geocodeAddress(
 export async function geocodeProspectiveEvent(
   prospectEvent: string,
   country: string,
-  state: string
+  state: string,
 ): Promise<{
   success: boolean;
   coordinates?: Coordinate;
@@ -154,15 +159,15 @@ export async function geocodeProspectiveEvent(
       `https://nominatim.openstreetmap.org/search?format=json&q=${encodedQuery}&limit=1`,
       {
         headers: {
-          'User-Agent': 'Ambassy-Prospective-Events/1.0'
-        }
-      }
+          "User-Agent": "Ambassy-Prospective-Events/1.0",
+        },
+      },
     );
 
     if (!response.ok) {
       return {
         success: false,
-        error: `Geocoding service returned ${response.status}`
+        error: `Geocoding service returned ${response.status}`,
       };
     }
 
@@ -171,29 +176,35 @@ export async function geocodeProspectiveEvent(
     if (results.length === 0) {
       return {
         success: false,
-        error: `No location found for "${query}"`
+        error: `No location found for "${query}"`,
       };
     }
 
     const result = results[0];
-    
+
     try {
-      const coord = fromNominatimFormat({ lat: parseFloat(result.lat), lon: parseFloat(result.lon) });
+      const coord = fromNominatimFormat({
+        lat: parseFloat(result.lat),
+        lon: parseFloat(result.lon),
+      });
       return {
         success: true,
-        coordinates: coord
+        coordinates: coord,
       };
     } catch (error) {
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Invalid coordinates returned from geocoding service'
+        error:
+          error instanceof Error
+            ? error.message
+            : "Invalid coordinates returned from geocoding service",
       };
     }
-
   } catch (error) {
     return {
       success: false,
-      error: error instanceof Error ? error.message : 'Geocoding request failed'
+      error:
+        error instanceof Error ? error.message : "Geocoding request failed",
     };
   }
 }

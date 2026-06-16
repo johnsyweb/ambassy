@@ -1,4 +1,4 @@
-import { Coordinate, fromGeoJSONArray, toGeoJSONArray } from './Coordinate';
+import { Coordinate, fromGeoJSONArray, toGeoJSONArray } from "./Coordinate";
 
 /**
  * EventDetails from parkrun API (GeoJSON format)
@@ -32,6 +32,8 @@ export function eventDetailsToCoordinate(event: EventDetails): Coordinate {
 /**
  * Creates EventDetails geometry from Coordinate (internal format)
  */
-export function coordinateToEventDetailsGeometry(coord: Coordinate): [number, number] {
+export function coordinateToEventDetailsGeometry(
+  coord: Coordinate,
+): [number, number] {
   return toGeoJSONArray(coord);
 }

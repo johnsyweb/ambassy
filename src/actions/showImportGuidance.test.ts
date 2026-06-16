@@ -5,7 +5,10 @@ import {
   markDataImported,
 } from "./showImportGuidance";
 import { loadFromStorage, saveToStorage } from "@utils/storage";
-import { ImportGuidanceState, createImportGuidanceState } from "@models/ImportGuidanceState";
+import {
+  ImportGuidanceState,
+  createImportGuidanceState,
+} from "@models/ImportGuidanceState";
 
 jest.mock("@utils/storage");
 
@@ -67,7 +70,7 @@ describe("showImportGuidance", () => {
         "importGuidanceState",
         expect.objectContaining({
           lastGuidanceShown: expect.any(Number),
-        })
+        }),
       );
     });
   });
@@ -77,7 +80,8 @@ describe("showImportGuidance", () => {
       const mockState: ImportGuidanceState = createImportGuidanceState();
       (loadFromStorage as jest.Mock).mockReturnValue(mockState);
 
-      document.getElementById("introduction")!.innerHTML = '<div id="importGuidance">Test</div>';
+      document.getElementById("introduction")!.innerHTML =
+        '<div id="importGuidance">Test</div>';
 
       dismissImportGuidance();
 
@@ -88,7 +92,7 @@ describe("showImportGuidance", () => {
         "importGuidanceState",
         expect.objectContaining({
           guidanceDismissed: true,
-        })
+        }),
       );
     });
   });
@@ -98,7 +102,8 @@ describe("showImportGuidance", () => {
       const mockState: ImportGuidanceState = createImportGuidanceState();
       (loadFromStorage as jest.Mock).mockReturnValue(mockState);
 
-      document.getElementById("introduction")!.innerHTML = '<div id="importGuidance">Test</div>';
+      document.getElementById("introduction")!.innerHTML =
+        '<div id="importGuidance">Test</div>';
 
       markDataImported();
 
@@ -106,7 +111,7 @@ describe("showImportGuidance", () => {
         "importGuidanceState",
         expect.objectContaining({
           hasImportedData: true,
-        })
+        }),
       );
 
       const guidance = document.getElementById("importGuidance");

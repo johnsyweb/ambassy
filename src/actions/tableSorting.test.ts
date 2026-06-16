@@ -203,7 +203,9 @@ describe("tableSorting", () => {
 
       sortTable("testTable", 0);
 
-      const sortedRow2 = tbody.querySelector("tr[data-event-short-name='row2']");
+      const sortedRow2 = tbody.querySelector(
+        "tr[data-event-short-name='row2']",
+      );
       expect(sortedRow2?.classList.contains("selected")).toBe(true);
       expect(highlightTableRow).toHaveBeenCalledWith("testTable", "row2", true);
     });
@@ -317,7 +319,7 @@ describe("tableSorting", () => {
       const header = document.querySelector("#testTable thead th")!;
       expect(header.textContent).toContain("↑");
       expect(header.getAttribute("aria-sort")).toBe("ascending");
-      
+
       // Test updateSortIndicators directly - it uses the current sort state
       // First sort by column 1 (which will toggle to descending if already sorted ascending)
       sortTable("testTable", 1);

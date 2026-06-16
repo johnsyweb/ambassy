@@ -4,15 +4,13 @@ import { EventDetailsMap } from "@models/EventDetailsMap";
 export function centerMapOnEvents(
   eventShortNames: string[],
   eventDetails: EventDetailsMap,
-  map: L.Map
+  map: L.Map,
 ): void {
   if (eventShortNames.length === 0) {
     return;
   }
 
-  const validEvents = eventShortNames.filter((name) =>
-    eventDetails.has(name)
-  );
+  const validEvents = eventShortNames.filter((name) => eventDetails.has(name));
 
   if (validEvents.length === 0) {
     return;
@@ -44,7 +42,7 @@ export function centerMapOnEvents(
 export function highlightEventsOnMap(
   eventShortNames: string[],
   markerMap: Map<string, L.CircleMarker>,
-  highlightLayer: L.LayerGroup
+  highlightLayer: L.LayerGroup,
 ): void {
   highlightLayer.clearLayers();
 
@@ -66,4 +64,3 @@ export function highlightEventsOnMap(
 export function clearMapHighlights(highlightLayer: L.LayerGroup): void {
   highlightLayer.clearLayers();
 }
-

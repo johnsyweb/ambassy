@@ -1,8 +1,14 @@
 import { EventAmbassadorMap } from "@models/EventAmbassadorMap";
 import { RegionalAmbassadorMap } from "@models/RegionalAmbassadorMap";
 import { LogEntry } from "@models/LogEntry";
-import { persistRegionalAmbassadors, persistEventAmbassadors } from "./persistState";
-import { calculateAllCapacityStatuses, loadCapacityLimits } from "./checkCapacity";
+import {
+  persistRegionalAmbassadors,
+  persistEventAmbassadors,
+} from "./persistState";
+import {
+  calculateAllCapacityStatuses,
+  loadCapacityLimits,
+} from "./checkCapacity";
 import { trackStateChange } from "./trackChanges";
 
 /**
@@ -15,7 +21,7 @@ export function reallocateEventAmbassador(
   newREA: string,
   eventAmbassadors: EventAmbassadorMap,
   regionalAmbassadors: RegionalAmbassadorMap,
-  log: LogEntry[]
+  log: LogEntry[],
 ): void {
   // Remove EA from old REA's supportsEAs array
   if (oldREA && oldREA.trim() !== "") {
@@ -54,7 +60,11 @@ export function reallocateEventAmbassador(
 
   // Recalculate capacity statuses after reallocation
   const capacityLimits = loadCapacityLimits();
-  calculateAllCapacityStatuses(eventAmbassadors, regionalAmbassadors, capacityLimits);
+  calculateAllCapacityStatuses(
+    eventAmbassadors,
+    regionalAmbassadors,
+    capacityLimits,
+  );
 
   // Log the change
   log.push({

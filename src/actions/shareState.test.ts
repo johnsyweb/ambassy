@@ -1,4 +1,8 @@
-import { shareStateAsFile, shareStateAsUrl, shareStateToClipboard } from "./shareState";
+import {
+  shareStateAsFile,
+  shareStateAsUrl,
+  shareStateToClipboard,
+} from "./shareState";
 import { exportApplicationState } from "./exportState";
 import { markStateExported } from "./trackChanges";
 import { copyToClipboard } from "@utils/clipboard";
@@ -26,7 +30,9 @@ describe("shareState", () => {
     },
   };
 
-  const mockBlob = new Blob([JSON.stringify(mockState)], { type: "application/json" });
+  const mockBlob = new Blob([JSON.stringify(mockState)], {
+    type: "application/json",
+  });
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -70,7 +76,7 @@ describe("shareState", () => {
     it("should create data URL and return url result", async () => {
       const jsonString = JSON.stringify(mockState);
       (exportApplicationState as jest.Mock).mockReturnValue(
-        new Blob([jsonString], { type: "application/json" })
+        new Blob([jsonString], { type: "application/json" }),
       );
 
       const result = await shareStateAsUrl();
@@ -86,7 +92,7 @@ describe("shareState", () => {
     it("should handle state too large for URL", async () => {
       const largeJson = JSON.stringify({ data: "x".repeat(2 * 1024 * 1024) });
       (exportApplicationState as jest.Mock).mockReturnValue(
-        new Blob([largeJson], { type: "application/json" })
+        new Blob([largeJson], { type: "application/json" }),
       );
 
       const result = await shareStateAsUrl();
@@ -114,7 +120,7 @@ describe("shareState", () => {
     it("should copy JSON to clipboard and return clipboard result", async () => {
       const jsonString = JSON.stringify(mockState);
       (exportApplicationState as jest.Mock).mockReturnValue(
-        new Blob([jsonString], { type: "application/json" })
+        new Blob([jsonString], { type: "application/json" }),
       );
       (copyToClipboard as jest.Mock).mockResolvedValue(undefined);
 
@@ -131,9 +137,11 @@ describe("shareState", () => {
     it("should handle clipboard errors", async () => {
       const jsonString = JSON.stringify(mockState);
       (exportApplicationState as jest.Mock).mockReturnValue(
-        new Blob([jsonString], { type: "application/json" })
+        new Blob([jsonString], { type: "application/json" }),
       );
-      (copyToClipboard as jest.Mock).mockRejectedValue(new Error("Clipboard unavailable"));
+      (copyToClipboard as jest.Mock).mockRejectedValue(
+        new Error("Clipboard unavailable"),
+      );
 
       const result = await shareStateToClipboard();
 

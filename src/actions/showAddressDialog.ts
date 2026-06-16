@@ -9,12 +9,18 @@ export function showAddressDialog(
   eventDetailsMap: EventDetailsMap,
   log: LogEntry[],
   onSuccess: () => void,
-  onCancel: () => void
+  onCancel: () => void,
 ): void {
   const dialog = document.getElementById("reallocationDialog") as HTMLElement;
-  const title = document.getElementById("reallocationDialogTitle") as HTMLElement;
-  const content = document.getElementById("reallocationDialogContent") as HTMLElement;
-  const cancelButton = document.getElementById("reallocationDialogCancel") as HTMLButtonElement;
+  const title = document.getElementById(
+    "reallocationDialogTitle",
+  ) as HTMLElement;
+  const content = document.getElementById(
+    "reallocationDialogContent",
+  ) as HTMLElement;
+  const cancelButton = document.getElementById(
+    "reallocationDialogCancel",
+  ) as HTMLButtonElement;
 
   if (!dialog || !title || !content || !cancelButton) {
     console.error("Dialog elements not found");
@@ -28,7 +34,8 @@ export function showAddressDialog(
   container.style.padding = "1em";
 
   const instructions = document.createElement("p");
-  instructions.textContent = "Enter a street address to automatically find coordinates for this event:";
+  instructions.textContent =
+    "Enter a street address to automatically find coordinates for this event:";
   instructions.style.marginBottom = "1em";
   container.appendChild(instructions);
 
@@ -44,7 +51,8 @@ export function showAddressDialog(
 
   // URL suggestion section
   const urlInstructions = document.createElement("p");
-  urlInstructions.textContent = "Suggested parkrun URL (edit if needed to extract complete event details):";
+  urlInstructions.textContent =
+    "Suggested parkrun URL (edit if needed to extract complete event details):";
   urlInstructions.style.marginTop = "1em";
   urlInstructions.style.marginBottom = "0.5em";
   container.appendChild(urlInstructions);
@@ -53,12 +61,14 @@ export function showAddressDialog(
   urlInput.type = "url";
   urlInput.placeholder = "https://www.parkrun.com.au/example/";
   // Load suggested URL asynchronously
-  suggestparkrunUrl(issue.eventShortName).then(url => {
-    urlInput.value = url;
-  }).catch(() => {
-    // Fallback if countries aren't loaded yet
-    urlInput.value = `https://www.parkrun.com.au/${issue.eventShortName.toLowerCase().replace(/\s+/g, '')}/`;
-  });
+  suggestparkrunUrl(issue.eventShortName)
+    .then((url) => {
+      urlInput.value = url;
+    })
+    .catch(() => {
+      // Fallback if countries aren't loaded yet
+      urlInput.value = `https://www.parkrun.com.au/${issue.eventShortName.toLowerCase().replace(/\s+/g, "")}/`;
+    });
   urlInput.style.width = "100%";
   urlInput.style.padding = "0.5em";
   urlInput.style.marginBottom = "1em";
@@ -67,7 +77,8 @@ export function showAddressDialog(
   container.appendChild(urlInput);
 
   const urlNote = document.createElement("small");
-  urlNote.textContent = "Leave empty to skip metadata extraction and use basic event information only.";
+  urlNote.textContent =
+    "Leave empty to skip metadata extraction and use basic event information only.";
   urlNote.style.color = "#666";
   urlNote.style.display = "block";
   urlNote.style.marginBottom = "1em";
@@ -122,11 +133,18 @@ export function showAddressDialog(
     urlInput.disabled = true;
 
     try {
-      await resolveIssueWithAddress(issue, address, eventDetailsMap, log, url || undefined);
+      await resolveIssueWithAddress(
+        issue,
+        address,
+        eventDetailsMap,
+        log,
+        url || undefined,
+      );
       dialog.style.display = "none";
       onSuccess();
     } catch (error) {
-      errorMessage.textContent = error instanceof Error ? error.message : "Geocoding failed";
+      errorMessage.textContent =
+        error instanceof Error ? error.message : "Geocoding failed";
       errorMessage.style.display = "block";
     } finally {
       geocodeButton.disabled = false;

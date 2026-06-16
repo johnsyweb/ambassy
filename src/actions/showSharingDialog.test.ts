@@ -1,5 +1,9 @@
 import { showSharingDialog } from "./showSharingDialog";
-import { shareStateAsFile, shareStateAsUrl, shareStateToClipboard } from "./shareState";
+import {
+  shareStateAsFile,
+  shareStateAsUrl,
+  shareStateToClipboard,
+} from "./shareState";
 import { downloadStateFile } from "./exportState";
 
 jest.mock("./shareState");
@@ -22,8 +26,12 @@ describe("showSharingDialog", () => {
 
     dialog = document.getElementById("reallocationDialog") as HTMLElement;
     title = document.getElementById("reallocationDialogTitle") as HTMLElement;
-    content = document.getElementById("reallocationDialogContent") as HTMLElement;
-    cancelButton = document.getElementById("reallocationDialogCancel") as HTMLButtonElement;
+    content = document.getElementById(
+      "reallocationDialogContent",
+    ) as HTMLElement;
+    cancelButton = document.getElementById(
+      "reallocationDialogCancel",
+    ) as HTMLButtonElement;
 
     jest.clearAllMocks();
     global.URL.createObjectURL = jest.fn(() => "blob:test-url");
@@ -79,10 +87,12 @@ describe("showSharingDialog", () => {
     await new Promise((resolve) => setTimeout(resolve, 100));
 
     expect(shareStateAsUrl).toHaveBeenCalled();
-    
+
     // The URL is displayed in an input field within the success message
     // The URL is encoded and wrapped: currentUrl + ?state= + encodeURIComponent(mockUrl)
-    const urlInput = content.querySelector('input[type="text"]') as HTMLInputElement;
+    const urlInput = content.querySelector(
+      'input[type="text"]',
+    ) as HTMLInputElement;
     expect(urlInput).toBeTruthy();
     expect(urlInput?.value).toContain(encodeURIComponent(mockUrl));
   });

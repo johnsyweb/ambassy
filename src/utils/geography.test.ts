@@ -9,8 +9,13 @@ describe("geography", () => {
       const sydneyLat = -33.8688;
       const sydneyLon = 151.2093;
 
-      const distance = calculateDistance(melbourneLat, melbourneLon, sydneyLat, sydneyLon);
-      
+      const distance = calculateDistance(
+        melbourneLat,
+        melbourneLon,
+        sydneyLat,
+        sydneyLon,
+      );
+
       // Allow 50km tolerance for Haversine calculation
       expect(distance).toBeGreaterThan(660);
       expect(distance).toBeLessThan(760);
@@ -58,8 +63,12 @@ describe("geography", () => {
         [-37.7, 144.95], // ~15 km away
       ];
 
-      const avgDistance = calculateAverageDistance(referenceLat, referenceLon, points);
-      
+      const avgDistance = calculateAverageDistance(
+        referenceLat,
+        referenceLon,
+        points,
+      );
+
       expect(avgDistance).not.toBeNull();
       expect(avgDistance).toBeGreaterThan(5);
       expect(avgDistance).toBeLessThan(20);
@@ -70,7 +79,11 @@ describe("geography", () => {
       const referenceLon = 144.9631;
       const points: Array<[number, number]> = [];
 
-      const avgDistance = calculateAverageDistance(referenceLat, referenceLon, points);
+      const avgDistance = calculateAverageDistance(
+        referenceLat,
+        referenceLon,
+        points,
+      );
       expect(avgDistance).toBeNull();
     });
 
@@ -79,12 +92,20 @@ describe("geography", () => {
       const referenceLon = 144.9631;
       const points: Array<[number, number]> = [[-37.8, 144.96]];
 
-      const avgDistance = calculateAverageDistance(referenceLat, referenceLon, points);
-      
+      const avgDistance = calculateAverageDistance(
+        referenceLat,
+        referenceLon,
+        points,
+      );
+
       expect(avgDistance).not.toBeNull();
-      const singleDistance = calculateDistance(referenceLat, referenceLon, -37.8, 144.96);
+      const singleDistance = calculateDistance(
+        referenceLat,
+        referenceLon,
+        -37.8,
+        144.96,
+      );
       expect(avgDistance).toBeCloseTo(singleDistance, 1);
     });
   });
 });
-

@@ -1,6 +1,13 @@
-import { EventDetails, eventDetailsToCoordinate, coordinateToEventDetailsGeometry } from "@models/EventDetails";
+import {
+  EventDetails,
+  eventDetailsToCoordinate,
+  coordinateToEventDetailsGeometry,
+} from "@models/EventDetails";
 import { normalizeEventName } from "@utils/fuzzyMatch";
-import { EventTeamsTableData, EventTeamsTableDataMap } from "./EventTeamsTableData";
+import {
+  EventTeamsTableData,
+  EventTeamsTableDataMap,
+} from "./EventTeamsTableData";
 
 export type EventDetailsMap = Map<string, EventDetails>;
 

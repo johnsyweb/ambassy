@@ -27,7 +27,10 @@ describe("transitionAmbassador", () => {
         ["Test EA", { name: "Test EA", events: ["event1"], state: "VIC" }],
       ]);
       const regionalAmbassadors: RegionalAmbassadorMap = new Map([
-        ["Test REA", { name: "Test REA", state: "VIC", supportsEAs: ["Test EA"] }],
+        [
+          "Test REA",
+          { name: "Test REA", state: "VIC", supportsEAs: ["Test EA"] },
+        ],
       ]);
       const log: LogEntry[] = [];
 
@@ -46,7 +49,10 @@ describe("transitionAmbassador", () => {
         ["Test EA", { name: "Test EA", events: ["event1"], state: "VIC" }],
       ]);
       const regionalAmbassadors: RegionalAmbassadorMap = new Map([
-        ["Test REA", { name: "Test REA", state: "VIC", supportsEAs: ["Test EA"] }],
+        [
+          "Test REA",
+          { name: "Test REA", state: "VIC", supportsEAs: ["Test EA"] },
+        ],
       ]);
       const log: LogEntry[] = [];
 
@@ -65,10 +71,16 @@ describe("transitionAmbassador", () => {
 
     it("should preserve events in eventsForReallocation field", () => {
       const eventAmbassadors: EventAmbassadorMap = new Map([
-        ["Test EA", { name: "Test EA", events: ["event1", "event2"], state: "VIC" }],
+        [
+          "Test EA",
+          { name: "Test EA", events: ["event1", "event2"], state: "VIC" },
+        ],
       ]);
       const regionalAmbassadors: RegionalAmbassadorMap = new Map([
-        ["Test REA", { name: "Test REA", state: "VIC", supportsEAs: ["Test EA"] }],
+        [
+          "Test REA",
+          { name: "Test REA", state: "VIC", supportsEAs: ["Test EA"] },
+        ],
       ]);
       const log: LogEntry[] = [];
 
@@ -85,15 +97,21 @@ describe("transitionAmbassador", () => {
 
     it("should preserve prospective events in prospectiveEventsForReallocation field", () => {
       const eventAmbassadors: EventAmbassadorMap = new Map([
-        ["Test EA", {
-          name: "Test EA",
-          events: ["event1"],
-          prospectiveEvents: ["prospect1", "prospect2"],
-          state: "VIC",
-        }],
+        [
+          "Test EA",
+          {
+            name: "Test EA",
+            events: ["event1"],
+            prospectiveEvents: ["prospect1", "prospect2"],
+            state: "VIC",
+          },
+        ],
       ]);
       const regionalAmbassadors: RegionalAmbassadorMap = new Map([
-        ["Test REA", { name: "Test REA", state: "VIC", supportsEAs: ["Test EA"] }],
+        [
+          "Test REA",
+          { name: "Test REA", state: "VIC", supportsEAs: ["Test EA"] },
+        ],
       ]);
       const log: LogEntry[] = [];
 
@@ -105,15 +123,33 @@ describe("transitionAmbassador", () => {
       );
 
       const rea = regionalAmbassadors.get("Test EA");
-      expect(rea?.prospectiveEventsForReallocation).toEqual(["prospect1", "prospect2"]);
+      expect(rea?.prospectiveEventsForReallocation).toEqual([
+        "prospect1",
+        "prospect2",
+      ]);
     });
 
     it("should remove EA from previous REA's supportsEAs list", () => {
       const eventAmbassadors: EventAmbassadorMap = new Map([
-        ["Test EA", { name: "Test EA", events: [], state: "VIC", regionalAmbassador: "Test REA" }],
+        [
+          "Test EA",
+          {
+            name: "Test EA",
+            events: [],
+            state: "VIC",
+            regionalAmbassador: "Test REA",
+          },
+        ],
       ]);
       const regionalAmbassadors: RegionalAmbassadorMap = new Map([
-        ["Test REA", { name: "Test REA", state: "VIC", supportsEAs: ["Test EA", "Other EA"] }],
+        [
+          "Test REA",
+          {
+            name: "Test REA",
+            state: "VIC",
+            supportsEAs: ["Test EA", "Other EA"],
+          },
+        ],
       ]);
       const log: LogEntry[] = [];
 
@@ -134,7 +170,10 @@ describe("transitionAmbassador", () => {
         ["Test EA", { name: "Test EA", events: [], state: "NSW" }],
       ]);
       const regionalAmbassadors: RegionalAmbassadorMap = new Map([
-        ["Test REA", { name: "Test REA", state: "VIC", supportsEAs: ["Test EA"] }],
+        [
+          "Test REA",
+          { name: "Test REA", state: "VIC", supportsEAs: ["Test EA"] },
+        ],
       ]);
       const log: LogEntry[] = [];
 
@@ -154,53 +193,10 @@ describe("transitionAmbassador", () => {
         ["Test EA", { name: "Test EA", events: [], state: "VIC" }],
       ]);
       const regionalAmbassadors: RegionalAmbassadorMap = new Map([
-        ["Test REA", { name: "Test REA", state: "VIC", supportsEAs: ["Test EA"] }],
-      ]);
-      const log: LogEntry[] = [];
-
-      transitionEventAmbassadorToRegional(
-        "Test EA",
-        eventAmbassadors,
-        regionalAmbassadors,
-        log,
-      );
-
-      const removeLog = log.find((entry) => entry.type === "remove event ambassador");
-      expect(removeLog).toBeDefined();
-      expect(removeLog?.event).toBe("Test EA");
-      expect(removeLog?.oldValue).toBe("Test EA");
-      expect(removeLog?.newValue).toBe("");
-    });
-
-    it("should log addition to REA list", () => {
-      const eventAmbassadors: EventAmbassadorMap = new Map([
-        ["Test EA", { name: "Test EA", events: [], state: "VIC" }],
-      ]);
-      const regionalAmbassadors: RegionalAmbassadorMap = new Map([
-        ["Test REA", { name: "Test REA", state: "VIC", supportsEAs: ["Test EA"] }],
-      ]);
-      const log: LogEntry[] = [];
-
-      transitionEventAmbassadorToRegional(
-        "Test EA",
-        eventAmbassadors,
-        regionalAmbassadors,
-        log,
-      );
-
-      const addLog = log.find((entry) => entry.type === "add regional ambassador");
-      expect(addLog).toBeDefined();
-      expect(addLog?.event).toBe("Test EA");
-      expect(addLog?.oldValue).toBe("");
-      expect(addLog?.newValue).toBe("Test EA");
-    });
-
-    it("should log removal from previous REA's supportsEAs list", () => {
-      const eventAmbassadors: EventAmbassadorMap = new Map([
-        ["Test EA", { name: "Test EA", events: [], state: "VIC", regionalAmbassador: "Test REA" }],
-      ]);
-      const regionalAmbassadors: RegionalAmbassadorMap = new Map([
-        ["Test REA", { name: "Test REA", state: "VIC", supportsEAs: ["Test EA", "Other EA"] }],
+        [
+          "Test REA",
+          { name: "Test REA", state: "VIC", supportsEAs: ["Test EA"] },
+        ],
       ]);
       const log: LogEntry[] = [];
 
@@ -212,7 +208,76 @@ describe("transitionAmbassador", () => {
       );
 
       const removeLog = log.find(
-        (entry) => entry.type === "remove event ambassador from regional supports",
+        (entry) => entry.type === "remove event ambassador",
+      );
+      expect(removeLog).toBeDefined();
+      expect(removeLog?.event).toBe("Test EA");
+      expect(removeLog?.oldValue).toBe("Test EA");
+      expect(removeLog?.newValue).toBe("");
+    });
+
+    it("should log addition to REA list", () => {
+      const eventAmbassadors: EventAmbassadorMap = new Map([
+        ["Test EA", { name: "Test EA", events: [], state: "VIC" }],
+      ]);
+      const regionalAmbassadors: RegionalAmbassadorMap = new Map([
+        [
+          "Test REA",
+          { name: "Test REA", state: "VIC", supportsEAs: ["Test EA"] },
+        ],
+      ]);
+      const log: LogEntry[] = [];
+
+      transitionEventAmbassadorToRegional(
+        "Test EA",
+        eventAmbassadors,
+        regionalAmbassadors,
+        log,
+      );
+
+      const addLog = log.find(
+        (entry) => entry.type === "add regional ambassador",
+      );
+      expect(addLog).toBeDefined();
+      expect(addLog?.event).toBe("Test EA");
+      expect(addLog?.oldValue).toBe("");
+      expect(addLog?.newValue).toBe("Test EA");
+    });
+
+    it("should log removal from previous REA's supportsEAs list", () => {
+      const eventAmbassadors: EventAmbassadorMap = new Map([
+        [
+          "Test EA",
+          {
+            name: "Test EA",
+            events: [],
+            state: "VIC",
+            regionalAmbassador: "Test REA",
+          },
+        ],
+      ]);
+      const regionalAmbassadors: RegionalAmbassadorMap = new Map([
+        [
+          "Test REA",
+          {
+            name: "Test REA",
+            state: "VIC",
+            supportsEAs: ["Test EA", "Other EA"],
+          },
+        ],
+      ]);
+      const log: LogEntry[] = [];
+
+      transitionEventAmbassadorToRegional(
+        "Test EA",
+        eventAmbassadors,
+        regionalAmbassadors,
+        log,
+      );
+
+      const removeLog = log.find(
+        (entry) =>
+          entry.type === "remove event ambassador from regional supports",
       );
       expect(removeLog).toBeDefined();
       expect(removeLog?.event).toBe("Test REA");
@@ -244,7 +309,10 @@ describe("transitionAmbassador", () => {
         ["Test EA", { name: "Test EA", events: [], state: "VIC" }],
       ]);
       const regionalAmbassadors: RegionalAmbassadorMap = new Map([
-        ["Test REA", { name: "Test REA", state: "VIC", supportsEAs: ["Test EA"] }],
+        [
+          "Test REA",
+          { name: "Test REA", state: "VIC", supportsEAs: ["Test EA"] },
+        ],
       ]);
       const log: LogEntry[] = [];
 
@@ -264,7 +332,10 @@ describe("transitionAmbassador", () => {
         ["Test EA", { name: "Test EA", events: [], state: "VIC" }],
       ]);
       const regionalAmbassadors: RegionalAmbassadorMap = new Map([
-        ["Test REA", { name: "Test REA", state: "VIC", supportsEAs: ["Test EA"] }],
+        [
+          "Test REA",
+          { name: "Test REA", state: "VIC", supportsEAs: ["Test EA"] },
+        ],
       ]);
       const log: LogEntry[] = [];
 
@@ -283,7 +354,10 @@ describe("transitionAmbassador", () => {
         ["Test EA", { name: "Test EA", events: [], state: "VIC" }],
       ]);
       const regionalAmbassadors: RegionalAmbassadorMap = new Map([
-        ["Test REA", { name: "Test REA", state: "VIC", supportsEAs: ["Test EA"] }],
+        [
+          "Test REA",
+          { name: "Test REA", state: "VIC", supportsEAs: ["Test EA"] },
+        ],
       ]);
       const log: LogEntry[] = [];
 
@@ -302,7 +376,10 @@ describe("transitionAmbassador", () => {
         ["Test EA", { name: "Test EA", events: [], state: "VIC" }],
       ]);
       const regionalAmbassadors: RegionalAmbassadorMap = new Map([
-        ["Test REA", { name: "Test REA", state: "VIC", supportsEAs: ["Test EA"] }],
+        [
+          "Test REA",
+          { name: "Test REA", state: "VIC", supportsEAs: ["Test EA"] },
+        ],
       ]);
       const log: LogEntry[] = [];
 
@@ -336,7 +413,10 @@ describe("transitionAmbassador", () => {
         ["Test EA", { name: "Test EA", events: [], state: "VIC" }],
       ]);
       const regionalAmbassadors: RegionalAmbassadorMap = new Map([
-        ["Test REA", { name: "Test REA", state: "VIC", supportsEAs: ["Test EA"] }],
+        [
+          "Test REA",
+          { name: "Test REA", state: "VIC", supportsEAs: ["Test EA"] },
+        ],
       ]);
       const log: LogEntry[] = [];
 
@@ -354,7 +434,10 @@ describe("transitionAmbassador", () => {
   describe("validateREAToEATransition", () => {
     it("should return null if transition is valid (other REAs exist)", () => {
       const regionalAmbassadors: RegionalAmbassadorMap = new Map([
-        ["Test REA", { name: "Test REA", state: "VIC", supportsEAs: ["EA1", "EA2"] }],
+        [
+          "Test REA",
+          { name: "Test REA", state: "VIC", supportsEAs: ["EA1", "EA2"] },
+        ],
         ["Other REA", { name: "Other REA", state: "NSW", supportsEAs: [] }],
       ]);
 
@@ -364,7 +447,10 @@ describe("transitionAmbassador", () => {
 
     it("should return error if no other REAs exist and REA has supported EAs", () => {
       const regionalAmbassadors: RegionalAmbassadorMap = new Map([
-        ["Test REA", { name: "Test REA", state: "VIC", supportsEAs: ["EA1", "EA2"] }],
+        [
+          "Test REA",
+          { name: "Test REA", state: "VIC", supportsEAs: ["EA1", "EA2"] },
+        ],
       ]);
 
       const result = validateREAToEATransition("Test REA", regionalAmbassadors);
@@ -384,7 +470,10 @@ describe("transitionAmbassador", () => {
     it("should return error if REA does not exist", () => {
       const regionalAmbassadors: RegionalAmbassadorMap = new Map();
 
-      const result = validateREAToEATransition("NonExistent REA", regionalAmbassadors);
+      const result = validateREAToEATransition(
+        "NonExistent REA",
+        regionalAmbassadors,
+      );
       expect(result).toContain("not found");
     });
   });
@@ -392,7 +481,15 @@ describe("transitionAmbassador", () => {
   describe("transitionRegionalAmbassadorToEvent", () => {
     it("should remove REA from Regional Ambassadors map", () => {
       const eventAmbassadors: EventAmbassadorMap = new Map([
-        ["EA1", { name: "EA1", events: [], state: "VIC", regionalAmbassador: "Test REA" }],
+        [
+          "EA1",
+          {
+            name: "EA1",
+            events: [],
+            state: "VIC",
+            regionalAmbassador: "Test REA",
+          },
+        ],
       ]);
       const regionalAmbassadors: RegionalAmbassadorMap = new Map([
         ["Test REA", { name: "Test REA", state: "VIC", supportsEAs: ["EA1"] }],
@@ -414,7 +511,15 @@ describe("transitionAmbassador", () => {
 
     it("should add ambassador to Event Ambassadors map", () => {
       const eventAmbassadors: EventAmbassadorMap = new Map([
-        ["EA1", { name: "EA1", events: [], state: "VIC", regionalAmbassador: "Test REA" }],
+        [
+          "EA1",
+          {
+            name: "EA1",
+            events: [],
+            state: "VIC",
+            regionalAmbassador: "Test REA",
+          },
+        ],
       ]);
       const regionalAmbassadors: RegionalAmbassadorMap = new Map([
         ["Test REA", { name: "Test REA", state: "VIC", supportsEAs: ["EA1"] }],
@@ -440,11 +545,30 @@ describe("transitionAmbassador", () => {
 
     it("should reallocate each EA to new REA", () => {
       const eventAmbassadors: EventAmbassadorMap = new Map([
-        ["EA1", { name: "EA1", events: [], state: "VIC", regionalAmbassador: "Test REA" }],
-        ["EA2", { name: "EA2", events: [], state: "VIC", regionalAmbassador: "Test REA" }],
+        [
+          "EA1",
+          {
+            name: "EA1",
+            events: [],
+            state: "VIC",
+            regionalAmbassador: "Test REA",
+          },
+        ],
+        [
+          "EA2",
+          {
+            name: "EA2",
+            events: [],
+            state: "VIC",
+            regionalAmbassador: "Test REA",
+          },
+        ],
       ]);
       const regionalAmbassadors: RegionalAmbassadorMap = new Map([
-        ["Test REA", { name: "Test REA", state: "VIC", supportsEAs: ["EA1", "EA2"] }],
+        [
+          "Test REA",
+          { name: "Test REA", state: "VIC", supportsEAs: ["EA1", "EA2"] },
+        ],
         ["Other REA", { name: "Other REA", state: "NSW", supportsEAs: [] }],
       ]);
       const log: LogEntry[] = [];
@@ -474,7 +598,15 @@ describe("transitionAmbassador", () => {
 
     it("should remove each EA from old REA's supportsEAs list", () => {
       const eventAmbassadors: EventAmbassadorMap = new Map([
-        ["EA1", { name: "EA1", events: [], state: "VIC", regionalAmbassador: "Test REA" }],
+        [
+          "EA1",
+          {
+            name: "EA1",
+            events: [],
+            state: "VIC",
+            regionalAmbassador: "Test REA",
+          },
+        ],
       ]);
       const regionalAmbassadors: RegionalAmbassadorMap = new Map([
         ["Test REA", { name: "Test REA", state: "VIC", supportsEAs: ["EA1"] }],
@@ -497,7 +629,15 @@ describe("transitionAmbassador", () => {
 
     it("should preserve state information during transition", () => {
       const eventAmbassadors: EventAmbassadorMap = new Map([
-        ["EA1", { name: "EA1", events: [], state: "VIC", regionalAmbassador: "Test REA" }],
+        [
+          "EA1",
+          {
+            name: "EA1",
+            events: [],
+            state: "VIC",
+            regionalAmbassador: "Test REA",
+          },
+        ],
       ]);
       const regionalAmbassadors: RegionalAmbassadorMap = new Map([
         ["Test REA", { name: "Test REA", state: "NSW", supportsEAs: ["EA1"] }],
@@ -520,7 +660,15 @@ describe("transitionAmbassador", () => {
 
     it("should log removal from REA list", () => {
       const eventAmbassadors: EventAmbassadorMap = new Map([
-        ["EA1", { name: "EA1", events: [], state: "VIC", regionalAmbassador: "Test REA" }],
+        [
+          "EA1",
+          {
+            name: "EA1",
+            events: [],
+            state: "VIC",
+            regionalAmbassador: "Test REA",
+          },
+        ],
       ]);
       const regionalAmbassadors: RegionalAmbassadorMap = new Map([
         ["Test REA", { name: "Test REA", state: "VIC", supportsEAs: ["EA1"] }],
@@ -537,7 +685,9 @@ describe("transitionAmbassador", () => {
         log,
       );
 
-      const removeLog = log.find((entry) => entry.type === "remove regional ambassador");
+      const removeLog = log.find(
+        (entry) => entry.type === "remove regional ambassador",
+      );
       expect(removeLog).toBeDefined();
       expect(removeLog?.event).toBe("Test REA");
       expect(removeLog?.oldValue).toBe("Test REA");
@@ -546,7 +696,15 @@ describe("transitionAmbassador", () => {
 
     it("should log addition to EA list", () => {
       const eventAmbassadors: EventAmbassadorMap = new Map([
-        ["EA1", { name: "EA1", events: [], state: "VIC", regionalAmbassador: "Test REA" }],
+        [
+          "EA1",
+          {
+            name: "EA1",
+            events: [],
+            state: "VIC",
+            regionalAmbassador: "Test REA",
+          },
+        ],
       ]);
       const regionalAmbassadors: RegionalAmbassadorMap = new Map([
         ["Test REA", { name: "Test REA", state: "VIC", supportsEAs: ["EA1"] }],
@@ -572,11 +730,30 @@ describe("transitionAmbassador", () => {
 
     it("should log each EA removal from old REA's supportsEAs list", () => {
       const eventAmbassadors: EventAmbassadorMap = new Map([
-        ["EA1", { name: "EA1", events: [], state: "VIC", regionalAmbassador: "Test REA" }],
-        ["EA2", { name: "EA2", events: [], state: "VIC", regionalAmbassador: "Test REA" }],
+        [
+          "EA1",
+          {
+            name: "EA1",
+            events: [],
+            state: "VIC",
+            regionalAmbassador: "Test REA",
+          },
+        ],
+        [
+          "EA2",
+          {
+            name: "EA2",
+            events: [],
+            state: "VIC",
+            regionalAmbassador: "Test REA",
+          },
+        ],
       ]);
       const regionalAmbassadors: RegionalAmbassadorMap = new Map([
-        ["Test REA", { name: "Test REA", state: "VIC", supportsEAs: ["EA1", "EA2"] }],
+        [
+          "Test REA",
+          { name: "Test REA", state: "VIC", supportsEAs: ["EA1", "EA2"] },
+        ],
         ["Other REA", { name: "Other REA", state: "NSW", supportsEAs: [] }],
       ]);
       const log: LogEntry[] = [];
@@ -594,7 +771,8 @@ describe("transitionAmbassador", () => {
       );
 
       const removeLogs = log.filter(
-        (entry) => entry.type === "remove event ambassador from regional supports",
+        (entry) =>
+          entry.type === "remove event ambassador from regional supports",
       );
       expect(removeLogs.length).toBe(2);
       expect(removeLogs[0].event).toBe("Test REA");
@@ -603,11 +781,30 @@ describe("transitionAmbassador", () => {
 
     it("should log each EA addition to new REA's supportsEAs list", () => {
       const eventAmbassadors: EventAmbassadorMap = new Map([
-        ["EA1", { name: "EA1", events: [], state: "VIC", regionalAmbassador: "Test REA" }],
-        ["EA2", { name: "EA2", events: [], state: "VIC", regionalAmbassador: "Test REA" }],
+        [
+          "EA1",
+          {
+            name: "EA1",
+            events: [],
+            state: "VIC",
+            regionalAmbassador: "Test REA",
+          },
+        ],
+        [
+          "EA2",
+          {
+            name: "EA2",
+            events: [],
+            state: "VIC",
+            regionalAmbassador: "Test REA",
+          },
+        ],
       ]);
       const regionalAmbassadors: RegionalAmbassadorMap = new Map([
-        ["Test REA", { name: "Test REA", state: "VIC", supportsEAs: ["EA1", "EA2"] }],
+        [
+          "Test REA",
+          { name: "Test REA", state: "VIC", supportsEAs: ["EA1", "EA2"] },
+        ],
         ["Other REA", { name: "Other REA", state: "NSW", supportsEAs: [] }],
       ]);
       const log: LogEntry[] = [];
@@ -634,11 +831,30 @@ describe("transitionAmbassador", () => {
 
     it("should log each EA's regionalAmbassador field update", () => {
       const eventAmbassadors: EventAmbassadorMap = new Map([
-        ["EA1", { name: "EA1", events: [], state: "VIC", regionalAmbassador: "Test REA" }],
-        ["EA2", { name: "EA2", events: [], state: "VIC", regionalAmbassador: "Test REA" }],
+        [
+          "EA1",
+          {
+            name: "EA1",
+            events: [],
+            state: "VIC",
+            regionalAmbassador: "Test REA",
+          },
+        ],
+        [
+          "EA2",
+          {
+            name: "EA2",
+            events: [],
+            state: "VIC",
+            regionalAmbassador: "Test REA",
+          },
+        ],
       ]);
       const regionalAmbassadors: RegionalAmbassadorMap = new Map([
-        ["Test REA", { name: "Test REA", state: "VIC", supportsEAs: ["EA1", "EA2"] }],
+        [
+          "Test REA",
+          { name: "Test REA", state: "VIC", supportsEAs: ["EA1", "EA2"] },
+        ],
         ["Other REA", { name: "Other REA", state: "NSW", supportsEAs: [] }],
       ]);
       const log: LogEntry[] = [];
@@ -656,7 +872,8 @@ describe("transitionAmbassador", () => {
       );
 
       const assignLogs = log.filter(
-        (entry) => entry.type === "assign event ambassador to regional ambassador",
+        (entry) =>
+          entry.type === "assign event ambassador to regional ambassador",
       );
       expect(assignLogs.length).toBe(2);
       expect(assignLogs[0].event).toBe("EA1");
@@ -706,14 +923,24 @@ describe("transitionAmbassador", () => {
 
     it("should throw error if EA recipient does not exist", () => {
       const eventAmbassadors: EventAmbassadorMap = new Map([
-        ["EA1", { name: "EA1", events: [], state: "VIC", regionalAmbassador: "Test REA" }],
+        [
+          "EA1",
+          {
+            name: "EA1",
+            events: [],
+            state: "VIC",
+            regionalAmbassador: "Test REA",
+          },
+        ],
       ]);
       const regionalAmbassadors: RegionalAmbassadorMap = new Map([
         ["Test REA", { name: "Test REA", state: "VIC", supportsEAs: ["EA1"] }],
         ["Other REA", { name: "Other REA", state: "NSW", supportsEAs: [] }],
       ]);
       const log: LogEntry[] = [];
-      const eaRecipients = new Map<string, string>([["EA1", "NonExistent REA"]]);
+      const eaRecipients = new Map<string, string>([
+        ["EA1", "NonExistent REA"],
+      ]);
 
       expect(() => {
         transitionRegionalAmbassadorToEvent(
@@ -728,11 +955,30 @@ describe("transitionAmbassador", () => {
 
     it("should throw error if EA does not exist in recipients map", () => {
       const eventAmbassadors: EventAmbassadorMap = new Map([
-        ["EA1", { name: "EA1", events: [], state: "VIC", regionalAmbassador: "Test REA" }],
-        ["EA2", { name: "EA2", events: [], state: "VIC", regionalAmbassador: "Test REA" }],
+        [
+          "EA1",
+          {
+            name: "EA1",
+            events: [],
+            state: "VIC",
+            regionalAmbassador: "Test REA",
+          },
+        ],
+        [
+          "EA2",
+          {
+            name: "EA2",
+            events: [],
+            state: "VIC",
+            regionalAmbassador: "Test REA",
+          },
+        ],
       ]);
       const regionalAmbassadors: RegionalAmbassadorMap = new Map([
-        ["Test REA", { name: "Test REA", state: "VIC", supportsEAs: ["EA1", "EA2"] }],
+        [
+          "Test REA",
+          { name: "Test REA", state: "VIC", supportsEAs: ["EA1", "EA2"] },
+        ],
         ["Other REA", { name: "Other REA", state: "NSW", supportsEAs: [] }],
       ]);
       const log: LogEntry[] = [];
@@ -751,7 +997,15 @@ describe("transitionAmbassador", () => {
 
     it("should persist Event Ambassadors after addition and updates", () => {
       const eventAmbassadors: EventAmbassadorMap = new Map([
-        ["EA1", { name: "EA1", events: [], state: "VIC", regionalAmbassador: "Test REA" }],
+        [
+          "EA1",
+          {
+            name: "EA1",
+            events: [],
+            state: "VIC",
+            regionalAmbassador: "Test REA",
+          },
+        ],
       ]);
       const regionalAmbassadors: RegionalAmbassadorMap = new Map([
         ["Test REA", { name: "Test REA", state: "VIC", supportsEAs: ["EA1"] }],
@@ -773,7 +1027,15 @@ describe("transitionAmbassador", () => {
 
     it("should persist Regional Ambassadors after removal and updates", () => {
       const eventAmbassadors: EventAmbassadorMap = new Map([
-        ["EA1", { name: "EA1", events: [], state: "VIC", regionalAmbassador: "Test REA" }],
+        [
+          "EA1",
+          {
+            name: "EA1",
+            events: [],
+            state: "VIC",
+            regionalAmbassador: "Test REA",
+          },
+        ],
       ]);
       const regionalAmbassadors: RegionalAmbassadorMap = new Map([
         ["Test REA", { name: "Test REA", state: "VIC", supportsEAs: ["EA1"] }],
@@ -795,7 +1057,15 @@ describe("transitionAmbassador", () => {
 
     it("should call trackStateChange after all operations", () => {
       const eventAmbassadors: EventAmbassadorMap = new Map([
-        ["EA1", { name: "EA1", events: [], state: "VIC", regionalAmbassador: "Test REA" }],
+        [
+          "EA1",
+          {
+            name: "EA1",
+            events: [],
+            state: "VIC",
+            regionalAmbassador: "Test REA",
+          },
+        ],
       ]);
       const regionalAmbassadors: RegionalAmbassadorMap = new Map([
         ["Test REA", { name: "Test REA", state: "VIC", supportsEAs: ["EA1"] }],
@@ -817,7 +1087,15 @@ describe("transitionAmbassador", () => {
 
     it("should persist changes log after all operations", () => {
       const eventAmbassadors: EventAmbassadorMap = new Map([
-        ["EA1", { name: "EA1", events: [], state: "VIC", regionalAmbassador: "Test REA" }],
+        [
+          "EA1",
+          {
+            name: "EA1",
+            events: [],
+            state: "VIC",
+            regionalAmbassador: "Test REA",
+          },
+        ],
       ]);
       const regionalAmbassadors: RegionalAmbassadorMap = new Map([
         ["Test REA", { name: "Test REA", state: "VIC", supportsEAs: ["EA1"] }],

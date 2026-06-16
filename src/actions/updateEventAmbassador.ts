@@ -5,7 +5,7 @@ export function updateEventAmbassador(
   eventTeamsTableDataMap: EventTeamsTableDataMap,
   eventShortName: string,
   newEventAmbassador: string,
-  log: LogEntry[]
+  log: LogEntry[],
 ): EventTeamsTableDataMap {
   const eventTeam = eventTeamsTableDataMap.get(eventShortName);
   if (eventTeam) {
@@ -14,11 +14,11 @@ export function updateEventAmbassador(
     eventTeamsTableDataMap.set(eventShortName, eventTeam);
 
     log.push({
-      type: 'update event ambassador',
+      type: "update event ambassador",
       event: eventShortName,
       oldValue: oldEventAmbassador,
       newValue: newEventAmbassador,
-      timestamp: Date.now()
+      timestamp: Date.now(),
     });
   }
   return eventTeamsTableDataMap;

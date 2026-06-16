@@ -1,5 +1,9 @@
 import { handleFileUpload } from "./uploadCSV";
-import { persistEventAmbassadors, persistEventTeams, persistRegionalAmbassadors } from "./persistState";
+import {
+  persistEventAmbassadors,
+  persistEventTeams,
+  persistRegionalAmbassadors,
+} from "./persistState";
 import { parseEventTeams } from "@parsers/parseEventTeams";
 import { parseEventAmbassadors } from "@parsers/parseEventAmbassadors";
 import { parseRegionalAmbassadors } from "@parsers/parseRegionalAmbassadors";
@@ -13,16 +17,33 @@ jest.mock("@parsers/parseRegionalAmbassadors");
 jest.mock("papaparse", () => ({
   __esModule: true,
   default: {
-    parse: jest.fn((file: File, options: { complete?: (result: { data: unknown[] }) => void }) => {
-      if (options.complete) {
-        const csvContent = file.name.includes("Event Teams")
-          ? [{ "Event Short Name": "Event1", "Event Ambassador": "EA1", "Event Director(s)": "ED1" }]
-          : file.name.includes("Event Ambassadors")
-          ? [{ Name: "Test EA", Events: "Event1" }]
-          : [{ "RA Name": "Test REA", "RA State": "VIC", "EA Name": "EA1" }];
-        options.complete({ data: csvContent });
-      }
-    }),
+    parse: jest.fn(
+      (
+        file: File,
+        options: { complete?: (result: { data: unknown[] }) => void },
+      ) => {
+        if (options.complete) {
+          const csvContent = file.name.includes("Event Teams")
+            ? [
+                {
+                  "Event Short Name": "Event1",
+                  "Event Ambassador": "EA1",
+                  "Event Director(s)": "ED1",
+                },
+              ]
+            : file.name.includes("Event Ambassadors")
+              ? [{ Name: "Test EA", Events: "Event1" }]
+              : [
+                  {
+                    "RA Name": "Test REA",
+                    "RA State": "VIC",
+                    "EA Name": "EA1",
+                  },
+                ];
+          options.complete({ data: csvContent });
+        }
+      },
+    ),
   },
 }));
 
@@ -49,7 +70,8 @@ describe("handleFileUpload", () => {
   });
 
   it("should persist Event Teams after parsing CSV", (done) => {
-    const csvContent = "Event Short Name,Event Ambassador,Event Director(s)\nEvent1,EA1,ED1";
+    const csvContent =
+      "Event Short Name,Event Ambassador,Event Director(s)\nEvent1,EA1,ED1";
     const file = new File([csvContent], "Ambassadors - Event Teams.csv", {
       type: "text/csv",
     });
@@ -66,9 +88,13 @@ describe("handleFileUpload", () => {
 
   it("should persist Regional Ambassadors after parsing CSV", (done) => {
     const csvContent = "Name,State,Supports EAs\nTest REA,VIC,EA1";
-    const file = new File([csvContent], "Ambassadors - Regional Ambassadors.csv", {
-      type: "text/csv",
-    });
+    const file = new File(
+      [csvContent],
+      "Ambassadors - Regional Ambassadors.csv",
+      {
+        type: "text/csv",
+      },
+    );
 
     handleFileUpload(file, () => {
       expect(persistRegionalAmbassadors).toHaveBeenCalled();
@@ -76,4 +102,3 @@ describe("handleFileUpload", () => {
     });
   });
 });
-

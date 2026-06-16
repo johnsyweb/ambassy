@@ -6,7 +6,10 @@ import { loadCapacityLimits } from "./checkCapacity";
 const CACHE_KEY = "parkrun events";
 
 function isManuallyResolvedEventDetails(
-  eventDetails: EventDetails & { manualCoordinates?: boolean; geocodedAddress?: boolean },
+  eventDetails: EventDetails & {
+    manualCoordinates?: boolean;
+    geocodedAddress?: boolean;
+  },
 ): boolean {
   return (
     eventDetails.manualCoordinates === true ||
@@ -71,7 +74,8 @@ export function exportApplicationState(): Blob {
       regionalAmbassadors,
       changesLog,
       capacityLimits,
-      resolvedEventDetails: resolvedEventDetails.length > 0 ? resolvedEventDetails : undefined,
+      resolvedEventDetails:
+        resolvedEventDetails.length > 0 ? resolvedEventDetails : undefined,
     },
   };
 

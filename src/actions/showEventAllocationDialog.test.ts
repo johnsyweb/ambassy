@@ -70,7 +70,9 @@ describe("showEventAllocationDialog", () => {
     dialog = document.getElementById("reallocationDialog")!;
     title = document.getElementById("reallocationDialogTitle")!;
     content = document.getElementById("reallocationDialogContent")!;
-    cancelButton = document.getElementById("reallocationDialogCancel") as HTMLButtonElement;
+    cancelButton = document.getElementById(
+      "reallocationDialogCancel",
+    ) as HTMLButtonElement;
 
     onSelect = jest.fn();
     onCancel = jest.fn();
@@ -103,7 +105,7 @@ describe("showEventAllocationDialog", () => {
       eventTeams,
       onSelect,
       onCancel,
-      suggestions
+      suggestions,
     );
 
     expect(dialog.style.display).not.toBe("none");
@@ -122,7 +124,7 @@ describe("showEventAllocationDialog", () => {
       eventTeams,
       onSelect,
       onCancel,
-      []
+      [],
     );
 
     expect(content.textContent).toContain("No Event Ambassadors available");
@@ -137,7 +139,7 @@ describe("showEventAllocationDialog", () => {
       eventTeams,
       onSelect,
       onCancel,
-      suggestions
+      suggestions,
     );
 
     const buttons = content.querySelectorAll("button.suggestion-button");
@@ -154,10 +156,12 @@ describe("showEventAllocationDialog", () => {
       eventTeams,
       onSelect,
       onCancel,
-      suggestions
+      suggestions,
     );
 
-    const firstButton = content.querySelector("button.suggestion-button") as HTMLButtonElement;
+    const firstButton = content.querySelector(
+      "button.suggestion-button",
+    ) as HTMLButtonElement;
     firstButton.click();
 
     expect(onSelect).toHaveBeenCalledWith("EA 1");
@@ -172,7 +176,7 @@ describe("showEventAllocationDialog", () => {
       eventTeams,
       onSelect,
       onCancel,
-      suggestions
+      suggestions,
     );
 
     cancelButton.click();
@@ -189,7 +193,7 @@ describe("showEventAllocationDialog", () => {
       eventTeams,
       onSelect,
       onCancel,
-      suggestions
+      suggestions,
     );
 
     expect(content.textContent).toContain("Director1");
@@ -204,12 +208,14 @@ describe("showEventAllocationDialog", () => {
       eventTeams,
       onSelect,
       onCancel,
-      suggestions
+      suggestions,
     );
 
     expect(dialog.getAttribute("role")).toBe("dialog");
     expect(dialog.getAttribute("aria-modal")).toBe("true");
-    expect(dialog.getAttribute("aria-labelledby")).toBe("reallocationDialogTitle");
+    expect(dialog.getAttribute("aria-labelledby")).toBe(
+      "reallocationDialogTitle",
+    );
   });
 
   it("should display nearest assigned event and distance", () => {
@@ -221,10 +227,12 @@ describe("showEventAllocationDialog", () => {
       eventTeams,
       onSelect,
       onCancel,
-      suggestions
+      suggestions,
     );
 
-    const firstButton = content.querySelector("button.suggestion-button") as HTMLButtonElement;
+    const firstButton = content.querySelector(
+      "button.suggestion-button",
+    ) as HTMLButtonElement;
     expect(firstButton).not.toBeNull();
     expect(firstButton.textContent).toContain("5.2 km to nearby-event");
   });
@@ -251,10 +259,12 @@ describe("showEventAllocationDialog", () => {
       eventTeams,
       onSelect,
       onCancel,
-      suggestionsWithNoEvents
+      suggestionsWithNoEvents,
     );
 
-    const button = content.querySelector("button.suggestion-button") as HTMLButtonElement;
+    const button = content.querySelector(
+      "button.suggestion-button",
+    ) as HTMLButtonElement;
     expect(button).not.toBeNull();
     expect(button.textContent).toContain("No events assigned");
   });

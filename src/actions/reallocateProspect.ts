@@ -2,7 +2,10 @@ import { ProspectiveEventList } from "@models/ProspectiveEventList";
 import { EventAmbassadorMap } from "@models/EventAmbassadorMap";
 import { RegionalAmbassadorMap } from "@models/RegionalAmbassadorMap";
 import { LogEntry } from "@models/LogEntry";
-import { calculateAllCapacityStatuses, loadCapacityLimits } from "./checkCapacity";
+import {
+  calculateAllCapacityStatuses,
+  loadCapacityLimits,
+} from "./checkCapacity";
 import { saveProspectiveEvents } from "./persistProspectiveEvents";
 import { persistEventAmbassadors, persistChangesLog } from "./persistState";
 import { trackStateChange } from "./trackChanges";
@@ -19,7 +22,7 @@ export function reallocateProspect(
   prospects: ProspectiveEventList,
   eventAmbassadors: EventAmbassadorMap,
   log: LogEntry[],
-  regionalAmbassadors?: RegionalAmbassadorMap
+  regionalAmbassadors?: RegionalAmbassadorMap,
 ): void {
   const prospect = prospects.findById(prospectId);
 
@@ -28,14 +31,16 @@ export function reallocateProspect(
   }
 
   if (prospect.eventAmbassador !== oldAmbassador) {
-    throw new Error(`Prospect '${prospect.prospectEvent}' is not currently assigned to '${oldAmbassador}'`);
+    throw new Error(
+      `Prospect '${prospect.prospectEvent}' is not currently assigned to '${oldAmbassador}'`,
+    );
   }
 
   // Update the prospect's ambassador assignment
   prospects.update({
     ...prospect,
     eventAmbassador: newAmbassador,
-    ambassadorMatchStatus: newAmbassador ? 'matched' : 'unmatched'
+    ambassadorMatchStatus: newAmbassador ? "matched" : "unmatched",
   });
 
   // Update EventAmbassador prospectiveEvents arrays
@@ -43,7 +48,9 @@ export function reallocateProspect(
   if (oldAmbassador) {
     const oldEA = eventAmbassadors.get(oldAmbassador);
     if (oldEA?.prospectiveEvents) {
-      oldEA.prospectiveEvents = oldEA.prospectiveEvents.filter(id => id !== prospectId);
+      oldEA.prospectiveEvents = oldEA.prospectiveEvents.filter(
+        (id) => id !== prospectId,
+      );
     }
   }
 
@@ -62,7 +69,11 @@ export function reallocateProspect(
 
   // Recalculate capacity statuses
   const capacityLimits = loadCapacityLimits();
-  calculateAllCapacityStatuses(eventAmbassadors, regionalAmbassadors ?? new Map(), capacityLimits);
+  calculateAllCapacityStatuses(
+    eventAmbassadors,
+    regionalAmbassadors ?? new Map(),
+    capacityLimits,
+  );
 
   // Persist the updated Event Ambassadors (prospectiveEvents arrays were modified)
   persistEventAmbassadors(eventAmbassadors);
@@ -77,7 +88,7 @@ export function reallocateProspect(
     type: "Prospect Reallocated",
     event: `Prospect "${prospect.prospectEvent}" (${prospect.country}, ${prospect.state}) reallocated from "${oldAmbassador}" to "${newAmbassador}"`,
     oldValue: oldAmbassador,
-    newValue: newAmbassador
+    newValue: newAmbassador,
   };
 
   log.unshift(changeEntry);

@@ -28,7 +28,7 @@ describe("persistState", () => {
       persistEventAmbassadors(eventAmbassadors);
       expect(saveToStorage).toHaveBeenCalledWith(
         "eventAmbassadors",
-        Array.from(eventAmbassadors.entries())
+        Array.from(eventAmbassadors.entries()),
       );
     });
   });
@@ -36,10 +36,20 @@ describe("persistState", () => {
   describe("persistEventTeams", () => {
     it("should save EventTeamMap to storage", () => {
       const eventTeams: EventTeamMap = new Map([
-        ["Event1", { eventShortName: "Event1", eventAmbassador: "EA1", eventDirectors: [] }],
+        [
+          "Event1",
+          {
+            eventShortName: "Event1",
+            eventAmbassador: "EA1",
+            eventDirectors: [],
+          },
+        ],
       ]);
       persistEventTeams(eventTeams);
-      expect(saveToStorage).toHaveBeenCalledWith("eventTeams", Array.from(eventTeams.entries()));
+      expect(saveToStorage).toHaveBeenCalledWith(
+        "eventTeams",
+        Array.from(eventTeams.entries()),
+      );
     });
   });
 
@@ -51,7 +61,7 @@ describe("persistState", () => {
       persistRegionalAmbassadors(regionalAmbassadors);
       expect(saveToStorage).toHaveBeenCalledWith(
         "regionalAmbassadors",
-        Array.from(regionalAmbassadors.entries())
+        Array.from(regionalAmbassadors.entries()),
       );
     });
   });
@@ -77,8 +87,19 @@ describe("persistState", () => {
       const mockState = {
         data: {
           eventAmbassadors: [["EA1", { name: "Test EA", events: [] }]],
-          eventTeams: [["Event1", { eventShortName: "Event1", eventAmbassador: "EA1", eventDirectors: [] }]],
-          regionalAmbassadors: [["REA1", { name: "Test REA", state: "VIC", supportsEAs: [] }]],
+          eventTeams: [
+            [
+              "Event1",
+              {
+                eventShortName: "Event1",
+                eventAmbassador: "EA1",
+                eventDirectors: [],
+              },
+            ],
+          ],
+          regionalAmbassadors: [
+            ["REA1", { name: "Test REA", state: "VIC", supportsEAs: [] }],
+          ],
           changesLog: [],
         },
       };
@@ -94,11 +115,27 @@ describe("persistState", () => {
       expect(result).toBeTruthy();
       // Expect migrated data with new prospectiveEvents and regionalAmbassador fields
       expect(result?.data.eventAmbassadors).toEqual([
-        ["EA1", { name: "Test EA", events: [], prospectiveEvents: [], regionalAmbassador: undefined }]
+        [
+          "EA1",
+          {
+            name: "Test EA",
+            events: [],
+            prospectiveEvents: [],
+            regionalAmbassador: undefined,
+          },
+        ],
       ]);
       expect(result?.data.eventTeams).toEqual(mockState.data.eventTeams);
       expect(result?.data.regionalAmbassadors).toEqual([
-        ["REA1", { name: "Test REA", state: "VIC", supportsEAs: [], prospectiveEvents: [] }]
+        [
+          "REA1",
+          {
+            name: "Test REA",
+            state: "VIC",
+            supportsEAs: [],
+            prospectiveEvents: [],
+          },
+        ],
       ]);
       expect(result?.data.changesLog).toEqual(mockState.data.changesLog);
     });
@@ -107,7 +144,9 @@ describe("persistState", () => {
       (loadFromStorage as jest.Mock)
         .mockReturnValueOnce([["EA1", { name: "Test EA", events: [] }]])
         .mockReturnValueOnce(null)
-        .mockReturnValueOnce([["REA1", { name: "Test REA", state: "VIC", supportsEAs: [] }]])
+        .mockReturnValueOnce([
+          ["REA1", { name: "Test REA", state: "VIC", supportsEAs: [] }],
+        ])
         .mockReturnValueOnce([]);
 
       const result = restoreApplicationState();
@@ -121,4 +160,3 @@ describe("persistState", () => {
     });
   });
 });
-

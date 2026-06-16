@@ -110,7 +110,10 @@ export function detectColumnType(
     }
 
     const date = new Date(sample);
-    if (!isNaN(date.getTime()) && date.toISOString() !== "1970-01-01T00:00:00.000Z") {
+    if (
+      !isNaN(date.getTime()) &&
+      date.toISOString() !== "1970-01-01T00:00:00.000Z"
+    ) {
       dateCount++;
     }
 

@@ -8,9 +8,13 @@ import { RegionalAmbassadorMap } from "./models/RegionalAmbassadorMap";
 function hasApplicationData(
   eventTeams: EventTeamMap,
   eventAmbassadors: EventAmbassadorMap,
-  regionalAmbassadors: RegionalAmbassadorMap
+  regionalAmbassadors: RegionalAmbassadorMap,
 ): boolean {
-  return eventTeams.size > 0 && eventAmbassadors.size > 0 && regionalAmbassadors.size > 0;
+  return (
+    eventTeams.size > 0 &&
+    eventAmbassadors.size > 0 &&
+    regionalAmbassadors.size > 0
+  );
 }
 
 function isMapViewDisplayed(): boolean {
@@ -20,7 +24,7 @@ function isMapViewDisplayed(): boolean {
 
 function updateButtonVisibility(
   hasData: boolean,
-  isMapViewVisible: boolean
+  isMapViewVisible: boolean,
 ): void {
   const exportButtonMap = document.getElementById("exportButtonMap");
   const importButton = document.getElementById("importButton");
@@ -46,7 +50,7 @@ function updateButtonVisibility(
 beforeEach(() => {
   // Create mock elements
   document.body.innerHTML = "";
-  
+
   const ambassy = document.createElement("div");
   ambassy.id = "ambassy";
   ambassy.style.display = "none";
@@ -75,23 +79,43 @@ describe("hasApplicationData", () => {
     const eventAmbassadors: EventAmbassadorMap = new Map();
     const regionalAmbassadors: RegionalAmbassadorMap = new Map();
 
-    expect(hasApplicationData(eventTeams, eventAmbassadors, regionalAmbassadors)).toBe(false);
+    expect(
+      hasApplicationData(eventTeams, eventAmbassadors, regionalAmbassadors),
+    ).toBe(false);
   });
 
   it("should return true when all data is present", () => {
-    const eventTeams: EventTeamMap = new Map([["team1", { eventShortName: "team1", eventAmbassador: "ea1", eventDirectors: [] }]]);
-    const eventAmbassadors: EventAmbassadorMap = new Map([["ea1", { name: "EA1", events: [] }]]);
-    const regionalAmbassadors: RegionalAmbassadorMap = new Map([["ra1", { name: "REA1", state: "VIC", supportsEAs: [] }]]);
+    const eventTeams: EventTeamMap = new Map([
+      [
+        "team1",
+        { eventShortName: "team1", eventAmbassador: "ea1", eventDirectors: [] },
+      ],
+    ]);
+    const eventAmbassadors: EventAmbassadorMap = new Map([
+      ["ea1", { name: "EA1", events: [] }],
+    ]);
+    const regionalAmbassadors: RegionalAmbassadorMap = new Map([
+      ["ra1", { name: "REA1", state: "VIC", supportsEAs: [] }],
+    ]);
 
-    expect(hasApplicationData(eventTeams, eventAmbassadors, regionalAmbassadors)).toBe(true);
+    expect(
+      hasApplicationData(eventTeams, eventAmbassadors, regionalAmbassadors),
+    ).toBe(true);
   });
 
   it("should return false when only some data is present", () => {
-    const eventTeams: EventTeamMap = new Map([["team1", { eventShortName: "team1", eventAmbassador: "ea1", eventDirectors: [] }]]);
+    const eventTeams: EventTeamMap = new Map([
+      [
+        "team1",
+        { eventShortName: "team1", eventAmbassador: "ea1", eventDirectors: [] },
+      ],
+    ]);
     const eventAmbassadors: EventAmbassadorMap = new Map();
     const regionalAmbassadors: RegionalAmbassadorMap = new Map();
 
-    expect(hasApplicationData(eventTeams, eventAmbassadors, regionalAmbassadors)).toBe(false);
+    expect(
+      hasApplicationData(eventTeams, eventAmbassadors, regionalAmbassadors),
+    ).toBe(false);
   });
 });
 
@@ -101,7 +125,7 @@ describe("isMapViewDisplayed", () => {
     if (ambassyElement) {
       ambassyElement.style.display = "none";
     }
-    
+
     expect(isMapViewDisplayed()).toBe(false);
   });
 
@@ -110,7 +134,7 @@ describe("isMapViewDisplayed", () => {
     if (ambassyElement) {
       ambassyElement.style.display = "block";
     }
-    
+
     expect(isMapViewDisplayed()).toBe(true);
   });
 });
@@ -121,9 +145,9 @@ describe("updateButtonVisibility", () => {
     if (ambassyElement) {
       ambassyElement.style.display = "none";
     }
-    
+
     updateButtonVisibility(false, false);
-    
+
     const exportButton = document.getElementById("exportButtonMap");
     expect(exportButton?.style.display).toBe("none");
   });
@@ -133,9 +157,9 @@ describe("updateButtonVisibility", () => {
     if (ambassyElement) {
       ambassyElement.style.display = "block";
     }
-    
+
     updateButtonVisibility(true, true);
-    
+
     const exportButton = document.getElementById("exportButtonMap");
     expect(exportButton?.style.display).not.toBe("none");
   });
@@ -151,13 +175,13 @@ describe("Export button visibility - integration", () => {
   it("should be visible in map view when data loaded", () => {
     const exportButtonMap = document.getElementById("exportButtonMap");
     const ambassyElement = document.getElementById("ambassy");
-    
+
     if (ambassyElement) {
       ambassyElement.style.display = "block";
     }
-    
+
     updateButtonVisibility(true, true);
-    
+
     expect(exportButtonMap).not.toBeNull();
     expect(exportButtonMap?.style.display).not.toBe("none");
   });
@@ -165,13 +189,13 @@ describe("Export button visibility - integration", () => {
   it("should be hidden in map view when no data", () => {
     const exportButtonMap = document.getElementById("exportButtonMap");
     const ambassyElement = document.getElementById("ambassy");
-    
+
     if (ambassyElement) {
       ambassyElement.style.display = "none";
     }
-    
+
     updateButtonVisibility(false, false);
-    
+
     expect(exportButtonMap).not.toBeNull();
     expect(exportButtonMap?.style.display).toBe("none");
   });
@@ -242,4 +266,3 @@ describe("Import button functionality", () => {
     expect(clicked).toBe(true);
   });
 });
-

@@ -33,7 +33,9 @@ describe("clipboard", () => {
     it("should throw error if Clipboard API fails", async () => {
       mockWriteText.mockRejectedValue(new Error("Clipboard write failed"));
 
-      await expect(copyToClipboard("test content")).rejects.toThrow("Clipboard write failed");
+      await expect(copyToClipboard("test content")).rejects.toThrow(
+        "Clipboard write failed",
+      );
     });
 
     it("should fall back to execCommand if Clipboard API unavailable", async () => {
@@ -49,9 +51,15 @@ describe("clipboard", () => {
       const mockTextarea = document.createElement("textarea");
       mockTextarea.select = jest.fn();
       mockTextarea.setSelectionRange = jest.fn();
-      const createElementSpy = jest.spyOn(document, "createElement").mockReturnValue(mockTextarea);
-      const appendChildSpy = jest.spyOn(document.body, "appendChild").mockImplementation();
-      const removeChildSpy = jest.spyOn(document.body, "removeChild").mockImplementation();
+      const createElementSpy = jest
+        .spyOn(document, "createElement")
+        .mockReturnValue(mockTextarea);
+      const appendChildSpy = jest
+        .spyOn(document.body, "appendChild")
+        .mockImplementation();
+      const removeChildSpy = jest
+        .spyOn(document.body, "removeChild")
+        .mockImplementation();
 
       await copyToClipboard("test content");
 
@@ -92,9 +100,15 @@ describe("clipboard", () => {
         writable: true,
         configurable: true,
       });
-      const createElementSpy = jest.spyOn(document, "createElement").mockReturnValue(mockTextarea as unknown as HTMLElement);
-      const appendChildSpy = jest.spyOn(document.body, "appendChild").mockImplementation();
-      const removeChildSpy = jest.spyOn(document.body, "removeChild").mockImplementation();
+      const createElementSpy = jest
+        .spyOn(document, "createElement")
+        .mockReturnValue(mockTextarea as unknown as HTMLElement);
+      const appendChildSpy = jest
+        .spyOn(document.body, "appendChild")
+        .mockImplementation();
+      const removeChildSpy = jest
+        .spyOn(document.body, "removeChild")
+        .mockImplementation();
 
       await expect(copyToClipboard("test content")).rejects.toThrow();
 

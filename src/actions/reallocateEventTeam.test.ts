@@ -60,7 +60,7 @@ describe("reallocateEventTeam", () => {
       eventAmbassadors,
       eventTeamsTableData,
       log,
-      regionalAmbassadors
+      regionalAmbassadors,
     );
 
     expect(assignEventToAmbassador).toHaveBeenCalledWith(
@@ -69,7 +69,7 @@ describe("reallocateEventTeam", () => {
       newAmbassador,
       eventAmbassadors,
       log,
-      regionalAmbassadors
+      regionalAmbassadors,
     );
   });
 
@@ -81,7 +81,7 @@ describe("reallocateEventTeam", () => {
       eventAmbassadors,
       eventTeamsTableData,
       log,
-      regionalAmbassadors
+      regionalAmbassadors,
     );
 
     const updatedData = eventTeamsTableData.get(eventShortName);
@@ -108,7 +108,7 @@ describe("reallocateEventTeam", () => {
       eventAmbassadors,
       eventTeamsTableData,
       log,
-      regionalAmbassadors
+      regionalAmbassadors,
     );
 
     const updatedData = eventTeamsTableData.get(eventShortName);
@@ -124,7 +124,7 @@ describe("reallocateEventTeam", () => {
       eventAmbassadors,
       eventTeamsTableData,
       log,
-      regionalAmbassadors
+      regionalAmbassadors,
     );
 
     expect(assignEventToAmbassador).toHaveBeenCalled();
@@ -138,7 +138,7 @@ describe("reallocateEventTeam", () => {
       eventAmbassadors,
       eventTeamsTableData,
       log,
-      regionalAmbassadors
+      regionalAmbassadors,
     );
 
     expect(calculateAllCapacityStatuses).toHaveBeenCalled();
@@ -157,7 +157,7 @@ describe("reallocateEventTeam", () => {
         eventAmbassadors,
         eventTeamsTableData,
         log,
-        regionalAmbassadors
+        regionalAmbassadors,
       );
     }).toThrow('Event Ambassador "Non-existent EA" not found');
   });
@@ -171,7 +171,7 @@ describe("reallocateEventTeam", () => {
         eventAmbassadors,
         eventTeamsTableData,
         log,
-        regionalAmbassadors
+        regionalAmbassadors,
       );
     }).toThrow("Event 'non-existent-event' not found in table data");
   });
@@ -195,7 +195,7 @@ describe("reallocateEventTeam", () => {
       eventAmbassadors,
       eventTeamsTableData,
       log,
-      regionalAmbassadors
+      regionalAmbassadors,
     );
 
     expect(assignEventToAmbassador).toHaveBeenCalledWith(
@@ -204,7 +204,7 @@ describe("reallocateEventTeam", () => {
       newAmbassador,
       eventAmbassadors,
       log,
-      regionalAmbassadors
+      regionalAmbassadors,
     );
 
     const updatedData = eventTeamsTableData.get("unassigned-event");

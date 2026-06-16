@@ -5,7 +5,7 @@
  * of prospect status, ambassador assignments, and allocation impact.
  */
 
-import { Coordinate } from './Coordinate';
+import { Coordinate } from "./Coordinate";
 
 export interface ProspectiveEvent {
   // Identity
@@ -30,8 +30,8 @@ export interface ProspectiveEvent {
   coordinates?: Coordinate;
 
   // Processing Status
-  geocodingStatus: 'pending' | 'success' | 'failed' | 'manual';
-  ambassadorMatchStatus: 'pending' | 'matched' | 'unmatched';
+  geocodingStatus: "pending" | "success" | "failed" | "manual";
+  ambassadorMatchStatus: "pending" | "matched" | "unmatched";
 
   // Metadata
   importTimestamp: number;

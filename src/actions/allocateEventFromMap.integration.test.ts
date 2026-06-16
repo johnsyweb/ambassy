@@ -66,14 +66,14 @@ describe("allocateEventFromMap integration", () => {
       regionalAmbassadors,
       eventTeams,
       eventDetails,
-      log
+      log,
     );
 
     const eventTeamsTableData = extractEventTeamsTableData(
       regionalAmbassadors,
       eventAmbassadors,
       eventTeams,
-      eventDetails
+      eventDetails,
     );
 
     expect(eventTeamsTableData.has("event1")).toBe(true);
@@ -92,16 +92,19 @@ describe("allocateEventFromMap integration", () => {
       regionalAmbassadors,
       eventTeams,
       eventDetails,
-      log
+      log,
     );
 
-    const allocationLog = log.find((entry) => entry.type === "allocate event from map");
+    const allocationLog = log.find(
+      (entry) => entry.type === "allocate event from map",
+    );
     expect(allocationLog).toBeDefined();
     expect(allocationLog?.event).toBe("event1");
     expect(allocationLog?.newValue).toBe("EA1");
 
     const reaLog = log.find(
-      (entry) => entry.type === "assign event ambassador to regional ambassador"
+      (entry) =>
+        entry.type === "assign event ambassador to regional ambassador",
     );
     expect(reaLog).toBeDefined();
     expect(reaLog?.newValue).toBe("REA1");
@@ -115,7 +118,7 @@ describe("allocateEventFromMap integration", () => {
       regionalAmbassadors,
       eventTeams,
       eventDetails,
-      log
+      log,
     );
 
     const ea = eventAmbassadors.get("EA1");
@@ -131,14 +134,14 @@ describe("allocateEventFromMap integration", () => {
       regionalAmbassadors,
       eventTeams,
       eventDetails,
-      log
+      log,
     );
 
     const eventTeamsTableData = extractEventTeamsTableData(
       regionalAmbassadors,
       eventAmbassadors,
       eventTeams,
-      eventDetails
+      eventDetails,
     );
 
     const eventData = eventTeamsTableData.get("event1");
@@ -153,14 +156,14 @@ describe("allocateEventFromMap integration", () => {
       regionalAmbassadors,
       eventTeams,
       eventDetails,
-      log
+      log,
     );
 
     const eventTeamsTableData = extractEventTeamsTableData(
       regionalAmbassadors,
       eventAmbassadors,
       eventTeams,
-      eventDetails
+      eventDetails,
     );
 
     expect(eventTeamsTableData.has("event1")).toBe(true);

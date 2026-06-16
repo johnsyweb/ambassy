@@ -5,10 +5,7 @@ import {
   calculateAllCapacityStatuses,
 } from "./checkCapacity";
 import { CapacityStatus } from "@models/CapacityStatus";
-import {
-  CapacityLimits,
-  defaultCapacityLimits,
-} from "@models/CapacityLimits";
+import { CapacityLimits, defaultCapacityLimits } from "@models/CapacityLimits";
 import { EventAmbassadorMap } from "@models/EventAmbassadorMap";
 import { RegionalAmbassadorMap } from "@models/RegionalAmbassadorMap";
 import { loadFromStorage } from "@utils/storage";

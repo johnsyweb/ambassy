@@ -5,8 +5,8 @@
  * and provides utilities for querying and managing prospect data.
  */
 
-import { ProspectiveEvent } from './ProspectiveEvent';
-import { EventAmbassadorMap } from './EventAmbassadorMap';
+import { ProspectiveEvent } from "./ProspectiveEvent";
+import { EventAmbassadorMap } from "./EventAmbassadorMap";
 
 export class ProspectiveEventList {
   private events: Map<string, ProspectiveEvent> = new Map();
@@ -49,10 +49,11 @@ export class ProspectiveEventList {
    * Get events that have unresolved issues
    */
   getUnresolved(): ProspectiveEvent[] {
-    return this.getAll().filter(event =>
-      event.geocodingStatus === 'pending' ||
-      event.geocodingStatus === 'failed' ||
-      event.ambassadorMatchStatus === 'unmatched'
+    return this.getAll().filter(
+      (event) =>
+        event.geocodingStatus === "pending" ||
+        event.geocodingStatus === "failed" ||
+        event.ambassadorMatchStatus === "unmatched",
     );
   }
 
@@ -60,9 +61,10 @@ export class ProspectiveEventList {
    * Get events that are fully resolved
    */
   getResolved(): ProspectiveEvent[] {
-    return this.getAll().filter(event =>
-      event.geocodingStatus === 'success' &&
-      event.ambassadorMatchStatus === 'matched'
+    return this.getAll().filter(
+      (event) =>
+        event.geocodingStatus === "success" &&
+        event.ambassadorMatchStatus === "matched",
     );
   }
 
@@ -70,8 +72,8 @@ export class ProspectiveEventList {
    * Get prospects assigned to a specific ambassador
    */
   getByAmbassador(ambassadorId: string): ProspectiveEvent[] {
-    return this.getAll().filter(event =>
-      event.eventAmbassador === ambassadorId
+    return this.getAll().filter(
+      (event) => event.eventAmbassador === ambassadorId,
     );
   }
 
@@ -85,7 +87,10 @@ export class ProspectiveEventList {
   /**
    * Get the Regional Ambassador for a prospect (inferred from EA)
    */
-  getRegionalAmbassador(prospectId: string, eventAmbassadors: EventAmbassadorMap): string | undefined {
+  getRegionalAmbassador(
+    prospectId: string,
+    eventAmbassadors: EventAmbassadorMap,
+  ): string | undefined {
     const prospect = this.findById(prospectId);
     if (!prospect) return undefined;
 
@@ -96,8 +101,11 @@ export class ProspectiveEventList {
   /**
    * Get prospects by Regional Ambassador (inferred relationship)
    */
-  getByRegionalAmbassador(raId: string, eventAmbassadors: EventAmbassadorMap): ProspectiveEvent[] {
-    return this.getAll().filter(prospect => {
+  getByRegionalAmbassador(
+    raId: string,
+    eventAmbassadors: EventAmbassadorMap,
+  ): ProspectiveEvent[] {
+    return this.getAll().filter((prospect) => {
       const ea = eventAmbassadors.get(prospect.eventAmbassador);
       return ea?.regionalAmbassador === raId;
     });
@@ -115,15 +123,21 @@ export class ProspectiveEventList {
   /**
    * Get events by geocoding status
    */
-  getByGeocodingStatus(status: ProspectiveEvent['geocodingStatus']): ProspectiveEvent[] {
-    return this.getAll().filter(event => event.geocodingStatus === status);
+  getByGeocodingStatus(
+    status: ProspectiveEvent["geocodingStatus"],
+  ): ProspectiveEvent[] {
+    return this.getAll().filter((event) => event.geocodingStatus === status);
   }
 
   /**
    * Get events by ambassador match status
    */
-  getByAmbassadorMatchStatus(status: ProspectiveEvent['ambassadorMatchStatus']): ProspectiveEvent[] {
-    return this.getAll().filter(event => event.ambassadorMatchStatus === status);
+  getByAmbassadorMatchStatus(
+    status: ProspectiveEvent["ambassadorMatchStatus"],
+  ): ProspectiveEvent[] {
+    return this.getAll().filter(
+      (event) => event.ambassadorMatchStatus === status,
+    );
   }
 
   /**

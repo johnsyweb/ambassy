@@ -1,5 +1,8 @@
 import { EventAmbassadorMap } from "@models/EventAmbassadorMap";
-import { EventDetailsMap, getEventDetailsByShortName } from "@models/EventDetailsMap";
+import {
+  EventDetailsMap,
+  getEventDetailsByShortName,
+} from "@models/EventDetailsMap";
 import { EventIssue } from "@models/EventIssue";
 import { EventTeamMap } from "@models/EventTeamMap";
 import { RegionalAmbassadorMap } from "@models/RegionalAmbassadorMap";

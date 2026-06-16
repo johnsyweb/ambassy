@@ -15,7 +15,9 @@ export function canonicaliseAllocationNames(
   eventDetails: EventDetailsMap,
   log: LogEntry[],
 ): boolean {
-  if (allocationDataLooksCanonical(eventAmbassadors, eventTeams, eventDetails)) {
+  if (
+    allocationDataLooksCanonical(eventAmbassadors, eventTeams, eventDetails)
+  ) {
     return false;
   }
 

@@ -59,7 +59,6 @@ async function fetchEvents(): Promise<void> {
         }),
       );
     }
-
   } catch (error) {
     console.error("Error fetching events:", error);
   }

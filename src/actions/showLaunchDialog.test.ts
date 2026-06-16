@@ -52,8 +52,12 @@ describe("showLaunchDialog", () => {
 
     dialog = document.getElementById("reallocationDialog") as HTMLElement;
     title = document.getElementById("reallocationDialogTitle") as HTMLElement;
-    content = document.getElementById("reallocationDialogContent") as HTMLElement;
-    cancelButton = document.getElementById("reallocationDialogCancel") as HTMLButtonElement;
+    content = document.getElementById(
+      "reallocationDialogContent",
+    ) as HTMLElement;
+    cancelButton = document.getElementById(
+      "reallocationDialogCancel",
+    ) as HTMLButtonElement;
 
     eventDetails = new Map();
     eventDetails.set("Event A", {
@@ -179,7 +183,9 @@ describe("showLaunchDialog", () => {
 
   it("allows selecting a matching event and shows EA selection", () => {
     const { findMatchingEvents } = jest.requireMock("./findMatchingEvents");
-    const { suggestEventAllocation } = jest.requireMock("./suggestEventAllocation");
+    const { suggestEventAllocation } = jest.requireMock(
+      "./suggestEventAllocation",
+    );
     const matchingEvent = eventDetails.get("Event A")!;
     findMatchingEvents.mockReturnValue([matchingEvent]);
     suggestEventAllocation.mockReturnValue([
@@ -233,7 +239,9 @@ describe("showLaunchDialog", () => {
 
   it("calls onLaunch with selected event and EA when both are selected", () => {
     const { findMatchingEvents } = jest.requireMock("./findMatchingEvents");
-    const { suggestEventAllocation } = jest.requireMock("./suggestEventAllocation");
+    const { suggestEventAllocation } = jest.requireMock(
+      "./suggestEventAllocation",
+    );
     const matchingEvent = eventDetails.get("Event A")!;
     findMatchingEvents.mockReturnValue([matchingEvent]);
     suggestEventAllocation.mockReturnValue([

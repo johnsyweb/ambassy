@@ -19,4 +19,3 @@ export interface ApplicationState {
   exportedAt: string;
   data: ApplicationStateData;
 }
-

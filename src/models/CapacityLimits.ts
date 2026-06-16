@@ -11,4 +11,3 @@ export const defaultCapacityLimits: CapacityLimits = {
   regionalAmbassadorMin: 3,
   regionalAmbassadorMax: 10,
 };
-

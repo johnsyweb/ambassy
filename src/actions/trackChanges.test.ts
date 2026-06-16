@@ -1,4 +1,10 @@
-import { trackStateChange, hasUnsavedChanges, markStateExported, setupExportReminder, removeExportReminder } from "./trackChanges";
+import {
+  trackStateChange,
+  hasUnsavedChanges,
+  markStateExported,
+  setupExportReminder,
+  removeExportReminder,
+} from "./trackChanges";
 import { loadFromStorage, saveToStorage } from "@utils/storage";
 import { ChangeTracker } from "@models/ChangeTracker";
 
@@ -23,13 +29,19 @@ describe("trackChanges", () => {
       trackStateChange();
       const afterTime = Date.now();
 
-      expect(saveToStorage).toHaveBeenCalledWith("changeTracker", expect.objectContaining({
-        lastExportTimestamp: 1000,
-        lastChangeTimestamp: expect.any(Number),
-      }));
+      expect(saveToStorage).toHaveBeenCalledWith(
+        "changeTracker",
+        expect.objectContaining({
+          lastExportTimestamp: 1000,
+          lastChangeTimestamp: expect.any(Number),
+        }),
+      );
 
-      const savedTracker = (saveToStorage as jest.Mock).mock.calls[0][1] as ChangeTracker;
-      expect(savedTracker.lastChangeTimestamp).toBeGreaterThanOrEqual(beforeTime);
+      const savedTracker = (saveToStorage as jest.Mock).mock
+        .calls[0][1] as ChangeTracker;
+      expect(savedTracker.lastChangeTimestamp).toBeGreaterThanOrEqual(
+        beforeTime,
+      );
       expect(savedTracker.lastChangeTimestamp).toBeLessThanOrEqual(afterTime);
     });
 
@@ -38,10 +50,13 @@ describe("trackChanges", () => {
 
       trackStateChange();
 
-      expect(saveToStorage).toHaveBeenCalledWith("changeTracker", expect.objectContaining({
-        lastExportTimestamp: 0,
-        lastChangeTimestamp: expect.any(Number),
-      }));
+      expect(saveToStorage).toHaveBeenCalledWith(
+        "changeTracker",
+        expect.objectContaining({
+          lastExportTimestamp: 0,
+          lastChangeTimestamp: expect.any(Number),
+        }),
+      );
     });
   });
 
@@ -105,13 +120,19 @@ describe("trackChanges", () => {
       markStateExported();
       const afterTime = Date.now();
 
-      expect(saveToStorage).toHaveBeenCalledWith("changeTracker", expect.objectContaining({
-        lastExportTimestamp: expect.any(Number),
-        lastChangeTimestamp: 2000,
-      }));
+      expect(saveToStorage).toHaveBeenCalledWith(
+        "changeTracker",
+        expect.objectContaining({
+          lastExportTimestamp: expect.any(Number),
+          lastChangeTimestamp: 2000,
+        }),
+      );
 
-      const savedTracker = (saveToStorage as jest.Mock).mock.calls[0][1] as ChangeTracker;
-      expect(savedTracker.lastExportTimestamp).toBeGreaterThanOrEqual(beforeTime);
+      const savedTracker = (saveToStorage as jest.Mock).mock
+        .calls[0][1] as ChangeTracker;
+      expect(savedTracker.lastExportTimestamp).toBeGreaterThanOrEqual(
+        beforeTime,
+      );
       expect(savedTracker.lastExportTimestamp).toBeLessThanOrEqual(afterTime);
     });
 
@@ -120,10 +141,13 @@ describe("trackChanges", () => {
 
       markStateExported();
 
-      expect(saveToStorage).toHaveBeenCalledWith("changeTracker", expect.objectContaining({
-        lastExportTimestamp: expect.any(Number),
-        lastChangeTimestamp: 0,
-      }));
+      expect(saveToStorage).toHaveBeenCalledWith(
+        "changeTracker",
+        expect.objectContaining({
+          lastExportTimestamp: expect.any(Number),
+          lastChangeTimestamp: 0,
+        }),
+      );
     });
   });
 
@@ -133,7 +157,10 @@ describe("trackChanges", () => {
 
       setupExportReminder();
 
-      expect(addEventListenerSpy).toHaveBeenCalledWith("beforeunload", expect.any(Function));
+      expect(addEventListenerSpy).toHaveBeenCalledWith(
+        "beforeunload",
+        expect.any(Function),
+      );
 
       addEventListenerSpy.mockRestore();
     });
@@ -148,7 +175,9 @@ describe("trackChanges", () => {
       const addEventListenerSpy = jest.spyOn(window, "addEventListener");
       setupExportReminder();
 
-      const beforeUnloadEvent = new Event("beforeunload", { cancelable: true }) as BeforeUnloadEvent;
+      const beforeUnloadEvent = new Event("beforeunload", {
+        cancelable: true,
+      }) as BeforeUnloadEvent;
       Object.defineProperty(beforeUnloadEvent, "returnValue", {
         writable: true,
         value: "",
@@ -159,7 +188,7 @@ describe("trackChanges", () => {
       });
 
       const handler = addEventListenerSpy.mock.calls.find(
-        (call) => call[0] === "beforeunload"
+        (call) => call[0] === "beforeunload",
       )?.[1] as ((event: BeforeUnloadEvent) => void) | undefined;
 
       if (handler && typeof handler === "function") {
@@ -168,7 +197,7 @@ describe("trackChanges", () => {
 
       expect(beforeUnloadEvent.returnValue).toBe("");
       expect(beforeUnloadEvent.preventDefault).toHaveBeenCalled();
-      
+
       addEventListenerSpy.mockRestore();
     });
 
@@ -182,7 +211,9 @@ describe("trackChanges", () => {
       const addEventListenerSpy = jest.spyOn(window, "addEventListener");
       setupExportReminder();
 
-      const beforeUnloadEvent = new Event("beforeunload", { cancelable: true }) as BeforeUnloadEvent;
+      const beforeUnloadEvent = new Event("beforeunload", {
+        cancelable: true,
+      }) as BeforeUnloadEvent;
       Object.defineProperty(beforeUnloadEvent, "returnValue", {
         writable: true,
         value: "",
@@ -193,7 +224,7 @@ describe("trackChanges", () => {
       });
 
       const handler = addEventListenerSpy.mock.calls.find(
-        (call) => call[0] === "beforeunload"
+        (call) => call[0] === "beforeunload",
       )?.[1] as ((event: BeforeUnloadEvent) => void) | undefined;
 
       if (handler && typeof handler === "function") {
@@ -202,7 +233,7 @@ describe("trackChanges", () => {
 
       expect(beforeUnloadEvent.returnValue).toBe("");
       expect(beforeUnloadEvent.preventDefault).not.toHaveBeenCalled();
-      
+
       addEventListenerSpy.mockRestore();
     });
   });
@@ -214,7 +245,10 @@ describe("trackChanges", () => {
       setupExportReminder();
       removeExportReminder();
 
-      expect(removeEventListenerSpy).toHaveBeenCalledWith("beforeunload", expect.any(Function));
+      expect(removeEventListenerSpy).toHaveBeenCalledWith(
+        "beforeunload",
+        expect.any(Function),
+      );
 
       removeEventListenerSpy.mockRestore();
     });

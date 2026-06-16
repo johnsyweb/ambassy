@@ -1,2 +1,4 @@
-
-export type FileUploadType = 'Event Ambassadors' | 'Event Teams' | 'Regional Ambassadors';
+export type FileUploadType =
+  | "Event Ambassadors"
+  | "Event Teams"
+  | "Regional Ambassadors";

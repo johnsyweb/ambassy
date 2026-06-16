@@ -77,7 +77,10 @@ describe("onboardAmbassador", () => {
     it("should return false if name already exists in regional ambassadors", () => {
       const eventAmbassadors: EventAmbassadorMap = new Map();
       const regionalAmbassadors: RegionalAmbassadorMap = new Map([
-        ["Existing REA", { name: "Existing REA", state: "VIC", supportsEAs: [] }],
+        [
+          "Existing REA",
+          { name: "Existing REA", state: "VIC", supportsEAs: [] },
+        ],
       ]);
 
       const isValid = validateAmbassadorName(
@@ -166,7 +169,10 @@ describe("onboardAmbassador", () => {
     it("should throw error if name already exists in regional ambassadors", () => {
       const eventAmbassadors: EventAmbassadorMap = new Map();
       const regionalAmbassadors: RegionalAmbassadorMap = new Map([
-        ["Existing REA", { name: "Existing REA", state: "VIC", supportsEAs: [] }],
+        [
+          "Existing REA",
+          { name: "Existing REA", state: "VIC", supportsEAs: [] },
+        ],
       ]);
       const log: LogEntry[] = [];
 
@@ -227,7 +233,13 @@ describe("onboardAmbassador", () => {
       const log: LogEntry[] = [];
 
       expect(() => {
-        onboardEventAmbassador("", "VIC", eventAmbassadors, regionalAmbassadors, log);
+        onboardEventAmbassador(
+          "",
+          "VIC",
+          eventAmbassadors,
+          regionalAmbassadors,
+          log,
+        );
       }).toThrow("Ambassador name already exists");
     });
 
@@ -296,7 +308,9 @@ describe("onboardAmbassador", () => {
       expect(log[0].oldValue).toBe("");
       expect(log[0].newValue).toBe("New EA");
 
-      expect(log[1].type).toBe("assign event ambassador to regional ambassador");
+      expect(log[1].type).toBe(
+        "assign event ambassador to regional ambassador",
+      );
       expect(log[1].event).toBe("New EA");
       expect(log[1].oldValue).toBe("");
       expect(log[1].newValue).toBe("Test REA");
@@ -321,7 +335,7 @@ describe("onboardAmbassador", () => {
           log,
           "NonExistent REA",
         );
-      }).toThrow("Regional Ambassador \"NonExistent REA\" not found");
+      }).toThrow('Regional Ambassador "NonExistent REA" not found');
     });
 
     it("should handle onboarding with state but without REA assignment", () => {
@@ -406,7 +420,10 @@ describe("onboardAmbassador", () => {
     it("should throw error if name already exists in regional ambassadors", () => {
       const eventAmbassadors: EventAmbassadorMap = new Map();
       const regionalAmbassadors: RegionalAmbassadorMap = new Map([
-        ["Existing REA", { name: "Existing REA", state: "VIC", supportsEAs: [] }],
+        [
+          "Existing REA",
+          { name: "Existing REA", state: "VIC", supportsEAs: [] },
+        ],
       ]);
       const log: LogEntry[] = [];
 

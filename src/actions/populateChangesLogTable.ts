@@ -7,24 +7,24 @@ import { buildEventHistoryUrl } from "@utils/eventHistoryUrl";
 export function populateChangesLogTable(
   log: LogEntry[],
   eventDetails?: EventDetailsMap,
-  countries?: CountryMap
+  countries?: CountryMap,
 ) {
-  const changesTableBody = document.querySelector('#changesTable tbody');
+  const changesTableBody = document.querySelector("#changesTable tbody");
   if (!changesTableBody) {
-    console.error('Table body not found for changes log');
+    console.error("Table body not found for changes log");
     return;
   }
-  changesTableBody.innerHTML = '';
+  changesTableBody.innerHTML = "";
 
-  log.forEach(entry => {
-    const row = document.createElement('tr');
+  log.forEach((entry) => {
+    const row = document.createElement("tr");
 
-    const changeTypeCell = document.createElement('td');
+    const changeTypeCell = document.createElement("td");
     changeTypeCell.textContent = entry.type;
     row.appendChild(changeTypeCell);
 
-    const eventNameCell = document.createElement('td');
-    
+    const eventNameCell = document.createElement("td");
+
     // For "Issue Resolved" entries, try to create an event history link
     if (entry.type === "Issue Resolved" && eventDetails && countries) {
       const eventDetail = eventDetails.get(entry.event);
@@ -32,9 +32,9 @@ export function populateChangesLogTable(
         const url = buildEventHistoryUrl(
           eventDetail.properties.eventname,
           eventDetail.properties.countrycode,
-          countries
+          countries,
         );
-        
+
         if (url) {
           const link = document.createElement("a");
           link.href = url;
@@ -52,18 +52,18 @@ export function populateChangesLogTable(
     } else {
       eventNameCell.textContent = entry.event;
     }
-    
+
     row.appendChild(eventNameCell);
 
-    const originalValueCell = document.createElement('td');
+    const originalValueCell = document.createElement("td");
     originalValueCell.textContent = entry.oldValue;
     row.appendChild(originalValueCell);
 
-    const newValueCell = document.createElement('td');
+    const newValueCell = document.createElement("td");
     newValueCell.textContent = entry.newValue;
     row.appendChild(newValueCell);
 
-    const timestampCell = document.createElement('td');
+    const timestampCell = document.createElement("td");
     timestampCell.textContent = new Date(entry.timestamp).toLocaleString();
     row.appendChild(timestampCell);
 
@@ -73,6 +73,6 @@ export function populateChangesLogTable(
   // Initialize sorting with default: Timestamp (column 4) descending (most recent first)
   // Only initialize if we have log entries
   if (log.length > 0) {
-    initializeTableSorting('changesTable', 4, 'desc');
+    initializeTableSorting("changesTable", 4, "desc");
   }
 }

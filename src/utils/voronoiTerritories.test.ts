@@ -84,10 +84,7 @@ describe("buildVoronoiSites", () => {
     const eventsJsonName = "O\u2019Connors Beach";
     const csvName = "O'Connors Beach";
     const eventDetails: EventDetailsMap = new Map([
-      [
-        eventsJsonName,
-        createEvent(eventsJsonName, [148.274083, -41.338567]),
-      ],
+      [eventsJsonName, createEvent(eventsJsonName, [148.274083, -41.338567])],
       ["Albany", createEvent("Albany", [117.883, -35.027])],
     ]);
     const eventTeamsTableData: EventTeamsTableDataMap = new Map([
@@ -330,9 +327,9 @@ describe("extractLocalTerritoryRing", () => {
     expect(
       isDrawableTerritoryRing(localRing!, baxterSite[0], baxterSite[1]),
     ).toBe(false);
-    expect(
-      pointInTerritoryRing(baxterSite[0], baxterSite[1], localRing!),
-    ).toBe(false);
+    expect(pointInTerritoryRing(baxterSite[0], baxterSite[1], localRing!)).toBe(
+      false,
+    );
   });
 });
 
@@ -535,34 +532,38 @@ describe("VoronoiTerritoryCache", () => {
       raColor: "#ff0066",
       tooltip: "Mt Clarence",
     };
-    const geoVoronoiFn = jest.fn<ReturnType<GeoVoronoiFn>, Parameters<GeoVoronoiFn>>(
-      () => ({
-        polygons: () => ({
-          features: [
-            {
-              type: "Feature",
-              properties: {},
-              geometry: {
-                type: "Polygon",
-                coordinates: [ring.ring],
-              },
+    const geoVoronoiFn = jest.fn<
+      ReturnType<GeoVoronoiFn>,
+      Parameters<GeoVoronoiFn>
+    >(() => ({
+      polygons: () => ({
+        features: [
+          {
+            type: "Feature",
+            properties: {},
+            geometry: {
+              type: "Polygon",
+              coordinates: [ring.ring],
             },
-          ],
-        }),
+          },
+        ],
       }),
-    );
+    }));
 
     const cache = new VoronoiTerritoryCache();
     expect(cache.getRings(sites, geoVoronoiFn)).toEqual([ring]);
     expect(cache.getRings(sites, geoVoronoiFn)).toEqual([ring]);
     expect(geoVoronoiFn).toHaveBeenCalledTimes(1);
 
-    const changedSites = [...sites, {
-      id: "Albany",
-      longitude: 117.883,
-      latitude: -35.027,
-      role: "constraining" as const,
-    }];
+    const changedSites = [
+      ...sites,
+      {
+        id: "Albany",
+        longitude: 117.883,
+        latitude: -35.027,
+        role: "constraining" as const,
+      },
+    ];
     expect(fingerprintVoronoiSites(changedSites)).not.toBe(
       fingerprintVoronoiSites(sites),
     );

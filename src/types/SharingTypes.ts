@@ -12,7 +12,11 @@ export class SharingError extends Error {
   method: SharingMethod;
   cause: Error | null;
 
-  constructor(message: string, method: SharingMethod, cause: Error | null = null) {
+  constructor(
+    message: string,
+    method: SharingMethod,
+    cause: Error | null = null,
+  ) {
     super(message);
     this.name = "SharingError";
     this.method = method;
@@ -30,7 +34,7 @@ export class StateTooLargeError extends SharingError {
     method: SharingMethod,
     size: number,
     maxSize: number,
-    suggestedMethod: SharingMethod = "file"
+    suggestedMethod: SharingMethod = "file",
   ) {
     super(message, method);
     this.name = "StateTooLargeError";

@@ -94,7 +94,10 @@ describe("Resolved Issues Persistence", () => {
     // Persist to storage
     saveToStorage("eventAmbassadors", Array.from(eventAmbassadors.entries()));
     saveToStorage("eventTeams", Array.from(eventTeams.entries()));
-    saveToStorage("regionalAmbassadors", Array.from(regionalAmbassadors.entries()));
+    saveToStorage(
+      "regionalAmbassadors",
+      Array.from(regionalAmbassadors.entries()),
+    );
     saveToStorage("changesLog", log);
 
     // Store resolved eventDetails in cache
@@ -162,9 +165,10 @@ describe("Resolved Issues Persistence", () => {
     expect(cachedData.eventDetailsMap[0][0]).toBe("TestEvent");
 
     // Verify that detectIssues doesn't detect the resolved issue
-    const restoredEventDetailsMap = new Map<string, import("@models/EventDetails").EventDetails>(
-      cachedData.eventDetailsMap,
-    );
+    const restoredEventDetailsMap = new Map<
+      string,
+      import("@models/EventDetails").EventDetails
+    >(cachedData.eventDetailsMap);
     const issues = detectIssues(
       eventTeams,
       restoredEventDetailsMap,

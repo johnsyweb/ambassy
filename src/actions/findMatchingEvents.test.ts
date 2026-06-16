@@ -80,7 +80,10 @@ describe("findMatchingEvents", () => {
 
   it("sorts by distance ascending", () => {
     // Add another close event slightly nearer
-    eventDetails.set("closest-event", makeEvent("Closest Event", -37.82, 144.95));
+    eventDetails.set(
+      "closest-event",
+      makeEvent("Closest Event", -37.82, 144.95),
+    );
     prospectWithCoords.prospectEvent = "Event";
     const results = findMatchingEvents(prospectWithCoords, eventDetails, 50);
     expect(results.length).toBe(2);
@@ -118,8 +121,11 @@ describe("findMatchingEvents", () => {
   });
 
   it("handles multiple matches and sorts by distance then match quality", () => {
-    eventDetails.set("exact-match", makeEvent("Exact Match Event", -37.81, 144.96));
-    eventDetails.set("fuzzy-match", makeEvent("Fuzzy Match", -37.80, 144.97));
+    eventDetails.set(
+      "exact-match",
+      makeEvent("Exact Match Event", -37.81, 144.96),
+    );
+    eventDetails.set("fuzzy-match", makeEvent("Fuzzy Match", -37.8, 144.97));
     prospectWithCoords.prospectEvent = "Exact Match Event";
     const results = findMatchingEvents(prospectWithCoords, eventDetails, 50);
     expect(results.length).toBeGreaterThan(0);

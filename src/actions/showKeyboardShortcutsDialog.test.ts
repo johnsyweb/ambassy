@@ -1,4 +1,7 @@
-import { showKeyboardShortcutsDialog, initializeKeyboardShortcuts } from "./showKeyboardShortcutsDialog";
+import {
+  showKeyboardShortcutsDialog,
+  initializeKeyboardShortcuts,
+} from "./showKeyboardShortcutsDialog";
 
 describe("showKeyboardShortcutsDialog", () => {
   let dialog: HTMLElement;
@@ -18,7 +21,9 @@ describe("showKeyboardShortcutsDialog", () => {
     dialog = document.getElementById("keyboardShortcutsDialog")!;
     title = document.getElementById("keyboardShortcutsDialogTitle")!;
     content = document.getElementById("keyboardShortcutsDialogContent")!;
-    closeButton = document.getElementById("keyboardShortcutsDialogClose") as HTMLButtonElement;
+    closeButton = document.getElementById(
+      "keyboardShortcutsDialogClose",
+    ) as HTMLButtonElement;
   });
 
   afterEach(() => {
@@ -63,7 +68,9 @@ describe("showKeyboardShortcutsDialog", () => {
 
     expect(dialog.getAttribute("role")).toBe("dialog");
     expect(dialog.getAttribute("aria-modal")).toBe("true");
-    expect(dialog.getAttribute("aria-labelledby")).toBe("keyboardShortcutsDialogTitle");
+    expect(dialog.getAttribute("aria-labelledby")).toBe(
+      "keyboardShortcutsDialogTitle",
+    );
   });
 
   it("should focus close button when opened", () => {
@@ -98,7 +105,9 @@ describe("initializeKeyboardShortcuts", () => {
     });
     document.dispatchEvent(ctrlSlashEvent);
 
-    const dialog = document.getElementById("keyboardShortcutsDialog") as HTMLElement;
+    const dialog = document.getElementById(
+      "keyboardShortcutsDialog",
+    ) as HTMLElement;
     expect(dialog.style.display).not.toBe("none");
   });
 
@@ -110,7 +119,9 @@ describe("initializeKeyboardShortcuts", () => {
     });
     document.dispatchEvent(questionEvent);
 
-    const dialog = document.getElementById("keyboardShortcutsDialog") as HTMLElement;
+    const dialog = document.getElementById(
+      "keyboardShortcutsDialog",
+    ) as HTMLElement;
     expect(dialog.style.display).not.toBe("none");
   });
 
@@ -130,7 +141,9 @@ describe("initializeKeyboardShortcuts", () => {
     });
     document.dispatchEvent(ctrlSlashEvent);
 
-    const dialog = document.getElementById("keyboardShortcutsDialog") as HTMLElement;
+    const dialog = document.getElementById(
+      "keyboardShortcutsDialog",
+    ) as HTMLElement;
     expect(dialog.style.display).toBe("none");
   });
 });

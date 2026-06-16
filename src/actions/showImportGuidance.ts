@@ -75,7 +75,9 @@ export function showImportGuidance(): void {
 
   introduction.appendChild(guidance);
 
-  const state = loadFromStorage<ImportGuidanceState>(STORAGE_KEY) || createImportGuidanceState();
+  const state =
+    loadFromStorage<ImportGuidanceState>(STORAGE_KEY) ||
+    createImportGuidanceState();
   state.lastGuidanceShown = Date.now();
   saveToStorage(STORAGE_KEY, state);
 }
@@ -86,7 +88,9 @@ export function dismissImportGuidance(): void {
     guidance.style.display = "none";
   }
 
-  const state = loadFromStorage<ImportGuidanceState>(STORAGE_KEY) || createImportGuidanceState();
+  const state =
+    loadFromStorage<ImportGuidanceState>(STORAGE_KEY) ||
+    createImportGuidanceState();
   state.guidanceDismissed = true;
   state.lastGuidanceShown = Date.now();
   saveToStorage(STORAGE_KEY, state);
@@ -98,7 +102,9 @@ export function markDataImported(): void {
     guidance.style.display = "none";
   }
 
-  const state = loadFromStorage<ImportGuidanceState>(STORAGE_KEY) || createImportGuidanceState();
+  const state =
+    loadFromStorage<ImportGuidanceState>(STORAGE_KEY) ||
+    createImportGuidanceState();
   state.hasImportedData = true;
   saveToStorage(STORAGE_KEY, state);
 }

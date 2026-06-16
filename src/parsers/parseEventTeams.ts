@@ -1,6 +1,6 @@
-import { EventTeam } from '@models/EventTeam';
-import { loadFromStorage } from '@utils/storage';
-import { csvStringCell } from '@utils/csvField';
+import { EventTeam } from "@models/EventTeam";
+import { loadFromStorage } from "@utils/storage";
+import { csvStringCell } from "@utils/csvField";
 
 /**
  * One row from the Event Teams CSV. Extra columns are ignored after pick.
@@ -41,7 +41,7 @@ export function parseEventTeams(
       currentEventTeam = {
         eventShortName,
         eventAmbassador,
-        eventDirectors: eventDirector ? [eventDirector] : []
+        eventDirectors: eventDirector ? [eventDirector] : [],
       };
     } else if (currentEventTeam && eventDirector) {
       currentEventTeam.eventDirectors.push(eventDirector);
@@ -51,14 +51,15 @@ export function parseEventTeams(
   });
 
   if (currentEventTeam) {
-    eventTeamsMap.set(currentEventTeam['eventShortName'], currentEventTeam);
+    eventTeamsMap.set(currentEventTeam["eventShortName"], currentEventTeam);
   }
 
   return eventTeamsMap;
 }
 
 export function getEventTeamsFromSession(): EventTeamMap {
-  const storedEventTeams = loadFromStorage<Array<[string, EventTeam]>>("eventTeams");
+  const storedEventTeams =
+    loadFromStorage<Array<[string, EventTeam]>>("eventTeams");
   if (storedEventTeams) {
     return new Map<string, EventTeam>(storedEventTeams);
   }

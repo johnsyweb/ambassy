@@ -10,7 +10,7 @@ import { trackStateChange } from "./trackChanges";
 export function validateAmbassadorName(
   name: string,
   eventAmbassadors: EventAmbassadorMap,
-  regionalAmbassadors: RegionalAmbassadorMap
+  regionalAmbassadors: RegionalAmbassadorMap,
 ): boolean {
   const trimmedName = name.trim();
   if (trimmedName === "") {
@@ -34,10 +34,12 @@ export function onboardEventAmbassador(
   eventAmbassadors: EventAmbassadorMap,
   regionalAmbassadors: RegionalAmbassadorMap,
   log: LogEntry[],
-  regionalAmbassadorName?: string
+  regionalAmbassadorName?: string,
 ): void {
   const trimmedName = name.trim();
-  if (!validateAmbassadorName(trimmedName, eventAmbassadors, regionalAmbassadors)) {
+  if (
+    !validateAmbassadorName(trimmedName, eventAmbassadors, regionalAmbassadors)
+  ) {
     throw new Error("Ambassador name already exists");
   }
 
@@ -61,7 +63,9 @@ export function onboardEventAmbassador(
   if (regionalAmbassadorName) {
     const rea = regionalAmbassadors.get(regionalAmbassadorName);
     if (!rea) {
-      throw new Error(`Regional Ambassador "${regionalAmbassadorName}" not found`);
+      throw new Error(
+        `Regional Ambassador "${regionalAmbassadorName}" not found`,
+      );
     }
 
     newAmbassador.regionalAmbassador = regionalAmbassadorName;
@@ -96,10 +100,12 @@ export function onboardRegionalAmbassador(
   state: string,
   eventAmbassadors: EventAmbassadorMap,
   regionalAmbassadors: RegionalAmbassadorMap,
-  log: LogEntry[]
+  log: LogEntry[],
 ): void {
   const trimmedName = name.trim();
-  if (!validateAmbassadorName(trimmedName, eventAmbassadors, regionalAmbassadors)) {
+  if (
+    !validateAmbassadorName(trimmedName, eventAmbassadors, regionalAmbassadors)
+  ) {
     throw new Error("Ambassador name already exists");
   }
 
@@ -121,4 +127,3 @@ export function onboardRegionalAmbassador(
     timestamp: Date.now(),
   });
 }
-

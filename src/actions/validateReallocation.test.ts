@@ -40,7 +40,7 @@ describe("validateReallocation", () => {
       eventShortName,
       newAmbassador,
       eventAmbassadors,
-      eventTeamsTableData
+      eventTeamsTableData,
     );
 
     expect(result.valid).toBe(true);
@@ -52,7 +52,7 @@ describe("validateReallocation", () => {
       "non-existent-event",
       newAmbassador,
       eventAmbassadors,
-      eventTeamsTableData
+      eventTeamsTableData,
     );
 
     expect(result.valid).toBe(false);
@@ -64,7 +64,7 @@ describe("validateReallocation", () => {
       eventShortName,
       "Non-existent EA",
       eventAmbassadors,
-      eventTeamsTableData
+      eventTeamsTableData,
     );
 
     expect(result.valid).toBe(false);
@@ -76,7 +76,7 @@ describe("validateReallocation", () => {
       eventShortName,
       "Current EA",
       eventAmbassadors,
-      eventTeamsTableData
+      eventTeamsTableData,
     );
 
     expect(result.valid).toBe(false);
@@ -99,10 +99,12 @@ describe("validateReallocation", () => {
       "unassigned-event",
       newAmbassador,
       eventAmbassadors,
-      eventTeamsTableData
+      eventTeamsTableData,
     );
 
     expect(result.valid).toBe(false);
-    expect(result.error).toBe("Event is not currently assigned to any ambassador");
+    expect(result.error).toBe(
+      "Event is not currently assigned to any ambassador",
+    );
   });
 });

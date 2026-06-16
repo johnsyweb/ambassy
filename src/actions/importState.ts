@@ -75,11 +75,17 @@ export function importApplicationState(state: ApplicationState): void {
   }
 
   // Restore resolved eventDetails to cache
-  if (state.data.resolvedEventDetails && state.data.resolvedEventDetails.length > 0) {
+  if (
+    state.data.resolvedEventDetails &&
+    state.data.resolvedEventDetails.length > 0
+  ) {
     const CACHE_KEY = "parkrun events";
     const existingCache = localStorage.getItem(CACHE_KEY);
-    let eventDetailsMap = new Map<string, import("@models/EventDetails").EventDetails>();
-    
+    let eventDetailsMap = new Map<
+      string,
+      import("@models/EventDetails").EventDetails
+    >();
+
     if (existingCache) {
       try {
         const parsed = JSON.parse(existingCache);
@@ -109,7 +115,9 @@ export function importApplicationState(state: ApplicationState): void {
   markDataImported();
 }
 
-export async function validateStateFromUrl(dataUrl: string): Promise<ApplicationState> {
+export async function validateStateFromUrl(
+  dataUrl: string,
+): Promise<ApplicationState> {
   try {
     const jsonString = parseDataUrl(dataUrl);
     const parsed = JSON.parse(jsonString);
@@ -122,7 +130,9 @@ export async function validateStateFromUrl(dataUrl: string): Promise<Application
   }
 }
 
-export async function validateStateFromClipboard(text: string): Promise<ApplicationState> {
+export async function validateStateFromClipboard(
+  text: string,
+): Promise<ApplicationState> {
   try {
     const parsed = JSON.parse(text);
     return validateApplicationState(parsed);

@@ -30,7 +30,9 @@ describe("populateProspectsTable", () => {
 
   beforeEach(() => {
     // Mock confirm to auto-accept
-    (globalThis as unknown as { confirm: () => boolean }).confirm = jest.fn(() => true);
+    (globalThis as unknown as { confirm: () => boolean }).confirm = jest.fn(
+      () => true,
+    );
 
     document.body.innerHTML = `
       <table id="prospectsTable">
@@ -109,8 +111,12 @@ describe("populateProspectsTable", () => {
       eventDetails,
     );
 
-    const launchButton = document.querySelector("button[aria-label*='launched']") as HTMLButtonElement;
-    const archiveButton = document.querySelector("button[aria-label*='Archive']") as HTMLButtonElement;
+    const launchButton = document.querySelector(
+      "button[aria-label*='launched']",
+    ) as HTMLButtonElement;
+    const archiveButton = document.querySelector(
+      "button[aria-label*='Archive']",
+    ) as HTMLButtonElement;
 
     expect(launchButton).not.toBeNull();
     expect(archiveButton).not.toBeNull();
@@ -138,7 +144,9 @@ describe("populateProspectsTable", () => {
 
     // Set up refresh callback - import the actual module for the callback setter
     // eslint-disable-next-line @typescript-eslint/no-require-imports
-    const { setProspectReallocationRefreshCallback } = require("./populateProspectsTable");
+    const {
+      setProspectReallocationRefreshCallback,
+    } = require("./populateProspectsTable");
     setProspectReallocationRefreshCallback(refreshCallback);
 
     populateProspectsTable(
@@ -149,7 +157,9 @@ describe("populateProspectsTable", () => {
       eventDetails,
     );
 
-    const launchButton = document.querySelector("button[aria-label*='launched']") as HTMLButtonElement;
+    const launchButton = document.querySelector(
+      "button[aria-label*='launched']",
+    ) as HTMLButtonElement;
     launchButton.click();
 
     expect(showLaunchDialog).toHaveBeenCalledTimes(1);

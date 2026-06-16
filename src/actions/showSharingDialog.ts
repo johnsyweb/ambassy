@@ -1,12 +1,23 @@
-import { shareStateAsFile, shareStateAsUrl, shareStateToClipboard, shareStateViaNativeShare } from "./shareState";
+import {
+  shareStateAsFile,
+  shareStateAsUrl,
+  shareStateToClipboard,
+  shareStateViaNativeShare,
+} from "./shareState";
 import { downloadStateFile } from "./exportState";
 import { ShareStateResult } from "@localtypes/SharingTypes";
 
 export function showSharingDialog(): void {
   const dialog = document.getElementById("reallocationDialog") as HTMLElement;
-  const title = document.getElementById("reallocationDialogTitle") as HTMLElement;
-  const content = document.getElementById("reallocationDialogContent") as HTMLElement;
-  const cancelButton = document.getElementById("reallocationDialogCancel") as HTMLButtonElement;
+  const title = document.getElementById(
+    "reallocationDialogTitle",
+  ) as HTMLElement;
+  const content = document.getElementById(
+    "reallocationDialogContent",
+  ) as HTMLElement;
+  const cancelButton = document.getElementById(
+    "reallocationDialogCancel",
+  ) as HTMLButtonElement;
 
   if (!dialog || !title || !content || !cancelButton) {
     console.error("Dialog elements not found");
@@ -43,7 +54,7 @@ export function showSharingDialog(): void {
   const createShareButton = (
     label: string,
     icon: string,
-    handler: () => Promise<ShareStateResult>
+    handler: () => Promise<ShareStateResult>,
   ): HTMLButtonElement => {
     const button = document.createElement("button");
     button.innerHTML = `${icon} ${label}`;
@@ -71,7 +82,10 @@ export function showSharingDialog(): void {
             const filename = `ambassy-state-${new Date().toISOString().split("T")[0]}.json`;
             downloadStateFile(result.data, filename);
             successMessage.textContent = "State saved to file successfully!";
-          } else if (result.method === "url" && typeof result.data === "string") {
+          } else if (
+            result.method === "url" &&
+            typeof result.data === "string"
+          ) {
             const currentUrl = window.location.href.split("?")[0];
             const dataUrl = result.data;
             const shareUrl = `${currentUrl}?state=${encodeURIComponent(dataUrl)}`;
@@ -107,10 +121,12 @@ export function showSharingDialog(): void {
               successMessage.style.display = "block";
             }
           } else if (result.method === "native") {
-            successMessage.textContent = "Shared successfully via your device's share menu!";
+            successMessage.textContent =
+              "Shared successfully via your device's share menu!";
             successMessage.style.display = "block";
           } else if (result.method === "clipboard") {
-            successMessage.textContent = "State text copied to clipboard! You can now paste it anywhere.";
+            successMessage.textContent =
+              "State text copied to clipboard! You can now paste it anywhere.";
             successMessage.style.display = "block";
           }
         } else {
@@ -118,7 +134,8 @@ export function showSharingDialog(): void {
           errorMessage.style.display = "block";
         }
       } catch (error) {
-        errorMessage.textContent = error instanceof Error ? error.message : "Sharing failed";
+        errorMessage.textContent =
+          error instanceof Error ? error.message : "Sharing failed";
         errorMessage.style.display = "block";
       } finally {
         button.disabled = false;
@@ -130,9 +147,17 @@ export function showSharingDialog(): void {
 
   const fileButton = createShareButton("Save to File", "💾", shareStateAsFile);
   const urlButton = createShareButton("Copy Share Link", "🔗", shareStateAsUrl);
-  const clipboardButton = createShareButton("Copy State Text", "📋", shareStateToClipboard);
-  
-  const nativeShareButton = createShareButton("Share via Device", "📱", shareStateViaNativeShare);
+  const clipboardButton = createShareButton(
+    "Copy State Text",
+    "📋",
+    shareStateToClipboard,
+  );
+
+  const nativeShareButton = createShareButton(
+    "Share via Device",
+    "📱",
+    shareStateViaNativeShare,
+  );
   if (!navigator.share) {
     nativeShareButton.disabled = true;
     nativeShareButton.title = "Native sharing not available in this browser";
@@ -171,30 +196,30 @@ export function showSharingDialog(): void {
       (document.activeElement as HTMLButtonElement).click();
     }
   };
-  
+
   const cleanup = () => {
     document.removeEventListener("keydown", handleEnterKey);
   };
-  
+
   const wrappedCancel = () => {
     cleanup();
     handleCancel();
   };
-  
+
   const wrappedKeyDown = (event: KeyboardEvent) => {
     if (event.key === "Escape") {
       cleanup();
       handleCancel();
     }
   };
-  
+
   cancelButton.removeEventListener("click", handleCancel);
   cancelButton.addEventListener("click", wrappedCancel);
-  
+
   document.removeEventListener("keydown", handleKeyDown);
   document.addEventListener("keydown", wrappedKeyDown, { once: true });
   document.addEventListener("keydown", handleEnterKey);
-  
+
   dialog.setAttribute("aria-labelledby", "reallocationDialogTitle");
   dialog.style.display = "block";
   fileButton.focus();
