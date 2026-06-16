@@ -1,5 +1,5 @@
 import { EventAmbassadorMap } from "@models/EventAmbassadorMap";
-import { EventDetailsMap } from "@models/EventDetailsMap";
+import { EventDetailsMap, getEventDetailsByShortName } from "@models/EventDetailsMap";
 import { EventIssue } from "@models/EventIssue";
 import { EventTeamMap } from "@models/EventTeamMap";
 import { RegionalAmbassadorMap } from "@models/RegionalAmbassadorMap";
@@ -20,7 +20,7 @@ export function detectIssues(
       }
 
       eventAmbassador.events.forEach((eventName) => {
-        const eventDetail = eventDetails.get(eventName);
+        const eventDetail = getEventDetailsByShortName(eventDetails, eventName);
         if (!eventDetail) {
           issues.push({
             eventShortName: eventName,

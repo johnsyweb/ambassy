@@ -1,6 +1,6 @@
 import { getCountriesSync } from "@models/country";
 import { EventAmbassadorMap } from "@models/EventAmbassadorMap";
-import { EventDetailsMap, eventDetailsToCoordinate } from "@models/EventDetailsMap";
+import { EventDetailsMap, eventDetailsToCoordinate, getEventDetailsByShortName } from "@models/EventDetailsMap";
 import { EventTeamMap } from "@models/EventTeamMap";
 import { RegionalAmbassadorMap } from "@models/RegionalAmbassadorMap";
 import { EventTeamsTableData, EventTeamsTableDataMap } from "./EventTeamsTableData";
@@ -18,7 +18,7 @@ export function extractEventTeamsTableData(
   regionalAmbassadors.forEach((ra, raName) => {
     ra.supportsEAs.forEach((ea) => {
       eventAmbassadors.get(ea)?.events.forEach((eventName) => {
-        const eventDetails = eventDetailsMap.get(eventName);
+        const eventDetails = getEventDetailsByShortName(eventDetailsMap, eventName);
         const eventTeam = eventTeams.get(eventName);
         const countryCode =
           eventDetails?.properties.countrycode ?? 0;

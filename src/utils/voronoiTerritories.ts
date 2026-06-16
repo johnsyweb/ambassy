@@ -1,5 +1,5 @@
 import { eventDetailsToCoordinate } from "@models/EventDetailsMap";
-import { EventDetailsMap } from "@models/EventDetailsMap";
+import { EventDetailsMap, getEventTeamsTableDataByShortName } from "@models/EventDetailsMap";
 import { EventTeamsTableDataMap } from "@models/EventTeamsTableData";
 import { isValidCoordinate, toGeoJSONArray } from "@models/Coordinate";
 import { ProspectiveEvent } from "@models/ProspectiveEvent";
@@ -86,7 +86,7 @@ export function buildVoronoiSites(input: BuildVoronoiSitesInput): VoronoiSite[] 
       return;
     }
 
-    if (input.eventTeamsTableData.has(eventShortName)) {
+    if (getEventTeamsTableDataByShortName(input.eventTeamsTableData, eventShortName)) {
       const style = input.styleForAllocatedEvent(eventShortName);
       sites.push({
         id: eventShortName,
