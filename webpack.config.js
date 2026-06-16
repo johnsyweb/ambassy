@@ -39,7 +39,8 @@ module.exports = {
       },
     ],
   },
-  cache: false,
+  cache: true,
+  devtool: "eval-cheap-module-source-map",
   plugins: [
     new webpack.DefinePlugin({
       "process.env.NODE_ENV": JSON.stringify("development"),
@@ -48,7 +49,6 @@ module.exports = {
       patterns: [{ from: "public", to: "" }],
     }),
   ],
-  devtool: "source-map",
   devServer: {
     static: {
       directory: path.join(__dirname, "public"),

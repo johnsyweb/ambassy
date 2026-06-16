@@ -28,7 +28,7 @@ Implement in order (highest impact first):
 | 05 | Skip `populateMap` when map inputs unchanged | done |
 | 06 | Draw territory polygons for viewport-visible allocations only | done |
 | 07 | Instrument Voronoi first-compute cost | done |
-| 08 | Tune webpack dev config for faster local dev | ready-for-agent |
-| 09 | Debounce finish-import activation handlers | ready-for-agent |
+| 08 | Tune webpack dev config for faster local dev | done |
+| 09 | Debounce finish-import activation handlers | done |
 | 10 | Keep parsed events catalogue in memory | ready-for-agent |
 | 11 | CI smoke test for map DOM budget | ready-for-agent |

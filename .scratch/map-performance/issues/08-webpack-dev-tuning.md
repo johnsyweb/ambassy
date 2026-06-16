@@ -1,4 +1,4 @@
-Status: ready-for-agent
+Status: done
 
 # Tune webpack dev config
 
@@ -8,10 +8,10 @@ Improve local dev server responsiveness: enable webpack caching and use a lighte
 
 ## Acceptance criteria
 
-- [ ] `cache: true` in `webpack.config.js`
-- [ ] `devtool` changed to `eval-cheap-module-source-map` (or documented alternative)
-- [ ] `pnpm start` still serves a working app on port 8081
-- [ ] README or CONTEXT notes trade-off if full source maps are needed for debugging
+- [x] `cache: true` in `webpack.config.js`
+- [x] `devtool` changed to `eval-cheap-module-source-map` (or documented alternative)
+- [x] `pnpm start` still serves a working app on port 8081
+- [x] README or CONTEXT notes trade-off if full source maps are needed for debugging
 
 ## Blocked by
 

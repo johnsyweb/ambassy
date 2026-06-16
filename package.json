@@ -11,6 +11,7 @@
     "predeploy": "pnpm run build",
     "resolve": "tsc --traceResolution",
     "start": "webpack serve --open",
+    "start:sourcemaps": "webpack serve --open --devtool source-map",
     "test": "jest",
     "sync:userscript-matches": "node script/sync-finish-export-userscript-matches.cjs",
     "rebuild:userscript": "node script/rebuild-finish-export-userscript.cjs",
