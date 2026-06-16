@@ -32,7 +32,13 @@ import {
   onboardEventAmbassador,
   onboardRegionalAmbassador,
 } from "./actions/onboardAmbassador";
-import { persistChangesLog, persistEventDetails } from "./actions/persistState";
+import {
+  persistChangesLog,
+  persistEventDetails,
+  persistEventAmbassadors,
+  persistEventTeams,
+} from "./actions/persistState";
+import { canonicaliseAllocationNames } from "./actions/canonicaliseAllocationNames";
 import { initializeTabs } from "./utils/tabs";
 import {
   calculateAllCapacityStatuses,
@@ -173,10 +179,16 @@ function updateButtonVisibility(
 ): void {
   const exportButtonMap = document.getElementById("exportButtonMap");
   const importButtonMap = document.getElementById("importButtonMap");
-  const addEventAmbassadorButton = document.getElementById("addEventAmbassadorButton");
-  const addRegionalAmbassadorButton = document.getElementById("addRegionalAmbassadorButton");
+  const addEventAmbassadorButton = document.getElementById(
+    "addEventAmbassadorButton",
+  );
+  const addRegionalAmbassadorButton = document.getElementById(
+    "addRegionalAmbassadorButton",
+  );
   const addProspectButton = document.getElementById("addProspectButton");
-  const configureCapacityLimitsButton = document.getElementById("configureCapacityLimitsButton");
+  const configureCapacityLimitsButton = document.getElementById(
+    "configureCapacityLimitsButton",
+  );
   const purgeButton = document.getElementById("purgeButton");
 
   // Share button - only show when data is loaded and map is visible
@@ -367,7 +379,9 @@ function setupAddProspectButton(): void {
     const regionalAmbassadors = getRegionalAmbassadorsFromSession();
 
     if (eventAmbassadors.size === 0) {
-      alert("No Event Ambassadors available. Please onboard an Event Ambassador first.");
+      alert(
+        "No Event Ambassadors available. Please onboard an Event Ambassador first.",
+      );
       return;
     }
 
@@ -400,7 +414,7 @@ function setupAddProspectButton(): void {
       () => {
         // On cancel: no action needed
       },
-      log
+      log,
     );
   });
 }
@@ -1124,6 +1138,19 @@ async function ambassy() {
     regionalAmbassadors,
   );
   if (hasData) {
+    if (
+      canonicaliseAllocationNames(
+        eventAmbassadors,
+        eventTeams,
+        eventDetails,
+        log,
+      )
+    ) {
+      persistEventAmbassadors(eventAmbassadors);
+      persistEventTeams(eventTeams);
+      persistChangesLog(log);
+    }
+
     initializeChangeTrackerForLoadedData();
   }
 

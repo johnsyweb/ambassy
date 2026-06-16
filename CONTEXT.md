@@ -16,6 +16,14 @@ _Avoid_: Ambassador (alone, when EA is meant)
 The assignment of a live parkrun event to an Event Ambassador (and, by hierarchy, a Regional Event Ambassador).
 _Avoid_: Assignment (except in UI copy where already established)
 
+**Canonical event name**:
+The `EventShortName` from `events.json` used as the allocation key once an imported or stored name is matched to a live parkrun event.
+_Avoid_: Normalised name (too vague), official name
+
+**Event name canonicalisation**:
+Rewriting an allocation's event name to the canonical event name when it matches exactly one live parkrun in `events.json` under exact or strict normalised equality (e.g. comma vs space variants). Substring or fuzzy matches do not qualify. Logged in the Changes log; does not apply to prospective events or names with no unambiguous match.
+_Avoid_: Auto-resolve (implies manual issue workflow), alias entry
+
 **REA territory polygon**:
 The visible map region showing which geographic area an allocated event's Regional Event Ambassador is considered to cover. Computed as that event's cell in a spherical Voronoi diagram among defined sites, coloured by REA.
 _Avoid_: Voronoi layer (alone — too vague), catchment area, service envelope

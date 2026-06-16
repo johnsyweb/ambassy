@@ -136,6 +136,43 @@ describe("detectIssues", () => {
     expect(issues).toHaveLength(0);
   });
 
+  it("should not flag missing coordinates when commas differ from events.json", () => {
+    const eventsJsonName = "Albert Melbourne";
+    const csvName = "Albert, Melbourne";
+
+    eventAmbassadors.set("EA1", {
+      name: "EA1",
+      events: [csvName],
+    });
+
+    eventDetails.set(eventsJsonName, {
+      id: eventsJsonName,
+      type: "Feature",
+      geometry: {
+        type: "Point",
+        coordinates: [144.9631, -37.8136],
+      },
+      properties: {
+        eventname: "albertmelbourne",
+        EventLongName: "Albert Melbourne parkrun",
+        EventShortName: eventsJsonName,
+        LocalisedEventLongName: null,
+        countrycode: 3,
+        seriesid: 1,
+        EventLocation: "Melbourne",
+      },
+    });
+
+    const issues = detectIssues(
+      eventTeams,
+      eventDetails,
+      eventAmbassadors,
+      regionalAmbassadors,
+    );
+
+    expect(issues).toHaveLength(0);
+  });
+
   it("should detect events without coordinates", () => {
     const issues = detectIssues(
       eventTeams,

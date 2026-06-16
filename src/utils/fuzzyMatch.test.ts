@@ -6,7 +6,9 @@ describe("normalizeEventName", () => {
   });
 
   it("should remove parentheses and their content", () => {
-    expect(normalizeEventName("Event Name (not currently operating)")).toBe("event name");
+    expect(normalizeEventName("Event Name (not currently operating)")).toBe(
+      "event name",
+    );
   });
 
   it("should trim whitespace", () => {
@@ -28,6 +30,12 @@ describe("normalizeEventName", () => {
   it("should treat curly and straight apostrophes as equivalent", () => {
     expect(normalizeEventName("O\u2019Connors Beach")).toBe(
       normalizeEventName("O'Connors Beach"),
+    );
+  });
+
+  it("should treat commas as spaces for matching", () => {
+    expect(normalizeEventName("Albert, Melbourne")).toBe(
+      normalizeEventName("Albert Melbourne"),
     );
   });
 });

@@ -7,6 +7,7 @@ export function normalizeEventName(name: string): string {
     .replace(APOSTROPHE_LIKE_CHARACTERS, "'")
     .toLowerCase()
     .replace(/\([^)]*\)/g, "")
+    .replace(/,/g, " ")
     .trim()
     .replace(/\s+/g, " ");
 }
@@ -36,7 +37,7 @@ export function levenshteinDistance(str1: string, str2: string): number {
         matrix[i][j] = Math.min(
           matrix[i - 1][j - 1] + 1,
           matrix[i][j - 1] + 1,
-          matrix[i - 1][j] + 1
+          matrix[i - 1][j] + 1,
         );
       }
     }
@@ -70,16 +71,16 @@ export async function suggestparkrunUrl(
 
   // Look up domain from country code dynamically
   const country = countries[countryCode.toString()];
-  let domain = 'com.au'; // Default to Australia
-  
+  let domain = "com.au"; // Default to Australia
+
   if (country && country.url) {
     // Extract domain from URL (e.g., "www.parkrun.com.au" -> "com.au")
-    domain = country.url.replace(/^www\.parkrun\./, '');
+    domain = country.url.replace(/^www\.parkrun\./, "");
   } else if (countryCode === 0) {
     // If no country code provided, default to Australia (code 3)
     const australia = countries["3"];
     if (australia && australia.url) {
-      domain = australia.url.replace(/^www\.parkrun\./, '');
+      domain = australia.url.replace(/^www\.parkrun\./, "");
     }
   }
 
