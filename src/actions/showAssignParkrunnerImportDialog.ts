@@ -2,17 +2,23 @@ import { EventAmbassadorMap } from "@models/EventAmbassadorMap";
 import { RegionalAmbassadorMap } from "@models/RegionalAmbassadorMap";
 import { LogEntry } from "@models/LogEntry";
 import { formatParkrunnerIdForDisplay } from "@utils/parkrunnerProfileUrl";
+import { findUniqueAmbassadorByProfileDisplayName } from "@utils/matchAmbassadorByProfileDisplayName";
 import {
   AmbassadorReference,
   listAmbassadorOptions,
   setAmbassadorParkrunnerId,
 } from "./setAmbassadorParkrunnerId";
 
+export interface AssignParkrunnerImportDialogHints {
+  parkrunProfileDisplayName?: string;
+}
+
 export function showAssignParkrunnerImportDialog(
   parkrunnerId: string,
   eventAmbassadors: EventAmbassadorMap,
   regionalAmbassadors: RegionalAmbassadorMap,
   log: LogEntry[],
+  hints?: AssignParkrunnerImportDialogHints,
 ): Promise<AmbassadorReference | null> {
   return new Promise((resolve) => {
     const options = listAmbassadorOptions(
@@ -57,6 +63,13 @@ export function showAssignParkrunnerImportDialog(
     description.textContent = `Finish history is for parkrunner ID ${formatParkrunnerIdForDisplay(parkrunnerId)}. Choose the ambassador to assign it to before importing.`;
     dialog.appendChild(description);
 
+    const profileDisplayName = hints?.parkrunProfileDisplayName?.trim();
+    if (profileDisplayName) {
+      const profileNameNote = document.createElement("p");
+      profileNameNote.textContent = `Profile name on parkrun: ${profileDisplayName}`;
+      dialog.appendChild(profileNameNote);
+    }
+
     const label = document.createElement("label");
     label.htmlFor = "assignParkrunnerImportSelect";
     label.textContent = "Ambassador";
@@ -75,6 +88,15 @@ export function showAssignParkrunnerImportDialog(
       select.appendChild(element);
     }
     dialog.appendChild(select);
+
+    const preselectedAmbassador = findUniqueAmbassadorByProfileDisplayName(
+      profileDisplayName,
+      eventAmbassadors,
+      regionalAmbassadors,
+    );
+    if (preselectedAmbassador) {
+      select.value = `${preselectedAmbassador.role}:${preselectedAmbassador.name}`;
+    }
 
     const actions = document.createElement("div");
     actions.style.display = "flex";
