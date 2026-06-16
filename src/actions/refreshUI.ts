@@ -14,13 +14,15 @@ import { RegionalAmbassador } from "@models/RegionalAmbassador";
 import { LogEntry } from "@models/LogEntry";
 import { loadFromStorage } from "@utils/storage";
 import { getCountriesSync } from "@models/country";
+import { enrichEventTeamsWithLastAmbassadorVisit } from "./enrichEventTeamsWithLastAmbassadorVisit";
+import { loadAmbassadorFinishHistories } from "./persistAmbassadorFinishHistory";
 
 export function refreshUI(
   eventDetails: EventDetailsMap,
   eventTeamsTableData: EventTeamsTableDataMap,
   log: LogEntry[],
   eventAmbassadors?: EventAmbassadorMap,
-  regionalAmbassadors?: RegionalAmbassadorMap
+  regionalAmbassadors?: RegionalAmbassadorMap,
 ) {
   if (!eventDetails || !eventTeamsTableData) {
     console.error("Event details are not available");
@@ -31,27 +33,60 @@ export function refreshUI(
   const eventAmbassadorsToUse =
     eventAmbassadors ??
     (() => {
-      const stored = loadFromStorage<Array<[string, EventAmbassador]>>("eventAmbassadors");
-      return stored ? new Map<string, EventAmbassador>(stored) : new Map<string, EventAmbassador>();
+      const stored =
+        loadFromStorage<Array<[string, EventAmbassador]>>("eventAmbassadors");
+      return stored
+        ? new Map<string, EventAmbassador>(stored)
+        : new Map<string, EventAmbassador>();
     })();
 
   const regionalAmbassadorsToUse =
     regionalAmbassadors ??
     (() => {
-      const stored = loadFromStorage<Array<[string, RegionalAmbassador]>>("regionalAmbassadors");
-      return stored ? new Map<string, RegionalAmbassador>(stored) : new Map<string, RegionalAmbassador>();
+      const stored = loadFromStorage<Array<[string, RegionalAmbassador]>>(
+        "regionalAmbassadors",
+      );
+      return stored
+        ? new Map<string, RegionalAmbassador>(stored)
+        : new Map<string, RegionalAmbassador>();
     })();
 
   const prospectiveEvents = loadProspectiveEvents();
   const prospectsList = new ProspectiveEventList(prospectiveEvents);
+  const finishHistories = loadAmbassadorFinishHistories();
+
+  enrichEventTeamsWithLastAmbassadorVisit(
+    eventTeamsTableData,
+    eventAmbassadorsToUse,
+    regionalAmbassadorsToUse,
+    finishHistories,
+  );
 
   populateEventTeamsTable(eventTeamsTableData);
-  populateMap(eventTeamsTableData, eventDetails, eventAmbassadorsToUse, regionalAmbassadorsToUse, prospectiveEvents);
-  
+  populateMap(
+    eventTeamsTableData,
+    eventDetails,
+    eventAmbassadorsToUse,
+    regionalAmbassadorsToUse,
+    prospectiveEvents,
+  );
+
   // Get countries synchronously (should already be cached)
   const countries = getCountriesSync();
-  
-  populateAmbassadorsTable(eventAmbassadorsToUse, regionalAmbassadorsToUse, eventTeamsTableData, eventDetails, countries);
-  populateProspectsTable(prospectsList, eventAmbassadorsToUse, regionalAmbassadorsToUse, log, eventDetails);
+
+  populateAmbassadorsTable(
+    eventAmbassadorsToUse,
+    regionalAmbassadorsToUse,
+    eventTeamsTableData,
+    eventDetails,
+    countries,
+  );
+  populateProspectsTable(
+    prospectsList,
+    eventAmbassadorsToUse,
+    regionalAmbassadorsToUse,
+    log,
+    eventDetails,
+  );
   populateChangesLogTable(log, eventDetails, countries);
 }

@@ -82,11 +82,15 @@ The app is written in TypeScript with unit tests and runs in a modern web browse
 
 ## Privacy and data sovereignty
 
-Uploaded CSV data are processed in the browser and persisted in local storage on your device. They are not uploaded to johnsy.com or stored on application servers. Only the columns Ambassy understands are read from each CSV; any other columns are ignored and never stored. There is no analytics whatsoever: usage is not counted, adoption is not measured, and Ambassy is shared in goodwill, not to boost traffic or prove how many people use it. The intent is close to [Datensparsamkeit](https://martinfowler.com/bliki/Datensparsamkeit.html) (data minimisation): carry only what you need for the job. Outbound requests are limited to OpenStreetMap map tiles and the public parkrun events catalogue. When you geocode a place, the search text you enter is sent to OpenStreetMap’s [Nominatim](https://nominatim.org/release-docs/latest/), and that request does not include your CSV or ambassador names. Sharing state only happens when you explicitly export, copy, or open a file or link. You may use aliases in CSVs; using real names can make conflicts of interest across volunteer tiers easier to see.
+Uploaded CSV data are processed in the browser and persisted in local storage on your device. Optional **parkrunner IDs** and imported **finish histories** are stored the same way. Nothing is uploaded to johnsy.com or stored on application servers. Only the columns Ambassy understands are read from each CSV; any other columns are ignored and never stored. There is no analytics whatsoever: usage is not counted, adoption is not measured, and Ambassy is shared in goodwill, not to boost traffic or prove how many people use it. The intent is close to [Datensparsamkeit](https://martinfowler.com/bliki/Datensparsamkeit.html) (data minimisation): carry only what you need for the job.
+
+Outbound requests are limited to OpenStreetMap map tiles, the public parkrun events catalogue, and — if you install the finish export userscript — fetching that script from johnsy.com for installation and updates. That script request does not include your allocation or finish data. Visiting parkrun profile pages to import finishes is ordinary browsing on parkrun's own sites. When you geocode a place, the search text you enter is sent to OpenStreetMap’s [Nominatim](https://nominatim.org/release-docs/latest/), and that request does not include your CSV or ambassador names.
+
+Sharing state only happens when you explicitly export, copy, or open a file or link. Exported state includes allocations, ambassadors, and related settings (including parkrunner IDs when set) but **not** imported finish histories — those stay on the device where you imported them. Finish import may copy JSON to your clipboard if you use that fallback, or pass through [Tampermonkey](https://www.tampermonkey.net/) on your device when moving from a parkrun profile tab to Ambassy. You may use aliases in CSVs; using real names can make conflicts of interest across volunteer tiers easier to see.
 
 ## State Persistence and Sharing
 
-Ambassy automatically persists your uploaded CSV data to browser local storage, so you don't need to re-upload files every time you visit the application. Your data persists across browser sessions.
+Ambassy automatically persists your uploaded CSV data, parkrunner IDs, and imported finish histories to browser local storage, so you do not need to re-upload files every time you visit the application. Your data persist across browser sessions.
 
 ### Sharing Your State
 
@@ -98,6 +102,8 @@ Click the **"Share…"** button to share your current map and allocations with o
 - **Share via Device**: Use your device's native share sheet (mobile/desktop) to hand off the export through another app if you prefer
 
 **Note**: If your state is too large for link sharing, you'll be prompted to use file or text sharing instead.
+
+**Note**: Shared exports do not include imported finish histories. Re-import finish history on each device where you need it.
 
 ### Opening Shared State
 
@@ -112,6 +118,29 @@ Click the **"Open Saved State"** button to load state shared by another ambassad
 ### Export Reminders
 
 If you've made changes since your last export, Ambassy will remind you to share your state before closing the browser window. This helps ensure your changes aren't lost.
+
+## Ambassador finish history
+
+Ambassy can show **last ambassador visit** on the Event Teams tab (who finished at that event most recently, and when), based on imported parkrun profile finish history.
+
+### Setup
+
+1. Open **Finish history** from the top bar and follow the instructions to add the finish export userscript to Tampermonkey. Tampermonkey checks the published script on [johnsy.com](https://johnsy.com/ambassy/script/ambassy-finish-export.user.js) for updates automatically.
+2. Set each ambassador's **parkrunner ID** (e.g. `A1001388`) on the Event Ambassadors or Regional Ambassadors tab, or via the optional `parkrunner ID` CSV column.
+
+### Importing finishes
+
+1. Open the ambassador's parkrun profile `/all/` page (link from their parkrunner ID when set).
+2. Click **Export finishes to Ambassy** on that page.
+3. Open or switch to Ambassy — the import runs automatically when the userscript bridge delivers the payload.
+
+**Clipboard fallback:** copy the JSON from the userscript notification, then click **Import finish history from clipboard** on the Finish history page.
+
+Only finishes that match live events in `events.json` are kept. Re-import merges history, keeping the latest finish date per event per ambassador.
+
+### Privacy
+
+Finish history is imported only when you choose to. It is stored in local storage on your device and is not uploaded to johnsy.com. The userscript may use Tampermonkey to hand off data between tabs on your device; clipboard import is available if you prefer. See [Privacy and data sovereignty](#privacy-and-data-sovereignty) for the full picture.
 
 ## Ambassador Capacity Management
 

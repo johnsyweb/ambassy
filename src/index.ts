@@ -37,6 +37,7 @@ import {
   persistEventDetails,
   persistEventAmbassadors,
   persistEventTeams,
+  persistRegionalAmbassadors,
 } from "./actions/persistState";
 import { canonicaliseAllocationNames } from "./actions/canonicaliseAllocationNames";
 import { initializeTabs } from "./utils/tabs";
@@ -56,12 +57,30 @@ import {
   setOffboardingHandlers,
   setEAReallocateHandler,
   setHomeParkrunHandlers,
+  setParkrunnerIdHandlers,
   setTransitionHandlers,
 } from "./actions/populateAmbassadorsTable";
 import {
   setEventAmbassadorHomeParkrun,
   canonicaliseEventAmbassadorHomeParkruns,
 } from "./actions/setEventAmbassadorHomeParkrun";
+import {
+  setAmbassadorParkrunnerId,
+  AmbassadorReference,
+  canonicaliseAmbassadorParkrunnerIds,
+} from "./actions/setAmbassadorParkrunnerId";
+import { showParkrunnerIdDialog } from "./actions/showParkrunnerIdDialog";
+import {
+  applyAmbassyRoute,
+  navigateToMainAmbassyPage,
+  wireFinishHistoryInstallLinks,
+} from "./utils/finishHistoryPage";
+import {
+  processPendingFinishImport,
+  processFinishImportFromClipboard,
+  registerFinishImportListener,
+} from "./actions/processPendingFinishImport";
+import { AmbassadorRole } from "./models/AmbassadorFinishHistory";
 import {
   transitionEventAmbassadorToRegional,
   transitionRegionalAmbassadorToEvent,
@@ -158,6 +177,7 @@ const log: LogEntry[] = getLogFromSession();
 
 let eventTeamsTableData: Map<string, EventTeamsTableData> | null = null;
 let eventDetails: EventDetailsMap | null = null;
+let lastApplicationHasData = false;
 const selectionState: SelectionState = createSelectionState();
 const issuesState = createIssuesState();
 
@@ -1109,9 +1129,143 @@ function setupOffboardingButtons(): void {
       }
     },
   );
+
+  setParkrunnerIdHandlers(
+    async (role: AmbassadorRole, ambassadorName: string) => {
+      const eventAmbassadors = getEventAmbassadorsFromSession();
+      const regionalAmbassadors = getRegionalAmbassadorsFromSession();
+      const currentValue =
+        role === "ea"
+          ? eventAmbassadors.get(ambassadorName)?.parkrunnerId
+          : regionalAmbassadors.get(ambassadorName)?.parkrunnerId;
+
+      const nextValue = await showParkrunnerIdDialog(
+        ambassadorName,
+        role,
+        currentValue,
+      );
+      if (nextValue === null) {
+        return;
+      }
+
+      const reference: AmbassadorReference = { role, name: ambassadorName };
+      setAmbassadorParkrunnerId(
+        reference,
+        nextValue ?? undefined,
+        eventAmbassadors,
+        regionalAmbassadors,
+        log,
+      );
+      persistChangesLog(log);
+      if (eventDetails && eventTeamsTableData) {
+        refreshUI(
+          eventDetails,
+          eventTeamsTableData,
+          log,
+          eventAmbassadors,
+          regionalAmbassadors,
+        );
+      }
+    },
+    (role: AmbassadorRole, ambassadorName: string) => {
+      const eventAmbassadors = getEventAmbassadorsFromSession();
+      const regionalAmbassadors = getRegionalAmbassadorsFromSession();
+      const reference: AmbassadorReference = { role, name: ambassadorName };
+      setAmbassadorParkrunnerId(
+        reference,
+        undefined,
+        eventAmbassadors,
+        regionalAmbassadors,
+        log,
+      );
+      persistChangesLog(log);
+      if (eventDetails && eventTeamsTableData) {
+        refreshUI(
+          eventDetails,
+          eventTeamsTableData,
+          log,
+          eventAmbassadors,
+          regionalAmbassadors,
+        );
+      }
+    },
+  );
 }
 
 setupOffboardingButtons();
+
+registerFinishImportListener(() => {
+  const details = eventDetails;
+  const tableData = eventTeamsTableData;
+  if (!details || !tableData) {
+    return;
+  }
+
+  void processPendingFinishImport(
+    details,
+    getEventAmbassadorsFromSession(),
+    getRegionalAmbassadorsFromSession(),
+    log,
+    () => {
+      persistChangesLog(log);
+      refreshUI(
+        details,
+        tableData,
+        log,
+        getEventAmbassadorsFromSession(),
+        getRegionalAmbassadorsFromSession(),
+      );
+    },
+  );
+});
+
+async function importFinishHistoryFromClipboard(): Promise<void> {
+  const details = eventDetails;
+  if (!details) {
+    alert("Event details are not loaded yet.");
+    return;
+  }
+
+  try {
+    const clipboardText = await navigator.clipboard.readText();
+    await processFinishImportFromClipboard(
+      clipboardText,
+      details,
+      getEventAmbassadorsFromSession(),
+      getRegionalAmbassadorsFromSession(),
+      log,
+      () => {
+        persistChangesLog(log);
+        if (eventTeamsTableData) {
+          refreshUI(
+            details,
+            eventTeamsTableData,
+            log,
+            getEventAmbassadorsFromSession(),
+            getRegionalAmbassadorsFromSession(),
+          );
+        }
+      },
+    );
+  } catch (error) {
+    alert(
+      `Could not import finish history: ${error instanceof Error ? error.message : "Unknown error"}`,
+    );
+  }
+}
+
+document
+  .getElementById("importFinishHistoryButton")
+  ?.addEventListener("click", () => {
+    void importFinishHistoryFromClipboard();
+  });
+
+document
+  .getElementById("finishHistoryBackLink")
+  ?.addEventListener("click", (event) => {
+    event.preventDefault();
+    navigateToMainAmbassyPage();
+  });
 
 document
   .getElementById("importFileInput")
@@ -1218,6 +1372,13 @@ async function ambassy() {
       persistChangesLog(log);
     }
 
+    if (
+      canonicaliseAmbassadorParkrunnerIds(eventAmbassadors, regionalAmbassadors)
+    ) {
+      persistEventAmbassadors(eventAmbassadors);
+      persistRegionalAmbassadors(regionalAmbassadors);
+    }
+
     initializeChangeTrackerForLoadedData();
   }
 
@@ -1274,6 +1435,27 @@ async function ambassy() {
       eventAmbassadors,
       regionalAmbassadors,
     );
+
+    const refreshAfterFinishImport = () => {
+      persistChangesLog(log);
+      if (eventDetails && eventTeamsTableData) {
+        refreshUI(
+          eventDetails,
+          eventTeamsTableData,
+          log,
+          getEventAmbassadorsFromSession(),
+          getRegionalAmbassadorsFromSession(),
+        );
+      }
+    };
+
+    void processPendingFinishImport(
+      eventDetails,
+      eventAmbassadors,
+      regionalAmbassadors,
+      log,
+      refreshAfterFinishImport,
+    );
   } else {
     introduction.style.display = "block";
     ambassy.style.display = "none";
@@ -1291,6 +1473,8 @@ async function ambassy() {
     uploadPrompt.textContent = `Please upload the following files: ${missingFiles.join(", ")}`;
   }
 
+  lastApplicationHasData = hasData;
+  applyAmbassyRoute(hasData);
   updateButtonVisibility(hasData, isMapViewDisplayed());
 }
 
@@ -1989,6 +2173,12 @@ document.addEventListener("DOMContentLoaded", async () => {
   initializeTabs();
   setupExportReminder();
   initializeKeyboardShortcuts();
+  wireFinishHistoryInstallLinks();
+
+  window.addEventListener("hashchange", () => {
+    applyAmbassyRoute(lastApplicationHasData);
+    updateButtonVisibility(lastApplicationHasData, isMapViewDisplayed());
+  });
 
   const keyboardShortcutsButton = document.getElementById(
     "keyboardShortcutsButton",

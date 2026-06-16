@@ -95,3 +95,19 @@ _Avoid_: Pacific-centred longitude, date-line split (until needed)
 **Territory edge rendering**:
 Clipped cell rings are drawn with Leaflet straight lat/lng segments (`L.polygon`). Great-circle subdivision is out of scope until visual inaccuracy is observed at REA working zoom levels.
 _Avoid_: Geodesic polygon, great-circle densification
+
+**parkrunner ID**:
+The identifier for a parkrun volunteer. Ambassy stores the numeric portion only (e.g. `1001388`) and displays it with an `A` prefix in the UI (e.g. `A1001388`). Profile URLs use the numeric portion (e.g. `…/parkrunner/1001388/all/`). Optional metadata on an Event Ambassador or Regional Event Ambassador, set by the REA via the ambassadors UI or CSV. Used to link to that person's profile and to import their finish history into Ambassy. If finish history arrives for an unknown ID, Ambassy prompts the REA to assign it to an ambassador before importing.
+_Avoid_: parkrun ID (ambiguous with event id), athlete ID
+
+**Ambassador visit history**:
+The set of dates on which a given ambassador (EA or REA with a parkrunner ID) **finished** (ran as a participant) at a live parkrun event, imported from the runs table on their parkrun profile `/all/` tab and cached in Ambassy. Only finishes that match a live event in `events.json` are kept; others are discarded on import. Re-import **merges** with existing cache, keeping the latest finish date per event for that ambassador. Volunteer-only roles are out of scope until parkrun exposes them in a form Ambassy can import.
+_Avoid_: Run history (implies volunteering), attendance record, visit (ambiguous with volunteer)
+
+**Last ambassador visit**:
+For a given live event, the most recent **finish** among all Event Ambassadors and Regional Event Ambassadors in Ambassy with imported history — not only those assigned to that event. Recorded as **who** (one or more ambassador names if tied on the same date) and **when** (finish date). Shown on the Event Teams tab when known; **N/A** when no qualifying finish is on record.
+_Avoid_: Last EA visit (too narrow), last allocation visit
+
+**parkrun country domain**:
+The per-country website host for a parkrun territory (e.g. `www.parkrun.com.au`, `www.parkrun.co.uk`), from `events.json` countries data. parkrun profiles and event URLs use the domain of the event's country; the finish-import userscript must support all domains present in that data.
+_Avoid_: TLD (too vague), parkrun URL (ambiguous with images.parkrun.com)

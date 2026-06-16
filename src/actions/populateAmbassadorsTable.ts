@@ -18,6 +18,13 @@ import { persistEventAmbassadors } from "./persistState";
 import { EventDetailsMap } from "@models/EventDetailsMap";
 import { CountryMap } from "@models/country";
 import { buildEventHistoryUrl } from "@utils/eventHistoryUrl";
+import {
+  buildParkrunnerProfileUrl,
+  formatParkrunnerIdForDisplay,
+} from "@utils/parkrunnerProfileUrl";
+import { EventAmbassador } from "@models/EventAmbassador";
+import { RegionalAmbassador } from "@models/RegionalAmbassador";
+import { AmbassadorRole } from "@models/AmbassadorFinishHistory";
 
 // Forward declaration - will be set by index.ts
 let handleOffboardEventAmbassador: (name: string) => void = () => {
@@ -68,7 +75,13 @@ export function populateAmbassadorsTable(
     eventDetails,
     countries,
   );
-  populateRegionalAmbassadorsTable(regionalAmbassadors, eventTeamsTableData);
+  populateRegionalAmbassadorsTable(
+    regionalAmbassadors,
+    eventTeamsTableData,
+    eventAmbassadors,
+    eventDetails,
+    countries,
+  );
 }
 
 // Forward declaration - will be set by index.ts
@@ -89,6 +102,126 @@ export function setHomeParkrunHandlers(
 ): void {
   handleSetHomeParkrun = setHandler;
   handleClearHomeParkrun = clearHandler;
+}
+
+let handleSetParkrunnerId:
+  | ((role: AmbassadorRole, name: string) => void)
+  | null = null;
+let handleClearParkrunnerId:
+  | ((role: AmbassadorRole, name: string) => void)
+  | null = null;
+
+export function setParkrunnerIdHandlers(
+  setHandler: (role: AmbassadorRole, name: string) => void,
+  clearHandler: (role: AmbassadorRole, name: string) => void,
+): void {
+  handleSetParkrunnerId = setHandler;
+  handleClearParkrunnerId = clearHandler;
+}
+
+function inferCountryCodeForEventAmbassador(
+  ambassador: EventAmbassador,
+  eventDetails?: EventDetailsMap,
+): number {
+  if (!eventDetails) {
+    return 3;
+  }
+
+  for (const eventName of ambassador.events) {
+    const details = eventDetails.get(eventName);
+    if (details?.properties.countrycode) {
+      return details.properties.countrycode;
+    }
+  }
+
+  return 3;
+}
+
+function inferCountryCodeForRegionalAmbassador(
+  ambassador: RegionalAmbassador,
+  eventAmbassadors: EventAmbassadorMap,
+  eventDetails?: EventDetailsMap,
+): number {
+  for (const eaName of ambassador.supportsEAs) {
+    const ea = eventAmbassadors.get(eaName);
+    if (ea) {
+      return inferCountryCodeForEventAmbassador(ea, eventDetails);
+    }
+  }
+
+  return 3;
+}
+
+function appendAmbassadorNameLabel(
+  container: HTMLElement,
+  name: string,
+  profileUrl: string | null,
+): void {
+  if (profileUrl) {
+    const link = document.createElement("a");
+    link.href = profileUrl;
+    link.target = "_blank";
+    link.rel = "noopener noreferrer";
+    link.textContent = name;
+    link.title = "Open parkrun profile";
+    container.appendChild(link);
+    return;
+  }
+
+  const nameSpan = document.createElement("span");
+  nameSpan.textContent = name;
+  container.appendChild(nameSpan);
+}
+
+function appendParkrunnerIdCell(
+  row: HTMLTableRowElement,
+  role: AmbassadorRole,
+  name: string,
+  parkrunnerId: string | undefined,
+): void {
+  const parkrunnerCell = document.createElement("td");
+  const label = document.createElement("div");
+  label.textContent = parkrunnerId
+    ? formatParkrunnerIdForDisplay(parkrunnerId)
+    : "—";
+  if (!parkrunnerId) {
+    label.style.fontStyle = "italic";
+    label.style.color = "#666";
+  }
+  parkrunnerCell.appendChild(label);
+
+  const actions = document.createElement("div");
+  actions.style.display = "flex";
+  actions.style.gap = "0.5em";
+  actions.style.marginTop = "0.25em";
+
+  const setButton = document.createElement("button");
+  setButton.type = "button";
+  setButton.textContent = parkrunnerId ? "Change" : "Set";
+  setButton.title = "Set parkrunner ID for finish history import";
+  setButton.setAttribute(
+    "aria-label",
+    `${parkrunnerId ? "Change" : "Set"} parkrunner ID for ${name}`,
+  );
+  setButton.addEventListener("click", () => {
+    handleSetParkrunnerId?.(role, name);
+  });
+  actions.appendChild(setButton);
+
+  if (parkrunnerId) {
+    const clearButton = document.createElement("button");
+    clearButton.type = "button";
+    clearButton.textContent = "Clear";
+    clearButton.title = "Clear parkrunner ID";
+    clearButton.setAttribute("aria-label", `Clear parkrunner ID for ${name}`);
+    clearButton.addEventListener("click", () => {
+      handleClearParkrunnerId?.(role, name);
+    });
+    actions.appendChild(clearButton);
+  }
+
+  parkrunnerCell.appendChild(actions);
+  row.appendChild(parkrunnerCell);
 }
 
 function populateEventAmbassadorsTable(
@@ -158,6 +291,19 @@ function populateEventAmbassadorsTable(
     }
     row.appendChild(reaCell);
 
+    const countryCode = inferCountryCodeForEventAmbassador(
+      ambassador,
+      eventDetails,
+    );
+    const profileUrl =
+      ambassador.parkrunnerId && countries
+        ? buildParkrunnerProfileUrl(
+            ambassador.parkrunnerId,
+            countryCode,
+            countries,
+          )
+        : null;
+
     const nameCell = document.createElement("td");
     const nameContainer = document.createElement("div");
     nameContainer.style.display = "flex";
@@ -176,9 +322,7 @@ function populateEventAmbassadorsTable(
     colorIndicator.title = `Map color: ${color}`;
     nameContainer.appendChild(colorIndicator);
 
-    const nameSpan = document.createElement("span");
-    nameSpan.textContent = name;
-    nameContainer.appendChild(nameSpan);
+    appendAmbassadorNameLabel(nameContainer, name, profileUrl);
 
     nameCell.appendChild(nameContainer);
     row.appendChild(nameCell);
@@ -235,6 +379,8 @@ function populateEventAmbassadorsTable(
 
     homeParkrunCell.appendChild(homeActions);
     row.appendChild(homeParkrunCell);
+
+    appendParkrunnerIdCell(row, "ea", name, ambassador.parkrunnerId);
 
     const allocationsCell = document.createElement("td");
     const eventCount = ambassador.events.length;
@@ -443,6 +589,9 @@ function populateEventAmbassadorsTable(
 function populateRegionalAmbassadorsTable(
   regionalAmbassadors: RegionalAmbassadorMap,
   eventTeamsTableData?: EventTeamsTableDataMap,
+  eventAmbassadors?: EventAmbassadorMap,
+  eventDetails?: EventDetailsMap,
+  countries?: CountryMap,
 ): void {
   const tableBody = document.querySelector("#regionalAmbassadorsTable tbody");
   if (!tableBody) {
@@ -463,6 +612,20 @@ function populateRegionalAmbassadorsTable(
     const row = document.createElement("tr");
     row.setAttribute("data-ra-name", name);
 
+    const countryCode = inferCountryCodeForRegionalAmbassador(
+      ambassador,
+      eventAmbassadors ?? new Map(),
+      eventDetails,
+    );
+    const profileUrl =
+      ambassador.parkrunnerId && countries
+        ? buildParkrunnerProfileUrl(
+            ambassador.parkrunnerId,
+            countryCode,
+            countries,
+          )
+        : null;
+
     const nameCell = document.createElement("td");
     const nameContainer = document.createElement("div");
     nameContainer.style.display = "flex";
@@ -481,9 +644,7 @@ function populateRegionalAmbassadorsTable(
     colorIndicator.title = `Map color: ${color}`;
     nameContainer.appendChild(colorIndicator);
 
-    const nameSpan = document.createElement("span");
-    nameSpan.textContent = name;
-    nameContainer.appendChild(nameSpan);
+    appendAmbassadorNameLabel(nameContainer, name, profileUrl);
 
     nameCell.appendChild(nameContainer);
     row.appendChild(nameCell);
@@ -491,6 +652,8 @@ function populateRegionalAmbassadorsTable(
     const stateCell = document.createElement("td");
     stateCell.textContent = ambassador.state;
     row.appendChild(stateCell);
+
+    appendParkrunnerIdCell(row, "rea", name, ambassador.parkrunnerId);
 
     const allocationsCell = document.createElement("td");
     const eaCount = ambassador.supportsEAs.length;
