@@ -25,6 +25,7 @@ import {
   VoronoiTerritoryCache,
   viewportFromLeafletBounds,
 } from "@utils/voronoiTerritories";
+import { getEventTeamsTableDataByShortName } from "@models/EventDetailsMap";
 import { colorPalette } from "./colorPalette";
 
 const DEFAULT_EVENT_COLOUR = "rebeccapurple";
@@ -54,7 +55,10 @@ export function populateMap(
     const coord = eventDetailsToCoordinate(event);
     const latitude = getLatitude(coord);
     const longitude = getLongitude(coord);
-    const data = eventTeamsTableData.get(eventName);
+    const data = getEventTeamsTableDataByShortName(
+      eventTeamsTableData,
+      eventName,
+    );
 
     // Skip events without ambassador data for processing
 
@@ -184,7 +188,10 @@ export function populateMap(
     eventTeamsTableData,
     prospectiveEvents,
     styleForAllocatedEvent: (eventShortName) => {
-      const data = eventTeamsTableData.get(eventShortName)!;
+      const data = getEventTeamsTableDataByShortName(
+        eventTeamsTableData,
+        eventShortName,
+      )!;
       return {
         raColor:
           raColorMap.get(data.regionalAmbassador) ?? DEFAULT_POLYGON_COLOUR,
@@ -253,7 +260,10 @@ function calculateEventBounds(
   let hasBounds = false;
 
   eventDetails.forEach((event, eventName) => {
-    const data = eventTeamsTableData.get(eventName);
+    const data = getEventTeamsTableDataByShortName(
+      eventTeamsTableData,
+      eventName,
+    );
     if (data) {
       const coord = eventDetailsToCoordinate(event);
       const [lat, lng] = toLeafletArray(coord);
