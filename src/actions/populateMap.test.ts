@@ -3,6 +3,7 @@ import {
   resetVoronoiTerritoryCacheForTests,
   isEventMarkerVisibleOnMap,
   applyAmbassadorNameFilterToMap,
+  getMarkerMap,
 } from "./populateMap";
 
 jest.mock("d3-geo-voronoi", () => ({
@@ -248,6 +249,71 @@ describe("populateMap", () => {
     afterEach(() => {
       document.body.innerHTML = "";
       sessionStorage.clear();
+    });
+
+    it("creates markers only for allocated events, not unallocated catalogue entries", () => {
+      const eventTeamsTableData = new Map();
+      eventTeamsTableData.set("event1", {
+        eventShortName: "event1",
+        eventDirectors: "Director1",
+        eventAmbassador: "EA1",
+        regionalAmbassador: "REA1",
+        eventCoordinates: "37.80000° S 144.90000° E",
+        eventSeries: 1,
+        eventCountryCode: 3,
+        eventCountry: "Australia",
+      });
+
+      const eventDetails = new Map();
+      eventDetails.set("event1", {
+        id: "1",
+        type: "Feature",
+        geometry: { type: "Point", coordinates: [144.9631, -37.8136] },
+        properties: {
+          eventname: "Event 1",
+          EventLongName: "Event 1 Long Name",
+          EventShortName: "event1",
+          LocalisedEventLongName: null,
+          countrycode: 0,
+          seriesid: 1,
+          EventLocation: "Location 1",
+        },
+      });
+      eventDetails.set("unallocated", {
+        id: "2",
+        type: "Feature",
+        geometry: { type: "Point", coordinates: [145.0, -37.9] },
+        properties: {
+          eventname: "Unallocated",
+          EventLongName: "Unallocated",
+          EventShortName: "unallocated",
+          LocalisedEventLongName: null,
+          countrycode: 0,
+          seriesid: 1,
+          EventLocation: "Location 2",
+        },
+      });
+
+      const eventAmbassadors = new Map();
+      eventAmbassadors.set("EA1", { name: "EA1", events: ["event1"] });
+
+      const regionalAmbassadors = new Map();
+      regionalAmbassadors.set("REA1", {
+        name: "REA1",
+        state: "VIC",
+        supportsEAs: ["EA1"],
+      });
+
+      populateMap(
+        eventTeamsTableData,
+        eventDetails,
+        eventAmbassadors,
+        regionalAmbassadors,
+      );
+
+      expect(getMarkerMap().size).toBe(1);
+      expect(isEventMarkerVisibleOnMap("event1")).toBe(true);
+      expect(isEventMarkerVisibleOnMap("unallocated")).toBe(false);
     });
 
     it("hides unallocated markers and non-matching allocated markers when filter is active", () => {

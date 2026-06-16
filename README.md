@@ -158,15 +158,8 @@ Ambassy provides tools for managing ambassador capacity and lifecycle:
 
 ### Allocating Events from the Map
 
-- **Allocate Unallocated Events**: Click on an unallocated event marker on the map (small purple markers) to allocate it to an Event Ambassador
-  - Unallocated events appear as small markers (radius: 1) with default purple colour
-  - Clicking an unallocated event opens an allocation dialog with suggested Event Ambassadors
-  - The system suggests EAs based on capacity, geographic proximity, and existing allocations
-  - You can select from the top suggestions or choose "Other" to manually select any Event Ambassador
-  - The supporting Regional Ambassador is automatically determined from the selected EA's hierarchy
-  - After allocation, the event appears in the Event Teams table with complete information (EA, REA, Event Directors if known)
-  - The map updates immediately to show the newly allocated event with the EA's assigned colour and larger size
-  - All allocations are logged in the changes log
+- **Allocate unallocated events**: Use **Event search** (keyboard shortcut) to find and allocate a live parkrun not yet in your CSV. Map markers are shown for **allocated** events and prospects only — unallocated parkruns still shape REA territory boundaries (Voronoi constraining sites) but are not drawn as thousands of global markers. Viewport-limited unallocated markers for click-to-allocate are planned as a follow-up performance improvement.
+- **Allocated events**: Click an allocated event marker to reallocate or inspect it. After allocation, the event appears in the Event Teams table with complete information (EA, REA, Event Directors if known), the map updates with the EA's colour, and the change is logged.
 
 ### Adding Prospects by Address
 

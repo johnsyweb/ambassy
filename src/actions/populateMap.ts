@@ -60,106 +60,43 @@ export function populateMap(
   _eventMarkerFilterState.clear();
   _prospectMarkers.clear();
 
-  eventDetails.forEach((event, eventName) => {
+  eventTeamsTableData.forEach((data, eventName) => {
+    const event = eventDetails.get(eventName);
+    if (!event) {
+      return;
+    }
+
     const coord = eventDetailsToCoordinate(event);
     const latitude = getLatitude(coord);
     const longitude = getLongitude(coord);
-    const data = getEventTeamsTableDataByShortName(
-      eventTeamsTableData,
-      eventName,
-    );
 
-    // Skip events without ambassador data for processing
+    _eventMarkerFilterState.set(eventName, {
+      kind: "allocated",
+      regionalAmbassador: data.regionalAmbassador,
+      eventAmbassador: data.eventAmbassador,
+    });
 
-    if (data) {
-      _eventMarkerFilterState.set(eventName, {
-        kind: "allocated",
-        regionalAmbassador: data.regionalAmbassador,
-        eventAmbassador: data.eventAmbassador,
-      });
-
-      const eaColor =
-        eaColorMap.get(data.eventAmbassador) ?? DEFAULT_EVENT_COLOUR;
-      const tooltip = `
+    const eaColor =
+      eaColorMap.get(data.eventAmbassador) ?? DEFAULT_EVENT_COLOUR;
+    const tooltip = `
         <strong>Event:</strong> ${eventName}<br>
         <strong>Event Director(s):</strong> ${data.eventDirectors}<br>
         <strong>Event Ambassador(s):</strong> ${data.eventAmbassador}<br>
         <strong>Regional Ambassador(s):</strong> ${data.regionalAmbassador}<br>
       `;
 
-      const marker = L.circleMarker([latitude, longitude], {
-        radius: 5,
-        color: eaColor,
+    const marker = L.circleMarker([latitude, longitude], {
+      radius: 5,
+      color: eaColor,
+    });
+    marker.bindTooltip(tooltip);
+    _markerMap.set(eventName, marker);
+    markersLayer.addLayer(marker);
+
+    if (_markerClickHandler) {
+      marker.on("click", () => {
+        _markerClickHandler!(eventName);
       });
-      marker.bindTooltip(tooltip);
-      _markerMap.set(eventName, marker);
-      markersLayer.addLayer(marker);
-
-      if (_markerClickHandler) {
-        marker.on("click", () => {
-          _markerClickHandler!(eventName);
-        });
-      }
-    } else {
-      _eventMarkerFilterState.set(eventName, { kind: "unallocated" });
-
-      // Unallocated events - make them larger and more visible for easier clicking
-      const marker = L.circleMarker([latitude, longitude], {
-        radius: 4,
-        color: DEFAULT_EVENT_COLOUR,
-        fillColor: DEFAULT_EVENT_COLOUR,
-        fillOpacity: 0.6,
-        weight: 2,
-      });
-      marker.bindTooltip(`${eventName}<br><em>Click to allocate</em>`, {
-        permanent: false,
-        direction: "top",
-        offset: [0, -10],
-      });
-
-      // Add hover effect to make it clear the marker is interactive
-      marker.on("mouseover", () => {
-        marker.setStyle({
-          radius: 6,
-          fillOpacity: 0.8,
-          weight: 3,
-        });
-        const element = marker.getElement() as HTMLElement | null;
-        if (element) {
-          element.style.cursor = "pointer";
-        }
-      });
-      marker.on("mouseout", () => {
-        marker.setStyle({
-          radius: 4,
-          fillOpacity: 0.6,
-          weight: 2,
-        });
-        const element = marker.getElement() as HTMLElement | null;
-        if (element) {
-          element.style.cursor = "pointer";
-        }
-      });
-
-      // Set cursor style on the marker element when added to map
-      marker.on("add", () => {
-        const element = marker.getElement() as HTMLElement | null;
-        if (element) {
-          element.style.cursor = "pointer";
-        }
-      });
-
-      _markerMap.set(eventName, marker);
-      markersLayer.addLayer(marker);
-
-      if (_markerClickHandler) {
-        marker.on("click", () => {
-          _markerClickHandler!(eventName);
-        });
-      }
-
-      // Note: Events without ambassador data are not included in Voronoi polygons
-      // Polygons should only represent territories based on events with ambassador assignments
     }
   });
 
