@@ -845,6 +845,26 @@
           </form>
         </div>
 
+        <div id="ambassadorNameFilterBar" class="ambassador-name-filter-bar">
+          <label for="ambassadorNameFilterInput">Ambassador name filter</label>
+          <input
+            type="search"
+            id="ambassadorNameFilterInput"
+            autocomplete="off"
+            spellcheck="false"
+            aria-describedby="ambassadorNameFilterStatus"
+            placeholder="Filter by ambassador name"
+          />
+          <button type="button" id="ambassadorNameFilterClear">
+            Clear
+          </button>
+          <span
+            id="ambassadorNameFilterStatus"
+            class="ambassador-name-filter-status"
+            aria-live="polite"
+          ></span>
+        </div>
+
         <div id="tabsContainer">
           <div class="tabs" role="tablist">
             <button

@@ -5,6 +5,36 @@
 let eventTeamsTabVisibleCallback: (() => void) | null = null;
 let issuesTabVisibleCallback: (() => void) | null = null;
 let prospectsTabVisibleCallback: (() => void) | null = null;
+let tabChangeCallback: (() => void) | null = null;
+
+export function setTabChangeCallback(callback: () => void): void {
+  tabChangeCallback = callback;
+}
+
+export type FilterableTabLabel =
+  | "Event Teams"
+  | "Event Ambassadors"
+  | "Regional Ambassadors"
+  | "Prospects";
+
+const FILTERABLE_TAB_LABELS: FilterableTabLabel[] = [
+  "Event Teams",
+  "Event Ambassadors",
+  "Regional Ambassadors",
+  "Prospects",
+];
+
+export function getActiveFilterableTabLabel(): FilterableTabLabel {
+  const activeButton =
+    document.querySelector<HTMLButtonElement>(".tab-button.active");
+  const label = activeButton?.textContent?.trim() ?? "Event Teams";
+
+  if (FILTERABLE_TAB_LABELS.includes(label as FilterableTabLabel)) {
+    return label as FilterableTabLabel;
+  }
+
+  return "Event Teams";
+}
 
 export function setEventTeamsTabVisibleCallback(callback: () => void): void {
   eventTeamsTabVisibleCallback = callback;
@@ -19,7 +49,8 @@ export function setProspectsTabVisibleCallback(callback: () => void): void {
 }
 
 export function initializeTabs(): void {
-  const tabButtons = document.querySelectorAll<HTMLButtonElement>(".tab-button");
+  const tabButtons =
+    document.querySelectorAll<HTMLButtonElement>(".tab-button");
 
   tabButtons.forEach((button, index) => {
     button.addEventListener("click", () => {
@@ -52,7 +83,8 @@ export function initializeTabs(): void {
 }
 
 function switchTab(index: number): void {
-  const tabButtons = document.querySelectorAll<HTMLButtonElement>(".tab-button");
+  const tabButtons =
+    document.querySelectorAll<HTMLButtonElement>(".tab-button");
   const tabContents = document.querySelectorAll<HTMLElement>(".tab-content");
 
   // Hide all tabs and remove active state
@@ -89,6 +121,9 @@ function switchTab(index: number): void {
     if (index === 5 && issuesTabVisibleCallback) {
       issuesTabVisibleCallback();
     }
+
+    if (tabChangeCallback) {
+      tabChangeCallback();
+    }
   }
 }
-

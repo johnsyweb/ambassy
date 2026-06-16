@@ -3,10 +3,18 @@
  * Accessible via button click or keyboard shortcut (Ctrl+/ or ?).
  */
 export function showKeyboardShortcutsDialog(): void {
-  const dialog = document.getElementById("keyboardShortcutsDialog") as HTMLElement;
-  const title = document.getElementById("keyboardShortcutsDialogTitle") as HTMLElement;
-  const content = document.getElementById("keyboardShortcutsDialogContent") as HTMLElement;
-  const closeButton = document.getElementById("keyboardShortcutsDialogClose") as HTMLButtonElement;
+  const dialog = document.getElementById(
+    "keyboardShortcutsDialog",
+  ) as HTMLElement;
+  const title = document.getElementById(
+    "keyboardShortcutsDialogTitle",
+  ) as HTMLElement;
+  const content = document.getElementById(
+    "keyboardShortcutsDialogContent",
+  ) as HTMLElement;
+  const closeButton = document.getElementById(
+    "keyboardShortcutsDialogClose",
+  ) as HTMLButtonElement;
 
   if (!dialog || !title || !content || !closeButton) {
     console.error("Keyboard shortcuts dialog elements not found");
@@ -16,30 +24,51 @@ export function showKeyboardShortcutsDialog(): void {
   title.textContent = "Keyboard Shortcuts";
   content.innerHTML = "";
 
-  const shortcuts: Array<{ category: string; items: Array<{ keys: string; description: string }> }> = [
+  const shortcuts: Array<{
+    category: string;
+    items: Array<{ keys: string; description: string }>;
+  }> = [
     {
       category: "General",
       items: [
         { keys: "Ctrl+/ or ?", description: "Show keyboard shortcuts" },
-        { keys: "Escape", description: "Close dialogs" },
+        { keys: "/", description: "Focus ambassador name filter" },
+        {
+          keys: "Escape",
+          description:
+            "Close dialogs, or clear ambassador name filter when it has focus",
+        },
         { keys: "Tab", description: "Navigate between controls" },
-        { keys: "Enter / Space", description: "Activate focused button or control" },
+        {
+          keys: "Enter / Space",
+          description: "Activate focused button or control",
+        },
       ],
     },
     {
       category: "Allocation & Reallocation Dialogs",
       items: [
-        { keys: "Arrow Up/Down", description: "Navigate between suggestion buttons" },
+        {
+          keys: "Arrow Up/Down",
+          description: "Navigate between suggestion buttons",
+        },
         { keys: "Enter / Space", description: "Select focused suggestion" },
         { keys: "Escape", description: "Cancel and close dialog" },
-        { keys: "Tab", description: "Move to next control (suggestions → dropdown → buttons)" },
+        {
+          keys: "Tab",
+          description:
+            "Move to next control (suggestions → dropdown → buttons)",
+        },
       ],
     },
     {
       category: "Table Navigation",
       items: [
         { keys: "Click row", description: "Select event and highlight on map" },
-        { keys: "Click map marker", description: "Select event and highlight in table" },
+        {
+          keys: "Click map marker",
+          description: "Select event and highlight in table",
+        },
       ],
     },
   ];
@@ -110,7 +139,7 @@ export function initializeKeyboardShortcuts(): void {
   document.addEventListener("keydown", (e) => {
     // Ctrl+/ or Cmd+/ (Mac) or ? key
     if (
-      (e.ctrlKey || e.metaKey) && e.key === "/" ||
+      ((e.ctrlKey || e.metaKey) && e.key === "/") ||
       (!e.ctrlKey && !e.metaKey && e.key === "?" && !e.shiftKey)
     ) {
       // Don't trigger if user is typing in an input field
