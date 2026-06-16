@@ -16,6 +16,7 @@ import {
 } from "./populateEventTeamsTable";
 import { EventTeamsTableDataMap } from "@models/EventTeamsTableData";
 import { SelectionState, createSelectionState } from "@models/SelectionState";
+import { applyAmbassadorNameFilterToTables } from "@utils/ambassadorNameFilter";
 
 describe("populateEventTeamsTable - Reallocate Button", () => {
   let eventTeamsTableData: EventTeamsTableDataMap;
@@ -225,6 +226,34 @@ describe("populateEventTeamsTable - Reallocate Button", () => {
     reallocateButton.dispatchEvent(spaceEvent);
 
     expect(handler).toHaveBeenCalledWith("test-event");
+  });
+
+  it("hides Event Teams rows that do not match the ambassador name filter", () => {
+    eventTeamsTableData.set("other-event", {
+      eventShortName: "other-event",
+      eventDirectors: "Director 2",
+      eventAmbassador: "Other EA",
+      regionalAmbassador: "Other REA",
+      eventCoordinates: "37.80000° S 144.90000° E",
+      eventSeries: 1,
+      eventCountryCode: 3,
+      eventCountry: "Australia",
+    });
+
+    populateEventTeamsTable(eventTeamsTableData);
+
+    sessionStorage.setItem("ambassy:ambassadorNameFilter", "test ea");
+    applyAmbassadorNameFilterToTables();
+
+    const matchingRow = tableBody.querySelector(
+      "tr[data-event-short-name='test-event']",
+    ) as HTMLTableRowElement;
+    const hiddenRow = tableBody.querySelector(
+      "tr[data-event-short-name='other-event']",
+    ) as HTMLTableRowElement;
+
+    expect(matchingRow.hidden).toBe(false);
+    expect(hiddenRow.hidden).toBe(true);
   });
 
   it("should update button state when selection changes", () => {

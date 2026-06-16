@@ -27,6 +27,7 @@ import { applyHomeParkrunBonusFromCoordinate } from "@utils/homeParkrunBonus";
 import { ProspectiveEvent } from "@models/ProspectiveEvent";
 import { EventAmbassador } from "@models/EventAmbassador";
 import { initializeTableSorting } from "./tableSorting";
+import { buildAmbassadorFilterText } from "@utils/ambassadorNameFilter";
 
 type AmbassadorWithCounts = {
   name: string;
@@ -119,6 +120,9 @@ function createProspectRow(
 ): HTMLTableRowElement {
   const row = document.createElement("tr");
   row.setAttribute("data-prospect-id", prospect.id);
+  row.dataset.ambassadorFilterText = buildAmbassadorFilterText(
+    prospect.eventAmbassador,
+  );
 
   // Prospect Event
   const prospectEventCell = document.createElement("td");

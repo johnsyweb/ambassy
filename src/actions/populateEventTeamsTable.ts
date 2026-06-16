@@ -4,6 +4,7 @@ import {
   regionalAmbassadorsFrom,
 } from "@models/EventTeamsTableData";
 import { SelectionState } from "@models/SelectionState";
+import { buildAmbassadorFilterText } from "@utils/ambassadorNameFilter";
 import { colorPalette } from "./colorPalette";
 import { initializeTableSorting } from "./tableSorting";
 
@@ -29,6 +30,10 @@ export function populateEventTeamsTable(
   eventTeamsTableData.forEach((data) => {
     const row = document.createElement("tr");
     row.setAttribute("data-event-short-name", data.eventShortName);
+    row.dataset.ambassadorFilterText = buildAmbassadorFilterText(
+      data.regionalAmbassador,
+      data.eventAmbassador,
+    );
 
     const regionalAmbassadorCell = document.createElement("td");
     const reaContainer = document.createElement("div");

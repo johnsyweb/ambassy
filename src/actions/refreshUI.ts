@@ -16,6 +16,9 @@ import { loadFromStorage } from "@utils/storage";
 import { getCountriesSync } from "@models/country";
 import { enrichEventTeamsWithLastAmbassadorVisit } from "./enrichEventTeamsWithLastAmbassadorVisit";
 import { loadAmbassadorFinishHistories } from "./persistAmbassadorFinishHistory";
+import { updateAmbassadorNameFilterStatus } from "./ambassadorNameFilterUI";
+import { applyAmbassadorNameFilterToTables } from "@utils/ambassadorNameFilter";
+import { applyAmbassadorNameFilterToMap } from "./populateMap";
 
 export function refreshUI(
   eventDetails: EventDetailsMap,
@@ -89,4 +92,13 @@ export function refreshUI(
     eventDetails,
   );
   populateChangesLogTable(log, eventDetails, countries);
+
+  applyAmbassadorNameFilterToTables();
+  applyAmbassadorNameFilterToMap(eventTeamsTableData);
+  updateAmbassadorNameFilterStatus({
+    eventTeamsTableData,
+    eventAmbassadors: eventAmbassadorsToUse,
+    regionalAmbassadors: regionalAmbassadorsToUse,
+    prospects: prospectsList,
+  });
 }

@@ -22,6 +22,7 @@ import {
   buildParkrunnerProfileUrl,
   formatParkrunnerIdForDisplay,
 } from "@utils/parkrunnerProfileUrl";
+import { buildAmbassadorFilterText } from "@utils/ambassadorNameFilter";
 import { EventAmbassador } from "@models/EventAmbassador";
 import { RegionalAmbassador } from "@models/RegionalAmbassador";
 import { AmbassadorRole } from "@models/AmbassadorFinishHistory";
@@ -269,6 +270,10 @@ function populateEventAmbassadorsTable(
   sortedAmbassadors.forEach(([name, ambassador]) => {
     const row = document.createElement("tr");
     row.setAttribute("data-ea-name", name);
+    row.dataset.ambassadorFilterText = buildAmbassadorFilterText(
+      name,
+      ambassador.regionalAmbassador,
+    );
 
     // Load prospective events for this ambassador once
     const prospectiveEvents = loadProspectiveEvents().filter(
@@ -611,6 +616,10 @@ function populateRegionalAmbassadorsTable(
   sortedAmbassadors.forEach(([name, ambassador]) => {
     const row = document.createElement("tr");
     row.setAttribute("data-ra-name", name);
+    row.dataset.ambassadorFilterText = buildAmbassadorFilterText(
+      name,
+      ...ambassador.supportsEAs,
+    );
 
     const countryCode = inferCountryCodeForRegionalAmbassador(
       ambassador,
