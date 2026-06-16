@@ -37,7 +37,11 @@ module.exports = {
   },
   optimization: {
     minimize: true,
-    minimizer: [new TerserPlugin()]
+    minimizer: [
+      new TerserPlugin({
+        exclude: /\.user\.js$/i,
+      }),
+    ],
   },
   plugins: [
     new CleanWebpackPlugin(),
