@@ -23,7 +23,7 @@ Implement in order (highest impact first):
 |---|--------|--------|
 | 01 | Stop rendering global unallocated event markers | done |
 | 02 | Viewport-culled unallocated markers for map allocation | done |
-| 03 | Canvas renderer for mass markers | ready-for-agent |
+| 03 | Canvas renderer for mass markers | done |
 | 04 | Split table refresh from map refresh | ready-for-agent |
 | 05 | Skip `populateMap` when map inputs unchanged | ready-for-agent |
 | 06 | Draw territory polygons for viewport-visible allocations only | ready-for-agent |

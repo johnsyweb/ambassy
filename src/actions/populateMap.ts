@@ -35,6 +35,10 @@ import { colorPalette } from "./colorPalette";
 const DEFAULT_EVENT_COLOUR = "rebeccapurple";
 const DEFAULT_POLYGON_COLOUR = "lightgrey";
 
+export const EVENT_MARKER_MAP_OPTIONS: L.MapOptions = {
+  preferCanvas: true,
+};
+
 export function populateMap(
   eventTeamsTableData: EventTeamsTableDataMap,
   eventDetails: EventDetailsMap,
@@ -253,7 +257,7 @@ function setupMapView(eventBounds: L.LatLngBounds | null): {
 } {
   const isNewMap = !_map;
   if (!_map) {
-    _map = L.map("mapContainer");
+    _map = L.map("mapContainer", EVENT_MARKER_MAP_OPTIONS);
     L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
       attribution: "&copy; OpenStreetMap contributors",
     }).addTo(_map);

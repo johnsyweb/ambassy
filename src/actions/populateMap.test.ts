@@ -7,6 +7,8 @@ import {
   getUnallocatedMarkerMap,
   getMap,
   refreshViewportUnallocatedMarkersForTests,
+  setMarkerClickHandler,
+  EVENT_MARKER_MAP_OPTIONS,
 } from "./populateMap";
 
 jest.mock("d3-geo-voronoi", () => ({
@@ -528,6 +530,119 @@ describe("populateMap", () => {
       expect(getUnallocatedMarkerMap().has("nearby-unallocated")).toBe(false);
       expect(getUnallocatedMarkerMap().has("distant-unallocated")).toBe(true);
       expect(isEventMarkerVisibleOnMap("distant-unallocated")).toBe(true);
+    });
+  });
+
+  describe("Canvas marker rendering", () => {
+    beforeEach(() => {
+      document.body.innerHTML = '<div id="mapContainer"></div>';
+    });
+
+    afterEach(() => {
+      document.body.innerHTML = "";
+    });
+
+    it("enables preferCanvas so circle markers use the canvas renderer", () => {
+      const eventTeamsTableData = new Map();
+      eventTeamsTableData.set("event1", {
+        eventShortName: "event1",
+        eventDirectors: "Director1",
+        eventAmbassador: "EA1",
+        regionalAmbassador: "REA1",
+        eventCoordinates: "37.80000° S 144.90000° E",
+        eventSeries: 1,
+        eventCountryCode: 3,
+        eventCountry: "Australia",
+      });
+
+      const eventDetails = new Map();
+      eventDetails.set("event1", {
+        id: "1",
+        type: "Feature",
+        geometry: { type: "Point", coordinates: [144.9631, -37.8136] },
+        properties: {
+          eventname: "Event 1",
+          EventLongName: "Event 1 Long Name",
+          EventShortName: "event1",
+          LocalisedEventLongName: null,
+          countrycode: 0,
+          seriesid: 1,
+          EventLocation: "Location 1",
+        },
+      });
+
+      const eventAmbassadors = new Map();
+      eventAmbassadors.set("EA1", { name: "EA1", events: ["event1"] });
+
+      const regionalAmbassadors = new Map();
+      regionalAmbassadors.set("REA1", {
+        name: "REA1",
+        state: "VIC",
+        supportsEAs: ["EA1"],
+      });
+
+      populateMap(
+        eventTeamsTableData,
+        eventDetails,
+        eventAmbassadors,
+        regionalAmbassadors,
+      );
+
+      expect(EVENT_MARKER_MAP_OPTIONS.preferCanvas).toBe(true);
+      expect(getMap()?.options.preferCanvas).toBe(true);
+    });
+
+    it("still routes allocated marker clicks to the map click handler", () => {
+      const eventTeamsTableData = new Map();
+      eventTeamsTableData.set("event1", {
+        eventShortName: "event1",
+        eventDirectors: "Director1",
+        eventAmbassador: "EA1",
+        regionalAmbassador: "REA1",
+        eventCoordinates: "37.80000° S 144.90000° E",
+        eventSeries: 1,
+        eventCountryCode: 3,
+        eventCountry: "Australia",
+      });
+
+      const eventDetails = new Map();
+      eventDetails.set("event1", {
+        id: "1",
+        type: "Feature",
+        geometry: { type: "Point", coordinates: [144.9631, -37.8136] },
+        properties: {
+          eventname: "Event 1",
+          EventLongName: "Event 1 Long Name",
+          EventShortName: "event1",
+          LocalisedEventLongName: null,
+          countrycode: 0,
+          seriesid: 1,
+          EventLocation: "Location 1",
+        },
+      });
+
+      const eventAmbassadors = new Map();
+      eventAmbassadors.set("EA1", { name: "EA1", events: ["event1"] });
+
+      const regionalAmbassadors = new Map();
+      regionalAmbassadors.set("REA1", {
+        name: "REA1",
+        state: "VIC",
+        supportsEAs: ["EA1"],
+      });
+
+      const onMarkerClick = jest.fn();
+      setMarkerClickHandler(onMarkerClick);
+
+      populateMap(
+        eventTeamsTableData,
+        eventDetails,
+        eventAmbassadors,
+        regionalAmbassadors,
+      );
+
+      getMarkerMap().get("event1")?.fire("click");
+      expect(onMarkerClick).toHaveBeenCalledWith("event1");
     });
   });
 });
