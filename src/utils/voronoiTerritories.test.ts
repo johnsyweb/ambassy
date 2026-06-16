@@ -1,0 +1,421 @@
+import { EventDetails } from "@models/EventDetails";
+import { EventDetailsMap } from "@models/EventDetailsMap";
+import { EventTeamsTableDataMap } from "@models/EventTeamsTableData";
+import { execFileSync } from "child_process";
+import path from "path";
+import { ProspectiveEvent } from "@models/ProspectiveEvent";
+import {
+  buildVoronoiSites,
+  clipRingToViewport,
+  computeVisibleTerritoryRings,
+  deduplicateVoronoiSites,
+  extractLocalTerritoryRing,
+  fingerprintVoronoiSites,
+  GeoVoronoiFn,
+  isDrawableTerritoryRing,
+  TerritoryRing,
+  VoronoiSite,
+  VoronoiTerritoryCache,
+} from "./voronoiTerritories";
+
+function createEvent(
+  shortName: string,
+  coordinates: [number, number],
+): EventDetails {
+  return {
+    id: shortName,
+    type: "Feature",
+    geometry: { type: "Point", coordinates },
+    properties: {
+      eventname: shortName.toLowerCase().replace(/\s+/g, ""),
+      EventLongName: shortName,
+      EventShortName: shortName,
+      LocalisedEventLongName: null,
+      countrycode: 3,
+      seriesid: 1,
+      EventLocation: "",
+    },
+  };
+}
+
+describe("buildVoronoiSites", () => {
+  it("includes an allocated live event as a visible Voronoi site", () => {
+    const eventDetails: EventDetailsMap = new Map([
+      ["Mt Clarence", createEvent("Mt Clarence", [117.916528, -35.025659])],
+    ]);
+    const eventTeamsTableData: EventTeamsTableDataMap = new Map([
+      [
+        "Mt Clarence",
+        {
+          eventShortName: "Mt Clarence",
+          eventDirectors: "Director",
+          eventAmbassador: "EA1",
+          regionalAmbassador: "REA1",
+          eventCoordinates: "35.02566° S 117.91653° E",
+          eventSeries: 1,
+          eventCountryCode: 3,
+          eventCountry: "au",
+        },
+      ],
+    ]);
+
+    const sites = buildVoronoiSites({
+      eventDetails,
+      eventTeamsTableData,
+      styleForAllocatedEvent: () => ({
+        raColor: "#ff0066",
+        tooltip: "Mt Clarence",
+      }),
+    });
+
+    const mtClarence = sites.find((site) => site.id === "Mt Clarence");
+    expect(mtClarence).toEqual({
+      id: "Mt Clarence",
+      longitude: 117.916528,
+      latitude: -35.025659,
+      role: "visible",
+      raColor: "#ff0066",
+      tooltip: "Mt Clarence",
+    });
+  });
+
+  it("includes an unallocated parkrun as a constraining Voronoi site", () => {
+    const eventDetails: EventDetailsMap = new Map([
+      ["Mt Clarence", createEvent("Mt Clarence", [117.916528, -35.025659])],
+      ["Albany", createEvent("Albany", [117.883, -35.027])],
+    ]);
+    const eventTeamsTableData: EventTeamsTableDataMap = new Map([
+      [
+        "Mt Clarence",
+        {
+          eventShortName: "Mt Clarence",
+          eventDirectors: "Director",
+          eventAmbassador: "EA1",
+          regionalAmbassador: "REA1",
+          eventCoordinates: "35.02566° S 117.91653° E",
+          eventSeries: 1,
+          eventCountryCode: 3,
+          eventCountry: "au",
+        },
+      ],
+    ]);
+
+    const sites = buildVoronoiSites({
+      eventDetails,
+      eventTeamsTableData,
+      styleForAllocatedEvent: () => ({
+        raColor: "#ff0066",
+        tooltip: "Mt Clarence",
+      }),
+    });
+
+    const albany = sites.find((site) => site.id === "Albany");
+    expect(albany).toEqual({
+      id: "Albany",
+      longitude: 117.883,
+      latitude: -35.027,
+      role: "constraining",
+    });
+  });
+
+  it("includes an EA-assigned prospective event as a visible Voronoi site", () => {
+    const eventDetails: EventDetailsMap = new Map();
+    const eventTeamsTableData: EventTeamsTableDataMap = new Map();
+    const prospectiveEvents: ProspectiveEvent[] = [
+      {
+        id: "prospect-1",
+        prospectEvent: "Bay East Garden",
+        country: "Singapore",
+        state: "SG",
+        prospectEDs: "",
+        eventAmbassador: "EA1",
+        courseFound: false,
+        landownerPermission: false,
+        fundingConfirmed: false,
+        dateMadeContact: null,
+        coordinates: { latitude: 1.294155, longitude: 103.866771 },
+        geocodingStatus: "success",
+        ambassadorMatchStatus: "matched",
+        importTimestamp: 0,
+        sourceRow: 1,
+      },
+    ];
+
+    const sites = buildVoronoiSites({
+      eventDetails,
+      eventTeamsTableData,
+      prospectiveEvents,
+      styleForAllocatedEvent: () => ({
+        raColor: "unused",
+        tooltip: "unused",
+      }),
+      styleForProspect: () => ({
+        raColor: "#00ff00",
+        tooltip: "Bay East Garden",
+      }),
+    });
+
+    expect(sites).toEqual([
+      {
+        id: "prospect:prospect-1",
+        longitude: 103.866771,
+        latitude: 1.294155,
+        role: "visible",
+        raColor: "#00ff00",
+        tooltip: "Bay East Garden",
+      },
+    ]);
+  });
+});
+
+describe("extractLocalTerritoryRing", () => {
+  const hamiltonIslandSite = [148.95513, -20.345551] as [number, number];
+  const wrappingRing: [number, number][] = [
+    [179.26127847511003, 0.5682388699175069],
+    [158.75107162994405, -16.41684752568569],
+    [154.2026627971397, -19.22962114121061],
+    [148.65267865887563, -20.798622152811774],
+    [149.34544067661713, -18.89053790773871],
+    [151.49050921190144, -15.067820620089904],
+    [157.41979354698594, -9.633392314261878],
+    [178.7849480012309, 10.872081038890277],
+    [-174.0415745101038, 11.083409052182981],
+    [-179.82249810622864, 1.381146179161851],
+  ];
+
+  it("removes antimeridian wrap vertices from a spherical Voronoi ring", () => {
+    const localRing = extractLocalTerritoryRing(
+      wrappingRing,
+      hamiltonIslandSite[0],
+      hamiltonIslandSite[1],
+    );
+
+    expect(localRing).not.toBeNull();
+    expect(localRing!.length).toBeGreaterThanOrEqual(3);
+    localRing!.forEach(([longitude, latitude]) => {
+      expect(longitude).toBeGreaterThan(140);
+      expect(longitude).toBeLessThan(165);
+      expect(latitude).toBeLessThan(0);
+    });
+    expect(
+      isDrawableTerritoryRing(
+        localRing!,
+        hamiltonIslandSite[0],
+        hamiltonIslandSite[1],
+      ),
+    ).toBe(true);
+  });
+});
+
+describe("computeVisibleTerritoryRings", () => {
+  const localRing: [number, number][] = [
+    [117.5, -35.5],
+    [118.5, -35.5],
+    [118.5, -34.5],
+    [117.5, -34.5],
+    [117.5, -35.5],
+  ];
+
+  const mockGeoVoronoi: GeoVoronoiFn = () => ({
+    polygons: () => ({
+      features: [
+        {
+          type: "Feature",
+          properties: {},
+          geometry: { type: "Polygon", coordinates: [localRing] },
+        },
+        {
+          type: "Feature",
+          properties: {},
+          geometry: { type: "Polygon", coordinates: [localRing] },
+        },
+      ],
+    }),
+  });
+
+  it("returns REA territory rings for visible sites only", () => {
+    const sites: VoronoiSite[] = [
+      {
+        id: "Mt Clarence",
+        longitude: 117.916528,
+        latitude: -35.025659,
+        role: "visible",
+        raColor: "#ff0066",
+        tooltip: "Mt Clarence",
+      },
+      {
+        id: "Albany",
+        longitude: 117.883,
+        latitude: -35.027,
+        role: "constraining",
+      },
+    ];
+
+    const rings = computeVisibleTerritoryRings(sites, mockGeoVoronoi);
+
+    expect(rings).toEqual([
+      {
+        id: "Mt Clarence",
+        ring: localRing,
+        raColor: "#ff0066",
+        tooltip: "Mt Clarence",
+      },
+    ]);
+  });
+});
+
+describe("clipRingToViewport", () => {
+  it("returns the visible portion of a territory ring inside the viewport", () => {
+    const ring: [number, number][] = [
+      [117, -36],
+      [119, -36],
+      [119, -34],
+      [117, -34],
+      [117, -36],
+    ];
+
+    const clipped = clipRingToViewport(ring, {
+      minLongitude: 117.5,
+      maxLongitude: 118.5,
+      minLatitude: -35.5,
+      maxLatitude: -34.5,
+    });
+
+    expect(clipped).not.toBeNull();
+    expect(clipped!.length).toBeGreaterThanOrEqual(3);
+    clipped!.forEach(([longitude, latitude]) => {
+      expect(longitude).toBeGreaterThanOrEqual(117.5);
+      expect(longitude).toBeLessThanOrEqual(118.5);
+      expect(latitude).toBeGreaterThanOrEqual(-35.5);
+      expect(latitude).toBeLessThanOrEqual(-34.5);
+    });
+  });
+
+  it("returns null when the ring is entirely outside the viewport", () => {
+    const ring: [number, number][] = [
+      [100, -10],
+      [101, -10],
+      [101, -9],
+      [100, -9],
+      [100, -10],
+    ];
+
+    expect(
+      clipRingToViewport(ring, {
+        minLongitude: 117,
+        maxLongitude: 118,
+        minLatitude: -36,
+        maxLatitude: -35,
+      }),
+    ).toBeNull();
+  });
+});
+
+describe("VoronoiTerritoryCache", () => {
+  it("recomputes territory rings only when Voronoi sites change", () => {
+    const sites: VoronoiSite[] = [
+      {
+        id: "Mt Clarence",
+        longitude: 117.916528,
+        latitude: -35.025659,
+        role: "visible",
+        raColor: "#ff0066",
+        tooltip: "Mt Clarence",
+      },
+    ];
+    const ring: TerritoryRing = {
+      id: "Mt Clarence",
+      ring: [
+        [117.5, -35.5],
+        [118.5, -35.5],
+        [118.5, -34.5],
+        [117.5, -34.5],
+        [117.5, -35.5],
+      ],
+      raColor: "#ff0066",
+      tooltip: "Mt Clarence",
+    };
+    const geoVoronoiFn = jest.fn<ReturnType<GeoVoronoiFn>, Parameters<GeoVoronoiFn>>(
+      () => ({
+        polygons: () => ({
+          features: [
+            {
+              type: "Feature",
+              properties: {},
+              geometry: {
+                type: "Polygon",
+                coordinates: [ring.ring],
+              },
+            },
+          ],
+        }),
+      }),
+    );
+
+    const cache = new VoronoiTerritoryCache();
+    expect(cache.getRings(sites, geoVoronoiFn)).toEqual([ring]);
+    expect(cache.getRings(sites, geoVoronoiFn)).toEqual([ring]);
+    expect(geoVoronoiFn).toHaveBeenCalledTimes(1);
+
+    const changedSites = [...sites, {
+      id: "Albany",
+      longitude: 117.883,
+      latitude: -35.027,
+      role: "constraining" as const,
+    }];
+    expect(fingerprintVoronoiSites(changedSites)).not.toBe(
+      fingerprintVoronoiSites(sites),
+    );
+    cache.getRings(changedSites, geoVoronoiFn);
+    expect(geoVoronoiFn).toHaveBeenCalledTimes(2);
+  });
+});
+
+describe("deduplicateVoronoiSites", () => {
+  it("removes duplicate coordinates from the global site set", () => {
+    const sites: VoronoiSite[] = [
+      {
+        id: "event-a",
+        longitude: 117.916528,
+        latitude: -35.025659,
+        role: "visible",
+        raColor: "red",
+        tooltip: "A",
+      },
+      {
+        id: "event-b",
+        longitude: 117.916528,
+        latitude: -35.025659,
+        role: "constraining",
+      },
+    ];
+
+    expect(deduplicateVoronoiSites(sites)).toHaveLength(1);
+  });
+});
+
+describe("d3-geo-voronoi integration", () => {
+  it("draws a local Mt Clarence REA territory with global parkrun sites", () => {
+    const scriptPath = path.join(
+      __dirname,
+      "../../script/verify-mt-clarence-voronoi.cjs",
+    );
+
+    execFileSync("node", [scriptPath], {
+      stdio: "pipe",
+      cwd: path.join(__dirname, "../.."),
+    });
+  });
+
+  it("draws a local Hamilton Island REA territory with global parkrun sites", () => {
+    const scriptPath = path.join(
+      __dirname,
+      "../../script/verify-hamilton-island-voronoi.cjs",
+    );
+
+    execFileSync("node", [scriptPath], {
+      stdio: "pipe",
+      cwd: path.join(__dirname, "../.."),
+    });
+  });
+});
