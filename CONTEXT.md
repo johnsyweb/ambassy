@@ -67,6 +67,14 @@ _Avoid_: All-or-nothing bounds check, full-ring draw
 An allocated event whose REA territory polygon cannot be computed or clipped to a renderable shape. The event marker and tooltip still appear; no polygon is drawn and no user-facing error is shown.
 _Avoid_: Fallback envelope, territory issue
 
+**Drawable territory**:
+A computed REA territory cell ring that passes validation: the allocated event site lies inside the polygon (point-in-polygon), and the ring is locally sensible (e.g. longitude span within limits).
+_Avoid_: Bounding-box-only check, drawable if longitude range contains site
+
+**Raw cell fallback**:
+When local territory ring extraction fails drawable validation but the raw global Voronoi cell ring passes, the raw ring is used. Preserves global spherical compute; may draw a wrapped path (e.g. through the Indian Ocean) so the site remains inside the polygon.
+_Avoid_: Meridian-box repair, planar Voronoi fallback
+
 **Antimeridian (deferred)**:
 REA territory polygons that cross ±180° longitude are out of scope until allocations span the Pacific. Current regions (UK, Australia, SE Asia, Japan, NZ) do not require antimeridian splitting.
 _Avoid_: Pacific-centred longitude, date-line split (until needed)

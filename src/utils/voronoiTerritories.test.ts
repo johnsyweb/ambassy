@@ -13,6 +13,7 @@ import {
   fingerprintVoronoiSites,
   GeoVoronoiFn,
   isDrawableTerritoryRing,
+  pointInTerritoryRing,
   TerritoryRing,
   VoronoiSite,
   VoronoiTerritoryCache,
@@ -213,6 +214,62 @@ describe("buildVoronoiSites", () => {
   });
 });
 
+describe("isDrawableTerritoryRing", () => {
+  it("rejects a ring whose bounding box contains the site but the site lies outside the polygon", () => {
+    const ring: [number, number][] = [
+      [100, -20],
+      [120, -20],
+      [120, -25],
+      [115, -25],
+      [115, -30],
+      [100, -30],
+      [100, -20],
+    ];
+
+    expect(isDrawableTerritoryRing(ring, 118, -27)).toBe(false);
+  });
+
+  it("accepts a ring that contains the site", () => {
+    const ring: [number, number][] = [
+      [117.5, -35.5],
+      [118.5, -35.5],
+      [118.5, -34.5],
+      [117.5, -34.5],
+      [117.5, -35.5],
+    ];
+
+    expect(isDrawableTerritoryRing(ring, 118, -35)).toBe(true);
+  });
+});
+
+describe("pointInTerritoryRing", () => {
+  it("returns true when the site lies inside the polygon", () => {
+    const ring: [number, number][] = [
+      [117.5, -35.5],
+      [118.5, -35.5],
+      [118.5, -34.5],
+      [117.5, -34.5],
+      [117.5, -35.5],
+    ];
+
+    expect(pointInTerritoryRing(118, -35, ring)).toBe(true);
+  });
+
+  it("returns false when the site lies outside the polygon", () => {
+    const ring: [number, number][] = [
+      [100, -20],
+      [120, -20],
+      [120, -25],
+      [115, -25],
+      [115, -30],
+      [100, -30],
+      [100, -20],
+    ];
+
+    expect(pointInTerritoryRing(118, -27, ring)).toBe(false);
+  });
+});
+
 describe("extractLocalTerritoryRing", () => {
   const hamiltonIslandSite = [148.95513, -20.345551] as [number, number];
   const wrappingRing: [number, number][] = [
@@ -250,6 +307,33 @@ describe("extractLocalTerritoryRing", () => {
       ),
     ).toBe(true);
   });
+
+  it("does not treat a wrapped Baxter cell as drawable after extraction", () => {
+    const baxterSite: [number, number] = [113.65484, -24.89145];
+    const wrappedBaxterRing: [number, number][] = [
+      [73.231, -26.064],
+      [73.014, -21.708],
+      [85.808, -18.568],
+      [97.162, -15.539],
+      [118.137, -24.62],
+      [118.981, -25.127],
+      [119.342, -25.44],
+    ];
+
+    const localRing = extractLocalTerritoryRing(
+      wrappedBaxterRing,
+      baxterSite[0],
+      baxterSite[1],
+    );
+
+    expect(localRing).not.toBeNull();
+    expect(
+      isDrawableTerritoryRing(localRing!, baxterSite[0], baxterSite[1]),
+    ).toBe(false);
+    expect(
+      pointInTerritoryRing(baxterSite[0], baxterSite[1], localRing!),
+    ).toBe(false);
+  });
 });
 
 describe("computeVisibleTerritoryRings", () => {
@@ -266,12 +350,12 @@ describe("computeVisibleTerritoryRings", () => {
       features: [
         {
           type: "Feature",
-          properties: {},
+          properties: { sitecoordinates: [117.916528, -35.025659] },
           geometry: { type: "Polygon", coordinates: [localRing] },
         },
         {
           type: "Feature",
-          properties: {},
+          properties: { sitecoordinates: [117.883, -35.027] },
           geometry: { type: "Polygon", coordinates: [localRing] },
         },
       ],
@@ -306,6 +390,77 @@ describe("computeVisibleTerritoryRings", () => {
         tooltip: "Mt Clarence",
       },
     ]);
+  });
+
+  it("does not replace a local ring that is already drawable", () => {
+    const sites: VoronoiSite[] = [
+      {
+        id: "Mt Clarence",
+        longitude: 117.916528,
+        latitude: -35.025659,
+        role: "visible",
+        raColor: "#ff0066",
+        tooltip: "Mt Clarence",
+      },
+      {
+        id: "Albany",
+        longitude: 117.883,
+        latitude: -35.027,
+        role: "constraining",
+      },
+    ];
+
+    const rings = computeVisibleTerritoryRings(sites, mockGeoVoronoi);
+
+    expect(rings[0].ring).toEqual(localRing);
+  });
+
+  it("falls back to the raw global cell when local extraction misses the site", () => {
+    const baxterSite: [number, number] = [113.65484, -24.89145];
+    const wrappedBaxterRing: [number, number][] = [
+      [73.231, -26.064],
+      [73.014, -21.708],
+      [85.808, -18.568],
+      [97.162, -15.539],
+      [118.137, -24.62],
+      [118.981, -25.127],
+      [119.342, -25.44],
+    ];
+
+    const mockWrappedGeoVoronoi: GeoVoronoiFn = () => ({
+      polygons: () => ({
+        features: [
+          {
+            type: "Feature",
+            properties: { sitecoordinates: baxterSite },
+            geometry: {
+              type: "Polygon",
+              coordinates: [wrappedBaxterRing],
+            },
+          },
+        ],
+      }),
+    });
+
+    const rings = computeVisibleTerritoryRings(
+      [
+        {
+          id: "Baxter",
+          longitude: baxterSite[0],
+          latitude: baxterSite[1],
+          role: "visible",
+          raColor: "#ff0066",
+          tooltip: "Baxter",
+        },
+      ],
+      mockWrappedGeoVoronoi,
+    );
+
+    expect(rings).toHaveLength(1);
+    expect(rings[0].ring).toEqual(wrappedBaxterRing);
+    expect(
+      pointInTerritoryRing(baxterSite[0], baxterSite[1], rings[0].ring),
+    ).toBe(true);
   });
 });
 
@@ -468,6 +623,18 @@ describe("d3-geo-voronoi integration", () => {
     const scriptPath = path.join(
       __dirname,
       "../../script/verify-oconnors-beach-voronoi.cjs",
+    );
+
+    execFileSync("node", [scriptPath], {
+      stdio: "pipe",
+      cwd: path.join(__dirname, "../.."),
+    });
+  });
+
+  it("draws Baxter REA territory via raw global cell fallback", () => {
+    const scriptPath = path.join(
+      __dirname,
+      "../../script/verify-baxter-voronoi.cjs",
     );
 
     execFileSync("node", [scriptPath], {

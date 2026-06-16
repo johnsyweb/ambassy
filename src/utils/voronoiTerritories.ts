@@ -39,6 +39,8 @@ export type GeoVoronoiFn = (
 
 const DUPLICATE_COORDINATE_EPSILON = 0.000001;
 const MAX_TERRITORY_VERTEX_DISTANCE_DEGREES = 35;
+const MAX_TERRITORY_WRAP_EDGE_DEGREES = 25;
+const MAX_LOCAL_REPAIR_LONGITUDE_OFFSET_DEGREES = 6;
 const MAX_TERRITORY_LONGITUDE_SPAN_DEGREES = 120;
 
 export interface BuildVoronoiSitesInput {
@@ -193,7 +195,121 @@ function longitudeSpan(ring: [number, number][]): number {
   return Math.max(...longitudes) - Math.min(...longitudes);
 }
 
+export function pointInTerritoryRing(
+  siteLongitude: number,
+  siteLatitude: number,
+  ring: [number, number][],
+): boolean {
+  let inside = false;
+
+  for (
+    let index = 0, previous = ring.length - 1;
+    index < ring.length;
+    previous = index++
+  ) {
+    const [vertexLongitude, vertexLatitude] = ring[index];
+    const [previousLongitude, previousLatitude] = ring[previous];
+    const crossesLatitude =
+      vertexLatitude > siteLatitude !== previousLatitude > siteLatitude;
+
+    if (
+      crossesLatitude &&
+      siteLongitude <
+        ((previousLongitude - vertexLongitude) * (siteLatitude - vertexLatitude)) /
+          (previousLatitude - vertexLatitude) +
+          vertexLongitude
+    ) {
+      inside = !inside;
+    }
+  }
+
+  return inside;
+}
+
+function westernLongitudeLimit(siteLongitude: number): number {
+  return siteLongitude - MAX_LOCAL_REPAIR_LONGITUDE_OFFSET_DEGREES;
+}
+
+function vertexIsLocalToSite(
+  vertex: [number, number],
+  siteLongitude: number,
+): boolean {
+  return vertex[0] >= westernLongitudeLimit(siteLongitude);
+}
+
+function arcIsLocalToSite(
+  arc: [number, number][],
+  siteLongitude: number,
+): boolean {
+  return arc.every((vertex) => vertexIsLocalToSite(vertex, siteLongitude));
+}
+
 export function extractLocalTerritoryRing(
+  ring: [number, number][],
+  siteLongitude: number,
+  siteLatitude: number,
+): [number, number][] | null {
+  const siteContainingArcs = splitRingOnWrapEdges(
+    ring,
+    MAX_TERRITORY_WRAP_EDGE_DEGREES,
+  ).filter(
+    (arc) =>
+      arc.length >= 3 &&
+      arcIsLocalToSite(arc, siteLongitude) &&
+      pointInTerritoryRing(siteLongitude, siteLatitude, arc),
+  );
+
+  if (siteContainingArcs.length > 0) {
+    siteContainingArcs.sort(
+      (left, right) => longitudeSpan(left) - longitudeSpan(right),
+    );
+    return siteContainingArcs[0];
+  }
+
+  return extractLocalTerritoryRingFromVertexDistance(
+    ring,
+    siteLongitude,
+    siteLatitude,
+  );
+}
+
+function splitRingOnWrapEdges(
+  ring: [number, number][],
+  maxEdgeDegrees: number,
+): [number, number][][] {
+  const arcs: [number, number][][] = [];
+  let arc: [number, number][] = [ring[0]];
+
+  for (let index = 1; index < ring.length; index += 1) {
+    const edgeLength = greatCircleDistanceDegrees(ring[index - 1], ring[index]);
+
+    if (edgeLength > maxEdgeDegrees) {
+      if (arc.length >= 3) {
+        arcs.push(arc);
+      }
+      arc = [ring[index]];
+    } else {
+      arc.push(ring[index]);
+    }
+  }
+
+  const closingEdge = greatCircleDistanceDegrees(
+    ring[ring.length - 1],
+    ring[0],
+  );
+
+  if (closingEdge > maxEdgeDegrees) {
+    if (arc.length >= 3) {
+      arcs.push(arc);
+    }
+  } else if (arc.length >= 3) {
+    arcs.push(arc);
+  }
+
+  return arcs;
+}
+
+function extractLocalTerritoryRingFromVertexDistance(
   ring: [number, number][],
   siteLongitude: number,
   siteLatitude: number,
@@ -252,15 +368,45 @@ export function isDrawableTerritoryRing(
     return false;
   }
 
-  const longitudes = ring.map(([longitude]) => longitude);
-  const latitudes = ring.map(([, latitude]) => latitude);
+  return pointInTerritoryRing(siteLongitude, siteLatitude, ring);
+}
 
-  return (
-    siteLongitude >= Math.min(...longitudes) &&
-    siteLongitude <= Math.max(...longitudes) &&
-    siteLatitude >= Math.min(...latitudes) &&
-    siteLatitude <= Math.max(...latitudes)
-  );
+export function boundaryLatitudeAtLongitude(
+  ring: [number, number][],
+  longitude: number,
+  boundary: "north" | "south",
+): number | null {
+  const crossings: number[] = [];
+
+  for (let index = 0; index < ring.length; index += 1) {
+    const [startLongitude, startLatitude] = ring[index];
+    const [endLongitude, endLatitude] = ring[(index + 1) % ring.length];
+
+    if (startLongitude === endLongitude) {
+      if (Math.abs(startLongitude - longitude) < 1e-9) {
+        crossings.push(startLatitude, endLatitude);
+      }
+      continue;
+    }
+
+    const minLongitude = Math.min(startLongitude, endLongitude);
+    const maxLongitude = Math.max(startLongitude, endLongitude);
+
+    if (longitude < minLongitude || longitude > maxLongitude) {
+      continue;
+    }
+
+    const ratio = (longitude - startLongitude) / (endLongitude - startLongitude);
+    crossings.push(startLatitude + ratio * (endLatitude - startLatitude));
+  }
+
+  if (crossings.length === 0) {
+    return null;
+  }
+
+  return boundary === "south"
+    ? Math.min(...crossings)
+    : Math.max(...crossings);
 }
 
 function findSiteForPolygonFeature(
@@ -292,6 +438,31 @@ function extractPolygonRing(
   return ring.length >= 3 ? ring : null;
 }
 
+function selectDrawableTerritoryRing(
+  rawRing: [number, number][],
+  siteLongitude: number,
+  siteLatitude: number,
+): [number, number][] | null {
+  const extractedRing = extractLocalTerritoryRing(
+    rawRing,
+    siteLongitude,
+    siteLatitude,
+  );
+
+  if (
+    extractedRing &&
+    isDrawableTerritoryRing(extractedRing, siteLongitude, siteLatitude)
+  ) {
+    return extractedRing;
+  }
+
+  if (isDrawableTerritoryRing(rawRing, siteLongitude, siteLatitude)) {
+    return rawRing;
+  }
+
+  return null;
+}
+
 export function computeVisibleTerritoryRings(
   sites: VoronoiSite[],
   geoVoronoiFn: GeoVoronoiFn,
@@ -319,15 +490,12 @@ export function computeVisibleTerritoryRings(
       return;
     }
 
-    const ring = extractLocalTerritoryRing(
+    const ring = selectDrawableTerritoryRing(
       rawRing,
       site.longitude,
       site.latitude,
     );
-    if (
-      !ring ||
-      !isDrawableTerritoryRing(ring, site.longitude, site.latitude)
-    ) {
+    if (!ring) {
       return;
     }
 
