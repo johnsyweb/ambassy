@@ -111,3 +111,11 @@ _Avoid_: Last EA visit (too narrow), last allocation visit
 **parkrun country domain**:
 The per-country website host for a parkrun territory (e.g. `www.parkrun.com.au`, `www.parkrun.co.uk`), from `events.json` countries data. parkrun profiles and event URLs use the domain of the event's country; the finish-import userscript must support all domains present in that data.
 _Avoid_: TLD (too vague), parkrun URL (ambiguous with images.parkrun.com)
+
+**Ambassador name filter**:
+A shared free-text control above the data tabs. Case-insensitive substring match against ambassador allocation columns on the active tab: Event Teams (REA or EA), Event Ambassadors (EA name or supporting REA), Regional Ambassadors (REA name or any supported EA), Prospects (assigned EA). Persists across page reload in session storage; cleared on Purge. Out of scope for v1: Changes log, Issues, Last ambassador visit, and Event Director columns. Free text only (no autocomplete or dropdown).
+_Avoid_: Search (too generic), table search
+
+**Filtered map view**:
+The map presentation when an ambassador name filter is active. Allocated event markers and prospect markers follow the same matching rules as Event Teams and Prospects respectively; unallocated parkrun markers are hidden. REA territory polygons are drawn only for Regional Event Ambassadors with at least one visible allocated event. The Voronoi diagram is not recomputed — only which markers and polygons are shown changes.
+_Avoid_: Map search, clipped Voronoi
