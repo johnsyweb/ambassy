@@ -80,10 +80,14 @@ import {
   wireFinishHistoryInstallLinks,
 } from "./utils/finishHistoryPage";
 import {
+  dismissPendingFinishImport,
   processPendingFinishImport,
   processFinishImportFromClipboard,
+  ProcessPendingFinishImportOptions,
+  registerFinishImportActivation,
   registerFinishImportListener,
 } from "./actions/processPendingFinishImport";
+import { syncFinishImportPendingBanner } from "./actions/finishImportPendingBanner";
 import { AmbassadorRole } from "./models/AmbassadorFinishHistory";
 import {
   transitionEventAmbassadorToRegional,
@@ -1224,10 +1228,44 @@ function setupOffboardingButtons(): void {
 
 setupOffboardingButtons();
 
-registerFinishImportListener(() => {
+function onFinishImportComplete(): void {
+  const details = eventDetails;
+  if (!details) {
+    return;
+  }
+
+  persistChangesLog(log);
+  if (eventTeamsTableData) {
+    refreshUI(
+      details,
+      eventTeamsTableData,
+      log,
+      getEventAmbassadorsFromSession(),
+      getRegionalAmbassadorsFromSession(),
+    );
+  }
+  syncFinishImportPendingBannerControls();
+}
+
+function syncFinishImportPendingBannerControls(): void {
+  syncFinishImportPendingBanner(
+    () => {
+      attemptPendingFinishImport({ resume: true });
+    },
+    () => {
+      dismissPendingFinishImport();
+      syncFinishImportPendingBannerControls();
+    },
+  );
+}
+
+function attemptPendingFinishImport(
+  options?: ProcessPendingFinishImportOptions,
+): void {
   const details = eventDetails;
   const tableData = eventTeamsTableData;
   if (!details || !tableData) {
+    syncFinishImportPendingBannerControls();
     return;
   }
 
@@ -1236,18 +1274,22 @@ registerFinishImportListener(() => {
     getEventAmbassadorsFromSession(),
     getRegionalAmbassadorsFromSession(),
     log,
-    () => {
-      persistChangesLog(log);
-      refreshUI(
-        details,
-        tableData,
-        log,
-        getEventAmbassadorsFromSession(),
-        getRegionalAmbassadorsFromSession(),
-      );
-    },
-  );
+    onFinishImportComplete,
+    options,
+  ).then(() => {
+    syncFinishImportPendingBannerControls();
+  });
+}
+
+registerFinishImportListener(() => {
+  attemptPendingFinishImport();
 });
+
+registerFinishImportActivation(() => {
+  attemptPendingFinishImport();
+});
+
+syncFinishImportPendingBannerControls();
 
 async function importFinishHistoryFromClipboard(): Promise<void> {
   const details = eventDetails;
@@ -1264,19 +1306,9 @@ async function importFinishHistoryFromClipboard(): Promise<void> {
       getEventAmbassadorsFromSession(),
       getRegionalAmbassadorsFromSession(),
       log,
-      () => {
-        persistChangesLog(log);
-        if (eventTeamsTableData) {
-          refreshUI(
-            details,
-            eventTeamsTableData,
-            log,
-            getEventAmbassadorsFromSession(),
-            getRegionalAmbassadorsFromSession(),
-          );
-        }
-      },
+      onFinishImportComplete,
     );
+    syncFinishImportPendingBannerControls();
   } catch (error) {
     alert(
       `Could not import finish history: ${error instanceof Error ? error.message : "Unknown error"}`,
