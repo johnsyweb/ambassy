@@ -2,6 +2,8 @@
 :root {
   --parkrun-aubergine: #4c1a57;
   --parkrun-apricot: #f7a541;
+  --parkrun-footer-link: #ffc966;
+  --parkrun-footer-link-visited: #ffe0b3;
   --parkrun-white: #ffffff;
   --parkrun-black: #000000;
   --parkrun-grey: #666666;
@@ -524,28 +526,38 @@ tr.selected:hover {
   line-height: 1.5;
 }
 
-.app-footer a {
-  color: var(--parkrun-apricot);
-  text-decoration: none;
-  transition: opacity 0.2s ease;
-  text-underline-offset: 0.15em;
-}
-
-.app-footer a:hover {
-  opacity: 0.9;
+/* Specificity raised so footer links stay legible when main site CSS loads after ours */
+.app-footer p a {
+  color: var(--parkrun-footer-link);
+  background-color: transparent;
   text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.2em;
+  transition:
+    color 0.2s ease,
+    background-color 0.2s ease,
+    text-decoration-color 0.2s ease;
 }
 
-.app-footer a:focus,
-.app-footer a:focus-visible {
-  outline: 2px solid var(--parkrun-apricot);
+.app-footer p a:visited {
+  color: var(--parkrun-footer-link-visited);
+}
+
+.app-footer p a:hover,
+.app-footer p a:focus,
+.app-footer p a:focus-visible {
+  color: var(--parkrun-black);
+  background-color: var(--parkrun-apricot);
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  outline: 2px solid var(--parkrun-white);
   outline-offset: 2px;
   border-radius: 2px;
 }
 
 .app-footer strong {
   font-weight: 600;
-  color: var(--parkrun-apricot);
+  color: var(--parkrun-white);
 }
 
 /* Responsive Design */
