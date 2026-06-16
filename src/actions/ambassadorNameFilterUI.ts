@@ -159,7 +159,11 @@ export function updateAmbassadorNameFilterStatus(
           filter,
         );
       case "Prospects":
-        return countProspectsMatchingFilter(prospects, filter);
+        return countProspectsMatchingFilter(
+          prospects,
+          context.eventAmbassadors,
+          filter,
+        );
       case "Event Teams":
       default:
         return countEventTeamsMatchingFilter(

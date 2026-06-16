@@ -45,7 +45,8 @@ describe("populateProspectsTable", () => {
             <th>Country</th>
             <th>State</th>
             <th>Prospect ED/s</th>
-            <th>EA</th>
+            <th>Regional Event Ambassador (REA)</th>
+            <th>Event Ambassador</th>
             <th>Date Made Contact</th>
             <th>Course Found</th>
             <th>Landowner Permission</th>
@@ -92,10 +93,13 @@ describe("populateProspectsTable", () => {
           name: "EA1",
           events: [],
           prospectiveEvents: ["p1"],
+          regionalAmbassador: "REA1",
         },
       ],
     ]);
-    regionalAmbassadors = new Map();
+    regionalAmbassadors = new Map([
+      ["REA1", { name: "REA1", state: "VIC", supportsEAs: ["EA1"] }],
+    ]);
     log = [];
     eventDetails = new Map();
 
@@ -174,5 +178,25 @@ describe("populateProspectsTable", () => {
     expect(launchProspectArgs[6]).toBe("Event A");
     expect(launchProspectArgs[7]).toBe("EA1");
     expect(refreshCallback).toHaveBeenCalledTimes(1);
+  });
+
+  it("renders the supporting REA derived from the assigned EA", () => {
+    populateProspectsTable(
+      prospects,
+      eventAmbassadors,
+      regionalAmbassadors,
+      log,
+      eventDetails,
+    );
+
+    const row = document.querySelector(
+      "tr[data-prospect-id='p1']",
+    ) as HTMLTableRowElement;
+    expect(row).not.toBeNull();
+    expect(row.dataset.ambassadorFilterText).toBe("rea1 ea1");
+
+    const cells = row.querySelectorAll("td");
+    expect(cells[4].textContent).toBe("REA1");
+    expect(cells[5].textContent).toBe("EA1");
   });
 });

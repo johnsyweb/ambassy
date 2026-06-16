@@ -104,11 +104,26 @@ export function regionalAmbassadorRowMatchesAmbassadorNameFilter(
   );
 }
 
+export function regionalAmbassadorForEventAmbassador(
+  eventAmbassadorName: string | undefined,
+  eventAmbassadors: EventAmbassadorMap,
+): string | undefined {
+  if (!eventAmbassadorName) {
+    return undefined;
+  }
+
+  return eventAmbassadors.get(eventAmbassadorName)?.regionalAmbassador;
+}
+
 export function prospectRowMatchesAmbassadorNameFilter(
   eventAmbassadorName: string | undefined,
+  regionalAmbassadorName: string | undefined,
   filter: string,
 ): boolean {
-  return ambassadorNameFieldMatches(eventAmbassadorName, filter);
+  return anyAmbassadorNameFieldMatches(
+    [eventAmbassadorName, regionalAmbassadorName],
+    filter,
+  );
 }
 
 export function getAmbassadorNameFilter(): string {
@@ -194,6 +209,7 @@ export function countRegionalAmbassadorsMatchingFilter(
 
 export function countProspectsMatchingFilter(
   prospects: ProspectiveEvent[],
+  eventAmbassadors: EventAmbassadorMap,
   filter: string,
 ): { visible: number; total: number } {
   const total = prospects.length;
@@ -204,7 +220,14 @@ export function countProspectsMatchingFilter(
   let visible = 0;
   prospects.forEach((prospect) => {
     if (
-      prospectRowMatchesAmbassadorNameFilter(prospect.eventAmbassador, filter)
+      prospectRowMatchesAmbassadorNameFilter(
+        prospect.eventAmbassador,
+        regionalAmbassadorForEventAmbassador(
+          prospect.eventAmbassador,
+          eventAmbassadors,
+        ),
+        filter,
+      )
     ) {
       visible += 1;
     }

@@ -1,3 +1,4 @@
+import { EventAmbassadorMap } from "@models/EventAmbassadorMap";
 import { EventTeamsTableData } from "@models/EventTeamsTableData";
 import {
   ambassadorNameFieldMatches,
@@ -5,6 +6,7 @@ import {
   buildAmbassadorFilterText,
   clearAmbassadorNameFilter,
   countEventTeamsMatchingFilter,
+  countProspectsMatchingFilter,
   eventAmbassadorRowMatchesAmbassadorNameFilter,
   eventTeamRowMatchesAmbassadorNameFilter,
   formatAmbassadorNameFilterStatus,
@@ -94,16 +96,31 @@ describe("ambassadorNameFilter", () => {
     ).toBe(false);
   });
 
-  it("matches prospect rows on assigned EA only", () => {
+  it("matches prospect rows on assigned EA or supporting REA", () => {
     expect(
-      prospectRowMatchesAmbassadorNameFilter("Pete Robinson", "pete"),
+      prospectRowMatchesAmbassadorNameFilter(
+        "Pete Robinson",
+        "Kim De Waal",
+        "pete",
+      ),
     ).toBe(true);
-    expect(prospectRowMatchesAmbassadorNameFilter("Pete Robinson", "kim")).toBe(
-      false,
-    );
-    expect(prospectRowMatchesAmbassadorNameFilter(undefined, "pete")).toBe(
-      false,
-    );
+    expect(
+      prospectRowMatchesAmbassadorNameFilter(
+        "Pete Robinson",
+        "Kim De Waal",
+        "kim",
+      ),
+    ).toBe(true);
+    expect(
+      prospectRowMatchesAmbassadorNameFilter(
+        "Pete Robinson",
+        "Kim De Waal",
+        "chris",
+      ),
+    ).toBe(false);
+    expect(
+      prospectRowMatchesAmbassadorNameFilter(undefined, undefined, "pete"),
+    ).toBe(false);
   });
 
   it("builds lowercase filter text from ambassador fields", () => {
@@ -182,5 +199,95 @@ describe("ambassadorNameFilter", () => {
       visible: 1,
       total: 2,
     });
+  });
+
+  it("counts visible Prospects rows matching EA or supporting REA", () => {
+    const eventAmbassadors: EventAmbassadorMap = new Map([
+      [
+        "Pete Robinson",
+        {
+          name: "Pete Robinson",
+          events: [],
+          regionalAmbassador: "Kim De Waal",
+        },
+      ],
+      [
+        "Chris Example",
+        {
+          name: "Chris Example",
+          events: [],
+          regionalAmbassador: "Kim De Waal",
+        },
+      ],
+    ]);
+
+    expect(
+      countProspectsMatchingFilter(
+        [
+          {
+            id: "p1",
+            prospectEvent: "Prospect A",
+            country: "AU",
+            state: "VIC",
+            prospectEDs: "",
+            eventAmbassador: "Pete Robinson",
+            courseFound: false,
+            landownerPermission: false,
+            fundingConfirmed: false,
+            dateMadeContact: null,
+            geocodingStatus: "pending",
+            ambassadorMatchStatus: "pending",
+            importTimestamp: 0,
+            sourceRow: 1,
+            notes: "",
+          },
+          {
+            id: "p2",
+            prospectEvent: "Prospect B",
+            country: "AU",
+            state: "NSW",
+            prospectEDs: "",
+            eventAmbassador: "Chris Example",
+            courseFound: false,
+            landownerPermission: false,
+            fundingConfirmed: false,
+            dateMadeContact: null,
+            geocodingStatus: "pending",
+            ambassadorMatchStatus: "pending",
+            importTimestamp: 0,
+            sourceRow: 2,
+            notes: "",
+          },
+        ],
+        eventAmbassadors,
+        "pete",
+      ),
+    ).toEqual({ visible: 1, total: 2 });
+
+    expect(
+      countProspectsMatchingFilter(
+        [
+          {
+            id: "p1",
+            prospectEvent: "Prospect A",
+            country: "AU",
+            state: "VIC",
+            prospectEDs: "",
+            eventAmbassador: "Pete Robinson",
+            courseFound: false,
+            landownerPermission: false,
+            fundingConfirmed: false,
+            dateMadeContact: null,
+            geocodingStatus: "pending",
+            ambassadorMatchStatus: "pending",
+            importTimestamp: 0,
+            sourceRow: 1,
+            notes: "",
+          },
+        ],
+        eventAmbassadors,
+        "kim",
+      ),
+    ).toEqual({ visible: 1, total: 1 });
   });
 });

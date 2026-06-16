@@ -154,6 +154,8 @@ export function populateMap(
         _prospectMarkers.set(prospect.id, {
           marker,
           eventAmbassador: prospect.eventAmbassador,
+          regionalAmbassador: eventAmbassadors.get(prospect.eventAmbassador)
+            ?.regionalAmbassador,
         });
       }
     });
@@ -507,7 +509,11 @@ type EventMarkerFilterState =
 const _eventMarkerFilterState = new Map<string, EventMarkerFilterState>();
 const _prospectMarkers = new Map<
   string,
-  { marker: L.Marker; eventAmbassador?: string }
+  {
+    marker: L.Marker;
+    eventAmbassador?: string;
+    regionalAmbassador?: string;
+  }
 >();
 
 function eventMarkerMatchesFilter(
@@ -577,11 +583,15 @@ export function applyAmbassadorNameFilterToMap(
     );
   });
 
-  _prospectMarkers.forEach(({ marker, eventAmbassador }) => {
+  _prospectMarkers.forEach(({ marker, eventAmbassador, regionalAmbassador }) => {
     setMarkerLayerVisibility(
       _markersLayer,
       marker,
-      prospectRowMatchesAmbassadorNameFilter(eventAmbassador, filter),
+      prospectRowMatchesAmbassadorNameFilter(
+        eventAmbassador,
+        regionalAmbassador,
+        filter,
+      ),
     );
   });
 

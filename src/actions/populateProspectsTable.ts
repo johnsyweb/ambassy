@@ -73,7 +73,7 @@ export function populateProspectsTable(
     // Show empty state
     const emptyRow = document.createElement("tr");
     const emptyCell = document.createElement("td");
-    emptyCell.colSpan = 13;
+    emptyCell.colSpan = 14;
     emptyCell.textContent =
       "No prospective events. Import a Prospects CSV file to get started.";
     emptyCell.style.textAlign = "center";
@@ -118,9 +118,13 @@ function createProspectRow(
   log?: LogEntry[],
   eventDetails?: EventDetailsMap,
 ): HTMLTableRowElement {
+  const regionalAmbassador =
+    eventAmbassadors.get(prospect.eventAmbassador)?.regionalAmbassador ?? "";
+
   const row = document.createElement("tr");
   row.setAttribute("data-prospect-id", prospect.id);
   row.dataset.ambassadorFilterText = buildAmbassadorFilterText(
+    regionalAmbassador,
     prospect.eventAmbassador,
   );
 
@@ -143,6 +147,11 @@ function createProspectRow(
   const edsCell = document.createElement("td");
   edsCell.textContent = prospect.prospectEDs || "";
   row.appendChild(edsCell);
+
+  // Regional Event Ambassador (derived from assigned EA)
+  const reaCell = document.createElement("td");
+  reaCell.textContent = regionalAmbassador;
+  row.appendChild(reaCell);
 
   // Event Ambassador
   const eaCell = document.createElement("td");

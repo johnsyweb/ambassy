@@ -121,7 +121,7 @@ The per-country website host for a parkrun territory (e.g. `www.parkrun.com.au`,
 _Avoid_: TLD (too vague), parkrun URL (ambiguous with images.parkrun.com)
 
 **Ambassador name filter**:
-A shared free-text control above the data tabs. Case-insensitive substring match against ambassador allocation columns on the active tab: Event Teams (REA or EA), Event Ambassadors (EA name or supporting REA), Regional Ambassadors (REA name or any supported EA), Prospects (assigned EA). Persists across page reload in session storage; cleared on Purge. Out of scope for v1: Changes log, Issues, Last ambassador visit, and Event Director columns. Free text only (no autocomplete or dropdown).
+A shared free-text control above the data tabs. Case-insensitive substring match against ambassador allocation columns on the active tab: Event Teams (REA or EA), Event Ambassadors (EA name or supporting REA), Regional Ambassadors (REA name or any supported EA), Prospects (assigned EA or that EA's REA). Persists across page reload in session storage; cleared on Purge. Out of scope for v1: Changes log, Issues, Last ambassador visit, and Event Director columns. Free text only (no autocomplete or dropdown).
 _Avoid_: Search (too generic), table search
 
 **Filtered map view**:

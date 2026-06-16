@@ -9,7 +9,7 @@ REAs need to focus on one ambassador across tables and map without retyping on e
 ## Decision
 
 1. **One shared filter** persists across tab switches and page reload (`sessionStorage`); Purge clears it.
-2. **Matching** is case-insensitive substring on allocation-related ambassador columns per tab; not Last ambassador visit or Event Directors.
+2. **Matching** is case-insensitive substring on allocation-related ambassador columns per tab; not Last ambassador visit or Event Directors. On Prospects, REA is derived from the assigned EA.
 3. **Filtered map view** when the filter is non-empty: markers for matching allocations and prospects only; hide unallocated parkrun markers; draw REA territory polygons only where that REA has at least one visible allocated event. Voronoi cache is not invalidated or recomputed.
 4. **UI**: labelled field, Clear control, live row count; `/` focuses filter (when not in a text field), Escape clears when filter has focus.
 5. **Free text only** in v1 — no autocomplete or dropdown.
