@@ -10,11 +10,7 @@ import {
 import { ProspectiveEvent } from "@models/ProspectiveEvent";
 import { EventAmbassadorMap } from "@models/EventAmbassadorMap";
 import { RegionalAmbassadorMap } from "@models/RegionalAmbassadorMap";
-import {
-  toLeafletArray,
-  getLatitude,
-  getLongitude,
-} from "@models/Coordinate";
+import { toLeafletArray, getLatitude, getLongitude } from "@models/Coordinate";
 
 import { geoVoronoi } from "d3-geo-voronoi";
 import L from "leaflet";
@@ -26,6 +22,12 @@ import {
   viewportFromLeafletBounds,
 } from "@utils/voronoiTerritories";
 import { getEventTeamsTableDataByShortName } from "@models/EventDetailsMap";
+import {
+  eventTeamRowMatchesAmbassadorNameFilter,
+  getAmbassadorNameFilter,
+  isAmbassadorNameFilterActive,
+  prospectRowMatchesAmbassadorNameFilter,
+} from "@utils/ambassadorNameFilter";
 import { colorPalette } from "./colorPalette";
 
 const DEFAULT_EVENT_COLOUR = "rebeccapurple";
@@ -43,6 +45,11 @@ export function populateMap(
   const raColorMap = assignColorsToNames(raNames);
   const eaColorMap = assignColorsToNames(eaNames);
 
+  _mapTerritoryFilterContext = {
+    eventTeamsTableData,
+    filter: getAmbassadorNameFilter(),
+  };
+
   // Calculate event bounds for map centering
   const eventBounds = calculateEventBounds(eventTeamsTableData, eventDetails);
   const { map, markersLayer, polygonsLayer } = setupMapView(eventBounds);
@@ -50,6 +57,8 @@ export function populateMap(
   markersLayer.clearLayers();
   polygonsLayer.clearLayers();
   _markerMap.clear();
+  _eventMarkerFilterState.clear();
+  _prospectMarkers.clear();
 
   eventDetails.forEach((event, eventName) => {
     const coord = eventDetailsToCoordinate(event);
@@ -63,6 +72,12 @@ export function populateMap(
     // Skip events without ambassador data for processing
 
     if (data) {
+      _eventMarkerFilterState.set(eventName, {
+        kind: "allocated",
+        regionalAmbassador: data.regionalAmbassador,
+        eventAmbassador: data.eventAmbassador,
+      });
+
       const eaColor =
         eaColorMap.get(data.eventAmbassador) ?? DEFAULT_EVENT_COLOUR;
       const tooltip = `
@@ -86,6 +101,8 @@ export function populateMap(
         });
       }
     } else {
+      _eventMarkerFilterState.set(eventName, { kind: "unallocated" });
+
       // Unallocated events - make them larger and more visible for easier clicking
       const marker = L.circleMarker([latitude, longitude], {
         radius: 4,
@@ -148,7 +165,6 @@ export function populateMap(
 
   // Add markers for prospective events
   if (prospectiveEvents && prospectiveEvents.length > 0) {
-
     prospectiveEvents.forEach((prospect) => {
       if (prospect.coordinates && prospect.geocodingStatus === "success") {
         // Get the EA's color for the prospective event marker
@@ -176,6 +192,10 @@ export function populateMap(
 
         marker.bindTooltip(tooltip);
         markersLayer.addLayer(marker);
+        _prospectMarkers.set(prospect.id, {
+          marker,
+          eventAmbassador: prospect.eventAmbassador,
+        });
       }
     });
   }
@@ -225,6 +245,7 @@ export function populateMap(
 
   drawClippedTerritoryPolygons(map!, polygonsLayer, _currentVoronoiSites);
   ensureViewportClipListener(map!);
+  applyAmbassadorNameFilterToMap(eventTeamsTableData);
 
   // Add polygonsLayer to map
   // Note: polygons are non-interactive (interactive: false) so they don't block marker clicks
@@ -292,9 +313,6 @@ function setupMapView(eventBounds: L.LatLngBounds | null) {
     _polygonsLayer = L.layerGroup();
     _highlightLayer = L.layerGroup();
     _highlightLayer.addTo(_map);
-  } else if (eventBounds) {
-    // Update bounds if map already exists
-    _map.fitBounds(eventBounds);
   }
   return {
     map: _map,
@@ -324,7 +342,26 @@ function drawClippedTerritoryPolygons(
     viewportFromLeafletBounds(map.getBounds()),
   );
 
-  clippedPolygons.forEach(({ coordinates, raColor, tooltip }) => {
+  clippedPolygons.forEach(({ id, coordinates, raColor, tooltip }) => {
+    if (
+      _mapTerritoryFilterContext &&
+      isAmbassadorNameFilterActive(_mapTerritoryFilterContext.filter)
+    ) {
+      const data = getEventTeamsTableDataByShortName(
+        _mapTerritoryFilterContext.eventTeamsTableData,
+        id,
+      );
+      if (
+        !data ||
+        !eventTeamRowMatchesAmbassadorNameFilter(
+          data,
+          _mapTerritoryFilterContext.filter,
+        )
+      ) {
+        return;
+      }
+    }
+
     const poly = L.polygon(coordinates, {
       color: raColor,
       fillOpacity: 0.1,
@@ -342,11 +379,7 @@ function ensureViewportClipListener(map: L.Map): void {
 
   map.on("moveend zoomend", () => {
     if (_currentVoronoiSites && _polygonsLayer && _map) {
-      drawClippedTerritoryPolygons(
-        _map,
-        _polygonsLayer,
-        _currentVoronoiSites,
-      );
+      drawClippedTerritoryPolygons(_map, _polygonsLayer, _currentVoronoiSites);
     }
   });
   _viewportClipListenerAttached = true;
@@ -363,11 +396,116 @@ let _markerClickHandler: ((eventShortName: string) => void) | null = null;
 const _voronoiTerritoryCache = new VoronoiTerritoryCache();
 let _currentVoronoiSites: VoronoiSite[] = [];
 let _viewportClipListenerAttached = false;
+let _mapTerritoryFilterContext: {
+  eventTeamsTableData: EventTeamsTableDataMap;
+  filter: string;
+} | null = null;
+
+type EventMarkerFilterState =
+  | {
+      kind: "allocated";
+      regionalAmbassador: string;
+      eventAmbassador: string;
+    }
+  | { kind: "unallocated" };
+
+const _eventMarkerFilterState = new Map<string, EventMarkerFilterState>();
+const _prospectMarkers = new Map<
+  string,
+  { marker: L.Marker; eventAmbassador?: string }
+>();
+
+function eventMarkerMatchesFilter(
+  state: EventMarkerFilterState,
+  filter: string,
+): boolean {
+  if (!isAmbassadorNameFilterActive(filter)) {
+    return true;
+  }
+
+  if (state.kind === "unallocated") {
+    return false;
+  }
+
+  return eventTeamRowMatchesAmbassadorNameFilter(
+    {
+      eventShortName: "",
+      eventDirectors: "",
+      eventAmbassador: state.eventAmbassador,
+      regionalAmbassador: state.regionalAmbassador,
+      eventCoordinates: "",
+      eventSeries: 1,
+      eventCountryCode: 0,
+      eventCountry: "",
+    },
+    filter,
+  );
+}
+
+function setMarkerLayerVisibility(
+  markersLayer: L.LayerGroup,
+  marker: L.Layer,
+  visible: boolean,
+): void {
+  if (visible) {
+    if (!markersLayer.hasLayer(marker)) {
+      markersLayer.addLayer(marker);
+    }
+    return;
+  }
+
+  if (markersLayer.hasLayer(marker)) {
+    markersLayer.removeLayer(marker);
+  }
+}
+
+export function applyAmbassadorNameFilterToMap(
+  eventTeamsTableData: EventTeamsTableDataMap,
+): void {
+  if (!_map || !_markersLayer || !_polygonsLayer) {
+    return;
+  }
+
+  const filter = getAmbassadorNameFilter();
+  _mapTerritoryFilterContext = { eventTeamsTableData, filter };
+
+  _markerMap.forEach((marker, eventName) => {
+    const state = _eventMarkerFilterState.get(eventName);
+    if (!state) {
+      return;
+    }
+
+    setMarkerLayerVisibility(
+      _markersLayer,
+      marker,
+      eventMarkerMatchesFilter(state, filter),
+    );
+  });
+
+  _prospectMarkers.forEach(({ marker, eventAmbassador }) => {
+    setMarkerLayerVisibility(
+      _markersLayer,
+      marker,
+      prospectRowMatchesAmbassadorNameFilter(eventAmbassador, filter),
+    );
+  });
+
+  if (_currentVoronoiSites.length > 0) {
+    drawClippedTerritoryPolygons(_map, _polygonsLayer, _currentVoronoiSites);
+  }
+}
+
+export function isEventMarkerVisibleOnMap(eventName: string): boolean {
+  const marker = _markerMap.get(eventName);
+  return marker ? _markersLayer.hasLayer(marker) : false;
+}
 
 export function resetVoronoiTerritoryCacheForTests(): void {
   _voronoiTerritoryCache.clear();
   _currentVoronoiSites = [];
   _viewportClipListenerAttached = false;
+  _eventMarkerFilterState.clear();
+  _prospectMarkers.clear();
 }
 
 export function getMarkerMap(): Map<string, L.CircleMarker> {

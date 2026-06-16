@@ -15,6 +15,10 @@ import { getEventTeamsFromSession } from "@parsers/parseEventTeams";
 import { LogEntry } from "@models/LogEntry";
 import { EventTeamsTableData } from "@models/EventTeamsTableData";
 import { refreshUI } from "./actions/refreshUI";
+import {
+  initializeAmbassadorNameFilter,
+  updateAmbassadorNameFilterStatus,
+} from "./actions/ambassadorNameFilterUI";
 import { restoreApplicationState } from "./actions/persistState";
 import { loadFromStorage } from "@utils/storage";
 import { showSharingDialog } from "./actions/showSharingDialog";
@@ -40,7 +44,7 @@ import {
   persistRegionalAmbassadors,
 } from "./actions/persistState";
 import { canonicaliseAllocationNames } from "./actions/canonicaliseAllocationNames";
-import { initializeTabs } from "./utils/tabs";
+import { initializeTabs, setTabChangeCallback } from "./utils/tabs";
 import {
   calculateAllCapacityStatuses,
   loadCapacityLimits,
@@ -196,6 +200,32 @@ function hasApplicationData(
 function isMapViewDisplayed(): boolean {
   const ambassyElement = document.getElementById("ambassy");
   return ambassyElement !== null && ambassyElement.style.display !== "none";
+}
+
+function updateAmbassadorNameFilterStatusIfReady(): void {
+  if (!eventTeamsTableData) {
+    return;
+  }
+
+  updateAmbassadorNameFilterStatus({
+    eventTeamsTableData,
+    eventAmbassadors: getEventAmbassadorsFromSession(),
+    regionalAmbassadors: getRegionalAmbassadorsFromSession(),
+    prospects: new ProspectiveEventList(loadProspectiveEvents()),
+  });
+}
+
+function getAmbassadorNameFilterContext() {
+  if (!eventTeamsTableData) {
+    return null;
+  }
+
+  return {
+    eventTeamsTableData,
+    eventAmbassadors: getEventAmbassadorsFromSession(),
+    regionalAmbassadors: getRegionalAmbassadorsFromSession(),
+    prospects: new ProspectiveEventList(loadProspectiveEvents()),
+  };
 }
 
 function updateButtonVisibility(
@@ -2171,6 +2201,8 @@ async function checkForSharedStateInUrl(): Promise<void> {
 
 document.addEventListener("DOMContentLoaded", async () => {
   initializeTabs();
+  initializeAmbassadorNameFilter(getAmbassadorNameFilterContext);
+  setTabChangeCallback(updateAmbassadorNameFilterStatusIfReady);
   setupExportReminder();
   initializeKeyboardShortcuts();
   wireFinishHistoryInstallLinks();

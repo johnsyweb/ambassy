@@ -1,4 +1,9 @@
-import { populateMap, resetVoronoiTerritoryCacheForTests } from "./populateMap";
+import {
+  populateMap,
+  resetVoronoiTerritoryCacheForTests,
+  isEventMarkerVisibleOnMap,
+  applyAmbassadorNameFilterToMap,
+} from "./populateMap";
 
 jest.mock("d3-geo-voronoi", () => ({
   geoVoronoi: jest.fn(() => ({
@@ -7,7 +12,6 @@ jest.mock("d3-geo-voronoi", () => ({
 }));
 
 describe("populateMap", () => {
-
   beforeEach(() => {
     jest.clearAllMocks();
     resetVoronoiTerritoryCacheForTests();
@@ -55,9 +59,18 @@ describe("populateMap", () => {
       eventAmbassadors.set("EA1", { name: "EA1", events: ["event1"] });
 
       const regionalAmbassadors = new Map();
-      regionalAmbassadors.set("REA1", { name: "REA1", state: "VIC", supportsEAs: ["EA1"] });
+      regionalAmbassadors.set("REA1", {
+        name: "REA1",
+        state: "VIC",
+        supportsEAs: ["EA1"],
+      });
 
-      populateMap(eventTeamsTableData, eventDetails, eventAmbassadors, regionalAmbassadors);
+      populateMap(
+        eventTeamsTableData,
+        eventDetails,
+        eventAmbassadors,
+        regionalAmbassadors,
+      );
 
       const eventData = eventTeamsTableData.get("event1");
       expect(eventData?.eventDirectors).toBe("Director1, Director2");
@@ -96,9 +109,18 @@ describe("populateMap", () => {
       eventAmbassadors.set("EA1", { name: "EA1", events: ["event1"] });
 
       const regionalAmbassadors = new Map();
-      regionalAmbassadors.set("REA1", { name: "REA1", state: "VIC", supportsEAs: ["EA1"] });
+      regionalAmbassadors.set("REA1", {
+        name: "REA1",
+        state: "VIC",
+        supportsEAs: ["EA1"],
+      });
 
-      populateMap(eventTeamsTableData, eventDetails, eventAmbassadors, regionalAmbassadors);
+      populateMap(
+        eventTeamsTableData,
+        eventDetails,
+        eventAmbassadors,
+        regionalAmbassadors,
+      );
 
       const eventData = eventTeamsTableData.get("event1");
       expect(eventData?.eventDirectors).toBe("N/A");
@@ -147,9 +169,18 @@ describe("populateMap", () => {
       eventAmbassadors.set("EA1", { name: "EA1", events: ["event1"] });
 
       const regionalAmbassadors = new Map();
-      regionalAmbassadors.set("REA1", { name: "REA1", state: "VIC", supportsEAs: ["EA1"] });
+      regionalAmbassadors.set("REA1", {
+        name: "REA1",
+        state: "VIC",
+        supportsEAs: ["EA1"],
+      });
 
-      populateMap(eventTeamsTableData, eventDetails, eventAmbassadors, regionalAmbassadors);
+      populateMap(
+        eventTeamsTableData,
+        eventDetails,
+        eventAmbassadors,
+        regionalAmbassadors,
+      );
 
       const eventData = eventTeamsTableData.get("event1");
       expect(eventData).toBeDefined();
@@ -189,13 +220,132 @@ describe("populateMap", () => {
       eventAmbassadors.set("EA1", { name: "EA1", events: ["event1"] });
 
       const regionalAmbassadors = new Map();
-      regionalAmbassadors.set("REA1", { name: "REA1", state: "VIC", supportsEAs: ["EA1"] });
+      regionalAmbassadors.set("REA1", {
+        name: "REA1",
+        state: "VIC",
+        supportsEAs: ["EA1"],
+      });
 
-      populateMap(eventTeamsTableData, eventDetails, eventAmbassadors, regionalAmbassadors);
+      populateMap(
+        eventTeamsTableData,
+        eventDetails,
+        eventAmbassadors,
+        regionalAmbassadors,
+      );
 
       const eventData = eventTeamsTableData.get("event1");
       expect(eventData).toBeDefined();
       expect(eventData?.regionalAmbassador).toBe("REA1");
+    });
+  });
+
+  describe("Ambassador name filter", () => {
+    beforeEach(() => {
+      document.body.innerHTML = '<div id="mapContainer"></div>';
+      sessionStorage.clear();
+    });
+
+    afterEach(() => {
+      document.body.innerHTML = "";
+      sessionStorage.clear();
+    });
+
+    it("hides unallocated markers and non-matching allocated markers when filter is active", () => {
+      const eventTeamsTableData = new Map();
+      eventTeamsTableData.set("event1", {
+        eventShortName: "event1",
+        eventDirectors: "Director1",
+        eventAmbassador: "EA1",
+        regionalAmbassador: "REA1",
+        eventCoordinates: "37.80000° S 144.90000° E",
+        eventSeries: 1,
+        eventCountryCode: 3,
+        eventCountry: "Australia",
+      });
+      eventTeamsTableData.set("event2", {
+        eventShortName: "event2",
+        eventDirectors: "Director2",
+        eventAmbassador: "EA2",
+        regionalAmbassador: "REA2",
+        eventCoordinates: "37.80000° S 144.90000° E",
+        eventSeries: 1,
+        eventCountryCode: 3,
+        eventCountry: "Australia",
+      });
+
+      const eventDetails = new Map();
+      eventDetails.set("event1", {
+        id: "1",
+        type: "Feature",
+        geometry: { type: "Point", coordinates: [144.9631, -37.8136] },
+        properties: {
+          eventname: "Event 1",
+          EventLongName: "Event 1 Long Name",
+          EventShortName: "event1",
+          LocalisedEventLongName: null,
+          countrycode: 0,
+          seriesid: 1,
+          EventLocation: "Location 1",
+        },
+      });
+      eventDetails.set("event2", {
+        id: "2",
+        type: "Feature",
+        geometry: { type: "Point", coordinates: [151.2093, -33.8688] },
+        properties: {
+          eventname: "Event 2",
+          EventLongName: "Event 2 Long Name",
+          EventShortName: "event2",
+          LocalisedEventLongName: null,
+          countrycode: 0,
+          seriesid: 1,
+          EventLocation: "Location 2",
+        },
+      });
+      eventDetails.set("unallocated", {
+        id: "3",
+        type: "Feature",
+        geometry: { type: "Point", coordinates: [145.0, -37.9] },
+        properties: {
+          eventname: "Unallocated",
+          EventLongName: "Unallocated",
+          EventShortName: "unallocated",
+          LocalisedEventLongName: null,
+          countrycode: 0,
+          seriesid: 1,
+          EventLocation: "Location 3",
+        },
+      });
+
+      const eventAmbassadors = new Map();
+      eventAmbassadors.set("EA1", { name: "EA1", events: ["event1"] });
+      eventAmbassadors.set("EA2", { name: "EA2", events: ["event2"] });
+
+      const regionalAmbassadors = new Map();
+      regionalAmbassadors.set("REA1", {
+        name: "REA1",
+        state: "VIC",
+        supportsEAs: ["EA1"],
+      });
+      regionalAmbassadors.set("REA2", {
+        name: "REA2",
+        state: "NSW",
+        supportsEAs: ["EA2"],
+      });
+
+      populateMap(
+        eventTeamsTableData,
+        eventDetails,
+        eventAmbassadors,
+        regionalAmbassadors,
+      );
+
+      sessionStorage.setItem("ambassy:ambassadorNameFilter", "ea1");
+      applyAmbassadorNameFilterToMap(eventTeamsTableData);
+
+      expect(isEventMarkerVisibleOnMap("event1")).toBe(true);
+      expect(isEventMarkerVisibleOnMap("event2")).toBe(false);
+      expect(isEventMarkerVisibleOnMap("unallocated")).toBe(false);
     });
   });
 });
