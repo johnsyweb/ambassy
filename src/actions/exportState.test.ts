@@ -1,8 +1,16 @@
-import { exportApplicationState, downloadStateFile } from "./exportState";
+import {
+  exportApplicationState,
+  downloadStateFile,
+  buildStateExportFilename,
+} from "./exportState";
 import { loadFromStorage } from "@utils/storage";
 import { EventDetails } from "@models/EventDetails";
+import { loadProspectiveEvents } from "./persistProspectiveEvents";
+import { loadAmbassadorFinishHistories } from "./persistAmbassadorFinishHistory";
 
 jest.mock("@utils/storage");
+jest.mock("./persistProspectiveEvents");
+jest.mock("./persistAmbassadorFinishHistory");
 
 describe("exportState", () => {
   const mockLocalStorage = {
@@ -20,6 +28,8 @@ describe("exportState", () => {
       value: mockLocalStorage,
       writable: true,
     });
+    (loadProspectiveEvents as jest.Mock).mockReturnValue([]);
+    (loadAmbassadorFinishHistories as jest.Mock).mockReturnValue({});
   });
 
   describe("exportApplicationState", () => {
@@ -233,6 +243,14 @@ describe("exportState", () => {
 
       const blob = exportApplicationState();
       expect(blob).toBeInstanceOf(Blob);
+    });
+  });
+
+  describe("buildStateExportFilename", () => {
+    it("should use ISO date in filename", () => {
+      expect(buildStateExportFilename(new Date("2026-06-16T12:00:00Z"))).toBe(
+        "ambassy-state-2026-06-16.json",
+      );
     });
   });
 

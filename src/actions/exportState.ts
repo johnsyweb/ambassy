@@ -1,7 +1,12 @@
-import { ApplicationState } from "@models/ApplicationState";
+import {
+  ApplicationState,
+  CURRENT_APPLICATION_STATE_VERSION,
+} from "@models/ApplicationState";
 import { EventDetails } from "@models/EventDetails";
 import { loadFromStorage } from "@utils/storage";
 import { loadCapacityLimits } from "./checkCapacity";
+import { loadProspectiveEvents } from "./persistProspectiveEvents";
+import { loadAmbassadorFinishHistories } from "./persistAmbassadorFinishHistory";
 
 const CACHE_KEY = "parkrun events";
 
@@ -17,6 +22,10 @@ function isManuallyResolvedEventDetails(
     eventDetails.id.startsWith("manual-") ||
     eventDetails.id.startsWith("geocoded-")
   );
+}
+
+export function buildStateExportFilename(date = new Date()): string {
+  return `ambassy-state-${date.toISOString().slice(0, 10)}.json`;
 }
 
 export function exportApplicationState(): Blob {
@@ -43,8 +52,9 @@ export function exportApplicationState(): Blob {
   }
 
   const capacityLimits = loadCapacityLimits();
+  const prospectiveEvents = loadProspectiveEvents();
+  const ambassadorFinishHistories = loadAmbassadorFinishHistories();
 
-  // Extract manually resolved eventDetails from cache
   const resolvedEventDetails: Array<[string, EventDetails]> = [];
   const cacheData = localStorage.getItem(CACHE_KEY);
   if (cacheData) {
@@ -66,7 +76,7 @@ export function exportApplicationState(): Blob {
   }
 
   const state: ApplicationState = {
-    version: "1.0.0",
+    version: CURRENT_APPLICATION_STATE_VERSION,
     exportedAt: new Date().toISOString(),
     data: {
       eventAmbassadors,
@@ -76,6 +86,12 @@ export function exportApplicationState(): Blob {
       capacityLimits,
       resolvedEventDetails:
         resolvedEventDetails.length > 0 ? resolvedEventDetails : undefined,
+      prospectiveEvents:
+        prospectiveEvents.length > 0 ? prospectiveEvents : undefined,
+      ambassadorFinishHistories:
+        Object.keys(ambassadorFinishHistories).length > 0
+          ? ambassadorFinishHistories
+          : undefined,
     },
   };
 
