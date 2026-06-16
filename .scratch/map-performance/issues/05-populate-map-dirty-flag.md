@@ -1,4 +1,4 @@
-Status: ready-for-agent
+Status: done
 
 # Skip populateMap when map inputs unchanged
 
@@ -8,9 +8,9 @@ Track a fingerprint of Voronoi sites, allocations, prospects, and ambassador fil
 
 ## Acceptance criteria
 
-- [ ] Consecutive `refreshUI()` calls with identical map inputs do not rebuild markers or polygons
-- [ ] Fingerprint invalidates on allocation, prospect, coordinate, or filter changes
-- [ ] Regression test: double refresh does not double marker count
+- [x] Consecutive `refreshUI()` calls with identical map inputs do not rebuild markers or polygons
+- [x] Fingerprint invalidates on allocation, prospect, coordinate, or filter changes
+- [x] Regression test: double refresh does not double marker count
 
 ## Blocked by
 

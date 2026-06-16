@@ -23,6 +23,7 @@ import {
   ViewportBounds,
 } from "@utils/voronoiTerritories";
 import { findUnallocatedEventsInViewport } from "@utils/viewportUnallocatedMarkers";
+import { computeMapPopulationFingerprint } from "@utils/mapPopulationFingerprint";
 import { getEventTeamsTableDataByShortName } from "@models/EventDetailsMap";
 import {
   eventTeamRowMatchesAmbassadorNameFilter,
@@ -46,6 +47,18 @@ export function populateMap(
   regionalAmbassadors: RegionalAmbassadorMap,
   prospectiveEvents?: ProspectiveEvent[],
 ) {
+  const populationFingerprint = computeMapPopulationFingerprint({
+    eventTeamsTableData,
+    eventDetails,
+    prospectiveEvents,
+  });
+
+  if (_map && populationFingerprint === _lastMapPopulationFingerprint) {
+    return;
+  }
+
+  _lastMapPopulationFingerprint = populationFingerprint;
+
   const raNames = regionalAmbassadorsFrom(eventTeamsTableData);
   const eaNames = eventAmbassadorsFrom(eventTeamsTableData);
   const raColorMap = assignColorsToNames(raNames);
@@ -481,6 +494,7 @@ let _mapPopulationContext: {
   eventDetails: EventDetailsMap;
   eventTeamsTableData: EventTeamsTableDataMap;
 } | null = null;
+let _lastMapPopulationFingerprint: string | null = null;
 
 type EventMarkerFilterState =
   | {
@@ -591,6 +605,7 @@ export function resetVoronoiTerritoryCacheForTests(): void {
   _prospectMarkers.clear();
   _unallocatedMarkerMap.clear();
   _mapPopulationContext = null;
+  _lastMapPopulationFingerprint = null;
   _markerMap.clear();
   if (_layersControl) {
     _layersControl.remove();

@@ -645,4 +645,152 @@ describe("populateMap", () => {
       expect(onMarkerClick).toHaveBeenCalledWith("event1");
     });
   });
+
+  describe("Map population fingerprint", () => {
+    beforeEach(() => {
+      document.body.innerHTML = '<div id="mapContainer"></div>';
+    });
+
+    afterEach(() => {
+      document.body.innerHTML = "";
+    });
+
+    it("does not rebuild markers when map inputs are unchanged", () => {
+      const eventTeamsTableData = new Map();
+      eventTeamsTableData.set("event1", {
+        eventShortName: "event1",
+        eventDirectors: "Director1",
+        eventAmbassador: "EA1",
+        regionalAmbassador: "REA1",
+        eventCoordinates: "37.80000° S 144.90000° E",
+        eventSeries: 1,
+        eventCountryCode: 3,
+        eventCountry: "Australia",
+      });
+
+      const eventDetails = new Map();
+      eventDetails.set("event1", {
+        id: "1",
+        type: "Feature",
+        geometry: { type: "Point", coordinates: [144.9631, -37.8136] },
+        properties: {
+          eventname: "Event 1",
+          EventLongName: "Event 1 Long Name",
+          EventShortName: "event1",
+          LocalisedEventLongName: null,
+          countrycode: 0,
+          seriesid: 1,
+          EventLocation: "Location 1",
+        },
+      });
+
+      const eventAmbassadors = new Map();
+      eventAmbassadors.set("EA1", { name: "EA1", events: ["event1"] });
+
+      const regionalAmbassadors = new Map();
+      regionalAmbassadors.set("REA1", {
+        name: "REA1",
+        state: "VIC",
+        supportsEAs: ["EA1"],
+      });
+
+      const mapInputs = [
+        eventTeamsTableData,
+        eventDetails,
+        eventAmbassadors,
+        regionalAmbassadors,
+      ] as const;
+
+      populateMap(...mapInputs);
+      const markerAfterFirstPopulate = getMarkerMap().get("event1");
+
+      populateMap(...mapInputs);
+
+      expect(getMarkerMap().size).toBe(1);
+      expect(getMarkerMap().get("event1")).toBe(markerAfterFirstPopulate);
+    });
+
+    it("rebuilds markers when allocation changes", () => {
+      const eventTeamsTableData = new Map();
+      eventTeamsTableData.set("event1", {
+        eventShortName: "event1",
+        eventDirectors: "Director1",
+        eventAmbassador: "EA1",
+        regionalAmbassador: "REA1",
+        eventCoordinates: "37.80000° S 144.90000° E",
+        eventSeries: 1,
+        eventCountryCode: 3,
+        eventCountry: "Australia",
+      });
+
+      const eventDetails = new Map();
+      eventDetails.set("event1", {
+        id: "1",
+        type: "Feature",
+        geometry: { type: "Point", coordinates: [144.9631, -37.8136] },
+        properties: {
+          eventname: "Event 1",
+          EventLongName: "Event 1 Long Name",
+          EventShortName: "event1",
+          LocalisedEventLongName: null,
+          countrycode: 0,
+          seriesid: 1,
+          EventLocation: "Location 1",
+        },
+      });
+      eventDetails.set("event2", {
+        id: "2",
+        type: "Feature",
+        geometry: { type: "Point", coordinates: [145.1, -37.9] },
+        properties: {
+          eventname: "Event 2",
+          EventLongName: "Event 2 Long Name",
+          EventShortName: "event2",
+          LocalisedEventLongName: null,
+          countrycode: 0,
+          seriesid: 1,
+          EventLocation: "Location 2",
+        },
+      });
+
+      const eventAmbassadors = new Map();
+      eventAmbassadors.set("EA1", { name: "EA1", events: ["event1"] });
+      eventAmbassadors.set("EA2", { name: "EA2", events: ["event2"] });
+
+      const regionalAmbassadors = new Map();
+      regionalAmbassadors.set("REA1", {
+        name: "REA1",
+        state: "VIC",
+        supportsEAs: ["EA1", "EA2"],
+      });
+
+      populateMap(
+        eventTeamsTableData,
+        eventDetails,
+        eventAmbassadors,
+        regionalAmbassadors,
+      );
+      expect(getMarkerMap().size).toBe(1);
+
+      eventTeamsTableData.set("event2", {
+        eventShortName: "event2",
+        eventDirectors: "Director2",
+        eventAmbassador: "EA2",
+        regionalAmbassador: "REA1",
+        eventCoordinates: "37.90000° S 145.10000° E",
+        eventSeries: 1,
+        eventCountryCode: 3,
+        eventCountry: "Australia",
+      });
+
+      populateMap(
+        eventTeamsTableData,
+        eventDetails,
+        eventAmbassadors,
+        regionalAmbassadors,
+      );
+
+      expect(getMarkerMap().size).toBe(2);
+    });
+  });
 });
