@@ -10,15 +10,46 @@ on:
       - main
 
 permissions:
-  contents: read
+  contents: write
   pages: write
   id-token: write
+  pull-requests: write
+  issues: write
 
 concurrency:
   group: pages
   cancel-in-progress: false
 
 jobs:
+  commitlint:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request' || (github.event_name == 'push' && github.ref == 'refs/heads/main')
+    steps:
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
+        with:
+          fetch-depth: 0
+
+      - name: Setup mise
+        uses: jdx/mise-action@dba19683ed58901619b14f395a24841710cb4925 # v4
+        with:
+          install: true
+
+      - name: Setup pnpm cache
+        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6
+        with:
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Validate pull request commits
+        if: github.event_name == 'pull_request'
+        run: pnpm exec commitlint --from ${{ github.event.pull_request.base.sha }} --to ${{ github.event.pull_request.head.sha }} --verbose
+
+      - name: Validate push commit
+        if: github.event_name == 'push'
+        run: pnpm exec commitlint --from HEAD~1 --to HEAD --verbose
+
   lint:
     runs-on: ubuntu-latest
     steps:
@@ -118,15 +149,62 @@ jobs:
       - name: Map DOM budget smoke test
         run: pnpm run smoke:map-dom-budget
 
-  deploy:
-    needs: build
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+  check-docs-only:
     runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+    outputs:
+      skip-release: ${{ steps.check.outputs.skip-release }}
+      should-deploy-pages: ${{ steps.check.outputs.should-deploy-pages }}
     steps:
       - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
+        with:
+          fetch-depth: 0
+
+      - name: Check if changes are docs-only
+        id: check
+        run: |
+          if [ "${{ github.event_name }}" != "push" ] || [ "${{ github.ref }}" != "refs/heads/main" ]; then
+            echo "Not a push to main, using defaults"
+            echo "skip-release=false" >> ${GITHUB_OUTPUT}
+            echo "should-deploy-pages=false" >> ${GITHUB_OUTPUT}
+            exit 0
+          fi
+
+          commit_sha="${{ github.sha }}"
+          parent_sha=$(git rev-parse ${commit_sha}^ 2>/dev/null || echo "")
+
+          if [ -n "$parent_sha" ]; then
+            changed_files=$(git diff --name-only ${parent_sha} ${commit_sha} 2>/dev/null || echo "")
+          else
+            changed_files=$(git diff --name-only HEAD~1 HEAD 2>/dev/null || echo "")
+          fi
+
+          non_docs_files=$(echo "$changed_files" | grep -Ev '^(docs/|specs/|CONTEXT\.md|README\.md|\.github/)' | grep -v '^$' || true)
+
+          if [ -z "$non_docs_files" ]; then
+            echo "Docs-only changes, skipping release but deploying Pages"
+            echo "skip-release=true" >> ${GITHUB_OUTPUT}
+            echo "should-deploy-pages=true" >> ${GITHUB_OUTPUT}
+          else
+            echo "Non-docs files changed, proceeding with release"
+            echo "Changed files:"
+            echo "$changed_files"
+            echo "skip-release=false" >> ${GITHUB_OUTPUT}
+            echo "should-deploy-pages=false" >> ${GITHUB_OUTPUT}
+          fi
+
+  release:
+    needs: [build, check-docs-only]
+    if: |
+      github.event_name == 'push' &&
+      github.ref == 'refs/heads/main' &&
+      needs.check-docs-only.outputs.skip-release != 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
+        with:
+          fetch-depth: 0
+          persist-credentials: false
 
       - name: Setup mise
         uses: jdx/mise-action@dba19683ed58901619b14f395a24841710cb4925 # v4
@@ -141,8 +219,13 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Build
-        run: pnpm run build
+      - name: Semantic Release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: pnpm release
+
+      - name: Pull release commit
+        run: git fetch origin main && git checkout main && git pull origin main
 
       - name: Install Chrome for Puppeteer
         run: |
@@ -164,8 +247,61 @@ jobs:
       - name: Build with screenshots
         run: pnpm run build
 
+      - name: Upload release build artifact
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: dist-release
+          path: ./dist
+          retention-days: 1
+
+  deploy-pages-after-release:
+    needs: [release, map-dom-budget, check-docs-only]
+    if: |
+      github.event_name == 'push' &&
+      github.ref == 'refs/heads/main' &&
+      needs.check-docs-only.outputs.skip-release != 'true'
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
       - name: Setup Pages
         uses: actions/configure-pages@45bfe0192ca1faeb007ade9deae92b16b8254a0d # v6
+
+      - name: Download release build artifact
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7
+        with:
+          name: dist-release
+          path: dist
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
+        with:
+          path: ./dist
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@cd2ce8fcbc39b97be8ca5fce6e763baed58fa128 # v5
+
+  deploy-pages-after-build:
+    needs: [build, map-dom-budget, check-docs-only]
+    if: |
+      github.event_name == 'push' &&
+      github.ref == 'refs/heads/main' &&
+      needs.check-docs-only.outputs.should-deploy-pages == 'true'
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Setup Pages
+        uses: actions/configure-pages@45bfe0192ca1faeb007ade9deae92b16b8254a0d # v6
+
+      - name: Download build artifact
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7
+        with:
+          name: dist
+          path: dist
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
