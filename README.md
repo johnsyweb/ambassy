@@ -132,9 +132,10 @@ Ambassy can show **last ambassador visit** on the Event Teams tab (who finished 
 
 1. Open the ambassador's parkrun profile `/all/` page (link from their parkrunner ID when set).
 2. Click **Export finishes to Ambassy** on that page.
-3. Open or switch to Ambassy — the import runs automatically when the userscript bridge delivers the payload.
+3. Open or switch to Ambassy — the import runs automatically when the userscript bridge delivers the payload (no refresh needed if Ambassy is already open).
+4. If the parkrunner ID is not yet assigned, confirm the suggested ambassador in the assign dialog. If you cancel, use **Resume** on the main-page banner or **Import finish history from clipboard** on the Finish history page.
 
-**Clipboard fallback:** copy the JSON from the userscript notification, then click **Import finish history from clipboard** on the Finish history page.
+**Clipboard fallback:** copy the JSON from the userscript notification, then click **Import finish history from clipboard** on the Finish history page (this also resumes a pending import when one is waiting).
 
 Only finishes that match live events in `events.json` are kept. Re-import merges history, keeping the latest finish date per event per ambassador.
 
