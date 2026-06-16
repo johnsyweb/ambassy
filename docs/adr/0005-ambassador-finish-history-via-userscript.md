@@ -11,10 +11,10 @@ We import **finishes only** (profile `/all/` runs table) for v1. Volunteer roles
 ## Decision
 
 1. **parkrunnerId** optional on EA and REA; stored as digits only; displayed with `A` prefix in the UI; profile URLs use digits only; set via ambassadors UI or CSV (`parkrunner ID`); blank CSV cell preserves session value; changes logged.
-2. **Userscript** (`script/ambassy-finish-export.user.js`) with dual `@match`: all `events.json` country profile URLs + Ambassy origin(s). Parses `/all/` table (not paginated); extracts event slug from result links and finish date from `format-date`.
-3. **Handoff:** parkrun page → Tampermonkey `GM_setValue` → Ambassy `@match` bridge writes `ambassy:pendingFinishImport` to `localStorage` and dispatches `ambassy-finish-import-ready`. Clipboard JSON import as fallback.
-4. **Import:** match slug to `events.json` `eventname`; discard unmatched. Merge per ambassador keeping latest ISO date per event. Unknown parkrunner ID prompts REA to assign EA/REA then import.
-5. **Last ambassador visit:** max finish date across **all** EAs and REAs with imported history; show all names tied on that date; **N/A** when unknown. Display e.g. `Pete Robinson; Kim De Waal — 13 Jun 2026` on Event Teams.
+2. **Userscript** (`script/ambassy-finish-export.user.js`) with dual `@match`: all `events.json` country profile URLs + Ambassy origin(s). Parses `/all/` table (not paginated); extracts event slug from result links and finish date from `format-date`; reads optional `parkrunProfileDisplayName` from the first profile `h2`, stripping a trailing `(A\d+)` suffix (schema v1).
+3. **Handoff:** parkrun page → Tampermonkey `GM_setValue` → Ambassy `@match` bridge writes `ambassy:pendingFinishImport` to `localStorage` and dispatches `ambassy-finish-import-ready` on page load and when the Ambassy tab becomes visible or gains focus. Clipboard JSON import as fallback. An already-open Ambassy tab also processes pending imports on cross-tab `storage`, `visibilitychange`, and `window` `focus` (see **Finish import activation** in `CONTEXT.md`).
+4. **Import:** match slug to `events.json` `eventname`; discard unmatched. Merge per ambassador keeping latest ISO date per event. Unknown parkrunner ID prompts REA to assign EA/REA then import; when the profile display name matches exactly one allocation name after normalised full-string equality, pre-select that ambassador in the dialog (REA still confirms). Pending import remains in `localStorage` until import succeeds; cancel on the assign dialog does not discard it but suppresses further auto-prompt until the REA resumes (main-page banner or Finish history import control). **Dismiss** on the banner clears pending.
+5. **Last ambassador visit:** max finish date across **all** EAs and REAs with imported history; show all names tied on that date; **N/A** when unknown. Display e.g. `Alex Sample; Kim Example — 13 Jun 2026` on Event Teams.
 
 ## Considered options
 
