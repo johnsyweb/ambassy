@@ -7,14 +7,18 @@ import { ProspectiveEvent } from "@models/ProspectiveEvent";
 import {
   buildVoronoiSites,
   clipRingToViewport,
+  clipTerritoryRingsToViewport,
   computeVisibleTerritoryRings,
   deduplicateVoronoiSites,
+  expandViewportBounds,
   extractLocalTerritoryRing,
+  filterTerritoryRingsForViewport,
   fingerprintVoronoiSites,
   GeoVoronoiFn,
   isDrawableTerritoryRing,
   pointInTerritoryRing,
   TerritoryRing,
+  territoryRingBoundingBoxIntersectsViewport,
   VoronoiSite,
   VoronoiTerritoryCache,
 } from "./voronoiTerritories";
@@ -505,6 +509,108 @@ describe("clipRingToViewport", () => {
         maxLatitude: -35,
       }),
     ).toBeNull();
+  });
+});
+
+describe("filterTerritoryRingsForViewport", () => {
+  const melbourneViewport = {
+    minLongitude: 144.5,
+    maxLongitude: 145.5,
+    minLatitude: -38.5,
+    maxLatitude: -37.5,
+  };
+
+  const melbourneRing: TerritoryRing = {
+    id: "melbourne",
+    ring: [
+      [144.6, -38.2],
+      [145.2, -38.2],
+      [145.2, -37.6],
+      [144.6, -37.6],
+      [144.6, -38.2],
+    ],
+    raColor: "#ff0066",
+    tooltip: "Melbourne",
+  };
+
+  const londonRing: TerritoryRing = {
+    id: "london",
+    ring: [
+      [-0.5, 51.2],
+      [0.5, 51.2],
+      [0.5, 51.8],
+      [-0.5, 51.8],
+      [-0.5, 51.2],
+    ],
+    raColor: "#0066ff",
+    tooltip: "London",
+  };
+
+  it("keeps only rings whose bounding box intersects the viewport", () => {
+    const filtered = filterTerritoryRingsForViewport(
+      [melbourneRing, londonRing],
+      melbourneViewport,
+    );
+
+    expect(filtered.map((ring) => ring.id)).toEqual(["melbourne"]);
+  });
+
+  it("reports bounding-box intersection for territory rings", () => {
+    expect(
+      territoryRingBoundingBoxIntersectsViewport(
+        melbourneRing.ring,
+        expandViewportBounds(melbourneViewport),
+      ),
+    ).toBe(true);
+    expect(
+      territoryRingBoundingBoxIntersectsViewport(
+        londonRing.ring,
+        expandViewportBounds(melbourneViewport),
+      ),
+    ).toBe(false);
+  });
+});
+
+describe("clipTerritoryRingsToViewport", () => {
+  it("clips only rings intersecting the viewport", () => {
+    const melbourneViewport = {
+      minLongitude: 144.8,
+      maxLongitude: 145.1,
+      minLatitude: -38.1,
+      maxLatitude: -37.7,
+    };
+
+    const clipped = clipTerritoryRingsToViewport(
+      [
+        {
+          id: "melbourne",
+          ring: [
+            [144.6, -38.2],
+            [145.2, -38.2],
+            [145.2, -37.6],
+            [144.6, -37.6],
+            [144.6, -38.2],
+          ],
+          raColor: "#ff0066",
+          tooltip: "Melbourne",
+        },
+        {
+          id: "london",
+          ring: [
+            [-0.5, 51.2],
+            [0.5, 51.2],
+            [0.5, 51.8],
+            [-0.5, 51.8],
+            [-0.5, 51.2],
+          ],
+          raColor: "#0066ff",
+          tooltip: "London",
+        },
+      ],
+      melbourneViewport,
+    );
+
+    expect(clipped.map((polygon) => polygon.id)).toEqual(["melbourne"]);
   });
 });
 

@@ -4,30 +4,23 @@ import {
   eventDetailsToCoordinate,
   getEventTeamsTableDataByShortName,
 } from "@models/EventDetailsMap";
-import { getLatitude, getLongitude, isValidCoordinate } from "@models/Coordinate";
-import { ViewportBounds } from "@utils/voronoiTerritories";
+import {
+  getLatitude,
+  getLongitude,
+  isValidCoordinate,
+} from "@models/Coordinate";
+import {
+  expandViewportBounds,
+  ViewportBounds,
+} from "@utils/voronoiTerritories";
+
+export type { ViewportBounds };
+export { expandViewportBounds };
 
 export interface UnallocatedEventInViewport {
   eventName: string;
   latitude: number;
   longitude: number;
-}
-
-export function expandViewportBounds(
-  viewport: ViewportBounds,
-  bufferRatio = 0.1,
-): ViewportBounds {
-  const longitudeSpan = viewport.maxLongitude - viewport.minLongitude;
-  const latitudeSpan = viewport.maxLatitude - viewport.minLatitude;
-  const longitudeBuffer = longitudeSpan * bufferRatio;
-  const latitudeBuffer = latitudeSpan * bufferRatio;
-
-  return {
-    minLongitude: viewport.minLongitude - longitudeBuffer,
-    maxLongitude: viewport.maxLongitude + longitudeBuffer,
-    minLatitude: viewport.minLatitude - latitudeBuffer,
-    maxLatitude: viewport.maxLatitude + latitudeBuffer,
-  };
 }
 
 export function isPointInViewport(
@@ -52,9 +45,7 @@ export function findUnallocatedEventsInViewport(
   const unallocatedEvents: UnallocatedEventInViewport[] = [];
 
   eventDetails.forEach((event, eventName) => {
-    if (
-      getEventTeamsTableDataByShortName(eventTeamsTableData, eventName)
-    ) {
+    if (getEventTeamsTableDataByShortName(eventTeamsTableData, eventName)) {
       return;
     }
 

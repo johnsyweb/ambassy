@@ -628,13 +628,74 @@ export interface ClippedTerritoryPolygon {
   tooltip: string;
 }
 
+export function expandViewportBounds(
+  viewport: ViewportBounds,
+  bufferRatio = 0.1,
+): ViewportBounds {
+  const longitudeSpan = viewport.maxLongitude - viewport.minLongitude;
+  const latitudeSpan = viewport.maxLatitude - viewport.minLatitude;
+  const longitudeBuffer = longitudeSpan * bufferRatio;
+  const latitudeBuffer = latitudeSpan * bufferRatio;
+
+  return {
+    minLongitude: viewport.minLongitude - longitudeBuffer,
+    maxLongitude: viewport.maxLongitude + longitudeBuffer,
+    minLatitude: viewport.minLatitude - latitudeBuffer,
+    maxLatitude: viewport.maxLatitude + latitudeBuffer,
+  };
+}
+
+export function territoryRingBoundingBoxIntersectsViewport(
+  ring: [number, number][],
+  viewport: ViewportBounds,
+): boolean {
+  if (ring.length === 0) {
+    return false;
+  }
+
+  let minLongitude = ring[0][0];
+  let maxLongitude = ring[0][0];
+  let minLatitude = ring[0][1];
+  let maxLatitude = ring[0][1];
+
+  for (let index = 1; index < ring.length; index += 1) {
+    const [longitude, latitude] = ring[index];
+    minLongitude = Math.min(minLongitude, longitude);
+    maxLongitude = Math.max(maxLongitude, longitude);
+    minLatitude = Math.min(minLatitude, latitude);
+    maxLatitude = Math.max(maxLatitude, latitude);
+  }
+
+  return (
+    maxLongitude >= viewport.minLongitude &&
+    minLongitude <= viewport.maxLongitude &&
+    maxLatitude >= viewport.minLatitude &&
+    minLatitude <= viewport.maxLatitude
+  );
+}
+
+export function filterTerritoryRingsForViewport(
+  rings: TerritoryRing[],
+  viewport: ViewportBounds,
+  bufferRatio = 0.1,
+): TerritoryRing[] {
+  const expandedViewport = expandViewportBounds(viewport, bufferRatio);
+  return rings.filter((territoryRing) =>
+    territoryRingBoundingBoxIntersectsViewport(
+      territoryRing.ring,
+      expandedViewport,
+    ),
+  );
+}
+
 export function clipTerritoryRingsToViewport(
   rings: TerritoryRing[],
   viewport: ViewportBounds,
 ): ClippedTerritoryPolygon[] {
   const clippedPolygons: ClippedTerritoryPolygon[] = [];
+  const viewportRings = filterTerritoryRingsForViewport(rings, viewport);
 
-  rings.forEach((territoryRing) => {
+  viewportRings.forEach((territoryRing) => {
     const clippedRing = clipRingToViewport(territoryRing.ring, viewport);
     if (!clippedRing) {
       return;
