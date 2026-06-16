@@ -31,4 +31,4 @@ Implement in order (highest impact first):
 | 08 | Tune webpack dev config for faster local dev | done |
 | 09 | Debounce finish-import activation handlers | done |
 | 10 | Keep parsed events catalogue in memory | done |
-| 11 | CI smoke test for map DOM budget | ready-for-agent |
+| 11 | CI smoke test for map DOM budget | done |

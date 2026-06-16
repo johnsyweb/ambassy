@@ -16,6 +16,7 @@
     "sync:userscript-matches": "node script/sync-finish-export-userscript-matches.cjs",
     "rebuild:userscript": "node script/rebuild-finish-export-userscript.cjs",
     "screenshots": "ts-node -r tsconfig-paths/register script/generate-screenshots.ts",
+    "smoke:map-dom-budget": "ts-node -r tsconfig-paths/register script/smoke-map-dom-budget.ts",
     "prepare": "husky"
   },
   "keywords": [

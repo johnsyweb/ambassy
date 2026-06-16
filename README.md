@@ -82,6 +82,8 @@ The app is written in TypeScript with unit tests and runs in a modern web browse
 
 The development server enables webpack filesystem caching and uses `eval-cheap-module-source-map` for faster rebuilds. Stack traces map to TypeScript modules; line numbers may be approximate. For line-accurate source maps while debugging, run `pnpm run start:sourcemaps`.
 
+After `pnpm run build`, run `pnpm run smoke:map-dom-budget` to check map overlay and DOM budgets against the bundled sample CSVs (also runs in CI).
+
 ### Voronoi performance timings (development)
 
 When running `pnpm start`, a global Voronoi recompute (after allocations or catalogue changes, not on pan/zoom) records a `performance.measure` named `ambassy:voronoi-compute` and logs a `console.debug` line with duration, site count, and visible territory count.

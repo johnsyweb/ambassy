@@ -1,0 +1,272 @@
+#!/usr/bin/env ts-node
+
+import puppeteer from "puppeteer";
+import * as fs from "fs";
+import * as path from "path";
+import * as net from "net";
+import { spawn, ChildProcess } from "child_process";
+import Papa from "papaparse";
+import {
+  parseEventTeams,
+  type EventTeamRow,
+} from "../src/parsers/parseEventTeams";
+import {
+  parseEventAmbassadors,
+  type EventAmbassadorRow,
+} from "../src/parsers/parseEventAmbassadors";
+import {
+  parseRegionalAmbassadors,
+  type RegionalAmbassadorRow,
+} from "../src/parsers/parseRegionalAmbassadors";
+
+const TIMEOUT_MS = 120_000;
+const MAX_OVERLAY_PATHS = 500;
+const MAX_DOM_NODES = 10_000;
+
+function fail(message: string): never {
+  console.error(`FAIL: ${message}`);
+  process.exit(1);
+}
+
+function pass(message: string): void {
+  console.log(`PASS: ${message}`);
+}
+
+function findAvailablePort(startPort: number): Promise<number> {
+  return new Promise((resolve, reject) => {
+    const server = net.createServer();
+    server.listen(startPort, () => {
+      const port = (server.address() as net.AddressInfo).port;
+      server.close(() => resolve(port));
+    });
+    server.on("error", (error: NodeJS.ErrnoException) => {
+      if (error.code === "EADDRINUSE") {
+        findAvailablePort(startPort + 1)
+          .then(resolve)
+          .catch(reject);
+      } else {
+        reject(error);
+      }
+    });
+  });
+}
+
+async function startStaticServer(
+  distDirectory: string,
+  port: number,
+): Promise<ChildProcess> {
+  return new Promise((resolve, reject) => {
+    const server = spawn(
+      "npx",
+      ["serve", "-s", distDirectory, "-l", String(port)],
+      {
+        stdio: "pipe",
+        shell: process.platform === "win32",
+      },
+    );
+
+    const timeout = setTimeout(() => {
+      reject(new Error("Timed out waiting for static server to start"));
+    }, 30_000);
+
+    server.stdout?.on("data", (chunk: Buffer) => {
+      const output = chunk.toString();
+      if (output.includes("Accepting connections")) {
+        clearTimeout(timeout);
+        resolve(server);
+      }
+    });
+
+    server.stderr?.on("data", (chunk: Buffer) => {
+      const output = chunk.toString();
+      if (output.includes("Accepting connections")) {
+        clearTimeout(timeout);
+        resolve(server);
+      }
+    });
+
+    server.on("error", (error) => {
+      clearTimeout(timeout);
+      reject(error);
+    });
+  });
+}
+
+function loadSampleAllocationState(): {
+  eventAmbassadorsJson: string;
+  eventTeamsJson: string;
+  regionalAmbassadorsJson: string;
+} {
+  const publicDir = path.join(process.cwd(), "public");
+  const eventAmbassadorsData = fs.readFileSync(
+    path.join(publicDir, "Ambassadors - Event Ambassadors.csv"),
+    "utf-8",
+  );
+  const eventTeamsData = fs.readFileSync(
+    path.join(publicDir, "Ambassadors - Event Teams.csv"),
+    "utf-8",
+  );
+  const regionalAmbassadorsData = fs.readFileSync(
+    path.join(publicDir, "Ambassadors - Regional Ambassadors.csv"),
+    "utf-8",
+  );
+
+  const eventAmbassadors = parseEventAmbassadors(
+    Papa.parse<EventAmbassadorRow>(eventAmbassadorsData, {
+      header: true,
+      skipEmptyLines: true,
+    }).data,
+  );
+  const eventTeams = parseEventTeams(
+    Papa.parse<EventTeamRow>(eventTeamsData, {
+      header: true,
+      skipEmptyLines: true,
+    }).data,
+  );
+  const regionalAmbassadors = parseRegionalAmbassadors(
+    Papa.parse<RegionalAmbassadorRow>(regionalAmbassadorsData, {
+      header: true,
+      skipEmptyLines: true,
+    }).data,
+  );
+
+  return {
+    eventAmbassadorsJson: JSON.stringify(
+      Array.from(eventAmbassadors.entries()),
+    ),
+    eventTeamsJson: JSON.stringify(Array.from(eventTeams.entries())),
+    regionalAmbassadorsJson: JSON.stringify(
+      Array.from(regionalAmbassadors.entries()),
+    ),
+  };
+}
+
+async function main(): Promise<void> {
+  const distDirectory = path.join(process.cwd(), "dist");
+  if (!fs.existsSync(path.join(distDirectory, "index.html"))) {
+    fail(
+      "dist/ is missing index.html — run pnpm run build before smoke:map-dom-budget",
+    );
+  }
+
+  const port = Number(process.env.PORT ?? (await findAvailablePort(8081)));
+  const baseUrl = process.env.BASE_URL ?? `http://localhost:${port}/`;
+  const shouldStartServer = !process.env.BASE_URL;
+  let staticServer: ChildProcess | null = null;
+
+  if (shouldStartServer) {
+    staticServer = await startStaticServer(distDirectory, port);
+  }
+
+  const browser = await puppeteer.launch({
+    headless: true,
+    args: ["--no-sandbox", "--disable-setuid-sandbox"],
+  });
+
+  try {
+    const page = await browser.newPage();
+    await page.setViewport({ width: 1280, height: 800 });
+
+    const { eventAmbassadorsJson, eventTeamsJson, regionalAmbassadorsJson } =
+      loadSampleAllocationState();
+
+    await page.goto(baseUrl, {
+      waitUntil: "networkidle2",
+      timeout: TIMEOUT_MS,
+    });
+
+    await page.evaluate(
+      (eaJson, etJson, raJson) => {
+        const prefix = "ambassy:";
+        const changesLog = "[]";
+        for (const [storage, suffix, value] of [
+          [localStorage, "eventAmbassadors", eaJson],
+          [localStorage, "eventTeams", etJson],
+          [localStorage, "regionalAmbassadors", raJson],
+          [localStorage, "changesLog", changesLog],
+          [sessionStorage, "eventAmbassadors", eaJson],
+          [sessionStorage, "eventTeams", etJson],
+          [sessionStorage, "regionalAmbassadors", raJson],
+          [sessionStorage, "changesLog", changesLog],
+        ] as const) {
+          storage.setItem(`${prefix}${suffix}`, value);
+        }
+      },
+      eventAmbassadorsJson,
+      eventTeamsJson,
+      regionalAmbassadorsJson,
+    );
+
+    await page.reload({ waitUntil: "networkidle2", timeout: TIMEOUT_MS });
+
+    await page.waitForFunction(
+      () => {
+        const intro = document.getElementById("introduction");
+        const ambassy = document.getElementById("ambassy");
+        return (
+          intro &&
+          ambassy &&
+          getComputedStyle(intro).display === "none" &&
+          getComputedStyle(ambassy).display !== "none"
+        );
+      },
+      { timeout: TIMEOUT_MS },
+    );
+
+    await page.waitForSelector("#mapContainer .leaflet-overlay-pane", {
+      timeout: TIMEOUT_MS,
+    });
+
+    await page.waitForFunction(
+      () =>
+        document.querySelectorAll("#mapContainer .leaflet-overlay-pane canvas")
+          .length > 0,
+      { timeout: TIMEOUT_MS },
+    );
+
+    const metrics = await page.evaluate(() => ({
+      overlayPaths: document.querySelectorAll(".leaflet-overlay-pane svg path")
+        .length,
+      overlayCanvasLayers: document.querySelectorAll(
+        ".leaflet-overlay-pane canvas",
+      ).length,
+      domNodes: document.querySelectorAll("*").length,
+    }));
+
+    if (metrics.overlayPaths >= MAX_OVERLAY_PATHS) {
+      fail(
+        `expected fewer than ${MAX_OVERLAY_PATHS} Leaflet overlay paths, found ${metrics.overlayPaths}`,
+      );
+    }
+
+    if (metrics.domNodes >= MAX_DOM_NODES) {
+      fail(
+        `expected fewer than ${MAX_DOM_NODES} DOM nodes, found ${metrics.domNodes}`,
+      );
+    }
+
+    if (metrics.domNodes < 2_000) {
+      fail(
+        `expected sample CSVs to produce a populated UI, found only ${metrics.domNodes} DOM nodes`,
+      );
+    }
+
+    if (metrics.overlayCanvasLayers < 1) {
+      fail("expected at least one Leaflet canvas overlay for event markers");
+    }
+
+    pass(
+      `map DOM budget ok (${metrics.overlayPaths} overlay paths, ${metrics.overlayCanvasLayers} canvas layer(s), ${metrics.domNodes} DOM nodes)`,
+    );
+  } finally {
+    await browser.close();
+    if (staticServer) {
+      staticServer.kill();
+    }
+  }
+}
+
+main().catch((error) => {
+  console.error(error);
+  process.exit(1);
+});
