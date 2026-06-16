@@ -13,7 +13,7 @@ export const FINISH_EXPORT_USERSCRIPT_METADATA = {
   runAt: "document-end",
   supportUrl: "https://github.com/johnsyweb/ambassy/issues/",
   tags: ["parkrun", "ambassy"] as const,
-  version: "1.1.2",
+  version: "1.2.0",
   grants: [
     "GM_setValue",
     "GM_getValue",

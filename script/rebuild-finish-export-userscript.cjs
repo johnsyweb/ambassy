@@ -28,7 +28,7 @@ const METADATA = {
   runAt: "document-end",
   supportUrl: "https://github.com/johnsyweb/ambassy/issues/",
   tags: ["parkrun", "ambassy"],
-  version: "1.1.2",
+  version: "1.2.0",
   grants: ["GM_setValue", "GM_getValue", "GM_setClipboard", "GM_notification"],
 };
 

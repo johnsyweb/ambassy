@@ -39,7 +39,7 @@
 // @tag          parkrun
 // @tag          ambassy
 // @updateURL    https://johnsy.com/ambassy/script/ambassy-finish-export.user.js
-// @version      1.1.2
+// @version      1.2.0
 // ==/UserScript==
 
 
@@ -83,6 +83,18 @@
   function parseParkrunnerId() {
     const match = window.location.pathname.match(/\/parkrunner\/(\d+)\/all\/?$/i);
     return match ? match[1] : null;
+  }
+
+  function parseParkrunProfileDisplayName() {
+    const heading = document.querySelector("h2");
+    if (!heading) {
+      return undefined;
+    }
+
+    const displayName = (heading.textContent || "")
+      .replace(/\s*\(A\d+\)\s*$/i, "")
+      .trim();
+    return displayName || undefined;
   }
 
   function parseAustralianDate(value) {
@@ -160,13 +172,20 @@
       throw new Error("Could not determine parkrunner ID from this page.");
     }
 
-    return {
+    const payload = {
       schemaVersion: SCHEMA_VERSION,
       parkrunnerId,
       sourceUrl: window.location.href,
       importedAt: new Date().toISOString(),
       finishes,
     };
+
+    const parkrunProfileDisplayName = parseParkrunProfileDisplayName();
+    if (parkrunProfileDisplayName) {
+      payload.parkrunProfileDisplayName = parkrunProfileDisplayName;
+    }
+
+    return payload;
   }
 
   function queueForAmbassy(payload) {
@@ -237,6 +256,15 @@
     }
   }
 
+  function registerAmbassyBridgeActivation() {
+    document.addEventListener("visibilitychange", () => {
+      if (document.visibilityState === "visible") {
+        consumePendingImportOnAmbassy();
+      }
+    });
+    window.addEventListener("focus", consumePendingImportOnAmbassy);
+  }
+
   function addProfileExportButton() {
     if (document.getElementById("ambassy-finish-export-button")) {
       return;
@@ -275,5 +303,6 @@
 
   if (isAmbassyPage()) {
     consumePendingImportOnAmbassy();
+    registerAmbassyBridgeActivation();
   }
 })();
