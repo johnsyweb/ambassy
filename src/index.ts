@@ -19,6 +19,7 @@ import {
   initializeAmbassadorNameFilter,
   updateAmbassadorNameFilterStatus,
 } from "./actions/ambassadorNameFilterUI";
+import { initializeTerritoryMapSearch } from "./actions/initializeTerritoryMapSearch";
 import { restoreApplicationState } from "./actions/persistState";
 import { loadFromStorage } from "@utils/storage";
 import {
@@ -224,6 +225,19 @@ function updateAmbassadorNameFilterStatusIfReady(): void {
     regionalAmbassadors: getRegionalAmbassadorsFromSession(),
     prospects: new ProspectiveEventList(loadProspectiveEvents()),
   });
+}
+
+function getTerritoryMapSearchContext() {
+  if (!eventDetails || !eventTeamsTableData) {
+    return null;
+  }
+
+  return {
+    eventDetails,
+    eventTeamsTableData,
+    prospects: new ProspectiveEventList(loadProspectiveEvents()),
+    eventAmbassadors: getEventAmbassadorsFromSession(),
+  };
 }
 
 function getAmbassadorNameFilterContext() {
@@ -2189,6 +2203,12 @@ window.addEventListener("storage", () => {
 document.addEventListener("DOMContentLoaded", async () => {
   initializeTabs();
   initializeAmbassadorNameFilter(getAmbassadorNameFilterContext);
+  initializeTerritoryMapSearch(getTerritoryMapSearchContext, {
+    selectionState,
+    getMap,
+    getMarkerMap,
+    getHighlightLayer,
+  });
   setTabChangeCallback(updateAmbassadorNameFilterStatusIfReady);
   setupExportReminder();
   initializeKeyboardShortcuts();

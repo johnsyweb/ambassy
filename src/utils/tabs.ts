@@ -82,6 +82,10 @@ export function initializeTabs(): void {
   });
 }
 
+export function activateTabAtIndex(index: number): void {
+  switchTab(index);
+}
+
 function switchTab(index: number): void {
   const tabButtons =
     document.querySelectorAll<HTMLButtonElement>(".tab-button");

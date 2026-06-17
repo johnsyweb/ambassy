@@ -9,6 +9,7 @@ import { RegionalAmbassadorMap } from "@models/RegionalAmbassadorMap";
 import { EventTeamMap } from "@models/EventTeamMap";
 import { showEventAllocationDialog } from "./showEventAllocationDialog";
 import L from "leaflet";
+import { activateTabAtIndex } from "@utils/tabs";
 
 export function selectEventTeamRow(
   state: SelectionState,
@@ -170,6 +171,65 @@ export function scrollToTableRow(tableId: string, identifier: string): void {
 export function isEventTeamsTabVisible(): boolean {
   const eventTeamsTab = document.getElementById("eventTeamsTab");
   return eventTeamsTab !== null && !eventTeamsTab.hidden;
+}
+
+export function selectLiveEventFromTerritoryMapSearch(
+  state: SelectionState,
+  eventShortName: string,
+  eventTeamsTableData: EventTeamsTableDataMap,
+  markerMap: Map<string, L.CircleMarker>,
+  highlightLayer: L.LayerGroup | null,
+  eventDetails: EventDetailsMap,
+  map: L.Map | null,
+): void {
+  state.selectedEventShortName = eventShortName;
+  state.selectedEventAmbassador = null;
+  state.selectedRegionalAmbassador = null;
+  state.highlightedEvents.clear();
+  state.highlightedEvents.add(eventShortName);
+
+  if (highlightLayer && map) {
+    highlightEventsOnMap([eventShortName], markerMap, highlightLayer);
+    centerMapOnEvents([eventShortName], eventDetails, map);
+  }
+
+  if (eventTeamsTableData.has(eventShortName)) {
+    activateTabAtIndex(0);
+    highlightTableRow("eventTeamsTable", eventShortName, true);
+    scrollToTableRow("eventTeamsTable", eventShortName);
+  }
+}
+
+export function selectProspectFromTerritoryMapSearch(
+  state: SelectionState,
+  prospectId: string,
+  prospects: ProspectiveEventList,
+  map: L.Map | null,
+): boolean {
+  const prospect = prospects.findById(prospectId);
+  if (!prospect) {
+    throw new Error(`Prospect ${prospectId} does not exist`);
+  }
+
+  state.selectedEventShortName = null;
+  state.selectedEventAmbassador = null;
+  state.selectedRegionalAmbassador = null;
+  state.highlightedEvents.clear();
+  state.selectedEventShortName = `prospect:${prospectId}`;
+
+  activateTabAtIndex(4);
+
+  const hasLocation =
+    prospect.coordinates !== null && prospect.geocodingStatus === "success";
+
+  if (hasLocation && map && prospect.coordinates) {
+    map.setView(toLeafletArray(prospect.coordinates), 13);
+  }
+
+  highlightProspectTableRow("prospectsTable", prospectId, true);
+  scrollToProspectTableRow("prospectsTable", prospectId);
+
+  return !hasLocation;
 }
 
 export function selectProspectRow(

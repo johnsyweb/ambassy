@@ -32,6 +32,7 @@ export function showKeyboardShortcutsDialog(): void {
       category: "General",
       items: [
         { keys: "Ctrl+/ or ?", description: "Show keyboard shortcuts" },
+        { keys: "Ctrl+K or Cmd+K", description: "Focus territory map search" },
         { keys: "/", description: "Focus ambassador name filter" },
         {
           keys: "Escape",

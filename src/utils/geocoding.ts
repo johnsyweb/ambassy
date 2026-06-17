@@ -9,6 +9,14 @@ import {
 } from "@models/Coordinate";
 
 const NOMINATIM_URL = "https://nominatim.openstreetmap.org/search";
+export const PLACE_SEARCH_MIN_QUERY_LENGTH = 3;
+export const PLACE_SEARCH_MAX_RESULTS = 5;
+
+export interface PlaceSearchResult {
+  label: string;
+  latitude: number;
+  longitude: number;
+}
 
 export interface GeocodingResult {
   lat: number | string;
@@ -120,4 +128,62 @@ function parseCoordinates(input: string): { lat: number; lng: number } | null {
   } catch {
     return null;
   }
+}
+
+export async function searchPlaces(
+  query: string,
+): Promise<PlaceSearchResult[]> {
+  if (query.trim().length < PLACE_SEARCH_MIN_QUERY_LENGTH) {
+    return [];
+  }
+
+  const response = await fetch(
+    `${NOMINATIM_URL}?q=${encodeURIComponent(query.trim())}&format=json&limit=${PLACE_SEARCH_MAX_RESULTS}&addressdetails=0`,
+  );
+
+  if (!response.ok) {
+    throw new Error(`Place search returned ${response.status}`);
+  }
+
+  const data: GeocodingResult[] = await response.json();
+
+  if (!Array.isArray(data)) {
+    return [];
+  }
+
+  return data
+    .map((result) => parsePlaceSearchResult(result))
+    .filter((result): result is PlaceSearchResult => result !== null);
+}
+
+function parsePlaceSearchResult(
+  result: GeocodingResult,
+): PlaceSearchResult | null {
+  const latitude = parseCoordinateComponent(result.lat);
+  const longitude = parseCoordinateComponent(result.lon ?? result.lng);
+
+  if (latitude === null || longitude === null) {
+    return null;
+  }
+
+  return {
+    label: result.display_name,
+    latitude,
+    longitude,
+  };
+}
+
+function parseCoordinateComponent(
+  value: number | string | undefined,
+): number | null {
+  if (typeof value === "number") {
+    return Number.isFinite(value) ? value : null;
+  }
+
+  if (typeof value === "string") {
+    const parsed = parseFloat(value);
+    return Number.isFinite(parsed) ? parsed : null;
+  }
+
+  return null;
 }
