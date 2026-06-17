@@ -508,29 +508,6 @@
                 border-radius: 4px;
               "
             ></div>
-            <div
-              id="finishImportPendingBanner"
-              role="status"
-              hidden
-              style="
-                margin-top: 1em;
-                padding: 0.75em;
-                background-color: #e3f2fd;
-                border-radius: 4px;
-                display: flex;
-                flex-wrap: wrap;
-                gap: 0.75em;
-                align-items: center;
-              "
-            >
-              <p id="finishImportPendingBannerMessage" style="margin: 0"></p>
-              <button type="button" id="finishImportPendingBannerResume">
-                Resume
-              </button>
-              <button type="button" id="finishImportPendingBannerDismiss">
-                Dismiss
-              </button>
-            </div>
             <p>
               Sample <abbr title="Comma-Separated Values">CSV</abbr> files are
               provided for you to download, inspect and populate:
@@ -868,6 +845,23 @@
               </button>
             </div>
           </form>
+        </div>
+
+        <div
+          id="finishImportPendingBanner"
+          class="finish-import-pending-banner"
+          role="status"
+          hidden
+        >
+          <p id="finishImportPendingBannerMessage"></p>
+          <div class="finish-import-pending-banner-actions">
+            <button type="button" id="finishImportPendingBannerResume">
+              Resume
+            </button>
+            <button type="button" id="finishImportPendingBannerDismiss">
+              Dismiss
+            </button>
+          </div>
         </div>
 
         <div id="ambassadorNameFilterBar" class="ambassador-name-filter-bar">

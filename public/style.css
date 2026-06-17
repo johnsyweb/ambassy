@@ -132,6 +132,72 @@ tr:hover {
   margin: auto;
 }
 
+/* Visit history pending import banner */
+.finish-import-pending-banner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  width: 80%;
+  margin: 1rem auto 0;
+  padding: 0.85rem 1rem;
+  background-color: #fff4e5;
+  border: 2px solid var(--parkrun-apricot);
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.finish-import-pending-banner[hidden] {
+  display: none;
+}
+
+.finish-import-pending-banner p {
+  margin: 0;
+  flex: 1 1 16rem;
+  font-weight: 600;
+  color: var(--parkrun-aubergine);
+}
+
+.finish-import-pending-banner-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.finish-import-pending-banner button {
+  padding: 0.45rem 0.9rem;
+  border-radius: 999px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+#finishImportPendingBannerResume {
+  background-color: var(--parkrun-aubergine);
+  color: var(--parkrun-white);
+  border: none;
+}
+
+#finishImportPendingBannerResume:hover,
+#finishImportPendingBannerResume:focus-visible {
+  background-color: #3a1444;
+  outline: 2px solid var(--parkrun-apricot);
+  outline-offset: 2px;
+}
+
+#finishImportPendingBannerDismiss {
+  background-color: transparent;
+  color: var(--parkrun-aubergine);
+  border: 1px solid var(--parkrun-aubergine);
+}
+
+#finishImportPendingBannerDismiss:hover,
+#finishImportPendingBannerDismiss:focus-visible {
+  background-color: rgba(76, 26, 87, 0.08);
+  outline: 2px solid var(--parkrun-apricot);
+  outline-offset: 2px;
+}
+
 /* Ambassador name filter */
 .ambassador-name-filter-bar {
   display: flex;
