@@ -45,15 +45,23 @@ describe("computeLastAmbassadorVisitByEvent", () => {
     );
   });
 
-  it("returns N/A when no imported finish exists for the event", () => {
+  it("returns no visit on record when no imported finish exists for the event", () => {
+    const finishHistories: AmbassadorFinishHistoryMap = {
+      "ea:Pete Robinson": {
+        parkrunnerId: "1001388",
+        finishesByEvent: { Coburg: "2026-06-13" },
+        lastImportedAt: 1,
+      },
+    };
+
     const result = computeLastAmbassadorVisitByEvent(
       ["Greenheart Robina Parklands"],
       eventAmbassadors,
       regionalAmbassadors,
-      {},
+      finishHistories,
     );
 
-    expect(result.get("Greenheart Robina Parklands")).toBe("N/A");
+    expect(result.get("Greenheart Robina Parklands")).toBe("No visit on record");
   });
 
   it("uses the most recent finish across ambassadors", () => {

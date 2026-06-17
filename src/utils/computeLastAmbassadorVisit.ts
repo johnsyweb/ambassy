@@ -7,7 +7,14 @@ import { EventAmbassadorMap } from "@models/EventAmbassadorMap";
 import { RegionalAmbassadorMap } from "@models/RegionalAmbassadorMap";
 import { formatLastAmbassadorVisit } from "@utils/formatAmbassadorVisitDate";
 
-export const LAST_AMBASSADOR_VISIT_NA = "N/A";
+export const LAST_AMBASSADOR_VISIT_NOT_IMPORTED = "Not imported";
+export const LAST_AMBASSADOR_VISIT_NONE_ON_RECORD = "No visit on record";
+
+export function hasImportedVisitHistory(
+  finishHistories: AmbassadorFinishHistoryMap,
+): boolean {
+  return Object.keys(finishHistories).length > 0;
+}
 
 export function computeLastAmbassadorVisitByEvent(
   eventShortNames: Iterable<string>,
@@ -49,7 +56,7 @@ export function computeLastAmbassadorVisitByEvent(
     }
 
     if (!latestDate || ambassadorsOnLatestDate.size === 0) {
-      result.set(eventShortName, LAST_AMBASSADOR_VISIT_NA);
+      result.set(eventShortName, LAST_AMBASSADOR_VISIT_NONE_ON_RECORD);
       continue;
     }
 
