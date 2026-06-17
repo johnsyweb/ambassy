@@ -6,6 +6,7 @@ import {
 } from "./finishExportUserscriptMatches";
 import {
   buildFinishExportUserscriptHeader,
+  FINISH_EXPORT_USERSCRIPT_GITHUB_RAW_URL,
   FINISH_EXPORT_USERSCRIPT_METADATA,
   getFinishExportUserscriptInstallUrl,
   parseUserscriptHeaderValue,
@@ -32,10 +33,10 @@ describe("finishExportUserscriptMetadata", () => {
     ]);
 
     expect(header).toContain(
-      "// @downloadURL  https://www.johnsy.com/ambassy/script/ambassy-finish-export.user.js",
+      `// @downloadURL  ${FINISH_EXPORT_USERSCRIPT_GITHUB_RAW_URL}`,
     );
     expect(header).toContain(
-      "// @updateURL    https://www.johnsy.com/ambassy/script/ambassy-finish-export.user.js",
+      `// @updateURL    ${FINISH_EXPORT_USERSCRIPT_GITHUB_RAW_URL}`,
     );
     expect(header).toContain("// @run-at       document-end");
     expect(header).toContain("// @tag          parkrun");

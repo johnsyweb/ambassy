@@ -2,7 +2,7 @@
 // @name         Ambassy visit history export
 // @description  Export parkrun profile finishes for Ambassy last ambassador visit tracking.
 // @author       Pete Johns (@johnsyweb)
-// @downloadURL  https://www.johnsy.com/ambassy/script/ambassy-finish-export.user.js
+// @downloadURL  https://raw.githubusercontent.com/johnsyweb/ambassy/refs/heads/main/public/script/ambassy-finish-export.user.js
 // @grant        GM_setValue
 // @grant        GM_getValue
 // @grant        GM_setClipboard
@@ -38,9 +38,11 @@
 // @supportURL   https://github.com/johnsyweb/ambassy/issues/
 // @tag          parkrun
 // @tag          ambassy
-// @updateURL    https://www.johnsy.com/ambassy/script/ambassy-finish-export.user.js
-// @version      1.2.1
+// @updateURL    https://raw.githubusercontent.com/johnsyweb/ambassy/refs/heads/main/public/script/ambassy-finish-export.user.js
+// @version      1.2.2
 // ==/UserScript==
+
+
 
 
 

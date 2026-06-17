@@ -1,11 +1,13 @@
+export const FINISH_EXPORT_USERSCRIPT_GITHUB_RAW_URL =
+  "https://raw.githubusercontent.com/johnsyweb/ambassy/refs/heads/main/public/script/ambassy-finish-export.user.js";
+
 export const FINISH_EXPORT_USERSCRIPT_METADATA = {
   name: "Ambassy visit history export",
   description:
     "Export parkrun profile finishes for Ambassy last ambassador visit tracking.",
   author: "Pete Johns (@johnsyweb)",
-  downloadUrl:
-    "https://www.johnsy.com/ambassy/script/ambassy-finish-export.user.js",
-  updateUrl: "https://www.johnsy.com/ambassy/script/ambassy-finish-export.user.js",
+  downloadUrl: FINISH_EXPORT_USERSCRIPT_GITHUB_RAW_URL,
+  updateUrl: FINISH_EXPORT_USERSCRIPT_GITHUB_RAW_URL,
   homepage: "https://www.johnsy.com/ambassy/#finish-history",
   icon: "https://www.google.com/s2/favicons?sz=64&domain=parkrun.com.au",
   license: "MIT",
@@ -13,7 +15,7 @@ export const FINISH_EXPORT_USERSCRIPT_METADATA = {
   runAt: "document-end",
   supportUrl: "https://github.com/johnsyweb/ambassy/issues/",
   tags: ["parkrun", "ambassy"] as const,
-  version: "1.2.1",
+  version: "1.2.2",
   grants: [
     "GM_setValue",
     "GM_getValue",
