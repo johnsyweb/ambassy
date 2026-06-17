@@ -3,7 +3,6 @@ import {
   eventAmbassadorsFrom,
   regionalAmbassadorsFrom,
 } from "@models/EventTeamsTableData";
-import { SelectionState } from "@models/SelectionState";
 import { buildAmbassadorFilterText } from "@utils/ambassadorNameFilter";
 import {
   LAST_AMBASSADOR_VISIT_NONE_ON_RECORD,
@@ -15,6 +14,31 @@ import { initializeTableSorting } from "./tableSorting";
 function assignColorToName(name: string, allNames: string[]): string {
   const index = allNames.indexOf(name);
   return index >= 0 ? colorPalette[index % colorPalette.length] : "#808080";
+}
+
+function wireReallocateButton(
+  reallocateButton: HTMLButtonElement,
+  eventShortName: string,
+): void {
+  if (!_reallocateButtonHandler) {
+    reallocateButton.disabled = true;
+    reallocateButton.onclick = null;
+    reallocateButton.onkeydown = null;
+    return;
+  }
+
+  reallocateButton.disabled = false;
+  reallocateButton.onclick = (e) => {
+    e.stopPropagation();
+    _reallocateButtonHandler!(eventShortName);
+  };
+  reallocateButton.onkeydown = (e) => {
+    if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      e.stopPropagation();
+      _reallocateButtonHandler!(eventShortName);
+    }
+  };
 }
 
 export function populateEventTeamsTable(
@@ -134,28 +158,7 @@ export function populateEventTeamsTable(
     reallocateButton.style.fontSize = "0.85em";
     reallocateButton.style.cursor = "pointer";
 
-    if (_reallocateButtonHandler && _selectionState) {
-      const isSelected =
-        _selectionState.selectedEventShortName === data.eventShortName;
-      reallocateButton.disabled = !isSelected;
-
-      if (isSelected) {
-        reallocateButton.onclick = (e) => {
-          e.stopPropagation();
-          _reallocateButtonHandler!(data.eventShortName);
-        };
-
-        reallocateButton.onkeydown = (e) => {
-          if (e.key === "Enter" || e.key === " ") {
-            e.preventDefault();
-            e.stopPropagation();
-            _reallocateButtonHandler!(data.eventShortName);
-          }
-        };
-      }
-    } else {
-      reallocateButton.disabled = true;
-    }
+    wireReallocateButton(reallocateButton, data.eventShortName);
 
     actionsCell.appendChild(reallocateButton);
     row.appendChild(actionsCell);
@@ -176,7 +179,6 @@ export function populateEventTeamsTable(
 
 let _rowClickHandler: ((eventShortName: string) => void) | null = null;
 let _reallocateButtonHandler: ((eventShortName: string) => void) | null = null;
-let _selectionState: SelectionState | null = null;
 
 export function setRowClickHandler(
   handler: (eventShortName: string) => void,
@@ -185,61 +187,12 @@ export function setRowClickHandler(
 }
 
 export function setReallocateButtonHandler(
-  selectionState: SelectionState,
   handler: (eventShortName: string) => void,
 ): void {
-  _selectionState = selectionState;
   _reallocateButtonHandler = handler;
 }
 
-/**
- * Update reallocate button states based on current selection.
- * Should be called when selection changes to enable/disable buttons accordingly.
- */
-export function updateReallocateButtonStates(): void {
-  if (!_selectionState) {
-    return;
-  }
-
-  const tableBody = document.querySelector("#eventTeamsTable tbody");
-  if (!tableBody) {
-    return;
-  }
-
-  const rows = tableBody.querySelectorAll("tr[data-event-short-name]");
-  rows.forEach((row) => {
-    const eventShortName = row.getAttribute("data-event-short-name");
-    if (!eventShortName) {
-      return;
-    }
-
-    const reallocateButton = row.querySelector(
-      "button.reallocate-button",
-    ) as HTMLButtonElement;
-    if (!reallocateButton) {
-      return;
-    }
-
-    const isSelected =
-      _selectionState!.selectedEventShortName === eventShortName;
-    reallocateButton.disabled = !isSelected;
-
-    if (isSelected && _reallocateButtonHandler) {
-      reallocateButton.onclick = (e) => {
-        e.stopPropagation();
-        _reallocateButtonHandler!(eventShortName);
-      };
-
-      reallocateButton.onkeydown = (e) => {
-        if (e.key === "Enter" || e.key === " ") {
-          e.preventDefault();
-          e.stopPropagation();
-          _reallocateButtonHandler!(eventShortName);
-        }
-      };
-    } else {
-      reallocateButton.onclick = null;
-      reallocateButton.onkeydown = null;
-    }
-  });
+export function resetEventTeamsTableActionHandlersForTests(): void {
+  _rowClickHandler = null;
+  _reallocateButtonHandler = null;
 }

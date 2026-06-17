@@ -2003,7 +2003,7 @@ function initializeTableMapNavigation(): void {
     }
   });
 
-  setReallocateButtonHandler(selectionState, (eventShortName: string) => {
+  setReallocateButtonHandler((eventShortName: string) => {
     if (!eventTeamsTableData || !eventDetails) {
       return;
     }
