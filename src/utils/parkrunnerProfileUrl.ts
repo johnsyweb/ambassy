@@ -73,7 +73,3 @@ export {
   FINISH_EXPORT_USERSCRIPT_CANONICAL_URL,
   getFinishExportUserscriptInstallUrl,
 };
-
-export function getTampermonkeyInstallUrl(userscriptUrl: string): string {
-  return `https://www.tampermonkey.net/script_installation.php#url=${encodeURIComponent(userscriptUrl)}`;
-}

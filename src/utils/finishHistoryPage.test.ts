@@ -20,8 +20,7 @@ function createAmbassyDom(): void {
     <div id="introduction"></div>
     <div id="ambassy"></div>
     <div id="finishHistoryPage" hidden></div>
-    <a id="tampermonkeyInstallLink"></a>
-    <a id="userscriptSourceLink"></a>
+    <a id="userscriptInstallLink" class="script-install-button"></a>
   `;
 }
 
@@ -92,24 +91,28 @@ describe("finishHistoryPage", () => {
     expect(window.location.hash).toBe("");
   });
 
-  it("wires install links on the finish history page", () => {
+  it("wires the userscript install link on the finish history page", () => {
     wireFinishHistoryInstallLinks("http://localhost:8081/");
 
-    const tampermonkeyInstallLink = document.getElementById(
-      "tampermonkeyInstallLink",
-    ) as HTMLAnchorElement;
-    const userscriptSourceLink = document.getElementById(
-      "userscriptSourceLink",
+    const installLink = document.getElementById(
+      "userscriptInstallLink",
     ) as HTMLAnchorElement;
 
-    expect(tampermonkeyInstallLink.href).toContain("tampermonkey.net");
-    expect(tampermonkeyInstallLink.href).toContain(
-      encodeURIComponent(
-        "http://localhost:8081/script/ambassy-finish-export.user.js",
-      ),
+    expect(installLink.href).toBe(
+      "http://localhost:8081/script/ambassy-finish-export.user.js",
     );
-    expect(userscriptSourceLink.href).toContain(
-      "script/ambassy-finish-export.user.js",
+    expect(installLink.classList.contains("script-install-button")).toBe(true);
+  });
+
+  it("uses the GitHub raw userscript URL in production", () => {
+    wireFinishHistoryInstallLinks("https://www.johnsy.com/ambassy/");
+
+    const installLink = document.getElementById(
+      "userscriptInstallLink",
+    ) as HTMLAnchorElement;
+
+    expect(installLink.href).toBe(
+      "https://raw.githubusercontent.com/johnsyweb/ambassy/refs/heads/main/public/script/ambassy-finish-export.user.js",
     );
   });
 

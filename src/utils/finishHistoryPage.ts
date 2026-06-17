@@ -1,7 +1,4 @@
-import {
-  getFinishExportUserscriptUrl,
-  getTampermonkeyInstallUrl,
-} from "@utils/parkrunnerProfileUrl";
+import { getFinishExportUserscriptInstallUrl } from "@utils/finishExportUserscriptMetadata";
 
 export const FINISH_HISTORY_PAGE_HASH = "finish-history";
 
@@ -69,19 +66,9 @@ export function navigateToMainAmbassyPage(): void {
 export function wireFinishHistoryInstallLinks(
   baseUrl: string = window.location.href,
 ): void {
-  const userscriptUrl = getFinishExportUserscriptUrl(baseUrl);
-  const tampermonkeyUrl = getTampermonkeyInstallUrl(userscriptUrl);
-
-  const tampermonkeyInstallLink = document.getElementById(
-    "tampermonkeyInstallLink",
-  );
-  if (tampermonkeyInstallLink instanceof HTMLAnchorElement) {
-    tampermonkeyInstallLink.href = tampermonkeyUrl;
-  }
-
-  const userscriptSourceLink = document.getElementById("userscriptSourceLink");
-  if (userscriptSourceLink instanceof HTMLAnchorElement) {
-    userscriptSourceLink.href = userscriptUrl;
+  const installLink = document.getElementById("userscriptInstallLink");
+  if (installLink instanceof HTMLAnchorElement) {
+    installLink.href = getFinishExportUserscriptInstallUrl(baseUrl);
   }
 }
 

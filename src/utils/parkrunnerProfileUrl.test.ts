@@ -2,13 +2,12 @@ import {
   buildParkrunnerProfileUrl,
   formatParkrunnerIdForDisplay,
   getFinishExportUserscriptUrl,
-  getTampermonkeyInstallUrl,
   isValidParkrunnerIdInput,
   normalizeParkrunnerIdForStorage,
   parkrunnerIdsMatch,
   stripParkrunnerIdPrefix,
 } from "./parkrunnerProfileUrl";
-import { FINISH_EXPORT_USERSCRIPT_METADATA } from "./finishExportUserscriptMetadata";
+import { FINISH_EXPORT_USERSCRIPT_GITHUB_RAW_URL } from "./finishExportUserscriptMetadata";
 
 describe("parkrunnerProfileUrl", () => {
   const countries = {
@@ -44,26 +43,15 @@ describe("parkrunnerProfileUrl", () => {
     expect(stripParkrunnerIdPrefix("A1001388")).toBe("1001388");
   });
 
-  it("uses the canonical Tampermonkey install URL in production", () => {
+  it("uses the GitHub raw userscript URL outside local development", () => {
     expect(
-      getTampermonkeyInstallUrl(
-        getFinishExportUserscriptUrl("https://www.johnsy.com/ambassy/"),
-      ),
-    ).toBe(
-      `https://www.tampermonkey.net/script_installation.php#url=${encodeURIComponent(FINISH_EXPORT_USERSCRIPT_METADATA.downloadUrl)}`,
-    );
+      getFinishExportUserscriptUrl("https://www.johnsy.com/ambassy/"),
+    ).toBe(FINISH_EXPORT_USERSCRIPT_GITHUB_RAW_URL);
   });
 
-  it("uses the local userscript URL for Tampermonkey install during development", () => {
+  it("uses the local userscript URL during development", () => {
     expect(getFinishExportUserscriptUrl("http://localhost:8081/")).toBe(
       "http://localhost:8081/script/ambassy-finish-export.user.js",
-    );
-    expect(
-      getTampermonkeyInstallUrl(
-        getFinishExportUserscriptUrl("http://localhost:8081/"),
-      ),
-    ).toBe(
-      "https://www.tampermonkey.net/script_installation.php#url=http%3A%2F%2Flocalhost%3A8081%2Fscript%2Fambassy-finish-export.user.js",
     );
   });
 });
