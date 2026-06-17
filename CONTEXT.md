@@ -140,6 +140,10 @@ _Avoid_: Map search, clipped Voronoi
 The main Ambassy map showing live event markers, prospective event markers, and REA territory polygons. Primary audience is the Regional Event Ambassador scanning allocation and launch pipeline across Event Ambassadors in a region. When prospective events are present, a persistent map legend explains live circle vs prospect diamond markers and the three prospect launch readiness segments (not Event Ambassador border colour, which matches live event markers).
 _Avoid_: Territory manager (not a defined role), allocation map
 
+**Territory map marker zoom scale**:
+How territory map event markers grow when the REA zooms in past region overview, up to a capped maximum at street-level zoom. At region overview zoom and below, markers stay at their baseline size. Applies to allocated live events, prospective events, and viewport unallocated events; table–map selection highlights on live events track the allocated marker size.
+_Avoid_: Responsive markers (too vague), pin scaling
+
 **State export**:
 A single JSON file containing all Ambassy data that cannot be recovered from parkrun alone: allocations, ambassadors, prospective events, capacity limits, changes log, manually resolved event coordinates, parkrunner IDs, and visit histories.
 _Avoid_: Share, backup, partial export
