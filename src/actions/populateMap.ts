@@ -43,6 +43,13 @@ import {
   prospectMapMarkerPixelSize,
   unallocatedMarkerRadii,
 } from "@utils/mapMarkerZoomScale";
+import {
+  applyUnallocatedParkrunsOverlayTitle,
+  LIVE_EVENTS_OVERLAY_LABEL,
+  PROSPECTIVE_EVENTS_OVERLAY_LABEL,
+  REGIONAL_EVENT_AMBASSADOR_OVERLAY_LABEL,
+  UNALLOCATED_PARKRUNS_OVERLAY_LABEL,
+} from "@utils/territoryMapOverlays";
 import { colorPalette } from "./colorPalette";
 
 const DEFAULT_EVENT_COLOUR = "rebeccapurple";
@@ -83,10 +90,18 @@ export function populateMap(
 
   // Calculate event bounds for map centering
   const eventBounds = calculateEventBounds(eventTeamsTableData, eventDetails);
-  const { map, markersLayer, polygonsLayer, isNewMap } =
-    setupMapView(eventBounds);
+  const {
+    map,
+    liveMarkersLayer,
+    prospectMarkersLayer,
+    unallocatedMarkersLayer,
+    polygonsLayer,
+    isNewMap,
+  } = setupMapView(eventBounds);
 
-  markersLayer.clearLayers();
+  liveMarkersLayer.clearLayers();
+  prospectMarkersLayer.clearLayers();
+  unallocatedMarkersLayer.clearLayers();
   polygonsLayer.clearLayers();
   _markerMap.clear();
   _unallocatedMarkerMap.clear();
@@ -125,7 +140,7 @@ export function populateMap(
     });
     marker.bindTooltip(tooltip);
     _markerMap.set(eventName, marker);
-    markersLayer.addLayer(marker);
+    liveMarkersLayer.addLayer(marker);
 
     if (_markerClickHandler) {
       marker.on("click", () => {
@@ -135,11 +150,9 @@ export function populateMap(
   });
 
   // Add markers for prospective events
-  let geocodedProspectCount = 0;
   if (prospectiveEvents && prospectiveEvents.length > 0) {
     prospectiveEvents.forEach((prospect) => {
       if (prospect.coordinates && prospect.geocodingStatus === "success") {
-        geocodedProspectCount += 1;
         const eaColor = prospect.eventAmbassador
           ? (eaColorMap.get(prospect.eventAmbassador) ?? DEFAULT_EVENT_COLOUR)
           : DEFAULT_EVENT_COLOUR;
@@ -159,7 +172,7 @@ export function populateMap(
         });
 
         marker.bindTooltip(formatProspectMapTooltip(prospect));
-        markersLayer.addLayer(marker);
+        prospectMarkersLayer.addLayer(marker);
         _prospectMarkers.set(prospect.id, {
           marker,
           readiness,
@@ -171,9 +184,6 @@ export function populateMap(
       }
     });
   }
-
-  // Add markersLayer to map
-  markersLayer.addTo(map!);
 
   refreshViewportUnallocatedMarkers();
   if (isNewMap) {
@@ -210,14 +220,15 @@ export function populateMap(
 
       return {
         raColor,
-        tooltip: `
-          <strong>Prospective Event:</strong> ${prospect.prospectEvent}<br>
-          <strong>Country:</strong> ${prospect.country}<br>
-          <strong>State:</strong> ${prospect.state}<br>
-          <strong>Event Ambassador:</strong> ${prospect.eventAmbassador}<br>
-          <strong>Regional Ambassador:</strong> ${ea?.regionalAmbassador || "Unknown"}<br>
-          <strong>Status:</strong> ${prospect.ambassadorMatchStatus}
-        `,
+        tooltip: formatProspectMapTooltip({
+          prospectEvent: prospect.prospectEvent,
+          country: prospect.country,
+          state: prospect.state,
+          eventAmbassador: prospect.eventAmbassador,
+          courseFound: prospect.courseFound,
+          landownerPermission: prospect.landownerPermission,
+          fundingConfirmed: prospect.fundingConfirmed,
+        }),
       };
     },
   });
@@ -226,31 +237,29 @@ export function populateMap(
   ensureViewportClipListener(map!);
   applyAmbassadorNameFilterToMap(eventTeamsTableData);
 
-  // Add polygonsLayer to map
   // Note: polygons are non-interactive (interactive: false) so they don't block marker clicks
   polygonsLayer.addTo(map!);
-
-  // Ensure markersLayer is on top by removing and re-adding it after polygons
-  // This ensures markers are clickable even though polygons are added later
-  if (map!.hasLayer(markersLayer)) {
-    markersLayer.remove();
-  }
-  markersLayer.addTo(map!);
+  ensureMarkerOverlayStack(map!, isNewMap);
 
   // Add or update layer control (remove existing if present)
   if (_layersControl) {
     _layersControl.remove();
   }
   const overlayMaps = {
-    "Event Markers": markersLayer,
-    "Regional Event Ambassador": polygonsLayer,
+    [LIVE_EVENTS_OVERLAY_LABEL]: liveMarkersLayer,
+    [PROSPECTIVE_EVENTS_OVERLAY_LABEL]: prospectMarkersLayer,
+    [UNALLOCATED_PARKRUNS_OVERLAY_LABEL]: unallocatedMarkersLayer,
+    [REGIONAL_EVENT_AMBASSADOR_OVERLAY_LABEL]: polygonsLayer,
   };
   _layersControl = L.control.layers(undefined, overlayMaps);
   _layersControl.addTo(map!);
 
+  ensureMapOverlayListener(map!);
+  syncProspectMapLegendVisibility();
+
   const mapContainer = document.getElementById("mapContainer");
   if (mapContainer) {
-    syncProspectMapLegend(mapContainer, geocodedProspectCount > 0);
+    applyUnallocatedParkrunsOverlayTitle(mapContainer);
   }
 
   syncMapMarkerSizes(map);
@@ -284,7 +293,9 @@ function calculateEventBounds(
 
 function setupMapView(eventBounds: L.LatLngBounds | null): {
   map: L.Map;
-  markersLayer: L.LayerGroup;
+  liveMarkersLayer: L.LayerGroup;
+  prospectMarkersLayer: L.LayerGroup;
+  unallocatedMarkersLayer: L.LayerGroup;
   polygonsLayer: L.LayerGroup;
   isNewMap: boolean;
 } {
@@ -301,17 +312,92 @@ function setupMapView(eventBounds: L.LatLngBounds | null): {
       _map.setView([0, 0], 2); // Default view if no bounds
     }
 
-    _markersLayer = L.layerGroup();
+    _liveMarkersLayer = L.layerGroup();
+    _prospectMarkersLayer = L.layerGroup();
+    _unallocatedMarkersLayer = L.layerGroup();
     _polygonsLayer = L.layerGroup();
     _highlightLayer = L.layerGroup();
     _highlightLayer.addTo(_map);
   }
   return {
     map: _map,
-    markersLayer: _markersLayer,
+    liveMarkersLayer: _liveMarkersLayer,
+    prospectMarkersLayer: _prospectMarkersLayer,
+    unallocatedMarkersLayer: _unallocatedMarkersLayer,
     polygonsLayer: _polygonsLayer,
     isNewMap,
   };
+}
+
+function ensureMarkerOverlayStack(map: L.Map, defaultAllOn: boolean): void {
+  const layers = [
+    _unallocatedMarkersLayer,
+    _prospectMarkersLayer,
+    _liveMarkersLayer,
+  ];
+  const visibility = defaultAllOn
+    ? layers.map(() => true)
+    : layers.map((layer) => map.hasLayer(layer));
+
+  for (const layer of layers) {
+    if (map.hasLayer(layer)) {
+      layer.remove();
+    }
+  }
+
+  visibility.forEach((visible, index) => {
+    if (visible) {
+      layers[index].addTo(map);
+    }
+  });
+}
+
+function hasVisibleProspectMarkersOnMap(): boolean {
+  if (!_map?.hasLayer(_prospectMarkersLayer)) {
+    return false;
+  }
+
+  for (const { marker } of _prospectMarkers.values()) {
+    if (_prospectMarkersLayer.hasLayer(marker)) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+function syncProspectMapLegendVisibility(): void {
+  const mapContainer = document.getElementById("mapContainer");
+  if (!mapContainer) {
+    return;
+  }
+
+  syncProspectMapLegend(mapContainer, hasVisibleProspectMarkersOnMap());
+}
+
+function refreshSelectionHighlightForOverlayState(): void {
+  if (!_map || !_highlightLayer) {
+    return;
+  }
+
+  if (!_map.hasLayer(_liveMarkersLayer)) {
+    _highlightLayer.clearLayers();
+    return;
+  }
+
+  _selectionHighlightRefreshHandler?.();
+}
+
+function ensureMapOverlayListener(map: L.Map): void {
+  if (_overlayListenerAttached) {
+    return;
+  }
+
+  map.on("overlayadd overlayremove", () => {
+    syncProspectMapLegendVisibility();
+    refreshSelectionHighlightForOverlayState();
+  });
+  _overlayListenerAttached = true;
 }
 
 function assignColorsToNames(names: string[]): Map<string, string> {
@@ -477,7 +563,7 @@ function createUnallocatedEventMarker(
 function refreshViewportUnallocatedMarkers(
   viewportOverride?: ViewportBounds,
 ): void {
-  if (!_map || !_markersLayer || !_mapPopulationContext) {
+  if (!_map || !_unallocatedMarkersLayer || !_mapPopulationContext) {
     return;
   }
 
@@ -518,14 +604,14 @@ function refreshViewportUnallocatedMarkers(
     );
     _markerMap.set(event.eventName, marker);
     _unallocatedMarkerMap.set(event.eventName, marker);
-    _markersLayer.addLayer(marker);
+    _unallocatedMarkersLayer.addLayer(marker);
   }
 }
 
 function removeUnallocatedMarker(eventName: string): void {
   const marker = _unallocatedMarkerMap.get(eventName);
-  if (marker && _markersLayer?.hasLayer(marker)) {
-    _markersLayer.removeLayer(marker);
+  if (marker && _unallocatedMarkersLayer?.hasLayer(marker)) {
+    _unallocatedMarkersLayer.removeLayer(marker);
   }
 
   _unallocatedMarkerMap.delete(eventName);
@@ -535,7 +621,9 @@ function removeUnallocatedMarker(eventName: string): void {
 
 // Global variables
 let _map: L.Map | null = null;
-let _markersLayer: L.LayerGroup;
+let _liveMarkersLayer: L.LayerGroup;
+let _prospectMarkersLayer: L.LayerGroup;
+let _unallocatedMarkersLayer: L.LayerGroup;
 let _polygonsLayer: L.LayerGroup;
 let _layersControl: L.Control.Layers | null = null;
 const _markerMap: Map<string, L.CircleMarker> = new Map();
@@ -547,6 +635,7 @@ const _unallocatedMarkerHoverState = new WeakMap<L.CircleMarker, boolean>();
 const _voronoiTerritoryCache = new VoronoiTerritoryCache();
 let _currentVoronoiSites: VoronoiSite[] = [];
 let _viewportClipListenerAttached = false;
+let _overlayListenerAttached = false;
 let _mapTerritoryFilterContext: {
   eventTeamsTableData: EventTeamsTableDataMap;
   filter: string;
@@ -624,7 +713,12 @@ function setMarkerLayerVisibility(
 export function applyAmbassadorNameFilterToMap(
   eventTeamsTableData: EventTeamsTableDataMap,
 ): void {
-  if (!_map || !_markersLayer || !_polygonsLayer) {
+  if (
+    !_map ||
+    !_liveMarkersLayer ||
+    !_prospectMarkersLayer ||
+    !_polygonsLayer
+  ) {
     return;
   }
 
@@ -637,8 +731,12 @@ export function applyAmbassadorNameFilterToMap(
       return;
     }
 
+    if (state.kind === "unallocated") {
+      return;
+    }
+
     setMarkerLayerVisibility(
-      _markersLayer,
+      _liveMarkersLayer,
       marker,
       eventMarkerMatchesFilter(state, filter),
     );
@@ -647,7 +745,7 @@ export function applyAmbassadorNameFilterToMap(
   _prospectMarkers.forEach(
     ({ marker, eventAmbassador, regionalAmbassador }) => {
       setMarkerLayerVisibility(
-        _markersLayer,
+        _prospectMarkersLayer,
         marker,
         prospectRowMatchesAmbassadorNameFilter(
           eventAmbassador,
@@ -663,17 +761,27 @@ export function applyAmbassadorNameFilterToMap(
   }
 
   refreshViewportUnallocatedMarkers();
+  syncProspectMapLegendVisibility();
 }
 
 export function isEventMarkerVisibleOnMap(eventName: string): boolean {
   const marker = _markerMap.get(eventName);
-  return marker ? _markersLayer.hasLayer(marker) : false;
+  if (!marker) {
+    return false;
+  }
+
+  if (_unallocatedMarkerMap.has(eventName)) {
+    return _unallocatedMarkersLayer.hasLayer(marker);
+  }
+
+  return _liveMarkersLayer.hasLayer(marker);
 }
 
 export function resetVoronoiTerritoryCacheForTests(): void {
   _voronoiTerritoryCache.clear();
   _currentVoronoiSites = [];
   _viewportClipListenerAttached = false;
+  _overlayListenerAttached = false;
   _eventMarkerFilterState.clear();
   _prospectMarkers.clear();
   _unallocatedMarkerMap.clear();
@@ -708,6 +816,18 @@ export function refreshViewportUnallocatedMarkersForTests(
   viewport: ViewportBounds,
 ): void {
   refreshViewportUnallocatedMarkers(viewport);
+}
+
+export function getLiveMarkersLayer(): L.LayerGroup {
+  return _liveMarkersLayer;
+}
+
+export function getProspectMarkersLayer(): L.LayerGroup {
+  return _prospectMarkersLayer;
+}
+
+export function getUnallocatedMarkersLayer(): L.LayerGroup {
+  return _unallocatedMarkersLayer;
 }
 
 export function getMarkerMap(): Map<string, L.CircleMarker> {

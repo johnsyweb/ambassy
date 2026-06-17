@@ -5,6 +5,9 @@ import {
   applyAmbassadorNameFilterToMap,
   getMarkerMap,
   getUnallocatedMarkerMap,
+  getLiveMarkersLayer,
+  getProspectMarkersLayer,
+  getUnallocatedMarkersLayer,
   getMap,
   getHighlightLayer,
   refreshViewportUnallocatedMarkersForTests,
@@ -15,6 +18,12 @@ import {
 } from "./populateMap";
 import { highlightEventsOnMap } from "@utils/mapNavigation";
 import { allocatedLiveMarkerRadius } from "@utils/mapMarkerZoomScale";
+import {
+  LIVE_EVENTS_OVERLAY_LABEL,
+  PROSPECTIVE_EVENTS_OVERLAY_LABEL,
+  UNALLOCATED_PARKRUNS_OVERLAY_LABEL,
+  REGIONAL_EVENT_AMBASSADOR_OVERLAY_LABEL,
+} from "@utils/territoryMapOverlays";
 import L from "leaflet";
 
 jest.mock("d3-geo-voronoi", () => ({
@@ -817,6 +826,188 @@ describe("populateMap", () => {
       expect(markerIcon).toContain('data-readiness="course-found"');
       expect(markerIcon).toContain('data-readiness="funding-confirmed"');
       expect(document.querySelector(".prospect-map-legend")).not.toBeNull();
+    });
+  });
+
+  describe("Territory map marker overlays", () => {
+    const eventTeamsTableData = new Map([
+      [
+        "event1",
+        {
+          eventShortName: "event1",
+          eventDirectors: "Director1",
+          eventAmbassador: "EA1",
+          regionalAmbassador: "REA1",
+          eventCoordinates: "37.80000° S 144.90000° E",
+          eventSeries: 1,
+          eventCountryCode: 3,
+          eventCountry: "Australia",
+        },
+      ],
+    ]);
+    const eventDetails = new Map([
+      [
+        "event1",
+        {
+          id: "1",
+          type: "Feature",
+          geometry: {
+            type: "Point",
+            coordinates: [144.9631, -37.8136] as [number, number],
+          },
+          properties: {
+            eventname: "Event 1",
+            EventLongName: "Event 1 Long Name",
+            EventShortName: "event1",
+            LocalisedEventLongName: null,
+            countrycode: 0,
+            seriesid: 1,
+            EventLocation: "Location 1",
+          },
+        },
+      ],
+      [
+        "nearby-unallocated",
+        {
+          id: "2",
+          type: "Feature",
+          geometry: {
+            type: "Point",
+            coordinates: [145.0, -37.9] as [number, number],
+          },
+          properties: {
+            eventname: "Nearby Unallocated",
+            EventLongName: "Nearby Unallocated",
+            EventShortName: "nearby-unallocated",
+            LocalisedEventLongName: null,
+            countrycode: 0,
+            seriesid: 1,
+            EventLocation: "Location 2",
+          },
+        },
+      ],
+    ]);
+    const eventAmbassadors = new Map([
+      [
+        "EA1",
+        {
+          name: "EA1",
+          events: ["event1"],
+          prospectiveEvents: ["p1"],
+        },
+      ],
+    ]);
+    const regionalAmbassadors = new Map([
+      ["REA1", { name: "REA1", state: "VIC", supportsEAs: ["EA1"] }],
+    ]);
+    const prospectiveEvents = [
+      {
+        id: "p1",
+        prospectEvent: "Future parkrun",
+        country: "Australia",
+        state: "VIC",
+        prospectEDs: "Pat",
+        eventAmbassador: "EA1",
+        courseFound: true,
+        landownerPermission: false,
+        fundingConfirmed: true,
+        dateMadeContact: null,
+        coordinates: {
+          latitude: -37.8136,
+          longitude: 144.9631,
+          source: "manual" as const,
+        },
+        geocodingStatus: "success" as const,
+        ambassadorMatchStatus: "matched" as const,
+        importTimestamp: 0,
+        sourceRow: 1,
+      },
+    ];
+
+    function populateMixedMarkerMap(): void {
+      populateMap(
+        eventTeamsTableData,
+        eventDetails,
+        eventAmbassadors,
+        regionalAmbassadors,
+        prospectiveEvents,
+      );
+      refreshViewportUnallocatedMarkersForTests({
+        minLongitude: 144.5,
+        maxLongitude: 145.5,
+        minLatitude: -38.5,
+        maxLatitude: -37.5,
+      });
+    }
+
+    it("registers separate marker overlays in the layer control", () => {
+      populateMixedMarkerMap();
+
+      const labels = [
+        ...document.querySelectorAll(".leaflet-control-layers-overlays label"),
+      ].map((element) => element.textContent?.trim());
+
+      expect(labels).toEqual([
+        LIVE_EVENTS_OVERLAY_LABEL,
+        PROSPECTIVE_EVENTS_OVERLAY_LABEL,
+        UNALLOCATED_PARKRUNS_OVERLAY_LABEL,
+        REGIONAL_EVENT_AMBASSADOR_OVERLAY_LABEL,
+      ]);
+    });
+
+    it("places allocated live, prospect, and unallocated markers in separate layers", () => {
+      populateMixedMarkerMap();
+
+      const liveMarker = getMarkerMap().get("event1")!;
+      const unallocatedMarker =
+        getUnallocatedMarkerMap().get("nearby-unallocated")!;
+      const prospectMarker = getProspectMarkersLayer().getLayers()[0];
+
+      expect(getLiveMarkersLayer().hasLayer(liveMarker)).toBe(true);
+      expect(getUnallocatedMarkersLayer().hasLayer(unallocatedMarker)).toBe(
+        true,
+      );
+      expect(getProspectMarkersLayer().hasLayer(prospectMarker)).toBe(true);
+      expect(getLiveMarkersLayer().hasLayer(unallocatedMarker)).toBe(false);
+      expect(getProspectMarkersLayer().hasLayer(liveMarker)).toBe(false);
+    });
+
+    it("shows all three marker overlays on the map by default", () => {
+      populateMixedMarkerMap();
+      const map = getMap()!;
+
+      expect(map.hasLayer(getLiveMarkersLayer())).toBe(true);
+      expect(map.hasLayer(getProspectMarkersLayer())).toBe(true);
+      expect(map.hasLayer(getUnallocatedMarkersLayer())).toBe(true);
+    });
+
+    it("hides the prospect legend when the prospective events overlay is off", () => {
+      populateMixedMarkerMap();
+      const map = getMap()!;
+
+      expect(document.querySelector(".prospect-map-legend")).not.toBeNull();
+
+      map.removeLayer(getProspectMarkersLayer());
+      map.fire("overlayremove");
+
+      expect(document.querySelector(".prospect-map-legend")).toBeNull();
+    });
+
+    it("clears selection highlight when the live events overlay is off", () => {
+      populateMixedMarkerMap();
+      const map = getMap()!;
+      const highlightLayer = getHighlightLayer()!;
+
+      setSelectionHighlightRefreshHandler(() => {
+        highlightEventsOnMap(["event1"], getMarkerMap(), highlightLayer);
+      });
+      highlightEventsOnMap(["event1"], getMarkerMap(), highlightLayer);
+      expect(highlightLayer.getLayers().length).toBe(1);
+
+      map.removeLayer(getLiveMarkersLayer());
+      map.fire("overlayremove");
+
+      expect(highlightLayer.getLayers().length).toBe(0);
     });
   });
 

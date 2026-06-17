@@ -137,8 +137,24 @@ The map presentation when an ambassador name filter is active. Allocated event m
 _Avoid_: Map search, clipped Voronoi
 
 **Territory map**:
-The main Ambassy map showing live event markers, prospective event markers, and REA territory polygons. Primary audience is the Regional Event Ambassador scanning allocation and launch pipeline across Event Ambassadors in a region. When prospective events are present, a persistent map legend explains live circle vs prospect diamond markers and the three prospect launch readiness segments (not Event Ambassador border colour, which matches live event markers).
+The main Ambassy map showing live event markers, prospective event markers, viewport unallocated parkrun markers, and REA territory polygons. Primary audience is the Regional Event Ambassador scanning allocation and launch pipeline across Event Ambassadors in a region. The layer control exposes each marker kind and territory polygons as separate toggles. When prospective event markers are visible, a map legend explains live circle vs prospect diamond markers and the three prospect launch readiness segments (not Event Ambassador border colour, which matches live event markers).
 _Avoid_: Territory manager (not a defined role), allocation map
+
+**Territory map overlay**:
+A togglable marker or polygon group on the territory map layer control. **Live events**, **Prospective events**, and **Unallocated parkruns** are separate marker overlays; **Regional Event Ambassador** territory polygons are a separate overlay. All three marker overlays default to visible until the REA toggles them off.
+_Avoid_: Event Markers (retired combined overlay), map layer (too vague)
+
+**Live events map overlay**:
+The territory map overlay for allocated live event circle markers only.
+_Avoid_: Live event markers (ambiguous with unallocated), allocated layer
+
+**Prospective events map overlay**:
+The territory map overlay for geocoded prospective event diamond markers only. When this overlay is off or no prospect markers would render, the prospect map legend is hidden.
+_Avoid_: Prospect layer, pipeline overlay
+
+**Unallocated parkruns map overlay**:
+The territory map overlay for viewport unallocated parkrun circle markers — click-to-allocate hints for catalogue parkruns with no Event Ambassador allocation in Ambassy.
+_Avoid_: Unallocated events, viewport layer
 
 **Territory map marker zoom scale**:
 How territory map event markers grow when the REA zooms in past region overview, up to a capped maximum at street-level zoom. At region overview zoom and below, markers stay at their baseline size. Applies to allocated live events, prospective events, and viewport unallocated events; table–map selection highlights on live events track the allocated marker size.
