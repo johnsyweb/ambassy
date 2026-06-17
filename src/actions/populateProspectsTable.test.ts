@@ -24,6 +24,10 @@ jest.mock("./persistState", () => ({
   persistChangesLog: jest.fn(),
 }));
 
+jest.mock("./toggleProspectReadiness", () => ({
+  toggleProspectReadiness: jest.fn(),
+}));
+
 describe("populateProspectsTable", () => {
   let prospects: ProspectiveEventList;
   let eventAmbassadors: EventAmbassadorMap;
@@ -216,5 +220,38 @@ describe("populateProspectsTable", () => {
 
     expect(cells[10].textContent).toBe("Location found");
     expect(cells[12].textContent).toBe("Event Ambassador assigned");
+  });
+
+  it("renders readiness toggle buttons and calls toggleProspectReadiness on click", () => {
+    const { toggleProspectReadiness } = jest.requireMock(
+      "./toggleProspectReadiness",
+    );
+    const refreshCallback = jest.fn();
+    setProspectReallocationRefreshCallback(refreshCallback);
+
+    populateProspectsTable(
+      prospects,
+      eventAmbassadors,
+      regionalAmbassadors,
+      log,
+      eventDetails,
+    );
+
+    const courseButton = document.querySelector(
+      "button.prospect-readiness-toggle[aria-label^='Course found']",
+    ) as HTMLButtonElement;
+    expect(courseButton).not.toBeNull();
+    expect(courseButton.getAttribute("aria-pressed")).toBe("false");
+    expect(courseButton.textContent).toBe("❌");
+
+    courseButton.click();
+
+    expect(toggleProspectReadiness).toHaveBeenCalledWith(
+      "p1",
+      "courseFound",
+      prospects,
+      log,
+    );
+    expect(refreshCallback).toHaveBeenCalledTimes(1);
   });
 });

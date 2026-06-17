@@ -7,6 +7,10 @@ import { EventAmbassadorMap } from "@models/EventAmbassadorMap";
 import { RegionalAmbassadorMap } from "@models/RegionalAmbassadorMap";
 import { showReallocationDialog } from "./showReallocationDialog";
 import { reallocateProspect } from "./reallocateProspect";
+import {
+  ProspectReadinessField,
+  toggleProspectReadiness,
+} from "./toggleProspectReadiness";
 import { LogEntry } from "@models/LogEntry";
 import { CapacityStatus } from "@models/CapacityStatus";
 import { ReallocationSuggestion } from "@models/ReallocationSuggestion";
@@ -111,6 +115,42 @@ export function populateProspectsTable(
   }
 }
 
+function appendProspectReadinessToggleCell(
+  row: HTMLTableRowElement,
+  prospect: ProspectiveEvent,
+  field: ProspectReadinessField,
+  columnLabel: string,
+  prospects: ProspectiveEventList,
+  log: LogEntry[] | undefined,
+): void {
+  const cell = document.createElement("td");
+  cell.style.textAlign = "center";
+
+  const isComplete = prospect[field];
+  const button = document.createElement("button");
+  button.type = "button";
+  button.className = "prospect-readiness-toggle";
+  button.setAttribute("aria-pressed", String(isComplete));
+  button.setAttribute(
+    "aria-label",
+    `${columnLabel}: ${isComplete ? "yes" : "no"}. Activate to toggle.`,
+  );
+  button.textContent = isComplete ? "✅" : "❌";
+  button.disabled = !log;
+
+  if (log) {
+    button.addEventListener("click", () => {
+      toggleProspectReadiness(prospect.id, field, prospects, log);
+      if (refreshUIAfterReallocation) {
+        refreshUIAfterReallocation();
+      }
+    });
+  }
+
+  cell.appendChild(button);
+  row.appendChild(cell);
+}
+
 /**
  * Create a table row for a prospective event
  */
@@ -171,20 +211,30 @@ function createProspectRow(
   }
   row.appendChild(dateCell);
 
-  // Course Found
-  const courseCell = document.createElement("td");
-  courseCell.textContent = prospect.courseFound ? "✅" : "❌";
-  row.appendChild(courseCell);
-
-  // Landowner Permission
-  const landownerCell = document.createElement("td");
-  landownerCell.textContent = prospect.landownerPermission ? "✅" : "❌";
-  row.appendChild(landownerCell);
-
-  // Funding Confirmed
-  const fundingCell = document.createElement("td");
-  fundingCell.textContent = prospect.fundingConfirmed ? "✅" : "❌";
-  row.appendChild(fundingCell);
+  appendProspectReadinessToggleCell(
+    row,
+    prospect,
+    "courseFound",
+    "Course found",
+    prospects,
+    log,
+  );
+  appendProspectReadinessToggleCell(
+    row,
+    prospect,
+    "landownerPermission",
+    "Landowner permission",
+    prospects,
+    log,
+  );
+  appendProspectReadinessToggleCell(
+    row,
+    prospect,
+    "fundingConfirmed",
+    "Funding confirmed",
+    prospects,
+    log,
+  );
 
   // Geocoding Status
   const geocodingCell = document.createElement("td");
