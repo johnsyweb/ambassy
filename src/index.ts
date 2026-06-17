@@ -104,6 +104,10 @@ import { showReallocationDialog } from "./actions/showReallocationDialog";
 import { setProspectReallocationRefreshCallback } from "./actions/populateProspectsTable";
 import { showAddProspectDialog } from "./actions/showAddProspectDialog";
 import {
+  clearTemporaryPlacePin,
+  getTemporaryPlacePin,
+} from "@utils/temporaryPlacePin";
+import {
   saveCapacityLimits,
   validateCapacityLimits,
 } from "./actions/configureCapacityLimits";
@@ -458,6 +462,59 @@ function setupOnboardingButtons(): void {
 }
 
 setupOnboardingButtons();
+
+function openAddProspectFromPlacePin(): void {
+  const place = getTemporaryPlacePin();
+  if (!place) {
+    return;
+  }
+
+  const eventAmbassadors = getEventAmbassadorsFromSession();
+  const regionalAmbassadors = getRegionalAmbassadorsFromSession();
+
+  if (eventAmbassadors.size === 0) {
+    alert(
+      "No Event Ambassadors available. Please onboard an Event Ambassador first.",
+    );
+    return;
+  }
+
+  if (!eventDetails) {
+    alert("Event details are not loaded. Please upload data first.");
+    return;
+  }
+
+  showAddProspectDialog(
+    eventAmbassadors,
+    regionalAmbassadors,
+    eventDetails,
+    () => {
+      clearTemporaryPlacePin(getMap());
+      refreshProspectsTable();
+      if (eventDetails && eventTeamsTableData) {
+        const eventAmbassadorsForMap = getEventAmbassadorsFromSession();
+        const regionalAmbassadorsForMap = getRegionalAmbassadorsFromSession();
+        populateMap(
+          eventTeamsTableData,
+          eventDetails,
+          eventAmbassadorsForMap,
+          regionalAmbassadorsForMap,
+          loadProspectiveEvents(),
+        );
+      }
+      trackStateChange();
+      persistChangesLog(log);
+    },
+    () => {},
+    log,
+    {
+      address: place.label,
+      latitude: place.latitude,
+      longitude: place.longitude,
+      coordinatesWereDragged: place.coordinatesWereDragged,
+    },
+  );
+}
 
 function setupAddProspectButton(): void {
   const addProspectButton = document.getElementById("addProspectButton");
@@ -2208,6 +2265,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     getMap,
     getMarkerMap,
     getHighlightLayer,
+    onAddProspectFromPlacePin: openAddProspectFromPlacePin,
   });
   setTabChangeCallback(updateAmbassadorNameFilterStatusIfReady);
   setupExportReminder();

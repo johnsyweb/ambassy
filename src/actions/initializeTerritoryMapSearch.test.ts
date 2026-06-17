@@ -1,8 +1,10 @@
 import {
   initializeTerritoryMapSearch,
+  renderPlaceSearchStatusHtml,
   renderTerritoryMapSearchSuggestionsHtml,
   resetTerritoryMapSearchForTests,
   TERRITORY_MAP_SEARCH_INPUT_ID,
+  TERRITORY_MAP_SEARCH_OPEN_PLACE_ACTIONS_ID,
 } from "./initializeTerritoryMapSearch";
 import { createSelectionState } from "@models/SelectionState";
 import { setTerritoryMapSearchMinimised } from "@utils/territoryMapSearchMinimised";
@@ -114,6 +116,16 @@ describe("initializeTerritoryMapSearch", () => {
       false,
     );
     expect(document.activeElement).toBe(input);
+  });
+});
+
+describe("renderPlaceSearchStatusHtml", () => {
+  it("includes an open place actions control for keyboard access", () => {
+    const html = renderPlaceSearchStatusHtml("Ballarat, Victoria, Australia");
+
+    expect(html).toContain("Ballarat, Victoria, Australia");
+    expect(html).toContain(TERRITORY_MAP_SEARCH_OPEN_PLACE_ACTIONS_ID);
+    expect(html).toContain("Open place actions");
   });
 });
 

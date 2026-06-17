@@ -370,6 +370,60 @@ tr.selected:hover {
   height: 20px;
 }
 
+.temporary-place-pin-marker {
+  background: transparent;
+  border: none;
+}
+
+.temporary-place-pin-marker-dot {
+  display: block;
+  margin: 0;
+  padding: 0;
+  border: none;
+  background: transparent;
+  cursor: grab;
+  line-height: 0;
+}
+
+.temporary-place-pin-marker-dot svg {
+  display: block;
+  width: 24px;
+  height: 24px;
+}
+
+.temporary-place-pin-marker-dot:focus-visible {
+  outline: 2px solid #4a90e2;
+  outline-offset: 2px;
+  border-radius: 50%;
+}
+
+.temporary-place-pin-leaflet-popup .leaflet-popup-content-wrapper {
+  border-radius: 4px;
+}
+
+.temporary-place-pin-leaflet-popup {
+  z-index: 1100;
+}
+
+.temporary-place-pin-popup-label {
+  margin: 0 0 0.5rem;
+}
+
+.temporary-place-pin-add-prospect {
+  width: 100%;
+  padding: 0.35rem 0.5rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  background: #f8f9fa;
+  font: inherit;
+  cursor: pointer;
+}
+
+.temporary-place-pin-add-prospect:hover,
+.temporary-place-pin-add-prospect:focus-visible {
+  background: #e9ecef;
+}
+
 .prospect-map-legend-host,
 .prospect-map-legend-restore-host {
   position: absolute;
@@ -545,6 +599,22 @@ tr.selected:hover {
   margin-top: 0.35rem;
   color: #555;
   font-size: 0.8rem;
+}
+
+.territory-map-search-open-place-actions {
+  margin-left: 0.35rem;
+  padding: 0.15rem 0.35rem;
+  border: 1px solid #bbb;
+  border-radius: 4px;
+  background: #f8f9fa;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
+.territory-map-search-open-place-actions:hover,
+.territory-map-search-open-place-actions:focus-visible {
+  background: #e9ecef;
 }
 
 .territory-map-search-listbox {

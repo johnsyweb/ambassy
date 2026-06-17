@@ -12,6 +12,7 @@ import { ReallocationSuggestion } from "@models/ReallocationSuggestion";
 import { geocodeAddress } from "@utils/geocoding";
 import { createCoordinate } from "@models/Coordinate";
 import { inferCountryCodeFromCoordinates } from "@models/country";
+import { resolveProspectGeocodingStatus } from "@utils/prospectGeocodingStatus";
 import { generateProspectAllocationSuggestions } from "./suggestEventAllocation";
 import { createProspectFromAddress } from "./createProspectFromAddress";
 import {
@@ -21,6 +22,13 @@ import {
 import { LogEntry } from "@models/LogEntry";
 import { ProspectiveEventList } from "@models/ProspectiveEventList";
 
+export type AddProspectDialogInitialPlace = {
+  address: string;
+  latitude: number;
+  longitude: number;
+  coordinatesWereDragged: boolean;
+};
+
 export function showAddProspectDialog(
   eventAmbassadors: EventAmbassadorMap,
   regionalAmbassadors: RegionalAmbassadorMap,
@@ -28,6 +36,7 @@ export function showAddProspectDialog(
   onSuccess: () => void,
   onCancel: () => void,
   log?: LogEntry[],
+  initialPlace?: AddProspectDialogInitialPlace,
 ): void {
   const dialog = document.getElementById("reallocationDialog") as HTMLElement;
   const title = document.getElementById(
@@ -107,6 +116,15 @@ export function showAddProspectDialog(
   addressInput.style.border = "1px solid #ccc";
   addressInput.style.borderRadius = "4px";
   container.appendChild(addressInput);
+
+  const locationFromMapNote = document.createElement("p");
+  locationFromMapNote.className = "add-prospect-location-from-map-note";
+  locationFromMapNote.style.display = "none";
+  locationFromMapNote.style.marginBottom = "1em";
+  locationFromMapNote.style.color = "#555";
+  locationFromMapNote.textContent =
+    "Location set from map. Edit the address to search for a different place.";
+  container.appendChild(locationFromMapNote);
 
   const stateLabel = document.createElement("label");
   stateLabel.textContent = "State/Region: *";
@@ -318,6 +336,48 @@ export function showAddProspectDialog(
   let allocationSuggestions: ReallocationSuggestion[] = [];
   let lastGeocodedAddress = "";
   let coordinatesEnteredManually = false;
+  let coordinatesFromPinDrag = false;
+  let initialPlaceAddress = "";
+
+  const loadAllocationSuggestionsFromCoordinates = async () => {
+    if (!geocodedCoordinates || !inferredCountry) {
+      return;
+    }
+
+    const prospectName = prospectNameInput.value.trim() || "New Prospect";
+    allocationSuggestions = await generateProspectAllocationSuggestions(
+      prospectName,
+      createCoordinate(geocodedCoordinates.lat, geocodedCoordinates.lng),
+      eventAmbassadors,
+      eventDetails,
+      regionalAmbassadors,
+    );
+    displayAllocationSuggestions();
+  };
+
+  const applyInitialPlace = async (place: AddProspectDialogInitialPlace) => {
+    addressInput.value = place.address;
+    initialPlaceAddress = place.address;
+    geocodedCoordinates = { lat: place.latitude, lng: place.longitude };
+    coordinatesFromPinDrag = place.coordinatesWereDragged;
+    coordinatesEnteredManually = false;
+    locationFromMapNote.style.display = "block";
+
+    const coordinates = createCoordinate(place.latitude, place.longitude);
+    inferredCountry = await inferCountryCodeFromCoordinates(coordinates);
+  };
+
+  if (initialPlace) {
+    addressInput.value = initialPlace.address;
+    initialPlaceAddress = initialPlace.address;
+    geocodedCoordinates = {
+      lat: initialPlace.latitude,
+      lng: initialPlace.longitude,
+    };
+    coordinatesFromPinDrag = initialPlace.coordinatesWereDragged;
+    coordinatesEnteredManually = false;
+    locationFromMapNote.style.display = "block";
+  }
 
   // Geocoding function
   const performGeocoding = async (address: string, state: string) => {
@@ -373,6 +433,7 @@ export function showAddProspectDialog(
 
       lastGeocodedAddress = address;
       coordinatesEnteredManually = false; // Reset manual flag on successful geocoding
+      coordinatesFromPinDrag = false;
     } catch (error) {
       loadingIndicator.style.display = "none";
       errorMessage.innerHTML = `
@@ -677,9 +738,10 @@ export function showAddProspectDialog(
         courseFound: courseFoundCheckbox.checked,
         landownerPermission: landownerPermissionCheckbox.checked,
         fundingConfirmed: fundingConfirmedCheckbox.checked,
-        geocodingStatus: coordinatesEnteredManually
-          ? ("manual" as const)
-          : ("success" as const),
+        geocodingStatus: resolveProspectGeocodingStatus({
+          coordinatesEnteredManually,
+          coordinatesFromPinDrag,
+        }),
       };
 
       const prospect = createProspectFromAddress(
@@ -722,6 +784,25 @@ export function showAddProspectDialog(
     const state = stateInput.value.trim();
 
     if (!address || !state) {
+      return;
+    }
+
+    if (
+      initialPlaceAddress &&
+      address === initialPlaceAddress &&
+      geocodedCoordinates
+    ) {
+      void (async () => {
+        if (!inferredCountry) {
+          inferredCountry = await inferCountryCodeFromCoordinates(
+            createCoordinate(
+              geocodedCoordinates!.lat,
+              geocodedCoordinates!.lng,
+            ),
+          );
+        }
+        await loadAllocationSuggestionsFromCoordinates();
+      })();
       return;
     }
 
@@ -857,7 +938,9 @@ export function showAddProspectDialog(
   // Focus management: focus first input when dialog opens
   prospectNameInput.focus();
 
-  // Store original focus element to restore on close
+  if (initialPlace) {
+    void applyInitialPlace(initialPlace);
+  }
   const originalActiveElement = document.activeElement as HTMLElement;
 
   // Enhanced cleanup to restore focus

@@ -141,11 +141,11 @@ The map presentation when an ambassador name filter is active. Allocated event m
 _Avoid_: clipped Voronoi
 
 **Territory map search**:
-A map control for finding and flying to a live event, prospective event, or town or place by name. Searches the full local catalogue and geocodes places via Nominatim; navigation only — it does not replace or override the ambassador name filter. Selecting a result pans and zooms the map even when the ambassador filter would hide that marker; matching suggestions and a post-selection status message may note when the target is hidden by the filter. Suggestions are grouped by live events, prospective events, and places. Selecting a live or prospective result syncs the relevant data tab when a row exists. Selecting a place drops a **temporary place pin** on the map, cleared on the next search selection or map click. Creating a prospective event from a place pin is a separate workflow.
+A map control for finding and flying to a live event, prospective event, or town or place by name. Searches the full local catalogue and geocodes places via Nominatim; navigation only — it does not replace or override the ambassador name filter. Selecting a result pans and zooms the map even when the ambassador filter would hide that marker; matching suggestions and a post-selection status message may note when the target is hidden by the filter. Suggestions are grouped by live events, prospective events, and places. Selecting a live or prospective result syncs the relevant data tab when a row exists. Selecting a place drops a **temporary place pin** on the map, cleared on the next search selection or map click. The pin can be dragged to fine-tune the location before opening the add-prospect dialog. Click the pin (or **Open place actions** in the search status) to add a prospective event at that place via the existing add-prospect flow.
 _Avoid_: Search (too generic), ambassador name filter
 
 **Temporary place pin**:
-A short-lived map marker dropped when the REA selects a place from territory map search. Shows where the geocoded town or place is; removed on the next search selection or map click. Not a prospective event or live event marker.
+A short-lived draggable map marker dropped when the REA selects a place from territory map search. Shows where the geocoded town or place is; removed on the next search selection, map click, or successful create from the pin. Click the pin or **Open place actions** in search status to start adding a prospective event with address and coordinates pre-filled. Not a prospective event or live event marker until created.
 _Avoid_: place marker, search pin
 
 **Territory map**:

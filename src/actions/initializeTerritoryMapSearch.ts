@@ -20,6 +20,7 @@ import {
 } from "@utils/territoryMapSearchSuggestions";
 import {
   clearTemporaryPlacePin,
+  openTemporaryPlacePinActions,
   setTemporaryPlacePin,
 } from "@utils/temporaryPlacePin";
 import {
@@ -38,12 +39,15 @@ export type TerritoryMapSearchContext = {
 
 export const TERRITORY_MAP_SEARCH_DEBOUNCE_MS = 300;
 export const TERRITORY_MAP_SEARCH_INPUT_ID = "territoryMapSearchInput";
+export const TERRITORY_MAP_SEARCH_OPEN_PLACE_ACTIONS_ID =
+  "territoryMapSearchOpenPlaceActions";
 
-type TerritoryMapSearchNavigation = {
+export type TerritoryMapSearchNavigation = {
   selectionState: SelectionState;
   getMap: () => L.Map | null;
   getMarkerMap: () => Map<string, L.CircleMarker>;
   getHighlightLayer: () => L.LayerGroup | null;
+  onAddProspectFromPlacePin?: () => void;
 };
 
 let searchDebounceTimer: ReturnType<typeof setTimeout> | null = null;
@@ -148,6 +152,7 @@ export function renderTerritoryMapSearchSuggestionsHtml(
             data-place-index="${index}"
             data-latitude="${place.latitude}"
             data-longitude="${place.longitude}"
+            data-place-label="${escapeHtml(place.label)}"
           >
             <span>${escapeHtml(place.label)}</span>
           </button>
@@ -166,6 +171,29 @@ function setSearchStatus(message: string): void {
   if (status) {
     status.textContent = message;
   }
+}
+
+export function renderPlaceSearchStatusHtml(placeLabel: string): string {
+  return `<span class="territory-map-search-place-label">${escapeHtml(placeLabel)}</span> <button type="button" id="${TERRITORY_MAP_SEARCH_OPEN_PLACE_ACTIONS_ID}" class="territory-map-search-open-place-actions">Open place actions</button>`;
+}
+
+function setPlaceSearchStatus(
+  placeLabel: string,
+  onOpenPlaceActions: () => void,
+): void {
+  const status = document.getElementById("territoryMapSearchStatus");
+  if (!status) {
+    return;
+  }
+
+  status.innerHTML = renderPlaceSearchStatusHtml(placeLabel);
+  const openActionsButton = status.querySelector(
+    `#${TERRITORY_MAP_SEARCH_OPEN_PLACE_ACTIONS_ID}`,
+  ) as HTMLButtonElement | null;
+  openActionsButton?.addEventListener("click", (event) => {
+    L.DomEvent.stopPropagation(event);
+    onOpenPlaceActions();
+  });
 }
 
 function hideSuggestionList(
@@ -286,8 +314,15 @@ function handleSuggestionSelection(
   ) {
     const latitude = Number.parseFloat(button.dataset.latitude);
     const longitude = Number.parseFloat(button.dataset.longitude);
+    const placeLabel = button.dataset.placeLabel ?? "";
     map.setView([latitude, longitude], 13, { animate: true });
-    setTemporaryPlacePin(map, latitude, longitude);
+    setTemporaryPlacePin(map, latitude, longitude, {
+      label: placeLabel,
+      onAddProspect: navigation.onAddProspectFromPlacePin,
+    });
+    setPlaceSearchStatus(placeLabel, () => {
+      openTemporaryPlacePinActions();
+    });
   }
 
   hideSuggestionList(listbox, input);
@@ -399,6 +434,11 @@ export function initializeTerritoryMapSearch(
   }
   host.dataset.initialized = "true";
 
+  L.DomEvent.disableClickPropagation(host);
+  L.DomEvent.disableScrollPropagation(host);
+  L.DomEvent.disableClickPropagation(restoreHost);
+  L.DomEvent.disableScrollPropagation(restoreHost);
+
   const dismissButton = host.querySelector(
     ".territory-map-search-dismiss",
   ) as HTMLButtonElement | null;
@@ -451,6 +491,8 @@ export function initializeTerritoryMapSearch(
   });
 
   listbox.addEventListener("click", (event) => {
+    L.DomEvent.stopPropagation(event);
+
     const target = (event.target as HTMLElement | null)?.closest(
       ".territory-map-search-option",
     ) as HTMLButtonElement | null;

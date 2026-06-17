@@ -779,4 +779,34 @@ describe("showAddProspectDialog", () => {
       expect(onSuccess).toHaveBeenCalled();
     });
   });
+
+  describe("Place pin initial location", () => {
+    it("pre-fills address and locks coordinates from a place pin", async () => {
+      showAddProspectDialog(
+        eventAmbassadors,
+        regionalAmbassadors,
+        eventDetails,
+        onSuccess,
+        onCancel,
+        undefined,
+        {
+          address: "Ballarat, Victoria, Australia",
+          latitude: -37.5622,
+          longitude: 143.8503,
+          coordinatesWereDragged: false,
+        },
+      );
+
+      const addressInput = content.querySelector(
+        'input[placeholder*="123 Main"]',
+      ) as HTMLInputElement;
+
+      expect(addressInput.value).toBe("Ballarat, Victoria, Australia");
+      expect(content.textContent).toContain("Location set from map");
+
+      await Promise.resolve();
+
+      expect(inferCountryCodeFromCoordinates).toHaveBeenCalled();
+    });
+  });
 });
