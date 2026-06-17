@@ -89,6 +89,25 @@ describe("buildProspectMapMarkerHtml", () => {
     );
     expect(border?.getAttribute("stroke")).toBe("#ff6600");
   });
+
+  it("includes a contrasting outline so grey segments stay visible on grey map features", () => {
+    const html = buildProspectMapMarkerHtml(
+      {
+        courseFound: false,
+        landownerPermission: false,
+        fundingConfirmed: false,
+      },
+      "#336699",
+    );
+    const doc = parseMarkerHtml(html);
+
+    const outline = doc.querySelector('[data-marker-part="outline"]');
+    expect(outline?.getAttribute("stroke")).toBe("#1a1a1a");
+    expect(outline?.getAttribute("stroke-width")).toBe("2.25");
+
+    const segment = doc.querySelector('[data-readiness="course-found"]');
+    expect(segment?.getAttribute("stroke")).toBe("#4a4a4a");
+  });
 });
 
 function baseProspect(

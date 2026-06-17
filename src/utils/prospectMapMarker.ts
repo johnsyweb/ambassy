@@ -11,6 +11,10 @@ export interface ProspectLaunchReadiness {
 }
 
 export const PROSPECT_SEGMENT_NOT_CONFIRMED_FILL = "#d0d0d0";
+export const PROSPECT_MARKER_OUTLINE_STROKE = "#1a1a1a";
+export const PROSPECT_MARKER_OUTLINE_STROKE_WIDTH = 2.25;
+export const PROSPECT_SEGMENT_STROKE = "#4a4a4a";
+export const PROSPECT_SEGMENT_STROKE_WIDTH = 0.5;
 export const LEGEND_SAMPLE_BORDER_COLOR = "rebeccapurple";
 
 export function buildLiveEventLegendSampleHtml(): string {
@@ -26,11 +30,19 @@ export function buildProspectMapMarkerHtml(
   const segmentFill = (confirmed: boolean): string =>
     confirmed ? borderColor : PROSPECT_SEGMENT_NOT_CONFIRMED_FILL;
 
+  const segmentPolygon = (
+    points: string,
+    fill: string,
+    readinessKey: string,
+  ): string =>
+    `<polygon points="${points}" fill="${fill}" stroke="${PROSPECT_SEGMENT_STROKE}" stroke-width="${PROSPECT_SEGMENT_STROKE_WIDTH}" data-readiness="${readinessKey}"/>`;
+
   return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" role="img" aria-label="Prospective event map marker">
+  <polygon points="8,0 16,8 8,16 0,8" fill="none" stroke="${PROSPECT_MARKER_OUTLINE_STROKE}" stroke-width="${PROSPECT_MARKER_OUTLINE_STROKE_WIDTH}" data-marker-part="outline"/>
   <polygon points="8,0 16,8 8,16 0,8" fill="none" stroke="${borderColor}" stroke-width="1.5" data-marker-part="border"/>
-  <polygon points="8,0 16,8 8,8" fill="${segmentFill(readiness.courseFound)}" data-readiness="course-found"/>
-  <polygon points="0,8 8,16 8,8" fill="${segmentFill(readiness.landownerPermission)}" data-readiness="landowner-permission"/>
-  <polygon points="16,8 8,16 8,8" fill="${segmentFill(readiness.fundingConfirmed)}" data-readiness="funding-confirmed"/>
+  ${segmentPolygon("8,0 16,8 8,8", segmentFill(readiness.courseFound), "course-found")}
+  ${segmentPolygon("0,8 8,16 8,8", segmentFill(readiness.landownerPermission), "landowner-permission")}
+  ${segmentPolygon("16,8 8,16 8,8", segmentFill(readiness.fundingConfirmed), "funding-confirmed")}
 </svg>`;
 }
 
