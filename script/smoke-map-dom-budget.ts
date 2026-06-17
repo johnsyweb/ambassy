@@ -18,8 +18,11 @@ import {
   parseRegionalAmbassadors,
   type RegionalAmbassadorRow,
 } from "../src/parsers/parseRegionalAmbassadors";
+import type { EventDetails } from "../src/models/EventDetails";
+import { EVENTS_CATALOGUE_CACHE_KEY } from "../src/actions/fetchEvents";
 
 const TIMEOUT_MS = 120_000;
+const EVENTS_COUNTRIES_CACHE_KEY = "parkrun countries";
 const MAX_OVERLAY_PATHS = 500;
 const MAX_DOM_NODES = 10_000;
 
@@ -30,6 +33,62 @@ function fail(message: string): never {
 
 function pass(message: string): void {
   console.log(`PASS: ${message}`);
+}
+
+function step(message: string): void {
+  console.log(`[smoke:map-dom-budget] ${message}`);
+}
+
+function buildStubEventsCatalogueJson(eventNames: string[]): string {
+  const eventDetailsMap: Array<[string, EventDetails]> = eventNames.map(
+    (name, index) => {
+      const latitude = -37.8 + (index % 20) * 0.05;
+      const longitude = 144.9 + Math.floor(index / 20) * 0.05;
+
+      return [
+        name,
+        {
+          id: name,
+          type: "Feature",
+          geometry: {
+            type: "Point",
+            coordinates: [longitude, latitude],
+          },
+          properties: {
+            eventname: name.toLowerCase().replace(/\s+/g, ""),
+            EventLongName: name,
+            EventShortName: name,
+            LocalisedEventLongName: name,
+            countrycode: 3,
+            seriesid: 1,
+            EventLocation: "Victoria",
+          },
+        },
+      ];
+    },
+  );
+
+  return JSON.stringify({
+    timestamp: Date.now(),
+    eventDetailsMap,
+  });
+}
+
+function buildStubCountriesCatalogueJson(): string {
+  return JSON.stringify({
+    timestamp: Date.now(),
+    countries: {},
+  });
+}
+
+function isLocalRequest(url: string, baseUrl: string): boolean {
+  try {
+    const requestOrigin = new URL(url).origin;
+    const localOrigin = new URL(baseUrl).origin;
+    return requestOrigin === localOrigin;
+  } catch {
+    return false;
+  }
 }
 
 function findAvailablePort(startPort: number): Promise<number> {
@@ -96,6 +155,8 @@ function loadSampleAllocationState(): {
   eventAmbassadorsJson: string;
   eventTeamsJson: string;
   regionalAmbassadorsJson: string;
+  eventsCatalogueJson: string;
+  countriesCatalogueJson: string;
 } {
   const publicDir = path.join(process.cwd(), "public");
   const eventAmbassadorsData = fs.readFileSync(
@@ -130,6 +191,8 @@ function loadSampleAllocationState(): {
     }).data,
   );
 
+  const eventNames = Array.from(eventTeams.keys()).filter(Boolean);
+
   return {
     eventAmbassadorsJson: JSON.stringify(
       Array.from(eventAmbassadors.entries()),
@@ -138,6 +201,8 @@ function loadSampleAllocationState(): {
     regionalAmbassadorsJson: JSON.stringify(
       Array.from(regionalAmbassadors.entries()),
     ),
+    eventsCatalogueJson: buildStubEventsCatalogueJson(eventNames),
+    countriesCatalogueJson: buildStubCountriesCatalogueJson(),
   };
 }
 
@@ -155,28 +220,67 @@ async function main(): Promise<void> {
   let staticServer: ChildProcess | null = null;
 
   if (shouldStartServer) {
+    step(`starting static server on port ${port}`);
     staticServer = await startStaticServer(distDirectory, port);
+    step("static server ready");
   }
 
+  step("launching browser");
   const browser = await puppeteer.launch({
     headless: true,
     args: ["--no-sandbox", "--disable-setuid-sandbox"],
+    timeout: 60_000,
   });
 
   try {
     const page = await browser.newPage();
+    page.setDefaultNavigationTimeout(TIMEOUT_MS);
+    page.setDefaultTimeout(TIMEOUT_MS);
     await page.setViewport({ width: 1280, height: 800 });
 
-    const { eventAmbassadorsJson, eventTeamsJson, regionalAmbassadorsJson } =
-      loadSampleAllocationState();
+    await page.setRequestInterception(true);
+    page.on("request", (request) => {
+      const url = request.url();
+      if (isLocalRequest(url, baseUrl)) {
+        request.continue();
+        return;
+      }
 
+      if (
+        url.includes("tile.openstreetmap.org") ||
+        url.includes("images.parkrun.com")
+      ) {
+        request.abort();
+        return;
+      }
+
+      request.continue();
+    });
+
+    const {
+      eventAmbassadorsJson,
+      eventTeamsJson,
+      regionalAmbassadorsJson,
+      eventsCatalogueJson,
+      countriesCatalogueJson,
+    } = loadSampleAllocationState();
+
+    step(`loading ${baseUrl}`);
     await page.goto(baseUrl, {
-      waitUntil: "networkidle2",
+      waitUntil: "load",
       timeout: TIMEOUT_MS,
     });
 
     await page.evaluate(
-      (eaJson, etJson, raJson) => {
+      (
+        eaJson,
+        etJson,
+        raJson,
+        eventsJson,
+        countriesJson,
+        eventsCacheKey,
+        countriesCacheKey,
+      ) => {
         const prefix = "ambassy:";
         const changesLog = "[]";
         for (const [storage, suffix, value] of [
@@ -191,14 +295,23 @@ async function main(): Promise<void> {
         ] as const) {
           storage.setItem(`${prefix}${suffix}`, value);
         }
+
+        localStorage.setItem(eventsCacheKey, eventsJson);
+        localStorage.setItem(countriesCacheKey, countriesJson);
       },
       eventAmbassadorsJson,
       eventTeamsJson,
       regionalAmbassadorsJson,
+      eventsCatalogueJson,
+      countriesCatalogueJson,
+      EVENTS_CATALOGUE_CACHE_KEY,
+      EVENTS_COUNTRIES_CACHE_KEY,
     );
 
-    await page.reload({ waitUntil: "networkidle2", timeout: TIMEOUT_MS });
+    step("reloading with sample allocation data");
+    await page.reload({ waitUntil: "load", timeout: TIMEOUT_MS });
 
+    step("waiting for main UI");
     await page.waitForFunction(
       () => {
         const intro = document.getElementById("introduction");
@@ -213,10 +326,12 @@ async function main(): Promise<void> {
       { timeout: TIMEOUT_MS },
     );
 
+    step("waiting for map overlay pane");
     await page.waitForSelector("#mapContainer .leaflet-overlay-pane", {
       timeout: TIMEOUT_MS,
     });
 
+    step("waiting for canvas markers");
     await page.waitForFunction(
       () =>
         document.querySelectorAll("#mapContainer .leaflet-overlay-pane canvas")
