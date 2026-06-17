@@ -52,6 +52,10 @@ _Avoid_: Prospect pin, pipeline marker
 The three boolean launch-pipeline flags on a prospective event: course found, landowner permission, and funding confirmed. Shown per-flag in the Prospects table and as three segments on the prospect map marker — top, bottom-left, and bottom-right respectively.
 _Avoid_: Launch status (too vague), readiness score
 
+**Prospect map legend**:
+The dismissable **Marker legend** panel on the territory map that explains how to read live vs prospective event markers and prospect launch readiness segment fills. Covers marker shape and segment meaning only — not Event Ambassador border colour (which matches live event markers) and not unallocated parkrun markers. Appears automatically when prospective event markers are visible unless the REA has dismissed it for the session. A **Show marker legend** control in the same map corner restores it after dismiss; legend and restore control share the same visibility gate (prospective overlay on and at least one visible prospect marker). Both states clear on Purge.
+_Avoid_: Map key, territory map legend (too broad)
+
 **Voronoi site**:
 Any point that competes in the REA territory Voronoi diagram. Site types:
 
@@ -134,10 +138,18 @@ _Avoid_: Search (too generic), table search
 
 **Filtered map view**:
 The map presentation when an ambassador name filter is active. Allocated event markers and prospect markers follow the same matching rules as Event Teams and Prospects respectively; unallocated parkrun markers are hidden. REA territory polygons are drawn only for Regional Event Ambassadors with at least one visible allocated event. The Voronoi diagram is not recomputed — only which markers and polygons are shown changes.
-_Avoid_: Map search, clipped Voronoi
+_Avoid_: clipped Voronoi
+
+**Territory map search**:
+A map control for finding and flying to a live event, prospective event, or town or place by name. Searches the full local catalogue and geocodes places via Nominatim; navigation only — it does not replace or override the ambassador name filter. Selecting a result pans and zooms the map even when the ambassador filter would hide that marker; matching suggestions and a post-selection status message may note when the target is hidden by the filter. Suggestions are grouped by live events, prospective events, and places. Selecting a live or prospective result syncs the relevant data tab when a row exists. Selecting a place drops a **temporary place pin** on the map, cleared on the next search selection or map click. Creating a prospective event from a place pin is a separate workflow.
+_Avoid_: Search (too generic), ambassador name filter
+
+**Temporary place pin**:
+A short-lived map marker dropped when the REA selects a place from territory map search. Shows where the geocoded town or place is; removed on the next search selection or map click. Not a prospective event or live event marker.
+_Avoid_: place marker, search pin
 
 **Territory map**:
-The main Ambassy map showing live event markers, prospective event markers, viewport unallocated parkrun markers, and REA territory polygons. Primary audience is the Regional Event Ambassador scanning allocation and launch pipeline across Event Ambassadors in a region. The layer control exposes each marker kind and territory polygons as separate toggles. When prospective event markers are visible, a map legend explains live circle vs prospect diamond markers and the three prospect launch readiness segments (not Event Ambassador border colour, which matches live event markers).
+The main Ambassy map showing live event markers, prospective event markers, viewport unallocated parkrun markers, and REA territory polygons. Primary audience is the Regional Event Ambassador scanning allocation and launch pipeline across Event Ambassadors in a region. The layer control exposes each marker kind and territory polygons as separate toggles. When prospective event markers are visible, the **prospect map legend** may appear.
 _Avoid_: Territory manager (not a defined role), allocation map
 
 **Territory map overlay**:
