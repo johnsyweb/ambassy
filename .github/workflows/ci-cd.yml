@@ -146,6 +146,9 @@ jobs:
           name: dist
           path: dist
 
+      - name: Install Chrome for Puppeteer
+        run: pnpm exec puppeteer browsers install chrome
+
       - name: Map DOM budget smoke test
         run: pnpm run smoke:map-dom-budget
 
