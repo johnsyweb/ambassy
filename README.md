@@ -78,6 +78,12 @@ Merges to `main` use [semantic-release](https://semantic-release.gitbook.io/) wi
 
 On each code release, CI generates `CHANGELOG.md`, bumps `package.json`, tags `vX.Y.Z`, publishes a GitHub Release, rebuilds with the new version injected into the footer, and deploys to GitHub Pages. The footer version links to that tag’s changelog. Docs-only changes (`docs/`, `specs/`, `CONTEXT.md`, `README.md`, `.github/`) skip versioning but still redeploy Pages.
 
+You can also run release or deploy manually from the GitHub Actions tab (**CI/CD** workflow → **Run workflow** on `main`):
+
+- **release-and-deploy** — semantic-release (when commits warrant it), screenshots, and GitHub Pages deploy
+- **deploy-latest-build** — lint, test, build, smoke test, then deploy the current `main` build without a new release
+- **release-only** — semantic-release and screenshots only; no Pages deploy
+
 See [ADR 0008](docs/adr/0008-semantic-release-and-changelog.md) for the full release and deploy flow.
 
 ## Local development
