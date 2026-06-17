@@ -1,10 +1,15 @@
 #!/usr/bin/env ts-node
 
 import puppeteer from "puppeteer";
-import * as fs from "fs";
+import {
+  createReadStream,
+  existsSync,
+  readFileSync,
+  statSync,
+} from "fs";
 import * as path from "path";
 import * as net from "net";
-import { spawn, ChildProcess } from "child_process";
+import * as http from "http";
 import Papa from "papaparse";
 import {
   parseEventTeams,
@@ -25,6 +30,24 @@ const TIMEOUT_MS = 120_000;
 const EVENTS_COUNTRIES_CACHE_KEY = "parkrun countries";
 const MAX_OVERLAY_PATHS = 500;
 const MAX_DOM_NODES = 10_000;
+const BROWSER_CLOSE_TIMEOUT_MS = 10_000;
+
+const MIME_TYPES: Record<string, string> = {
+  ".csv": "text/csv; charset=utf-8",
+  ".css": "text/css; charset=utf-8",
+  ".gif": "image/gif",
+  ".html": "text/html; charset=utf-8",
+  ".ico": "image/x-icon",
+  ".jpeg": "image/jpeg",
+  ".jpg": "image/jpeg",
+  ".js": "application/javascript; charset=utf-8",
+  ".json": "application/json; charset=utf-8",
+  ".png": "image/png",
+  ".svg": "image/svg+xml",
+  ".txt": "text/plain; charset=utf-8",
+  ".webp": "image/webp",
+  ".xml": "application/xml; charset=utf-8",
+};
 
 function fail(message: string): never {
   console.error(`FAIL: ${message}`);
@@ -113,42 +136,89 @@ function findAvailablePort(startPort: number): Promise<number> {
 async function startStaticServer(
   distDirectory: string,
   port: number,
-): Promise<ChildProcess> {
+): Promise<http.Server> {
+  const distRoot = path.resolve(distDirectory);
+
   return new Promise((resolve, reject) => {
-    const server = spawn(
-      "npx",
-      ["serve", "-s", distDirectory, "-l", String(port)],
-      {
-        stdio: "pipe",
-        shell: process.platform === "win32",
-      },
-    );
-
-    const timeout = setTimeout(() => {
-      reject(new Error("Timed out waiting for static server to start"));
-    }, 30_000);
-
-    server.stdout?.on("data", (chunk: Buffer) => {
-      const output = chunk.toString();
-      if (output.includes("Accepting connections")) {
-        clearTimeout(timeout);
-        resolve(server);
+    const server = http.createServer((request, response) => {
+      const filePath = resolveDistFile(distRoot, request.url ?? "/");
+      if (!filePath) {
+        response.writeHead(403);
+        response.end("Forbidden");
+        return;
       }
+
+      const extension = path.extname(filePath).toLowerCase();
+      response.setHeader(
+        "Content-Type",
+        MIME_TYPES[extension] ?? "application/octet-stream",
+      );
+      createReadStream(filePath)
+        .on("error", () => {
+          response.writeHead(500);
+          response.end("Internal Server Error");
+        })
+        .pipe(response);
     });
 
-    server.stderr?.on("data", (chunk: Buffer) => {
-      const output = chunk.toString();
-      if (output.includes("Accepting connections")) {
-        clearTimeout(timeout);
-        resolve(server);
-      }
-    });
+    server.on("error", reject);
+    server.listen(port, "127.0.0.1", () => resolve(server));
+  });
+}
 
-    server.on("error", (error) => {
-      clearTimeout(timeout);
-      reject(error);
+function resolveDistFile(
+  distRoot: string,
+  requestPath: string,
+): string | null {
+  const pathname = decodeURIComponent(requestPath.split("?")[0] ?? "/");
+  const relativePath = pathname.replace(/^\/+/, "") || "index.html";
+  const candidate = path.resolve(distRoot, relativePath);
+
+  if (candidate !== distRoot && !candidate.startsWith(`${distRoot}${path.sep}`)) {
+    return null;
+  }
+
+  if (existsSync(candidate) && statSync(candidate).isFile()) {
+    return candidate;
+  }
+
+  const indexPath = path.join(distRoot, "index.html");
+  return existsSync(indexPath) ? indexPath : null;
+}
+
+async function stopStaticServer(server: http.Server): Promise<void> {
+  await new Promise<void>((resolve, reject) => {
+    server.close((error) => {
+      if (error) {
+        reject(error);
+        return;
+      }
+      resolve();
     });
   });
+}
+
+async function closeBrowser(
+  browser: Awaited<ReturnType<typeof puppeteer.launch>>,
+): Promise<void> {
+  const pages = await browser.pages();
+  await Promise.all(
+    pages.map((page) => page.close({ runBeforeUnload: false })),
+  );
+
+  try {
+    await Promise.race([
+      browser.close(),
+      new Promise<never>((_, reject) => {
+        setTimeout(
+          () => reject(new Error("Timed out closing browser")),
+          BROWSER_CLOSE_TIMEOUT_MS,
+        );
+      }),
+    ]);
+  } catch {
+    browser.process()?.kill("SIGKILL");
+  }
 }
 
 function loadSampleAllocationState(): {
@@ -159,15 +229,15 @@ function loadSampleAllocationState(): {
   countriesCatalogueJson: string;
 } {
   const publicDir = path.join(process.cwd(), "public");
-  const eventAmbassadorsData = fs.readFileSync(
+  const eventAmbassadorsData = readFileSync(
     path.join(publicDir, "Ambassadors - Event Ambassadors.csv"),
     "utf-8",
   );
-  const eventTeamsData = fs.readFileSync(
+  const eventTeamsData = readFileSync(
     path.join(publicDir, "Ambassadors - Event Teams.csv"),
     "utf-8",
   );
-  const regionalAmbassadorsData = fs.readFileSync(
+  const regionalAmbassadorsData = readFileSync(
     path.join(publicDir, "Ambassadors - Regional Ambassadors.csv"),
     "utf-8",
   );
@@ -208,7 +278,7 @@ function loadSampleAllocationState(): {
 
 async function main(): Promise<void> {
   const distDirectory = path.join(process.cwd(), "dist");
-  if (!fs.existsSync(path.join(distDirectory, "index.html"))) {
+  if (!existsSync(path.join(distDirectory, "index.html"))) {
     fail(
       "dist/ is missing index.html — run pnpm run build before smoke:map-dom-budget",
     );
@@ -217,7 +287,7 @@ async function main(): Promise<void> {
   const port = Number(process.env.PORT ?? (await findAvailablePort(8081)));
   const baseUrl = process.env.BASE_URL ?? `http://localhost:${port}/`;
   const shouldStartServer = !process.env.BASE_URL;
-  let staticServer: ChildProcess | null = null;
+  let staticServer: http.Server | null = null;
 
   if (shouldStartServer) {
     step(`starting static server on port ${port}`);
@@ -374,14 +444,21 @@ async function main(): Promise<void> {
       `map DOM budget ok (${metrics.overlayPaths} overlay paths, ${metrics.overlayCanvasLayers} canvas layer(s), ${metrics.domNodes} DOM nodes)`,
     );
   } finally {
-    await browser.close();
+    step("closing browser");
+    await closeBrowser(browser);
     if (staticServer) {
-      staticServer.kill();
+      step("stopping static server");
+      await stopStaticServer(staticServer);
     }
   }
 }
 
-main().catch((error) => {
-  console.error(error);
-  process.exit(1);
-});
+main()
+  .then(() => {
+    step("done");
+    process.exit(0);
+  })
+  .catch((error) => {
+    console.error(error);
+    process.exit(1);
+  });
