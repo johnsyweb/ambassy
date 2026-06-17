@@ -120,6 +120,36 @@ describe("populateEventTeamsTable - Reallocate Button", () => {
     expect(row?.textContent).toContain("Pete Robinson — 13 Jun 2026");
   });
 
+  it("should display not imported when visit history is absent", () => {
+    eventTeamsTableData.set("test-event", {
+      ...eventTeamsTableData.get("test-event")!,
+      lastAmbassadorVisit: "Not imported",
+    });
+
+    populateEventTeamsTable(eventTeamsTableData);
+
+    const row = tableBody.querySelector(
+      "tr[data-event-short-name='test-event']",
+    );
+    const lastVisitCell = row?.querySelector("td.last-ambassador-visit-empty");
+    expect(lastVisitCell?.textContent).toBe("Not imported");
+  });
+
+  it("should display no visit on record when history has no finish for the event", () => {
+    eventTeamsTableData.set("test-event", {
+      ...eventTeamsTableData.get("test-event")!,
+      lastAmbassadorVisit: "No visit on record",
+    });
+
+    populateEventTeamsTable(eventTeamsTableData);
+
+    const row = tableBody.querySelector(
+      "tr[data-event-short-name='test-event']",
+    );
+    const lastVisitCell = row?.querySelector("td.last-ambassador-visit-empty");
+    expect(lastVisitCell?.textContent).toBe("No visit on record");
+  });
+
   it("should display Event Directors in table", () => {
     populateEventTeamsTable(eventTeamsTableData);
 

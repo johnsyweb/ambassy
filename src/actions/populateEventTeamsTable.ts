@@ -5,6 +5,10 @@ import {
 } from "@models/EventTeamsTableData";
 import { SelectionState } from "@models/SelectionState";
 import { buildAmbassadorFilterText } from "@utils/ambassadorNameFilter";
+import {
+  LAST_AMBASSADOR_VISIT_NONE_ON_RECORD,
+  LAST_AMBASSADOR_VISIT_NOT_IMPORTED,
+} from "@utils/computeLastAmbassadorVisit";
 import { colorPalette } from "./colorPalette";
 import { initializeTableSorting } from "./tableSorting";
 
@@ -106,7 +110,14 @@ export function populateEventTeamsTable(
     row.appendChild(eventCountryCell);
 
     const lastVisitCell = document.createElement("td");
-    lastVisitCell.textContent = data.lastAmbassadorVisit ?? "N/A";
+    lastVisitCell.textContent =
+      data.lastAmbassadorVisit ?? LAST_AMBASSADOR_VISIT_NOT_IMPORTED;
+    if (
+      data.lastAmbassadorVisit === LAST_AMBASSADOR_VISIT_NOT_IMPORTED ||
+      data.lastAmbassadorVisit === LAST_AMBASSADOR_VISIT_NONE_ON_RECORD
+    ) {
+      lastVisitCell.className = "last-ambassador-visit-empty";
+    }
     row.appendChild(lastVisitCell);
 
     const actionsCell = document.createElement("td");

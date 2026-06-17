@@ -303,6 +303,11 @@ tr.selected:hover {
   border-radius: 2px;
 }
 
+.last-ambassador-visit-empty {
+  color: var(--parkrun-grey);
+  font-style: italic;
+}
+
 /* Full-width breakout so header/footer span viewport when embedded */
 .app-header,
 .app-footer {
