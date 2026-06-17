@@ -44,6 +44,14 @@ _Avoid_: Unassigned event (ambiguous with never-allocated vs offboarded)
 A not-yet-live event in Ambassy's pipeline. Contributes to the Voronoi diagram as a visible site only when it has valid coordinates and an assigned Event Ambassador.
 _Avoid_: Prospect (alone in map context)
 
+**Prospect map marker**:
+The diamond marker on the territory map for a geocoded prospective event. Shape distinguishes it from live event circle markers. Border colour is the assigned Event Ambassador's colour; three internal segments encode **prospect launch readiness** — filled with the EA colour when confirmed, light grey when not. Tooltip lists all three readiness flags explicitly, alongside event name, ambassador, and location.
+_Avoid_: Prospect pin, pipeline marker
+
+**Prospect launch readiness**:
+The three boolean launch-pipeline flags on a prospective event: course found, landowner permission, and funding confirmed. Shown per-flag in the Prospects table and as three segments on the prospect map marker — top, bottom-left, and bottom-right respectively.
+_Avoid_: Launch status (too vague), readiness score
+
 **Voronoi site**:
 Any point that competes in the REA territory Voronoi diagram. Site types:
 
@@ -127,6 +135,10 @@ _Avoid_: Search (too generic), table search
 **Filtered map view**:
 The map presentation when an ambassador name filter is active. Allocated event markers and prospect markers follow the same matching rules as Event Teams and Prospects respectively; unallocated parkrun markers are hidden. REA territory polygons are drawn only for Regional Event Ambassadors with at least one visible allocated event. The Voronoi diagram is not recomputed — only which markers and polygons are shown changes.
 _Avoid_: Map search, clipped Voronoi
+
+**Territory map**:
+The main Ambassy map showing live event markers, prospective event markers, and REA territory polygons. Primary audience is the Regional Event Ambassador scanning allocation and launch pipeline across Event Ambassadors in a region. When prospective events are present, a persistent map legend explains live circle vs prospect diamond markers and the three prospect launch readiness segments (not Event Ambassador border colour, which matches live event markers).
+_Avoid_: Territory manager (not a defined role), allocation map
 
 **State export**:
 A single JSON file containing all Ambassy data that cannot be recovered from parkrun alone: allocations, ambassadors, prospective events, capacity limits, changes log, manually resolved event coordinates, parkrunner IDs, and visit histories.
