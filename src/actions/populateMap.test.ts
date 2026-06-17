@@ -8,6 +8,7 @@ import {
   getLiveMarkersLayer,
   getProspectMarkersLayer,
   getUnallocatedMarkersLayer,
+  getPolygonsLayer,
   getMap,
   getHighlightLayer,
   refreshViewportUnallocatedMarkersForTests,
@@ -24,6 +25,10 @@ import {
   UNALLOCATED_PARKRUNS_OVERLAY_LABEL,
   REGIONAL_EVENT_AMBASSADOR_OVERLAY_LABEL,
 } from "@utils/territoryMapOverlays";
+import {
+  getTerritoryMapOverlayVisibility,
+  setTerritoryMapOverlayVisibility,
+} from "@utils/territoryMapOverlayVisibility";
 import L from "leaflet";
 
 jest.mock("d3-geo-voronoi", () => ({
@@ -1008,6 +1013,47 @@ describe("populateMap", () => {
       map.fire("overlayremove");
 
       expect(highlightLayer.getLayers().length).toBe(0);
+    });
+
+    it("restores overlay visibility from session storage after reload", () => {
+      setTerritoryMapOverlayVisibility({
+        liveEvents: false,
+        prospectiveEvents: true,
+        unallocatedParkruns: false,
+        regionalEventAmbassador: false,
+      });
+
+      populateMixedMarkerMap();
+      const map = getMap()!;
+
+      expect(map.hasLayer(getLiveMarkersLayer())).toBe(false);
+      expect(map.hasLayer(getProspectMarkersLayer())).toBe(true);
+      expect(map.hasLayer(getUnallocatedMarkersLayer())).toBe(false);
+      expect(map.hasLayer(getPolygonsLayer())).toBe(false);
+    });
+
+    it("persists overlay toggles to session storage", () => {
+      populateMixedMarkerMap();
+      const map = getMap()!;
+
+      map.removeLayer(getLiveMarkersLayer());
+      map.removeLayer(getPolygonsLayer());
+      map.fire("overlayremove");
+
+      expect(getTerritoryMapOverlayVisibility()).toEqual({
+        liveEvents: false,
+        prospectiveEvents: true,
+        unallocatedParkruns: true,
+        regionalEventAmbassador: false,
+      });
+
+      resetVoronoiTerritoryCacheForTests();
+      document.body.innerHTML = '<div id="mapContainer"></div>';
+
+      populateMixedMarkerMap();
+
+      expect(getMap()!.hasLayer(getLiveMarkersLayer())).toBe(false);
+      expect(getMap()!.hasLayer(getPolygonsLayer())).toBe(false);
     });
   });
 

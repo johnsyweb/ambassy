@@ -141,7 +141,7 @@ The main Ambassy map showing live event markers, prospective event markers, view
 _Avoid_: Territory manager (not a defined role), allocation map
 
 **Territory map overlay**:
-A togglable marker or polygon group on the territory map layer control. **Live events**, **Prospective events**, and **Unallocated parkruns** are separate marker overlays; **Regional Event Ambassador** territory polygons are a separate overlay. All three marker overlays default to visible until the REA toggles them off.
+A togglable marker or polygon group on the territory map layer control. **Live events**, **Prospective events**, and **Unallocated parkruns** are separate marker overlays; **Regional Event Ambassador** territory polygons are a separate overlay. All three marker overlays default to visible until the REA toggles them off. Overlay visibility persists in session storage for the working session (cleared on Purge), like the ambassador name filter — not in state export/import.
 _Avoid_: Event Markers (retired combined overlay), map layer (too vague)
 
 **Live events map overlay**:

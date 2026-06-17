@@ -50,6 +50,10 @@ import {
   REGIONAL_EVENT_AMBASSADOR_OVERLAY_LABEL,
   UNALLOCATED_PARKRUNS_OVERLAY_LABEL,
 } from "@utils/territoryMapOverlays";
+import {
+  getTerritoryMapOverlayVisibility,
+  setTerritoryMapOverlayVisibility,
+} from "@utils/territoryMapOverlayVisibility";
 import { colorPalette } from "./colorPalette";
 
 const DEFAULT_EVENT_COLOUR = "rebeccapurple";
@@ -237,9 +241,7 @@ export function populateMap(
   ensureViewportClipListener(map!);
   applyAmbassadorNameFilterToMap(eventTeamsTableData);
 
-  // Note: polygons are non-interactive (interactive: false) so they don't block marker clicks
-  polygonsLayer.addTo(map!);
-  ensureMarkerOverlayStack(map!, isNewMap);
+  applyTerritoryMapOverlayVisibility(map!);
 
   // Add or update layer control (remove existing if present)
   if (_layersControl) {
@@ -329,26 +331,56 @@ function setupMapView(eventBounds: L.LatLngBounds | null): {
   };
 }
 
-function ensureMarkerOverlayStack(map: L.Map, defaultAllOn: boolean): void {
-  const layers = [
-    _unallocatedMarkersLayer,
-    _prospectMarkersLayer,
-    _liveMarkersLayer,
+function applyTerritoryMapOverlayVisibility(map: L.Map): void {
+  const visibility = getTerritoryMapOverlayVisibility();
+  const markerLayers = [
+    {
+      layer: _unallocatedMarkersLayer,
+      visible: visibility.unallocatedParkruns,
+    },
+    {
+      layer: _prospectMarkersLayer,
+      visible: visibility.prospectiveEvents,
+    },
+    { layer: _liveMarkersLayer, visible: visibility.liveEvents },
   ];
-  const visibility = defaultAllOn
-    ? layers.map(() => true)
-    : layers.map((layer) => map.hasLayer(layer));
 
-  for (const layer of layers) {
-    if (map.hasLayer(layer)) {
-      layer.remove();
+  _suppressOverlayPersistence = true;
+  try {
+    for (const { layer } of markerLayers) {
+      if (map.hasLayer(layer)) {
+        layer.remove();
+      }
     }
+
+    for (const { layer, visible } of markerLayers) {
+      if (visible) {
+        layer.addTo(map);
+      }
+    }
+
+    if (visibility.regionalEventAmbassador) {
+      if (!map.hasLayer(_polygonsLayer)) {
+        _polygonsLayer.addTo(map);
+      }
+    } else if (map.hasLayer(_polygonsLayer)) {
+      _polygonsLayer.remove();
+    }
+  } finally {
+    _suppressOverlayPersistence = false;
+  }
+}
+
+function persistTerritoryMapOverlayVisibilityFromMap(map: L.Map): void {
+  if (_suppressOverlayPersistence) {
+    return;
   }
 
-  visibility.forEach((visible, index) => {
-    if (visible) {
-      layers[index].addTo(map);
-    }
+  setTerritoryMapOverlayVisibility({
+    liveEvents: map.hasLayer(_liveMarkersLayer),
+    prospectiveEvents: map.hasLayer(_prospectMarkersLayer),
+    unallocatedParkruns: map.hasLayer(_unallocatedMarkersLayer),
+    regionalEventAmbassador: map.hasLayer(_polygonsLayer),
   });
 }
 
@@ -394,6 +426,7 @@ function ensureMapOverlayListener(map: L.Map): void {
   }
 
   map.on("overlayadd overlayremove", () => {
+    persistTerritoryMapOverlayVisibilityFromMap(map);
     syncProspectMapLegendVisibility();
     refreshSelectionHighlightForOverlayState();
   });
@@ -636,6 +669,7 @@ const _voronoiTerritoryCache = new VoronoiTerritoryCache();
 let _currentVoronoiSites: VoronoiSite[] = [];
 let _viewportClipListenerAttached = false;
 let _overlayListenerAttached = false;
+let _suppressOverlayPersistence = false;
 let _mapTerritoryFilterContext: {
   eventTeamsTableData: EventTeamsTableDataMap;
   filter: string;
@@ -782,6 +816,7 @@ export function resetVoronoiTerritoryCacheForTests(): void {
   _currentVoronoiSites = [];
   _viewportClipListenerAttached = false;
   _overlayListenerAttached = false;
+  _suppressOverlayPersistence = false;
   _eventMarkerFilterState.clear();
   _prospectMarkers.clear();
   _unallocatedMarkerMap.clear();
@@ -828,6 +863,10 @@ export function getProspectMarkersLayer(): L.LayerGroup {
 
 export function getUnallocatedMarkersLayer(): L.LayerGroup {
   return _unallocatedMarkersLayer;
+}
+
+export function getPolygonsLayer(): L.LayerGroup {
+  return _polygonsLayer;
 }
 
 export function getMarkerMap(): Map<string, L.CircleMarker> {
