@@ -12,18 +12,17 @@ jest.mock("d3-geo-voronoi", () => ({
 import {
   populateEventTeamsTable,
   setReallocateButtonHandler,
-  updateReallocateButtonStates,
+  resetEventTeamsTableActionHandlersForTests,
 } from "./populateEventTeamsTable";
 import { EventTeamsTableDataMap } from "@models/EventTeamsTableData";
-import { SelectionState, createSelectionState } from "@models/SelectionState";
 import { applyAmbassadorNameFilterToTables } from "@utils/ambassadorNameFilter";
 
 describe("populateEventTeamsTable - Reallocate Button", () => {
   let eventTeamsTableData: EventTeamsTableDataMap;
-  let selectionState: SelectionState;
   let tableBody: HTMLTableSectionElement;
 
   beforeEach(() => {
+    resetEventTeamsTableActionHandlersForTests();
     document.body.innerHTML = `
       <table id="eventTeamsTable">
         <thead>
@@ -57,8 +56,6 @@ describe("populateEventTeamsTable - Reallocate Button", () => {
       eventCountry: "Australia",
       lastAmbassadorVisit: "Pete Robinson — 13 Jun 2026",
     });
-
-    selectionState = createSelectionState();
   });
 
   it("should add Reallocate button to each row", () => {
@@ -79,25 +76,8 @@ describe("populateEventTeamsTable - Reallocate Button", () => {
     expect(reallocateButton?.textContent).toBe("🤝🏼 Reallocate");
   });
 
-  it("should disable Reallocate button when no row is selected", () => {
-    selectionState.selectedEventShortName = null;
-    setReallocateButtonHandler(selectionState, () => {});
-
-    populateEventTeamsTable(eventTeamsTableData);
-
-    const row = tableBody.querySelector(
-      "tr[data-event-short-name='test-event']",
-    );
-    const reallocateButton = row?.querySelector(
-      "button.reallocate-button",
-    ) as HTMLButtonElement;
-
-    expect(reallocateButton.disabled).toBe(true);
-  });
-
-  it("should enable Reallocate button when row is selected", () => {
-    selectionState.selectedEventShortName = "test-event";
-    setReallocateButtonHandler(selectionState, () => {});
+  it("should enable Reallocate button when handler is registered", () => {
+    setReallocateButtonHandler(() => {});
 
     populateEventTeamsTable(eventTeamsTableData);
 
@@ -109,6 +89,19 @@ describe("populateEventTeamsTable - Reallocate Button", () => {
     ) as HTMLButtonElement;
 
     expect(reallocateButton.disabled).toBe(false);
+  });
+
+  it("should disable Reallocate button when no handler is registered", () => {
+    populateEventTeamsTable(eventTeamsTableData);
+
+    const row = tableBody.querySelector(
+      "tr[data-event-short-name='test-event']",
+    );
+    const reallocateButton = row?.querySelector(
+      "button.reallocate-button",
+    ) as HTMLButtonElement;
+
+    expect(reallocateButton.disabled).toBe(true);
   });
 
   it("should display last ambassador visit in table", () => {
@@ -201,8 +194,7 @@ describe("populateEventTeamsTable - Reallocate Button", () => {
 
   it("should call handler when Reallocate button is clicked", () => {
     const handler = jest.fn();
-    selectionState.selectedEventShortName = "test-event";
-    setReallocateButtonHandler(selectionState, handler);
+    setReallocateButtonHandler(handler);
 
     populateEventTeamsTable(eventTeamsTableData);
 
@@ -220,8 +212,7 @@ describe("populateEventTeamsTable - Reallocate Button", () => {
 
   it("should be keyboard accessible (Enter key)", () => {
     const handler = jest.fn();
-    selectionState.selectedEventShortName = "test-event";
-    setReallocateButtonHandler(selectionState, handler);
+    setReallocateButtonHandler(handler);
 
     populateEventTeamsTable(eventTeamsTableData);
 
@@ -240,8 +231,7 @@ describe("populateEventTeamsTable - Reallocate Button", () => {
 
   it("should be keyboard accessible (Space key)", () => {
     const handler = jest.fn();
-    selectionState.selectedEventShortName = "test-event";
-    setReallocateButtonHandler(selectionState, handler);
+    setReallocateButtonHandler(handler);
 
     populateEventTeamsTable(eventTeamsTableData);
 
@@ -284,29 +274,5 @@ describe("populateEventTeamsTable - Reallocate Button", () => {
 
     expect(matchingRow.hidden).toBe(false);
     expect(hiddenRow.hidden).toBe(true);
-  });
-
-  it("should update button state when selection changes", () => {
-    selectionState.selectedEventShortName = null;
-    setReallocateButtonHandler(selectionState, () => {});
-
-    populateEventTeamsTable(eventTeamsTableData);
-
-    let row = tableBody.querySelector("tr[data-event-short-name='test-event']");
-    let reallocateButton = row?.querySelector(
-      "button.reallocate-button",
-    ) as HTMLButtonElement;
-
-    updateReallocateButtonStates();
-    expect(reallocateButton.disabled).toBe(true);
-
-    selectionState.selectedEventShortName = "test-event";
-    updateReallocateButtonStates();
-
-    row = tableBody.querySelector("tr[data-event-short-name='test-event']");
-    reallocateButton = row?.querySelector(
-      "button.reallocate-button",
-    ) as HTMLButtonElement;
-    expect(reallocateButton.disabled).toBe(false);
   });
 });
