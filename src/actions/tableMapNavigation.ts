@@ -196,7 +196,6 @@ export function selectLiveEventFromTerritoryMapSearch(
   if (eventTeamsTableData.has(eventShortName)) {
     activateTabAtIndex(0);
     highlightTableRow("eventTeamsTable", eventShortName, true);
-    scrollToTableRow("eventTeamsTable", eventShortName);
   }
 }
 
@@ -227,7 +226,6 @@ export function selectProspectFromTerritoryMapSearch(
   }
 
   highlightProspectTableRow("prospectsTable", prospectId, true);
-  scrollToProspectTableRow("prospectsTable", prospectId);
 
   return !hasLocation;
 }
