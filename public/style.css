@@ -127,6 +127,7 @@ tr:hover {
 }
 
 #mapContainer {
+  position: relative;
   height: 800px;
   width: 95%;
   margin: auto;
@@ -344,12 +345,37 @@ tr.selected:hover {
 }
 /* Prospective Event Markers */
 .prospective-event-marker {
-  /* Color is set dynamically via inline styles based on EA assignment */
-  font-size: 16px;
-  font-weight: bold;
-  text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.5);
   background: transparent;
   border: none;
+}
+
+.prospective-event-marker svg {
+  display: block;
+  width: 20px;
+  height: 20px;
+}
+
+.prospect-map-legend-host {
+  position: absolute;
+  bottom: 0.75rem;
+  left: 0.75rem;
+  z-index: 1000;
+  max-width: 14rem;
+  padding: 0.5rem 0.75rem;
+  background: rgba(255, 255, 255, 0.92);
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  line-height: 1.35;
+  pointer-events: none;
+}
+
+.prospect-map-legend p {
+  margin: 0 0 0.35rem;
+}
+
+.prospect-map-legend p:last-child {
+  margin-bottom: 0;
 }
 
 /* Event History Links */

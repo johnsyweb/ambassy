@@ -93,6 +93,9 @@ function appendProspectParts(
         prospect.eventAmbassador ?? "",
         longitude,
         latitude,
+        prospect.courseFound ? "1" : "0",
+        prospect.landownerPermission ? "1" : "0",
+        prospect.fundingConfirmed ? "1" : "0",
       ].join(":"),
     );
   }

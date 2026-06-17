@@ -144,4 +144,40 @@ describe("computeMapPopulationFingerprint", () => {
 
     expect(after).not.toBe(before);
   });
+
+  it("changes when prospect launch readiness flags change", () => {
+    const eventTeamsTableData = new Map() as EventTeamsTableDataMap;
+    const eventDetails = new Map() as EventDetailsMap;
+    const prospect: ProspectiveEvent = {
+      id: "prospect-1",
+      prospectEvent: "Future parkrun",
+      country: "Australia",
+      state: "VIC",
+      prospectEDs: "ED",
+      eventAmbassador: "EA1",
+      courseFound: false,
+      landownerPermission: false,
+      fundingConfirmed: false,
+      dateMadeContact: null,
+      coordinates: fromGeoJSONArray([144.9, -37.8]),
+      geocodingStatus: "success",
+      ambassadorMatchStatus: "matched",
+      importTimestamp: 1,
+      sourceRow: 1,
+    };
+
+    const before = computeMapPopulationFingerprint({
+      eventTeamsTableData,
+      eventDetails,
+      prospectiveEvents: [prospect],
+    });
+
+    const after = computeMapPopulationFingerprint({
+      eventTeamsTableData,
+      eventDetails,
+      prospectiveEvents: [{ ...prospect, courseFound: true }],
+    });
+
+    expect(after).not.toBe(before);
+  });
 });

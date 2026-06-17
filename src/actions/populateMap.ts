@@ -31,6 +31,13 @@ import {
   isAmbassadorNameFilterActive,
   prospectRowMatchesAmbassadorNameFilter,
 } from "@utils/ambassadorNameFilter";
+import {
+  buildProspectMapMarkerHtml,
+  formatProspectMapTooltip,
+  PROSPECT_MAP_MARKER_ANCHOR,
+  PROSPECT_MAP_MARKER_SIZE,
+  syncProspectMapLegend,
+} from "@utils/prospectMapMarker";
 import { colorPalette } from "./colorPalette";
 
 const DEFAULT_EVENT_COLOUR = "rebeccapurple";
@@ -123,33 +130,35 @@ export function populateMap(
   });
 
   // Add markers for prospective events
+  let geocodedProspectCount = 0;
   if (prospectiveEvents && prospectiveEvents.length > 0) {
     prospectiveEvents.forEach((prospect) => {
       if (prospect.coordinates && prospect.geocodingStatus === "success") {
-        // Get the EA's color for the prospective event marker
+        geocodedProspectCount += 1;
         const eaColor = prospect.eventAmbassador
           ? (eaColorMap.get(prospect.eventAmbassador) ?? DEFAULT_EVENT_COLOUR)
-          : DEFAULT_EVENT_COLOUR; // Default color for unassigned prospects
+          : DEFAULT_EVENT_COLOUR;
 
-        // Use diamond shape with EA's color
         const marker = L.marker(toLeafletArray(prospect.coordinates), {
           icon: L.divIcon({
             className: "prospective-event-marker",
-            html: `<span style="color: ${eaColor}; font-size: 16px;">◆</span>`,
-            iconSize: [16, 16],
-            iconAnchor: [8, 8],
+            html: buildProspectMapMarkerHtml(
+              {
+                courseFound: prospect.courseFound,
+                landownerPermission: prospect.landownerPermission,
+                fundingConfirmed: prospect.fundingConfirmed,
+              },
+              eaColor,
+            ),
+            iconSize: [PROSPECT_MAP_MARKER_SIZE, PROSPECT_MAP_MARKER_SIZE],
+            iconAnchor: [
+              PROSPECT_MAP_MARKER_ANCHOR,
+              PROSPECT_MAP_MARKER_ANCHOR,
+            ],
           }),
         });
 
-        const tooltip = `
-          <strong>Prospective Event:</strong> ${prospect.prospectEvent}<br>
-          <strong>Country:</strong> ${prospect.country}<br>
-          <strong>State:</strong> ${prospect.state}<br>
-          <strong>Event Ambassador:</strong> ${prospect.eventAmbassador || "Unassigned"}<br>
-          <strong>Status:</strong> ${prospect.ambassadorMatchStatus}
-        `;
-
-        marker.bindTooltip(tooltip);
+        marker.bindTooltip(formatProspectMapTooltip(prospect));
         markersLayer.addLayer(marker);
         _prospectMarkers.set(prospect.id, {
           marker,
@@ -236,6 +245,11 @@ export function populateMap(
   };
   _layersControl = L.control.layers(undefined, overlayMaps);
   _layersControl.addTo(map!);
+
+  const mapContainer = document.getElementById("mapContainer");
+  if (mapContainer) {
+    syncProspectMapLegend(mapContainer, geocodedProspectCount > 0);
+  }
 }
 
 /**
@@ -622,9 +636,18 @@ export function resetVoronoiTerritoryCacheForTests(): void {
     _layersControl = null;
   }
   if (_map) {
-    _map.remove();
+    try {
+      _map.remove();
+    } catch {
+      // jsdom tests may destroy the container before teardown runs
+    }
     _map = null;
   }
+
+  document
+    .getElementById("mapContainer")
+    ?.querySelector(".prospect-map-legend-host")
+    ?.remove();
 }
 
 export function getUnallocatedMarkerMap(): Map<string, L.CircleMarker> {

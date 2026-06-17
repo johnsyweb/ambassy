@@ -20,18 +20,17 @@ jest.mock("d3-geo-voronoi", () => ({
 describe("populateMap", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    document.body.innerHTML = '<div id="mapContainer"></div>';
     resetVoronoiTerritoryCacheForTests();
   });
 
+  afterEach(() => {
+    resetVoronoiTerritoryCacheForTests();
+    document.body.innerHTML = "";
+    sessionStorage.clear();
+  });
+
   describe("Event Directors in tooltips", () => {
-    beforeEach(() => {
-      document.body.innerHTML = '<div id="mapContainer"></div>';
-    });
-
-    afterEach(() => {
-      document.body.innerHTML = "";
-    });
-
     it("should include Event Directors in map tooltip for allocated events", () => {
       const eventTeamsTableData = new Map();
       eventTeamsTableData.set("event1", {
@@ -134,14 +133,6 @@ describe("populateMap", () => {
   });
 
   describe("Map refresh after allocation", () => {
-    beforeEach(() => {
-      document.body.innerHTML = '<div id="mapContainer"></div>';
-    });
-
-    afterEach(() => {
-      document.body.innerHTML = "";
-    });
-
     it("should render newly allocated events with EA color and larger size", () => {
       const eventTeamsTableData = new Map();
       eventTeamsTableData.set("event1", {
@@ -246,16 +237,6 @@ describe("populateMap", () => {
   });
 
   describe("Ambassador name filter", () => {
-    beforeEach(() => {
-      document.body.innerHTML = '<div id="mapContainer"></div>';
-      sessionStorage.clear();
-    });
-
-    afterEach(() => {
-      document.body.innerHTML = "";
-      sessionStorage.clear();
-    });
-
     it("creates markers only for allocated events, not unallocated catalogue entries", () => {
       const eventTeamsTableData = new Map();
       eventTeamsTableData.set("event1", {
@@ -421,16 +402,6 @@ describe("populateMap", () => {
   });
 
   describe("Viewport unallocated markers", () => {
-    beforeEach(() => {
-      document.body.innerHTML = '<div id="mapContainer"></div>';
-      sessionStorage.clear();
-    });
-
-    afterEach(() => {
-      document.body.innerHTML = "";
-      sessionStorage.clear();
-    });
-
     it("shows unallocated markers in the viewport and updates them on pan", () => {
       const eventTeamsTableData = new Map();
       eventTeamsTableData.set("event1", {
@@ -534,14 +505,6 @@ describe("populateMap", () => {
   });
 
   describe("Canvas marker rendering", () => {
-    beforeEach(() => {
-      document.body.innerHTML = '<div id="mapContainer"></div>';
-    });
-
-    afterEach(() => {
-      document.body.innerHTML = "";
-    });
-
     it("enables preferCanvas so circle markers use the canvas renderer", () => {
       const eventTeamsTableData = new Map();
       eventTeamsTableData.set("event1", {
@@ -647,14 +610,6 @@ describe("populateMap", () => {
   });
 
   describe("Map population fingerprint", () => {
-    beforeEach(() => {
-      document.body.innerHTML = '<div id="mapContainer"></div>';
-    });
-
-    afterEach(() => {
-      document.body.innerHTML = "";
-    });
-
     it("does not rebuild markers when map inputs are unchanged", () => {
       const eventTeamsTableData = new Map();
       eventTeamsTableData.set("event1", {
@@ -791,6 +746,71 @@ describe("populateMap", () => {
       );
 
       expect(getMarkerMap().size).toBe(2);
+    });
+  });
+
+  describe("Prospective event map markers", () => {
+    it("renders readiness segments on geocoded prospect markers and shows the map legend", () => {
+      const eventTeamsTableData = new Map();
+      const eventDetails = new Map();
+      const eventAmbassadors = new Map([
+        [
+          "EA1",
+          {
+            name: "EA1",
+            events: [],
+            prospectiveEvents: ["p1"],
+          },
+        ],
+      ]);
+      const regionalAmbassadors = new Map([
+        [
+          "REA1",
+          {
+            name: "REA1",
+            state: "VIC",
+            supportsEAs: ["EA1"],
+          },
+        ],
+      ]);
+      const prospectiveEvents = [
+        {
+          id: "p1",
+          prospectEvent: "Future parkrun",
+          country: "Australia",
+          state: "VIC",
+          prospectEDs: "Pat",
+          eventAmbassador: "EA1",
+          courseFound: true,
+          landownerPermission: false,
+          fundingConfirmed: true,
+          dateMadeContact: null,
+          coordinates: {
+            latitude: -37.8136,
+            longitude: 144.9631,
+            source: "manual" as const,
+          },
+          geocodingStatus: "success" as const,
+          ambassadorMatchStatus: "matched" as const,
+          importTimestamp: 0,
+          sourceRow: 1,
+        },
+      ];
+
+      populateMap(
+        eventTeamsTableData,
+        eventDetails,
+        eventAmbassadors,
+        regionalAmbassadors,
+        prospectiveEvents,
+      );
+
+      const markerIcon = document.querySelector(
+        ".prospective-event-marker",
+      )?.innerHTML;
+      expect(markerIcon).toContain('data-readiness="course-found"');
+      expect(markerIcon).toContain('data-readiness="funding-confirmed"');
+      expect(document.querySelector(".prospect-map-legend")).not.toBeNull();
     });
   });
 });
