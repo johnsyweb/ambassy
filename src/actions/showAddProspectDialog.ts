@@ -9,10 +9,23 @@ import { EventAmbassadorMap } from "@models/EventAmbassadorMap";
 import { RegionalAmbassadorMap } from "@models/RegionalAmbassadorMap";
 import { EventDetailsMap } from "@models/EventDetailsMap";
 import { ReallocationSuggestion } from "@models/ReallocationSuggestion";
-import { geocodeAddress } from "@utils/geocoding";
+import {
+  geocodeAddress,
+  searchPlaces,
+  PlaceSearchResult,
+} from "@utils/geocoding";
 import { createCoordinate } from "@models/Coordinate";
 import { inferCountryCodeFromCoordinates } from "@models/country";
 import { resolveProspectGeocodingStatus } from "@utils/prospectGeocodingStatus";
+import {
+  buildPlaceSearchQuery,
+  inferExpectedCountryCodeFromStateRegion,
+} from "@utils/prospectPlaceSearch";
+import {
+  getAddProspectLocationStatusClassName,
+  renderAddProspectLocationStatusMessage,
+} from "@utils/addProspectLocationStatus";
+import { renderAddProspectPlaceListboxHtml } from "@utils/renderAddProspectPlaceListboxHtml";
 import { generateProspectAllocationSuggestions } from "./suggestEventAllocation";
 import { createProspectFromAddress } from "./createProspectFromAddress";
 import {
@@ -28,6 +41,12 @@ export type AddProspectDialogInitialPlace = {
   longitude: number;
   coordinatesWereDragged: boolean;
 };
+
+function disableFieldAutocomplete(
+  element: HTMLInputElement | HTMLSelectElement,
+): void {
+  element.setAttribute("autocomplete", "off");
+}
 
 export function showAddProspectDialog(
   eventAmbassadors: EventAmbassadorMap,
@@ -91,6 +110,7 @@ export function showAddProspectDialog(
   container.appendChild(prospectNameLabel);
 
   const prospectNameInput = document.createElement("input");
+  prospectNameInput.id = "addProspectNameInput";
   prospectNameInput.type = "text";
   prospectNameInput.placeholder = "e.g., New Park Prospect";
   prospectNameInput.style.width = "100%";
@@ -98,33 +118,8 @@ export function showAddProspectDialog(
   prospectNameInput.style.marginBottom = "1em";
   prospectNameInput.style.border = "1px solid #ccc";
   prospectNameInput.style.borderRadius = "4px";
+  disableFieldAutocomplete(prospectNameInput);
   container.appendChild(prospectNameInput);
-
-  const addressLabel = document.createElement("label");
-  addressLabel.textContent = "Address: *";
-  addressLabel.style.display = "block";
-  addressLabel.style.marginBottom = "0.25em";
-  addressLabel.style.fontWeight = "bold";
-  container.appendChild(addressLabel);
-
-  const addressInput = document.createElement("input");
-  addressInput.type = "text";
-  addressInput.placeholder = "e.g., 123 Main St, Melbourne VIC 3000, Australia";
-  addressInput.style.width = "100%";
-  addressInput.style.padding = "0.5em";
-  addressInput.style.marginBottom = "1em";
-  addressInput.style.border = "1px solid #ccc";
-  addressInput.style.borderRadius = "4px";
-  container.appendChild(addressInput);
-
-  const locationFromMapNote = document.createElement("p");
-  locationFromMapNote.className = "add-prospect-location-from-map-note";
-  locationFromMapNote.style.display = "none";
-  locationFromMapNote.style.marginBottom = "1em";
-  locationFromMapNote.style.color = "#555";
-  locationFromMapNote.textContent =
-    "Location set from map. Edit the address to search for a different place.";
-  container.appendChild(locationFromMapNote);
 
   const stateLabel = document.createElement("label");
   stateLabel.textContent = "State/Region: *";
@@ -134,14 +129,83 @@ export function showAddProspectDialog(
   container.appendChild(stateLabel);
 
   const stateInput = document.createElement("input");
+  stateInput.id = "addProspectStateInput";
   stateInput.type = "text";
-  stateInput.placeholder = "e.g., VIC, NSW";
+  stateInput.placeholder = "e.g., VIC, NSW, NZ";
   stateInput.style.width = "100%";
   stateInput.style.padding = "0.5em";
   stateInput.style.marginBottom = "1em";
   stateInput.style.border = "1px solid #ccc";
   stateInput.style.borderRadius = "4px";
+  disableFieldAutocomplete(stateInput);
   container.appendChild(stateInput);
+
+  const addressLabel = document.createElement("label");
+  addressLabel.htmlFor = "addProspectAddressInput";
+  addressLabel.textContent = "Address: *";
+  addressLabel.style.display = "block";
+  addressLabel.style.marginBottom = "0.25em";
+  addressLabel.style.fontWeight = "bold";
+
+  const addressField = document.createElement("div");
+  addressField.className = "add-prospect-address-field";
+  addressField.appendChild(addressLabel);
+
+  const addressInput = document.createElement("input");
+  addressInput.id = "addProspectAddressInput";
+  addressInput.type = "text";
+  addressInput.placeholder = "e.g., 123 Main St, Melbourne VIC 3000, Australia";
+  addressInput.style.width = "100%";
+  addressInput.style.padding = "0.5em";
+  addressInput.style.border = "1px solid #ccc";
+  addressInput.style.borderRadius = "4px";
+  addressInput.setAttribute("role", "combobox");
+  addressInput.setAttribute("aria-expanded", "false");
+  addressInput.setAttribute("aria-controls", "addProspectPlacesListbox");
+  disableFieldAutocomplete(addressInput);
+  addressInput.setAttribute("data-1p-ignore", "true");
+  addressInput.setAttribute("data-lpignore", "true");
+  addressInput.setAttribute("spellcheck", "false");
+  addressField.appendChild(addressInput);
+
+  const placesContainer = document.createElement("div");
+  placesContainer.id = "addProspectPlacesListbox";
+  placesContainer.className = "territory-map-search-listbox";
+  placesContainer.hidden = true;
+  placesContainer.setAttribute("role", "listbox");
+  placesContainer.setAttribute("aria-label", "Places");
+  addressField.appendChild(placesContainer);
+
+  const locationStatus = document.createElement("div");
+  locationStatus.id = "addProspectLocationStatus";
+  locationStatus.className =
+    "add-prospect-location-status territory-map-search-status";
+  locationStatus.style.display = "none";
+  locationStatus.setAttribute("role", "status");
+  locationStatus.setAttribute("aria-live", "polite");
+  addressField.appendChild(locationStatus);
+
+  const locationFromMapNote = document.createElement("p");
+  locationFromMapNote.className = "add-prospect-location-from-map-note";
+  locationFromMapNote.style.display = "none";
+  locationFromMapNote.style.marginTop = "0.5em";
+  locationFromMapNote.style.color = "#555";
+  locationFromMapNote.textContent =
+    "Location set from map. Edit the address to search for a different place.";
+  addressField.appendChild(locationFromMapNote);
+
+  container.appendChild(addressField);
+
+  const errorMessage = document.createElement("div");
+  errorMessage.id = "geocodingError";
+  errorMessage.style.display = "none";
+  errorMessage.style.color = "#d32f2f";
+  errorMessage.style.marginBottom = "1em";
+  errorMessage.style.padding = "0.5em";
+  errorMessage.style.backgroundColor = "#ffebee";
+  errorMessage.style.borderRadius = "4px";
+  errorMessage.setAttribute("role", "alert");
+  container.appendChild(errorMessage);
 
   // Optional fields
   const optionalFieldsLabel = document.createElement("p");
@@ -165,6 +229,7 @@ export function showAddProspectDialog(
   prospectEDsInput.style.marginBottom = "1em";
   prospectEDsInput.style.border = "1px solid #ccc";
   prospectEDsInput.style.borderRadius = "4px";
+  disableFieldAutocomplete(prospectEDsInput);
   container.appendChild(prospectEDsInput);
 
   const dateMadeContactLabel = document.createElement("label");
@@ -184,6 +249,7 @@ export function showAddProspectDialog(
   dateMadeContactInput.style.marginBottom = "1em";
   dateMadeContactInput.style.border = "1px solid #ccc";
   dateMadeContactInput.style.borderRadius = "4px";
+  disableFieldAutocomplete(dateMadeContactInput);
   container.appendChild(dateMadeContactInput);
 
   const statusFlagsContainer = document.createElement("div");
@@ -198,6 +264,7 @@ export function showAddProspectDialog(
   courseFoundLabel.style.gap = "0.5em";
   const courseFoundCheckbox = document.createElement("input");
   courseFoundCheckbox.type = "checkbox";
+  disableFieldAutocomplete(courseFoundCheckbox);
   courseFoundLabel.appendChild(courseFoundCheckbox);
   courseFoundLabel.appendChild(document.createTextNode("Course Found"));
   statusFlagsContainer.appendChild(courseFoundLabel);
@@ -208,6 +275,7 @@ export function showAddProspectDialog(
   landownerPermissionLabel.style.gap = "0.5em";
   const landownerPermissionCheckbox = document.createElement("input");
   landownerPermissionCheckbox.type = "checkbox";
+  disableFieldAutocomplete(landownerPermissionCheckbox);
   landownerPermissionLabel.appendChild(landownerPermissionCheckbox);
   landownerPermissionLabel.appendChild(
     document.createTextNode("Landowner Permission"),
@@ -220,6 +288,7 @@ export function showAddProspectDialog(
   fundingConfirmedLabel.style.gap = "0.5em";
   const fundingConfirmedCheckbox = document.createElement("input");
   fundingConfirmedCheckbox.type = "checkbox";
+  disableFieldAutocomplete(fundingConfirmedCheckbox);
   fundingConfirmedLabel.appendChild(fundingConfirmedCheckbox);
   fundingConfirmedLabel.appendChild(
     document.createTextNode("Funding Confirmed"),
@@ -227,29 +296,6 @@ export function showAddProspectDialog(
   statusFlagsContainer.appendChild(fundingConfirmedLabel);
 
   container.appendChild(statusFlagsContainer);
-
-  // Loading indicator
-  const loadingIndicator = document.createElement("div");
-  loadingIndicator.id = "geocodingLoading";
-  loadingIndicator.style.display = "none";
-  loadingIndicator.style.marginBottom = "1em";
-  loadingIndicator.style.padding = "0.5em";
-  loadingIndicator.style.backgroundColor = "#e3f2fd";
-  loadingIndicator.style.borderRadius = "4px";
-  loadingIndicator.textContent = "Geocoding address...";
-  container.appendChild(loadingIndicator);
-
-  // Error message
-  const errorMessage = document.createElement("div");
-  errorMessage.id = "geocodingError";
-  errorMessage.style.display = "none";
-  errorMessage.style.color = "#d32f2f";
-  errorMessage.style.marginBottom = "1em";
-  errorMessage.style.padding = "0.5em";
-  errorMessage.style.backgroundColor = "#ffebee";
-  errorMessage.style.borderRadius = "4px";
-  errorMessage.setAttribute("role", "alert");
-  container.appendChild(errorMessage);
 
   // Duplicate warning message (initially hidden)
   const duplicateWarning = document.createElement("div");
@@ -295,6 +341,7 @@ export function showAddProspectDialog(
   coordinatesInput.style.marginBottom = "0.5em";
   coordinatesInput.style.border = "1px solid #ccc";
   coordinatesInput.style.borderRadius = "4px";
+  disableFieldAutocomplete(coordinatesInput);
   manualCoordinatesContainer.appendChild(coordinatesInput);
 
   const manualCoordinatesError = document.createElement("div");
@@ -338,6 +385,74 @@ export function showAddProspectDialog(
   let coordinatesEnteredManually = false;
   let coordinatesFromPinDrag = false;
   let initialPlaceAddress = "";
+  let activePlaceSuggestions: PlaceSearchResult[] = [];
+
+  const hidePlacesListbox = () => {
+    placesContainer.hidden = true;
+    placesContainer.innerHTML = "";
+    activePlaceSuggestions = [];
+    addressInput.setAttribute("aria-expanded", "false");
+    addressField.classList.remove("add-prospect-address-field--places-open");
+  };
+
+  const showPlacesListbox = (places: PlaceSearchResult[]) => {
+    activePlaceSuggestions = places;
+    placesContainer.innerHTML = renderAddProspectPlaceListboxHtml(places);
+    placesContainer.hidden = false;
+    addressInput.setAttribute("aria-expanded", "true");
+    addressField.classList.add("add-prospect-address-field--places-open");
+  };
+
+  placesContainer.addEventListener("click", (event) => {
+    if (!(event.target instanceof Element)) {
+      return;
+    }
+
+    const button = event.target.closest(
+      ".add-prospect-place-option",
+    ) as HTMLButtonElement | null;
+    if (!button) {
+      return;
+    }
+
+    const placeIndex = Number.parseInt(button.dataset.placeIndex ?? "", 10);
+    const place = activePlaceSuggestions[placeIndex];
+    if (place) {
+      void applySelectedPlace(place);
+    }
+  });
+
+  const setLocationStatusLoading = () => {
+    locationStatus.className = getAddProspectLocationStatusClassName("loading");
+    locationStatus.textContent =
+      renderAddProspectLocationStatusMessage("loading");
+    locationStatus.style.display = "block";
+    locationStatus.setAttribute("aria-busy", "true");
+  };
+
+  const setLocationStatusSuccess = (
+    lat: number,
+    lng: number,
+    country: string,
+  ) => {
+    const coordinate = createCoordinate(lat, lng);
+    locationStatus.className = getAddProspectLocationStatusClassName("success");
+    locationStatus.textContent = renderAddProspectLocationStatusMessage(
+      "success",
+      {
+        coordinate,
+        country,
+      },
+    );
+    locationStatus.style.display = "block";
+    locationStatus.removeAttribute("aria-busy");
+  };
+
+  const clearLocationStatus = () => {
+    locationStatus.style.display = "none";
+    locationStatus.textContent = "";
+    locationStatus.removeAttribute("aria-busy");
+  };
 
   const loadAllocationSuggestionsFromCoordinates = async () => {
     if (!geocodedCoordinates || !inferredCountry) {
@@ -365,6 +480,15 @@ export function showAddProspectDialog(
 
     const coordinates = createCoordinate(place.latitude, place.longitude);
     inferredCountry = await inferCountryCodeFromCoordinates(coordinates);
+
+    if (inferredCountry && inferredCountry !== "Unknown") {
+      setLocationStatusSuccess(
+        place.latitude,
+        place.longitude,
+        inferredCountry,
+      );
+      await loadAllocationSuggestionsFromCoordinates();
+    }
   };
 
   if (initialPlace) {
@@ -380,6 +504,120 @@ export function showAddProspectDialog(
   }
 
   // Geocoding function
+  const completeGeocodingWithCoordinates = async (
+    lat: number,
+    lng: number,
+    address: string,
+  ) => {
+    const coordinates = createCoordinate(lat, lng);
+    geocodedCoordinates = { lat, lng };
+    inferredCountry = await inferCountryCodeFromCoordinates(coordinates);
+
+    if (!inferredCountry || inferredCountry === "Unknown") {
+      throw new Error(
+        "Could not determine country from coordinates. Please verify the address or enter coordinates manually.",
+      );
+    }
+
+    checkDuplicateName();
+
+    const prospectName = prospectNameInput.value.trim() || "New Prospect";
+    allocationSuggestions = await generateProspectAllocationSuggestions(
+      prospectName,
+      coordinates,
+      eventAmbassadors,
+      eventDetails,
+      regionalAmbassadors,
+    );
+
+    hidePlacesListbox();
+    manualCoordinatesContainer.style.display = "none";
+    errorMessage.style.display = "none";
+    setLocationStatusSuccess(lat, lng, inferredCountry);
+    displayAllocationSuggestions();
+
+    lastGeocodedAddress = address;
+    coordinatesEnteredManually = false;
+    coordinatesFromPinDrag = false;
+  };
+
+  const applySelectedPlace = async (place: PlaceSearchResult) => {
+    addressInput.value = place.label;
+    setLocationStatusLoading();
+    hidePlacesListbox();
+
+    try {
+      await completeGeocodingWithCoordinates(
+        place.latitude,
+        place.longitude,
+        place.label,
+      );
+    } catch (error) {
+      clearLocationStatus();
+      showManualCoordinateFallback(
+        error instanceof Error ? error.message : "Could not use selected place",
+      );
+    }
+  };
+
+  const showManualCoordinateFallback = (message: string) => {
+    clearLocationStatus();
+    hidePlacesListbox();
+    errorMessage.innerHTML = `
+      ${message}
+      <br>
+      <button type="button" id="retryGeocodingButton" style="margin-top: 0.5em; padding: 0.25em 0.5em; background-color: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer;">
+        Retry Geocoding
+      </button>
+    `;
+    errorMessage.style.display = "block";
+    hidePlacesListbox();
+    manualCoordinatesContainer.style.display = "block";
+
+    const retryButton = errorMessage.querySelector(
+      "#retryGeocodingButton",
+    ) as HTMLButtonElement;
+    if (retryButton) {
+      retryButton.addEventListener("click", () => {
+        errorMessage.style.display = "none";
+        manualCoordinatesContainer.style.display = "none";
+        triggerGeocoding();
+      });
+    }
+  };
+
+  const offerPlaceSearch = async (
+    address: string,
+    state: string,
+    failureMessage?: string,
+  ) => {
+    geocodedCoordinates = null;
+    inferredCountry = null;
+    allocationSuggestions = [];
+    suggestionsContainer.style.display = "none";
+    manualCoordinatesContainer.style.display = "none";
+    hidePlacesListbox();
+
+    let places: PlaceSearchResult[];
+    try {
+      places = await searchPlaces(buildPlaceSearchQuery(address, state));
+    } catch {
+      places = [];
+    }
+
+    if (places.length > 0) {
+      errorMessage.style.display = "none";
+      clearLocationStatus();
+      showPlacesListbox(places);
+      return;
+    }
+
+    showManualCoordinateFallback(
+      failureMessage ??
+        "No matching places found. Try refining the address or enter coordinates manually.",
+    );
+  };
+
   const performGeocoding = async (address: string, state: string) => {
     if (!address.trim() || !state.trim()) {
       return;
@@ -391,9 +629,11 @@ export function showAddProspectDialog(
     }
 
     // Show loading
-    loadingIndicator.style.display = "block";
+    setLocationStatusLoading();
     errorMessage.style.display = "none";
     suggestionsContainer.style.display = "none";
+    hidePlacesListbox();
+    manualCoordinatesContainer.style.display = "none";
     addressInput.disabled = true;
     stateInput.disabled = true;
 
@@ -401,67 +641,27 @@ export function showAddProspectDialog(
       currentGeocodeAbort = new AbortController();
       const { lat, lng } = await geocodeAddress(address);
       const coordinates = createCoordinate(lat, lng);
+      const inferred = await inferCountryCodeFromCoordinates(coordinates);
+      const expectedCountry = inferExpectedCountryCodeFromStateRegion(state);
 
-      geocodedCoordinates = { lat, lng };
-
-      // Infer country code (two-letter format like "AU" to match CSV imports)
-      inferredCountry = await inferCountryCodeFromCoordinates(coordinates);
-
-      // Handle country inference failure
-      if (!inferredCountry || inferredCountry === "Unknown") {
-        throw new Error(
-          "Could not determine country from coordinates. Please verify the address or enter coordinates manually.",
-        );
+      if (
+        expectedCountry &&
+        inferred &&
+        inferred !== "Unknown" &&
+        inferred !== expectedCountry
+      ) {
+        await offerPlaceSearch(address, state);
+        return;
       }
 
-      // Check for duplicate name now that we have country
-      checkDuplicateName();
-
-      // Generate allocation suggestions
-      const prospectName = prospectNameInput.value.trim() || "New Prospect";
-      allocationSuggestions = await generateProspectAllocationSuggestions(
-        prospectName,
-        coordinates,
-        eventAmbassadors,
-        eventDetails,
-        regionalAmbassadors,
-      );
-
-      // Hide loading, show suggestions
-      loadingIndicator.style.display = "none";
-      displayAllocationSuggestions();
-
-      lastGeocodedAddress = address;
-      coordinatesEnteredManually = false; // Reset manual flag on successful geocoding
-      coordinatesFromPinDrag = false;
+      inferredCountry = inferred;
+      await completeGeocodingWithCoordinates(lat, lng, address);
     } catch (error) {
-      loadingIndicator.style.display = "none";
-      errorMessage.innerHTML = `
-        ${error instanceof Error ? error.message : "Geocoding failed"}
-        <br>
-        <button type="button" id="retryGeocodingButton" style="margin-top: 0.5em; padding: 0.25em 0.5em; background-color: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer;">
-          Retry Geocoding
-        </button>
-      `;
-      errorMessage.style.display = "block";
-      geocodedCoordinates = null;
-      inferredCountry = null;
-      allocationSuggestions = [];
-
-      // Show manual coordinate entry option
-      manualCoordinatesContainer.style.display = "block";
-
-      // Add retry button handler
-      const retryButton = errorMessage.querySelector(
-        "#retryGeocodingButton",
-      ) as HTMLButtonElement;
-      if (retryButton) {
-        retryButton.addEventListener("click", () => {
-          errorMessage.style.display = "none";
-          manualCoordinatesContainer.style.display = "none";
-          triggerGeocoding();
-        });
-      }
+      await offerPlaceSearch(
+        address,
+        state,
+        error instanceof Error ? error.message : "Geocoding failed",
+      );
     } finally {
       addressInput.disabled = false;
       stateInput.disabled = false;
@@ -528,6 +728,7 @@ export function showAddProspectDialog(
       manualCoordinatesError.style.display = "none";
       errorMessage.style.display = "none";
       coordinatesEnteredManually = true;
+      setLocationStatusSuccess(lat, lng, inferredCountry);
       displayAllocationSuggestions();
     } catch (error) {
       manualCoordinatesError.textContent =
@@ -667,6 +868,7 @@ export function showAddProspectDialog(
     dropdown.id = "otherEASelect";
     dropdown.style.width = "100%";
     dropdown.style.padding = "0.5em";
+    disableFieldAutocomplete(dropdown);
     dropdown.setAttribute("tabindex", topSuggestions.length > 0 ? "-1" : "0");
 
     const emptyOption = document.createElement("option");
@@ -784,6 +986,7 @@ export function showAddProspectDialog(
     const state = stateInput.value.trim();
 
     if (!address || !state) {
+      clearLocationStatus();
       return;
     }
 
@@ -801,6 +1004,13 @@ export function showAddProspectDialog(
             ),
           );
         }
+        if (inferredCountry && inferredCountry !== "Unknown") {
+          setLocationStatusSuccess(
+            geocodedCoordinates!.lat,
+            geocodedCoordinates!.lng,
+            inferredCountry,
+          );
+        }
         await loadAllocationSuggestionsFromCoordinates();
       })();
       return;
@@ -809,6 +1019,8 @@ export function showAddProspectDialog(
     if (geocodeTimeout) {
       clearTimeout(geocodeTimeout);
     }
+
+    setLocationStatusLoading();
 
     geocodeTimeout = setTimeout(() => {
       performGeocoding(address, state);

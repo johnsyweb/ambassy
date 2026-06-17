@@ -6,7 +6,7 @@ import { showAddProspectDialog } from "./showAddProspectDialog";
 import { EventAmbassadorMap } from "@models/EventAmbassadorMap";
 import { RegionalAmbassadorMap } from "@models/RegionalAmbassadorMap";
 import { EventDetailsMap } from "@models/EventDetailsMap";
-import { geocodeAddress } from "@utils/geocoding";
+import { geocodeAddress, searchPlaces } from "@utils/geocoding";
 import { inferCountryCodeFromCoordinates } from "@models/country";
 import { generateProspectAllocationSuggestions } from "./suggestEventAllocation";
 import { createProspectFromAddress } from "./createProspectFromAddress";
@@ -15,7 +15,22 @@ import { saveProspectiveEvents } from "./persistProspectiveEvents";
 // Mock dependencies
 jest.mock("@utils/geocoding", () => ({
   geocodeAddress: jest.fn(),
+  searchPlaces: jest.fn(),
 }));
+
+function getAddProspectFormInputs(container: HTMLElement) {
+  return {
+    prospectName: container.querySelector(
+      "#addProspectNameInput",
+    ) as HTMLInputElement,
+    state: container.querySelector(
+      "#addProspectStateInput",
+    ) as HTMLInputElement,
+    address: container.querySelector(
+      "#addProspectAddressInput",
+    ) as HTMLInputElement,
+  };
+}
 
 jest.mock("@models/country", () => ({
   inferCountryCodeFromCoordinates: jest.fn(),
@@ -88,6 +103,7 @@ describe("showAddProspectDialog", () => {
       lat: -37.8136,
       lng: 144.9631,
     });
+    (searchPlaces as jest.Mock).mockResolvedValue([]);
     (inferCountryCodeFromCoordinates as jest.Mock).mockResolvedValue("AU");
     (generateProspectAllocationSuggestions as jest.Mock).mockResolvedValue([]);
     (createProspectFromAddress as jest.Mock).mockReturnValue({
@@ -123,7 +139,7 @@ describe("showAddProspectDialog", () => {
 
       // Check for required fields
       const prospectNameInput = content.querySelector(
-        'input[type="text"]',
+        "#addProspectNameInput",
       ) as HTMLInputElement;
       expect(prospectNameInput).not.toBeNull();
       expect(prospectNameInput.placeholder).toContain("New Park Prospect");
@@ -235,16 +251,11 @@ describe("showAddProspectDialog", () => {
         onCancel,
       );
 
-      // Fill in form fields
-      const prospectNameInput = content.querySelectorAll(
-        'input[type="text"]',
-      )[0] as HTMLInputElement;
-      const addressInput = content.querySelectorAll(
-        'input[type="text"]',
-      )[1] as HTMLInputElement;
-      const stateInput = content.querySelectorAll(
-        'input[type="text"]',
-      )[2] as HTMLInputElement;
+      const {
+        prospectName: prospectNameInput,
+        state: stateInput,
+        address: addressInput,
+      } = getAddProspectFormInputs(content);
 
       prospectNameInput.value = "Test Prospect";
       addressInput.value = "123 Main St, Melbourne VIC 3000";
@@ -261,6 +272,13 @@ describe("showAddProspectDialog", () => {
       expect(geocodeAddress).toHaveBeenCalledWith(
         "123 Main St, Melbourne VIC 3000",
       );
+
+      const locationStatus = content.querySelector(
+        "#addProspectLocationStatus",
+      ) as HTMLElement;
+      expect(locationStatus.style.display).not.toBe("none");
+      expect(locationStatus.textContent).toContain("Location found");
+      expect(locationStatus.textContent).toContain("Country: AU");
 
       // Verify country inference was called
       expect(inferCountryCodeFromCoordinates).toHaveBeenCalled();
@@ -304,12 +322,8 @@ describe("showAddProspectDialog", () => {
         onCancel,
       );
 
-      const addressInput = content.querySelectorAll(
-        'input[type="text"]',
-      )[1] as HTMLInputElement;
-      const stateInput = content.querySelectorAll(
-        'input[type="text"]',
-      )[2] as HTMLInputElement;
+      const { address: addressInput, state: stateInput } =
+        getAddProspectFormInputs(content);
 
       addressInput.value = "Invalid Address";
       stateInput.value = "VIC";
@@ -365,12 +379,8 @@ describe("showAddProspectDialog", () => {
         onCancel,
       );
 
-      const addressInput = content.querySelectorAll(
-        'input[type="text"]',
-      )[1] as HTMLInputElement;
-      const stateInput = content.querySelectorAll(
-        'input[type="text"]',
-      )[2] as HTMLInputElement;
+      const { address: addressInput, state: stateInput } =
+        getAddProspectFormInputs(content);
 
       addressInput.value = "Invalid Address";
       stateInput.value = "VIC";
@@ -400,6 +410,11 @@ describe("showAddProspectDialog", () => {
       ) as HTMLElement;
       expect(manualCoordinatesContainer).not.toBeNull();
       expect(manualCoordinatesContainer.style.display).not.toBe("none");
+
+      const locationStatus = content.querySelector(
+        "#addProspectLocationStatus",
+      ) as HTMLElement;
+      expect(locationStatus.style.display).toBe("none");
     });
 
     it("should allow manual coordinate entry when geocoding fails", async () => {
@@ -428,12 +443,8 @@ describe("showAddProspectDialog", () => {
         onCancel,
       );
 
-      const addressInput = content.querySelectorAll(
-        'input[type="text"]',
-      )[1] as HTMLInputElement;
-      const stateInput = content.querySelectorAll(
-        'input[type="text"]',
-      )[2] as HTMLInputElement;
+      const { address: addressInput, state: stateInput } =
+        getAddProspectFormInputs(content);
 
       addressInput.value = "Invalid Address";
       stateInput.value = "VIC";
@@ -508,17 +519,12 @@ describe("showAddProspectDialog", () => {
       );
 
       // Fill in prospect name
-      const prospectNameInput = content.querySelectorAll(
-        'input[type="text"]',
-      )[0] as HTMLInputElement;
+      const {
+        prospectName: prospectNameInput,
+        address: addressInput,
+        state: stateInput,
+      } = getAddProspectFormInputs(content);
       prospectNameInput.value = "Test Prospect";
-
-      const addressInput = content.querySelectorAll(
-        'input[type="text"]',
-      )[1] as HTMLInputElement;
-      const stateInput = content.querySelectorAll(
-        'input[type="text"]',
-      )[2] as HTMLInputElement;
 
       addressInput.value = "Invalid Address";
       stateInput.value = "VIC";
@@ -589,15 +595,11 @@ describe("showAddProspectDialog", () => {
         onCancel,
       );
 
-      const prospectNameInput = content.querySelectorAll(
-        'input[type="text"]',
-      )[0] as HTMLInputElement;
-      const addressInput = content.querySelectorAll(
-        'input[type="text"]',
-      )[1] as HTMLInputElement;
-      const stateInput = content.querySelectorAll(
-        'input[type="text"]',
-      )[2] as HTMLInputElement;
+      const {
+        prospectName: prospectNameInput,
+        address: addressInput,
+        state: stateInput,
+      } = getAddProspectFormInputs(content);
 
       prospectNameInput.value = "Test Prospect";
       addressInput.value = "123 Main St, Melbourne VIC 3000";
@@ -661,15 +663,11 @@ describe("showAddProspectDialog", () => {
         onCancel,
       );
 
-      const prospectNameInput = content.querySelectorAll(
-        'input[type="text"]',
-      )[0] as HTMLInputElement;
-      const addressInput = content.querySelectorAll(
-        'input[type="text"]',
-      )[1] as HTMLInputElement;
-      const stateInput = content.querySelectorAll(
-        'input[type="text"]',
-      )[2] as HTMLInputElement;
+      const {
+        prospectName: prospectNameInput,
+        address: addressInput,
+        state: stateInput,
+      } = getAddProspectFormInputs(content);
 
       prospectNameInput.value = "Test Prospect";
       addressInput.value = "123 Main St, Melbourne VIC 3000";
@@ -734,15 +732,11 @@ describe("showAddProspectDialog", () => {
         onCancel,
       );
 
-      const prospectNameInput = content.querySelectorAll(
-        'input[type="text"]',
-      )[0] as HTMLInputElement;
-      const addressInput = content.querySelectorAll(
-        'input[type="text"]',
-      )[1] as HTMLInputElement;
-      const stateInput = content.querySelectorAll(
-        'input[type="text"]',
-      )[2] as HTMLInputElement;
+      const {
+        prospectName: prospectNameInput,
+        address: addressInput,
+        state: stateInput,
+      } = getAddProspectFormInputs(content);
 
       prospectNameInput.value = "Test Prospect";
       addressInput.value = "123 Main St, Melbourne VIC 3000";
@@ -780,6 +774,280 @@ describe("showAddProspectDialog", () => {
     });
   });
 
+  describe("Place search suggestions", () => {
+    it("shows Places when geocoded country mismatches state and hides manual coordinates", async () => {
+      (geocodeAddress as jest.Mock).mockResolvedValue({
+        lat: 39.1128845,
+        lng: -84.5125709,
+      });
+      (inferCountryCodeFromCoordinates as jest.Mock).mockResolvedValue("US");
+      (searchPlaces as jest.Mock).mockResolvedValue([
+        {
+          label:
+            "Main Street, Hamilton Central, Hamilton City, Waikato, New Zealand",
+          latitude: -37.787,
+          longitude: 175.279,
+        },
+      ]);
+
+      showAddProspectDialog(
+        eventAmbassadors,
+        regionalAmbassadors,
+        eventDetails,
+        onSuccess,
+        onCancel,
+      );
+
+      const { state: stateInput, address: addressInput } =
+        getAddProspectFormInputs(content);
+
+      stateInput.value = "NZ";
+      addressInput.value = "main st, hamilton";
+
+      addressInput.dispatchEvent(new Event("blur"));
+      stateInput.dispatchEvent(new Event("blur"));
+
+      await new Promise((resolve) => setTimeout(resolve, 600));
+
+      expect(searchPlaces).toHaveBeenCalledWith(
+        "main st, hamilton, New Zealand",
+      );
+
+      const placesListbox = content.querySelector(
+        "#addProspectPlacesListbox",
+      ) as HTMLElement;
+      expect(placesListbox).not.toBeNull();
+      expect(placesListbox.hidden).toBe(false);
+      expect(placesListbox.textContent).toContain("Hamilton Central");
+      expect(
+        placesListbox.closest(".add-prospect-address-field"),
+      ).not.toBeNull();
+      expect(addressInput.nextElementSibling?.id).toBe(
+        "addProspectPlacesListbox",
+      );
+
+      const locationStatus = content.querySelector(
+        "#addProspectLocationStatus",
+      ) as HTMLElement;
+      expect(locationStatus.style.display).toBe("none");
+
+      const manualCoordinatesContainer = content.querySelector(
+        "#manualCoordinates",
+      ) as HTMLElement;
+      expect(manualCoordinatesContainer.style.display).toBe("none");
+    });
+
+    it("updates address and shows allocation suggestions when a place is selected", async () => {
+      (geocodeAddress as jest.Mock).mockResolvedValue({
+        lat: 39.1128845,
+        lng: -84.5125709,
+      });
+      (inferCountryCodeFromCoordinates as jest.Mock)
+        .mockResolvedValueOnce("US")
+        .mockResolvedValueOnce("NZ");
+      (searchPlaces as jest.Mock).mockResolvedValue([
+        {
+          label:
+            "Main Street, Hamilton Central, Hamilton City, Waikato, New Zealand",
+          latitude: -37.787,
+          longitude: 175.279,
+        },
+      ]);
+      (generateProspectAllocationSuggestions as jest.Mock).mockResolvedValue([
+        {
+          fromAmbassador: "",
+          toAmbassador: "EA 1",
+          items: ["test-prospect"],
+          score: 100,
+          reasons: ["Has available capacity"],
+          allocationCount: 0,
+          liveEventsCount: 0,
+          prospectEventsCount: 0,
+        },
+      ]);
+
+      showAddProspectDialog(
+        eventAmbassadors,
+        regionalAmbassadors,
+        eventDetails,
+        onSuccess,
+        onCancel,
+      );
+
+      const { state: stateInput, address: addressInput } =
+        getAddProspectFormInputs(content);
+
+      stateInput.value = "NZ";
+      addressInput.value = "main st, hamilton";
+
+      addressInput.dispatchEvent(new Event("blur"));
+      stateInput.dispatchEvent(new Event("blur"));
+
+      await new Promise((resolve) => setTimeout(resolve, 600));
+
+      const placeButton = content.querySelector(
+        ".add-prospect-place-option",
+      ) as HTMLButtonElement;
+      expect(placeButton).not.toBeNull();
+      placeButton.click();
+
+      await new Promise((resolve) => setTimeout(resolve, 100));
+
+      expect(addressInput.value).toContain("Hamilton Central");
+      expect(generateProspectAllocationSuggestions).toHaveBeenCalled();
+
+      const suggestionsContainer = content.querySelector(
+        "#allocationSuggestions",
+      ) as HTMLElement;
+      expect(suggestionsContainer.style.display).not.toBe("none");
+    });
+
+    it("shows manual coordinates only when place search returns no results", async () => {
+      (geocodeAddress as jest.Mock).mockRejectedValue(
+        new Error("Geocoding failed"),
+      );
+      (searchPlaces as jest.Mock).mockResolvedValue([]);
+
+      showAddProspectDialog(
+        eventAmbassadors,
+        regionalAmbassadors,
+        eventDetails,
+        onSuccess,
+        onCancel,
+      );
+
+      const { state: stateInput, address: addressInput } =
+        getAddProspectFormInputs(content);
+
+      stateInput.value = "VIC";
+      addressInput.value = "Invalid Address";
+
+      addressInput.dispatchEvent(new Event("blur"));
+      stateInput.dispatchEvent(new Event("blur"));
+
+      await new Promise((resolve) => setTimeout(resolve, 600));
+
+      const placesListbox = content.querySelector(
+        "#addProspectPlacesListbox",
+      ) as HTMLElement;
+      expect(placesListbox.hidden).toBe(true);
+
+      const manualCoordinatesContainer = content.querySelector(
+        "#manualCoordinates",
+      ) as HTMLElement;
+      expect(manualCoordinatesContainer.style.display).not.toBe("none");
+    });
+
+    it("lists State/Region before Address in the form", () => {
+      showAddProspectDialog(
+        eventAmbassadors,
+        regionalAmbassadors,
+        eventDetails,
+        onSuccess,
+        onCancel,
+      );
+
+      const labels = Array.from(content.querySelectorAll("label")).map(
+        (label) => label.textContent,
+      );
+      const stateIndex = labels.findIndex((text) =>
+        text?.includes("State/Region"),
+      );
+      const addressIndex = labels.findIndex((text) =>
+        text?.includes("Address"),
+      );
+
+      expect(stateIndex).toBeGreaterThanOrEqual(0);
+      expect(addressIndex).toBeGreaterThan(stateIndex);
+    });
+
+    it("attaches the places listbox directly below the address input", () => {
+      showAddProspectDialog(
+        eventAmbassadors,
+        regionalAmbassadors,
+        eventDetails,
+        onSuccess,
+        onCancel,
+      );
+
+      const addressField = content.querySelector(
+        ".add-prospect-address-field",
+      ) as HTMLElement;
+      const addressInput = content.querySelector("#addProspectAddressInput");
+      const placesListbox = content.querySelector("#addProspectPlacesListbox");
+
+      expect(addressField).not.toBeNull();
+      expect(addressInput?.nextElementSibling?.id).toBe(
+        "addProspectPlacesListbox",
+      );
+      expect(
+        addressField.querySelector("#addProspectPlacesListbox"),
+      ).not.toBeNull();
+      expect(
+        placesListbox?.classList.contains("territory-map-search-listbox"),
+      ).toBe(true);
+    });
+
+    it("disables browser autofill on all dialog fields", () => {
+      showAddProspectDialog(
+        eventAmbassadors,
+        regionalAmbassadors,
+        eventDetails,
+        onSuccess,
+        onCancel,
+      );
+
+      const fields = content.querySelectorAll("input, select");
+      expect(fields.length).toBeGreaterThan(0);
+      fields.forEach((field) => {
+        expect(field.getAttribute("autocomplete")).toBe("off");
+      });
+
+      const { address: addressInput } = getAddProspectFormInputs(content);
+      expect(addressInput.getAttribute("data-1p-ignore")).toBe("true");
+      expect(addressInput.getAttribute("data-lpignore")).toBe("true");
+    });
+
+    it("shows a loading status while the address lookup is in progress", async () => {
+      let resolveGeocode: (value: { lat: number; lng: number }) => void = () =>
+        undefined;
+      (geocodeAddress as jest.Mock).mockImplementation(
+        () =>
+          new Promise((resolve) => {
+            resolveGeocode = resolve;
+          }),
+      );
+
+      showAddProspectDialog(
+        eventAmbassadors,
+        regionalAmbassadors,
+        eventDetails,
+        onSuccess,
+        onCancel,
+      );
+
+      const { state: stateInput, address: addressInput } =
+        getAddProspectFormInputs(content);
+
+      stateInput.value = "VIC";
+      addressInput.value = "Ruffey Lake Park";
+
+      addressInput.dispatchEvent(new Event("blur"));
+
+      const locationStatus = content.querySelector(
+        "#addProspectLocationStatus",
+      ) as HTMLElement;
+      expect(locationStatus.style.display).not.toBe("none");
+      expect(locationStatus.textContent).toContain("Looking up location");
+
+      await new Promise((resolve) => setTimeout(resolve, 550));
+      resolveGeocode({ lat: -37.787, lng: 145.123 });
+      await new Promise((resolve) => setTimeout(resolve, 100));
+
+      expect(locationStatus.textContent).toContain("Location found");
+    });
+  });
+
   describe("Place pin initial location", () => {
     it("pre-fills address and locks coordinates from a place pin", async () => {
       showAddProspectDialog(
@@ -798,13 +1066,20 @@ describe("showAddProspectDialog", () => {
       );
 
       const addressInput = content.querySelector(
-        'input[placeholder*="123 Main"]',
+        "#addProspectAddressInput",
       ) as HTMLInputElement;
 
       expect(addressInput.value).toBe("Ballarat, Victoria, Australia");
       expect(content.textContent).toContain("Location set from map");
 
       await Promise.resolve();
+      await Promise.resolve();
+
+      const locationStatus = content.querySelector(
+        "#addProspectLocationStatus",
+      ) as HTMLElement;
+      expect(locationStatus.style.display).not.toBe("none");
+      expect(locationStatus.textContent).toContain("Location found");
 
       expect(inferCountryCodeFromCoordinates).toHaveBeenCalled();
     });

@@ -424,6 +424,70 @@ tr.selected:hover {
   background: #e9ecef;
 }
 
+.add-prospect-location-status {
+  margin-bottom: 1em;
+  padding: 0.75em;
+  border-radius: 4px;
+  font-size: 0.95em;
+  line-height: 1.4;
+}
+
+.add-prospect-location-status--loading {
+  background: #e3f2fd;
+  color: #0d47a1;
+  border: 1px solid #90caf9;
+}
+
+.add-prospect-location-status--success {
+  background: #e8f5e9;
+  color: #1b5e20;
+  border: 1px solid #a5d6a7;
+}
+
+.add-prospect-location-status--choose-place {
+  background: #fff8e1;
+  color: #6d4c00;
+  border: 1px solid #ffe082;
+}
+
+.add-prospect-address-field {
+  margin-bottom: 1em;
+}
+
+.add-prospect-address-field #addProspectAddressInput {
+  box-sizing: border-box;
+}
+
+.add-prospect-address-field .territory-map-search-status {
+  margin-top: 0.35rem;
+  margin-bottom: 0;
+}
+
+.add-prospect-address-field .territory-map-search-listbox {
+  margin-top: 0;
+  padding: 0 0.5rem 0.35rem;
+  background: #fff;
+  border: 1px solid #bbb;
+  border-radius: 4px;
+}
+
+.add-prospect-address-field--places-open #addProspectAddressInput {
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+  border-bottom-color: #ddd;
+}
+
+.add-prospect-address-field--places-open .territory-map-search-listbox {
+  border-top: none;
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+  margin-top: 0;
+}
+
+.add-prospect-address-field .add-prospect-location-status {
+  margin-top: 0.35rem;
+}
+
 .prospect-map-legend-host,
 .prospect-map-legend-restore-host {
   position: absolute;
