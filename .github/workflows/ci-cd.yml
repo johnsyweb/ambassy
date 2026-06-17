@@ -8,6 +8,17 @@ on:
   pull_request:
     branches:
       - main
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: Release and deploy mode
+        required: true
+        type: choice
+        default: deploy-latest-build
+        options:
+          - release-and-deploy
+          - deploy-latest-build
+          - release-only
 
 permissions:
   contents: write
@@ -166,6 +177,22 @@ jobs:
       - name: Check if changes are docs-only
         id: check
         run: |
+          if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
+            case "${{ github.event.inputs.mode }}" in
+              release-and-deploy|release-only)
+                echo "Manual run: semantic release requested"
+                echo "skip-release=false" >> ${GITHUB_OUTPUT}
+                echo "should-deploy-pages=false" >> ${GITHUB_OUTPUT}
+                ;;
+              deploy-latest-build)
+                echo "Manual run: deploy latest build without release"
+                echo "skip-release=true" >> ${GITHUB_OUTPUT}
+                echo "should-deploy-pages=true" >> ${GITHUB_OUTPUT}
+                ;;
+            esac
+            exit 0
+          fi
+
           if [ "${{ github.event_name }}" != "push" ] || [ "${{ github.ref }}" != "refs/heads/main" ]; then
             echo "Not a push to main, using defaults"
             echo "skip-release=false" >> ${GITHUB_OUTPUT}
@@ -199,9 +226,20 @@ jobs:
   release:
     needs: [build, check-docs-only]
     if: |
-      github.event_name == 'push' &&
       github.ref == 'refs/heads/main' &&
-      needs.check-docs-only.outputs.skip-release != 'true'
+      (
+        (
+          github.event_name == 'push' &&
+          needs.check-docs-only.outputs.skip-release != 'true'
+        ) ||
+        (
+          github.event_name == 'workflow_dispatch' &&
+          (
+            github.event.inputs.mode == 'release-and-deploy' ||
+            github.event.inputs.mode == 'release-only'
+          )
+        )
+      )
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -261,9 +299,17 @@ jobs:
   deploy-pages-after-release:
     needs: [release, map-dom-budget, check-docs-only]
     if: |
-      github.event_name == 'push' &&
       github.ref == 'refs/heads/main' &&
-      needs.check-docs-only.outputs.skip-release != 'true'
+      (
+        (
+          github.event_name == 'push' &&
+          needs.check-docs-only.outputs.skip-release != 'true'
+        ) ||
+        (
+          github.event_name == 'workflow_dispatch' &&
+          github.event.inputs.mode == 'release-and-deploy'
+        )
+      )
     runs-on: ubuntu-latest
     environment:
       name: github-pages
@@ -290,9 +336,17 @@ jobs:
   deploy-pages-after-build:
     needs: [build, map-dom-budget, check-docs-only]
     if: |
-      github.event_name == 'push' &&
       github.ref == 'refs/heads/main' &&
-      needs.check-docs-only.outputs.should-deploy-pages == 'true'
+      (
+        (
+          github.event_name == 'push' &&
+          needs.check-docs-only.outputs.should-deploy-pages == 'true'
+        ) ||
+        (
+          github.event_name == 'workflow_dispatch' &&
+          github.event.inputs.mode == 'deploy-latest-build'
+        )
+      )
     runs-on: ubuntu-latest
     environment:
       name: github-pages
