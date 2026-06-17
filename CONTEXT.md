@@ -113,7 +113,7 @@ The set of dates on which a given ambassador (EA or REA with a parkrunner ID) **
 _Avoid_: Run history (implies volunteering), attendance record, visit (ambiguous with volunteer)
 
 **Last ambassador visit**:
-For a given live event, the most recent **finish** among all Event Ambassadors and Regional Event Ambassadors in Ambassy with imported history — not only those assigned to that event. Recorded as **who** (one or more ambassador names if tied on the same date) and **when** (finish date). Shown on the Event Teams tab when known; **N/A** when no qualifying finish is on record.
+For a given live event, the most recent **finish** among all Event Ambassadors and Regional Event Ambassadors in Ambassy with imported history — not only those assigned to that event. Recorded as **who** (one or more ambassador names if tied on the same date) and **when** (finish date). Shown on the Event Teams tab when known; **Not imported** when no visit history has been imported yet; **No visit on record** when history exists but no qualifying finish is on record for that event.
 _Avoid_: Last EA visit (too narrow), last allocation visit
 
 **parkrun country domain**:
