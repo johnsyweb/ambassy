@@ -1,6 +1,6 @@
 {
   "name": "ambassy",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "description": "For ambassador allocations",
   "main": "index.js",
   "scripts": {
