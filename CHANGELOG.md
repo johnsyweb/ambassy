@@ -1,3 +1,18 @@
+# [1.1.0](https://github.com/johnsyweb/ambassy/compare/v1.0.0...v1.1.0) (2026-06-17)
+
+
+### Bug Fixes
+
+* **ci:** avoid network hangs in map-dom-budget smoke test ([3447b08](https://github.com/johnsyweb/ambassy/commit/3447b085c947246b40de710b9f0f7bce9a08f604))
+* **ci:** cap map-dom-budget job at five minutes ([819f1a1](https://github.com/johnsyweb/ambassy/commit/819f1a1ce4f7e9f662ff5f63a736c8ed9c591418))
+* **ci:** exit cleanly after map-dom-budget smoke test ([66797ce](https://github.com/johnsyweb/ambassy/commit/66797ce3cc812c5e216a9de96decbe021600f8fe))
+* **ci:** install Chrome before map-dom-budget smoke test ([e64dc54](https://github.com/johnsyweb/ambassy/commit/e64dc54cf8d3f6f28ec761d2dfae2122138571c3))
+
+
+### Features
+
+* **ci:** add manual release and deploy workflow dispatch ([23008a3](https://github.com/johnsyweb/ambassy/commit/23008a36c1848aeed7071a03b05aca3973358994))
+
 # 1.0.0 (2026-06-17)
 
 
