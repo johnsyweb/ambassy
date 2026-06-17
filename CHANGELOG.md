@@ -1,3 +1,10 @@
+## [1.2.1](https://github.com/johnsyweb/ambassy/compare/v1.2.0...v1.2.1) (2026-06-17)
+
+
+### Bug Fixes
+
+* **ui:** show keyboard shortcuts dialog on empty-state screen ([f41c95d](https://github.com/johnsyweb/ambassy/commit/f41c95d4c9ca4e115fd19eec58a98bef59c4d335)), closes [#ambassy](https://github.com/johnsyweb/ambassy/issues/ambassy)
+
 # [1.2.0](https://github.com/johnsyweb/ambassy/compare/v1.1.0...v1.2.0) (2026-06-17)
 
 
