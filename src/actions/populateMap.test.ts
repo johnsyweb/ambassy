@@ -29,6 +29,7 @@ import {
   getTerritoryMapOverlayVisibility,
   setTerritoryMapOverlayVisibility,
 } from "@utils/territoryMapOverlayVisibility";
+import { setProspectMapLegendDismissed } from "@utils/prospectMapLegendDismiss";
 import L from "leaflet";
 
 jest.mock("d3-geo-voronoi", () => ({
@@ -831,6 +832,66 @@ describe("populateMap", () => {
       expect(markerIcon).toContain('data-readiness="course-found"');
       expect(markerIcon).toContain('data-readiness="funding-confirmed"');
       expect(document.querySelector(".prospect-map-legend")).not.toBeNull();
+      expect(
+        document.querySelector(".prospect-map-legend-live-sample circle"),
+      ).not.toBeNull();
+    });
+  });
+
+  describe("Prospect map legend dismiss", () => {
+    const prospectiveEvents = [
+      {
+        id: "p1",
+        prospectEvent: "Future parkrun",
+        country: "Australia",
+        state: "VIC",
+        prospectEDs: "Pat",
+        eventAmbassador: "EA1",
+        courseFound: true,
+        landownerPermission: false,
+        fundingConfirmed: true,
+        dateMadeContact: null,
+        coordinates: {
+          latitude: -37.8136,
+          longitude: 144.9631,
+          source: "manual" as const,
+        },
+        geocodingStatus: "success" as const,
+        ambassadorMatchStatus: "matched" as const,
+        importTimestamp: 0,
+        sourceRow: 1,
+      },
+    ];
+
+    function populateProspectOnlyMap(): void {
+      populateMap(
+        new Map(),
+        new Map(),
+        new Map([
+          [
+            "EA1",
+            {
+              name: "EA1",
+              events: [],
+              prospectiveEvents: ["p1"],
+            },
+          ],
+        ]),
+        new Map([
+          ["REA1", { name: "REA1", state: "VIC", supportsEAs: ["EA1"] }],
+        ]),
+        prospectiveEvents,
+      );
+    }
+
+    it("shows the restore control when the legend was dismissed before reload", () => {
+      setProspectMapLegendDismissed(true);
+      populateProspectOnlyMap();
+
+      expect(document.querySelector(".prospect-map-legend")).toBeNull();
+      expect(
+        document.querySelector(".prospect-map-legend-restore"),
+      ).not.toBeNull();
     });
   });
 

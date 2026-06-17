@@ -1,4 +1,8 @@
 import L from "leaflet";
+import {
+  isProspectMapLegendDismissed,
+  setProspectMapLegendDismissed,
+} from "./prospectMapLegendDismiss";
 
 export interface ProspectLaunchReadiness {
   courseFound: boolean;
@@ -7,6 +11,13 @@ export interface ProspectLaunchReadiness {
 }
 
 export const PROSPECT_SEGMENT_NOT_CONFIRMED_FILL = "#d0d0d0";
+export const LEGEND_SAMPLE_BORDER_COLOR = "rebeccapurple";
+
+export function buildLiveEventLegendSampleHtml(): string {
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" class="prospect-map-legend-live-sample" role="img" aria-hidden="true">
+  <circle cx="8" cy="8" r="5" fill="none" stroke="${LEGEND_SAMPLE_BORDER_COLOR}" stroke-width="1.5"/>
+</svg>`;
+}
 
 export function buildProspectMapMarkerHtml(
   readiness: ProspectLaunchReadiness,
@@ -48,14 +59,43 @@ export function formatProspectMapTooltip(prospect: {
 }
 
 export function buildProspectMapLegendHtml(): string {
+  const readinessSample = buildProspectMapMarkerHtml(
+    {
+      courseFound: true,
+      landownerPermission: false,
+      fundingConfirmed: true,
+    },
+    LEGEND_SAMPLE_BORDER_COLOR,
+  );
+
   return `
     <div class="prospect-map-legend" role="note" aria-label="Map marker legend">
-      <p><strong>Live event</strong> — circle marker</p>
-      <p><strong>Prospective event</strong> — diamond marker</p>
-      <p><strong>Course found</strong> — top segment</p>
-      <p><strong>Landowner permission</strong> — bottom-left segment</p>
-      <p><strong>Funding confirmed</strong> — bottom-right segment</p>
-      <p>Filled segment — confirmed; grey segment — not confirmed</p>
+      <div class="prospect-map-legend-header">
+        <h3 class="prospect-map-legend-title">Marker legend</h3>
+        <button type="button" class="prospect-map-legend-dismiss" aria-label="Dismiss marker legend">×</button>
+      </div>
+      <div class="prospect-map-legend-row">
+        <span class="prospect-map-legend-icon">${buildLiveEventLegendSampleHtml()}</span>
+        <span>Live event</span>
+      </div>
+      <div class="prospect-map-legend-row">
+        <span class="prospect-map-legend-icon prospect-map-legend-prospect-sample">${buildProspectMapMarkerHtml(
+          {
+            courseFound: true,
+            landownerPermission: true,
+            fundingConfirmed: true,
+          },
+          LEGEND_SAMPLE_BORDER_COLOR,
+        )}</span>
+        <span>Prospective event</span>
+      </div>
+      <div class="prospect-map-legend-row">
+        <span class="prospect-map-legend-icon prospect-map-legend-readiness-sample">${readinessSample}</span>
+      </div>
+      <p>Course found — top</p>
+      <p>Landowner permission — bottom-left</p>
+      <p>Funding confirmed — bottom-right</p>
+      <p>Filled = confirmed; grey = not confirmed</p>
     </div>
   `.trim();
 }
@@ -64,21 +104,55 @@ export function syncProspectMapLegend(
   mapContainer: HTMLElement,
   showLegend: boolean,
 ): void {
-  const existingLegend = mapContainer.querySelector(".prospect-map-legend");
+  removeProspectMapLegendUi(mapContainer);
 
   if (!showLegend) {
-    existingLegend?.remove();
     return;
   }
 
-  if (existingLegend) {
+  if (isProspectMapLegendDismissed()) {
+    mountProspectMapLegendRestore(mapContainer);
     return;
   }
 
+  mountProspectMapLegendPanel(mapContainer);
+}
+
+function removeProspectMapLegendUi(mapContainer: HTMLElement): void {
+  mapContainer.querySelector(".prospect-map-legend-host")?.remove();
+  mapContainer.querySelector(".prospect-map-legend-restore-host")?.remove();
+}
+
+function mountProspectMapLegendPanel(mapContainer: HTMLElement): void {
   const legendHost = document.createElement("div");
   legendHost.className = "prospect-map-legend-host";
   legendHost.innerHTML = buildProspectMapLegendHtml();
+
+  const dismissButton = legendHost.querySelector(
+    ".prospect-map-legend-dismiss",
+  ) as HTMLButtonElement | null;
+  dismissButton?.addEventListener("click", () => {
+    setProspectMapLegendDismissed(true);
+    syncProspectMapLegend(mapContainer, true);
+  });
+
   mapContainer.appendChild(legendHost);
+}
+
+function mountProspectMapLegendRestore(mapContainer: HTMLElement): void {
+  const restoreHost = document.createElement("div");
+  restoreHost.className = "prospect-map-legend-restore-host";
+  restoreHost.innerHTML = `<button type="button" class="prospect-map-legend-restore">Show marker legend</button>`;
+
+  const restoreButton = restoreHost.querySelector(
+    ".prospect-map-legend-restore",
+  ) as HTMLButtonElement;
+  restoreButton.addEventListener("click", () => {
+    setProspectMapLegendDismissed(false);
+    syncProspectMapLegend(mapContainer, true);
+  });
+
+  mapContainer.appendChild(restoreHost);
 }
 
 export const PROSPECT_MAP_MARKER_SIZE = 20;

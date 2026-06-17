@@ -11,8 +11,13 @@
 }
 
 body {
-  font-family: "Atkinson Hyperlegible", -apple-system, BlinkMacSystemFont,
-    "Segoe UI", Roboto, sans-serif;
+  font-family:
+    "Atkinson Hyperlegible",
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    Roboto,
+    sans-serif;
   display: flex;
   flex-direction: column;
   min-height: 100vh;
@@ -219,8 +224,13 @@ tr:hover {
   max-width: 28rem;
   padding: 0.5rem 0.75rem;
   font-size: 1rem;
-  font-family: "Atkinson Hyperlegible", -apple-system, BlinkMacSystemFont,
-    "Segoe UI", Roboto, sans-serif;
+  font-family:
+    "Atkinson Hyperlegible",
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    Roboto,
+    sans-serif;
 }
 
 .ambassador-name-filter-status {
@@ -243,8 +253,13 @@ tr:hover {
   padding: 12px 24px;
   cursor: pointer;
   font-size: 16px;
-  font-family: "Atkinson Hyperlegible", -apple-system, BlinkMacSystemFont,
-    "Segoe UI", Roboto, sans-serif;
+  font-family:
+    "Atkinson Hyperlegible",
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    Roboto,
+    sans-serif;
   transition: background-color 0.2s;
   margin-right: 4px;
 }
@@ -355,7 +370,8 @@ tr.selected:hover {
   height: 20px;
 }
 
-.prospect-map-legend-host {
+.prospect-map-legend-host,
+.prospect-map-legend-restore-host {
   position: absolute;
   bottom: 0.75rem;
   left: 0.75rem;
@@ -367,7 +383,72 @@ tr.selected:hover {
   border-radius: 4px;
   font-size: 0.85rem;
   line-height: 1.35;
-  pointer-events: none;
+}
+
+.prospect-map-legend-host {
+  pointer-events: auto;
+}
+
+.prospect-map-legend-restore {
+  display: block;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  line-height: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.prospect-map-legend-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 0.35rem;
+}
+
+.prospect-map-legend-title {
+  margin: 0;
+  font-size: inherit;
+  font-weight: 700;
+}
+
+.prospect-map-legend-dismiss {
+  flex-shrink: 0;
+  margin: 0;
+  padding: 0 0.25rem;
+  border: none;
+  background: transparent;
+  color: inherit;
+  font-size: 1.1rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.prospect-map-legend-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.35rem;
+}
+
+.prospect-map-legend-icon {
+  display: flex;
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  align-items: center;
+  justify-content: center;
+}
+
+.prospect-map-legend-icon svg {
+  display: block;
+  width: 20px;
+  height: 20px;
 }
 
 .prospect-map-legend p {
@@ -492,8 +573,13 @@ tr.selected:hover {
   font-size: 0.85rem;
   cursor: pointer;
   transition: background-color 0.2s ease;
-  font-family: "Atkinson Hyperlegible", -apple-system, BlinkMacSystemFont,
-    "Segoe UI", Roboto, sans-serif;
+  font-family:
+    "Atkinson Hyperlegible",
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    Roboto,
+    sans-serif;
   white-space: nowrap;
   height: 2.25rem;
   box-sizing: border-box;
@@ -522,8 +608,13 @@ tr.selected:hover {
   font-size: 0.85rem;
   text-decoration: none;
   transition: background-color 0.2s ease;
-  font-family: "Atkinson Hyperlegible", -apple-system, BlinkMacSystemFont,
-    "Segoe UI", Roboto, sans-serif;
+  font-family:
+    "Atkinson Hyperlegible",
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    Roboto,
+    sans-serif;
   white-space: nowrap;
   height: 2.25rem;
   box-sizing: border-box;
@@ -706,8 +797,13 @@ tr.selected:hover {
   font-size: 0.85rem;
   cursor: pointer;
   transition: background-color 0.2s ease;
-  font-family: "Atkinson Hyperlegible", -apple-system, BlinkMacSystemFont,
-    "Segoe UI", Roboto, sans-serif;
+  font-family:
+    "Atkinson Hyperlegible",
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    Roboto,
+    sans-serif;
   white-space: nowrap;
   height: 2.25rem;
   box-sizing: border-box;
@@ -740,8 +836,13 @@ tr.selected:hover {
   padding: 0.25rem 0.5rem;
   margin-right: 0.5rem;
   font-size: 0.85rem;
-  font-family: "Atkinson Hyperlegible", -apple-system, BlinkMacSystemFont,
-    "Segoe UI", Roboto, sans-serif;
+  font-family:
+    "Atkinson Hyperlegible",
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    Roboto,
+    sans-serif;
   cursor: pointer;
   height: auto;
 }

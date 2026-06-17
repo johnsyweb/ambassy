@@ -841,6 +841,10 @@ export function resetVoronoiTerritoryCacheForTests(): void {
     .getElementById("mapContainer")
     ?.querySelector(".prospect-map-legend-host")
     ?.remove();
+  document
+    .getElementById("mapContainer")
+    ?.querySelector(".prospect-map-legend-restore-host")
+    ?.remove();
 }
 
 export function getUnallocatedMarkerMap(): Map<string, L.CircleMarker> {
