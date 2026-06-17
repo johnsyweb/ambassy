@@ -7,6 +7,7 @@ import { formatParkrunnerIdForDisplay } from "@utils/parkrunnerProfileUrl";
 export function syncFinishImportPendingBanner(
   onResume: () => void,
   onDismiss: () => void,
+  applicationDataLoaded: boolean,
 ): void {
   const banner = document.getElementById("finishImportPendingBanner");
   const message = document.getElementById("finishImportPendingBannerMessage");
@@ -23,7 +24,9 @@ export function syncFinishImportPendingBanner(
 
   const pending = getPendingFinishImport();
   const shouldShow =
-    pending !== null && isFinishImportAutoPromptSuppressed();
+    applicationDataLoaded &&
+    pending !== null &&
+    isFinishImportAutoPromptSuppressed();
 
   banner.hidden = !shouldShow;
   if (!shouldShow) {

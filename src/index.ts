@@ -1274,6 +1274,7 @@ function syncFinishImportPendingBannerControls(): void {
       dismissPendingFinishImport();
       syncFinishImportPendingBannerControls();
     },
+    lastApplicationHasData,
   );
 }
 
@@ -1557,6 +1558,7 @@ async function ambassy() {
   lastApplicationHasData = hasData;
   applyAmbassyRoute(hasData);
   updateButtonVisibility(hasData, isMapViewDisplayed());
+  syncFinishImportPendingBannerControls();
 }
 
 function refreshIssuesTable(): void {

@@ -30,12 +30,29 @@ describe("syncFinishImportPendingBanner", () => {
     });
     suppressFinishImportAutoPrompt();
 
-    syncFinishImportPendingBanner(jest.fn(), jest.fn());
+    syncFinishImportPendingBanner(jest.fn(), jest.fn(), true);
 
     const banner = document.getElementById("finishImportPendingBanner");
     expect(banner?.hidden).toBe(false);
     expect(
       document.getElementById("finishImportPendingBannerMessage")?.textContent,
     ).toContain(formatParkrunnerIdForDisplay("1234567"));
+  });
+
+  it("hides the banner when application data is not loaded", () => {
+    storePendingFinishImport({
+      schemaVersion: 1,
+      parkrunnerId: "1234567",
+      sourceUrl: "https://example.test/parkrunner/1234567/all/",
+      importedAt: "2026-06-16T00:00:00.000Z",
+      finishes: [],
+    });
+    suppressFinishImportAutoPrompt();
+
+    syncFinishImportPendingBanner(jest.fn(), jest.fn(), false);
+
+    expect(document.getElementById("finishImportPendingBanner")?.hidden).toBe(
+      true,
+    );
   });
 });
