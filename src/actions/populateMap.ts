@@ -32,12 +32,17 @@ import {
   prospectRowMatchesAmbassadorNameFilter,
 } from "@utils/ambassadorNameFilter";
 import {
-  buildProspectMapMarkerHtml,
+  createProspectMapDivIcon,
   formatProspectMapTooltip,
-  PROSPECT_MAP_MARKER_ANCHOR,
-  PROSPECT_MAP_MARKER_SIZE,
+  ProspectLaunchReadiness,
   syncProspectMapLegend,
 } from "@utils/prospectMapMarker";
+import {
+  allocatedLiveMarkerRadius,
+  MAP_MARKER_ZOOM_SCALE_FLOOR,
+  prospectMapMarkerPixelSize,
+  unallocatedMarkerRadii,
+} from "@utils/mapMarkerZoomScale";
 import { colorPalette } from "./colorPalette";
 
 const DEFAULT_EVENT_COLOUR = "rebeccapurple";
@@ -115,7 +120,7 @@ export function populateMap(
       `;
 
     const marker = L.circleMarker([latitude, longitude], {
-      radius: 5,
+      radius: allocatedLiveMarkerRadius(map.getZoom()),
       color: eaColor,
     });
     marker.bindTooltip(tooltip);
@@ -139,29 +144,26 @@ export function populateMap(
           ? (eaColorMap.get(prospect.eventAmbassador) ?? DEFAULT_EVENT_COLOUR)
           : DEFAULT_EVENT_COLOUR;
 
+        const readiness: ProspectLaunchReadiness = {
+          courseFound: prospect.courseFound,
+          landownerPermission: prospect.landownerPermission,
+          fundingConfirmed: prospect.fundingConfirmed,
+        };
+
         const marker = L.marker(toLeafletArray(prospect.coordinates), {
-          icon: L.divIcon({
-            className: "prospective-event-marker",
-            html: buildProspectMapMarkerHtml(
-              {
-                courseFound: prospect.courseFound,
-                landownerPermission: prospect.landownerPermission,
-                fundingConfirmed: prospect.fundingConfirmed,
-              },
-              eaColor,
-            ),
-            iconSize: [PROSPECT_MAP_MARKER_SIZE, PROSPECT_MAP_MARKER_SIZE],
-            iconAnchor: [
-              PROSPECT_MAP_MARKER_ANCHOR,
-              PROSPECT_MAP_MARKER_ANCHOR,
-            ],
-          }),
+          icon: createProspectMapDivIcon(
+            readiness,
+            eaColor,
+            prospectMapMarkerPixelSize(map.getZoom()),
+          ),
         });
 
         marker.bindTooltip(formatProspectMapTooltip(prospect));
         markersLayer.addLayer(marker);
         _prospectMarkers.set(prospect.id, {
           marker,
+          readiness,
+          borderColor: eaColor,
           eventAmbassador: prospect.eventAmbassador,
           regionalAmbassador: eventAmbassadors.get(prospect.eventAmbassador)
             ?.regionalAmbassador,
@@ -250,6 +252,8 @@ export function populateMap(
   if (mapContainer) {
     syncProspectMapLegend(mapContainer, geocodedProspectCount > 0);
   }
+
+  syncMapMarkerSizes(map);
 }
 
 /**
@@ -370,9 +374,37 @@ function ensureViewportClipListener(map: L.Map): void {
     if (_currentVoronoiSites && _polygonsLayer && _map) {
       drawClippedTerritoryPolygons(_map, _polygonsLayer, _currentVoronoiSites);
     }
+    syncMapMarkerSizes(map);
     refreshViewportUnallocatedMarkers();
+    _selectionHighlightRefreshHandler?.();
   });
   _viewportClipListenerAttached = true;
+}
+
+function syncMapMarkerSizes(map: L.Map): void {
+  const zoom = map.getZoom();
+  const liveRadius = allocatedLiveMarkerRadius(zoom);
+  const { base, hover } = unallocatedMarkerRadii(zoom);
+  const prospectSize = prospectMapMarkerPixelSize(zoom);
+
+  _markerMap.forEach((marker, eventName) => {
+    if (_unallocatedMarkerMap.has(eventName)) {
+      return;
+    }
+
+    marker.setStyle({ radius: liveRadius });
+  });
+
+  _unallocatedMarkerMap.forEach((marker) => {
+    const isHovered = _unallocatedMarkerHoverState.get(marker) ?? false;
+    marker.setStyle({ radius: isHovered ? hover : base });
+  });
+
+  _prospectMarkers.forEach(({ marker, readiness, borderColor }) => {
+    marker.setIcon(
+      createProspectMapDivIcon(readiness, borderColor, prospectSize),
+    );
+  });
 }
 
 function createUnallocatedEventMarker(
@@ -380,8 +412,11 @@ function createUnallocatedEventMarker(
   latitude: number,
   longitude: number,
 ): L.CircleMarker {
+  const zoom = _map?.getZoom() ?? MAP_MARKER_ZOOM_SCALE_FLOOR;
+  const { base } = unallocatedMarkerRadii(zoom);
+
   const marker = L.circleMarker([latitude, longitude], {
-    radius: 4,
+    radius: base,
     color: DEFAULT_EVENT_COLOUR,
     fillColor: DEFAULT_EVENT_COLOUR,
     fillOpacity: 0.6,
@@ -394,8 +429,12 @@ function createUnallocatedEventMarker(
   });
 
   marker.on("mouseover", () => {
+    _unallocatedMarkerHoverState.set(marker, true);
+    const { hover: hoverRadius } = unallocatedMarkerRadii(
+      _map?.getZoom() ?? MAP_MARKER_ZOOM_SCALE_FLOOR,
+    );
     marker.setStyle({
-      radius: 6,
+      radius: hoverRadius,
       fillOpacity: 0.8,
       weight: 3,
     });
@@ -405,8 +444,12 @@ function createUnallocatedEventMarker(
     }
   });
   marker.on("mouseout", () => {
+    _unallocatedMarkerHoverState.set(marker, false);
+    const { base: baseRadius } = unallocatedMarkerRadii(
+      _map?.getZoom() ?? MAP_MARKER_ZOOM_SCALE_FLOOR,
+    );
     marker.setStyle({
-      radius: 4,
+      radius: baseRadius,
       fillOpacity: 0.6,
       weight: 2,
     });
@@ -499,6 +542,8 @@ const _markerMap: Map<string, L.CircleMarker> = new Map();
 const _unallocatedMarkerMap: Map<string, L.CircleMarker> = new Map();
 let _highlightLayer: L.LayerGroup | null = null;
 let _markerClickHandler: ((eventShortName: string) => void) | null = null;
+let _selectionHighlightRefreshHandler: (() => void) | null = null;
+const _unallocatedMarkerHoverState = new WeakMap<L.CircleMarker, boolean>();
 const _voronoiTerritoryCache = new VoronoiTerritoryCache();
 let _currentVoronoiSites: VoronoiSite[] = [];
 let _viewportClipListenerAttached = false;
@@ -525,6 +570,8 @@ const _prospectMarkers = new Map<
   string,
   {
     marker: L.Marker;
+    readiness: ProspectLaunchReadiness;
+    borderColor: string;
     eventAmbassador?: string;
     regionalAmbassador?: string;
   }
@@ -597,17 +644,19 @@ export function applyAmbassadorNameFilterToMap(
     );
   });
 
-  _prospectMarkers.forEach(({ marker, eventAmbassador, regionalAmbassador }) => {
-    setMarkerLayerVisibility(
-      _markersLayer,
-      marker,
-      prospectRowMatchesAmbassadorNameFilter(
-        eventAmbassador,
-        regionalAmbassador,
-        filter,
-      ),
-    );
-  });
+  _prospectMarkers.forEach(
+    ({ marker, eventAmbassador, regionalAmbassador }) => {
+      setMarkerLayerVisibility(
+        _markersLayer,
+        marker,
+        prospectRowMatchesAmbassadorNameFilter(
+          eventAmbassador,
+          regionalAmbassador,
+          filter,
+        ),
+      );
+    },
+  );
 
   if (_currentVoronoiSites.length > 0) {
     drawClippedTerritoryPolygons(_map, _polygonsLayer, _currentVoronoiSites);
@@ -630,6 +679,7 @@ export function resetVoronoiTerritoryCacheForTests(): void {
   _unallocatedMarkerMap.clear();
   _mapPopulationContext = null;
   _lastMapPopulationFingerprint = null;
+  _selectionHighlightRefreshHandler = null;
   _markerMap.clear();
   if (_layersControl) {
     _layersControl.remove();
@@ -676,4 +726,12 @@ export function setMarkerClickHandler(
   handler: (eventShortName: string) => void,
 ): void {
   _markerClickHandler = handler;
+}
+
+export function setSelectionHighlightRefreshHandler(handler: () => void): void {
+  _selectionHighlightRefreshHandler = handler;
+}
+
+export function syncMapMarkerSizesForTests(map: L.Map): void {
+  syncMapMarkerSizes(map);
 }

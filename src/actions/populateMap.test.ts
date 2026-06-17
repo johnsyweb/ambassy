@@ -6,10 +6,16 @@ import {
   getMarkerMap,
   getUnallocatedMarkerMap,
   getMap,
+  getHighlightLayer,
   refreshViewportUnallocatedMarkersForTests,
   setMarkerClickHandler,
+  setSelectionHighlightRefreshHandler,
+  syncMapMarkerSizesForTests,
   EVENT_MARKER_MAP_OPTIONS,
 } from "./populateMap";
+import { highlightEventsOnMap } from "@utils/mapNavigation";
+import { allocatedLiveMarkerRadius } from "@utils/mapMarkerZoomScale";
+import L from "leaflet";
 
 jest.mock("d3-geo-voronoi", () => ({
   geoVoronoi: jest.fn(() => ({
@@ -811,6 +817,178 @@ describe("populateMap", () => {
       expect(markerIcon).toContain('data-readiness="course-found"');
       expect(markerIcon).toContain('data-readiness="funding-confirmed"');
       expect(document.querySelector(".prospect-map-legend")).not.toBeNull();
+    });
+  });
+
+  describe("Territory map marker zoom scale", () => {
+    function populateSingleAllocatedEventMap(): void {
+      const eventTeamsTableData = new Map([
+        [
+          "event1",
+          {
+            eventShortName: "event1",
+            eventDirectors: "Director1",
+            eventAmbassador: "EA1",
+            regionalAmbassador: "REA1",
+            eventCoordinates: "37.80000° S 144.90000° E",
+            eventSeries: 1,
+            eventCountryCode: 3,
+            eventCountry: "Australia",
+          },
+        ],
+      ]);
+      const eventDetails = new Map([
+        [
+          "event1",
+          {
+            id: "1",
+            type: "Feature",
+            geometry: {
+              type: "Point",
+              coordinates: [144.9631, -37.8136] as [number, number],
+            },
+            properties: {
+              eventname: "Event 1",
+              EventLongName: "Event 1 Long Name",
+              EventShortName: "event1",
+              LocalisedEventLongName: null,
+              countrycode: 0,
+              seriesid: 1,
+              EventLocation: "Location 1",
+            },
+          },
+        ],
+      ]);
+      const eventAmbassadors = new Map([
+        ["EA1", { name: "EA1", events: ["event1"] }],
+      ]);
+      const regionalAmbassadors = new Map([
+        ["REA1", { name: "REA1", state: "VIC", supportsEAs: ["EA1"] }],
+      ]);
+
+      populateMap(
+        eventTeamsTableData,
+        eventDetails,
+        eventAmbassadors,
+        regionalAmbassadors,
+      );
+    }
+
+    it("scales allocated live markers on zoomend", () => {
+      populateSingleAllocatedEventMap();
+      const map = getMap()!;
+      const marker = getMarkerMap().get("event1")!;
+
+      map.setView([-37.8136, 144.9631], 11);
+      syncMapMarkerSizesForTests(map);
+      expect(marker.getRadius()).toBe(5);
+
+      map.setView([-37.8136, 144.9631], 13);
+      map.fire("zoomend");
+      expect(marker.getRadius()).toBeCloseTo(allocatedLiveMarkerRadius(13), 5);
+    });
+
+    it("creates viewport unallocated markers at the current zoom scale", () => {
+      const eventTeamsTableData = new Map([
+        [
+          "event1",
+          {
+            eventShortName: "event1",
+            eventDirectors: "Director1",
+            eventAmbassador: "EA1",
+            regionalAmbassador: "REA1",
+            eventCoordinates: "37.80000° S 144.90000° E",
+            eventSeries: 1,
+            eventCountryCode: 3,
+            eventCountry: "Australia",
+          },
+        ],
+      ]);
+      const eventDetails = new Map([
+        [
+          "event1",
+          {
+            id: "1",
+            type: "Feature",
+            geometry: {
+              type: "Point",
+              coordinates: [144.9631, -37.8136] as [number, number],
+            },
+            properties: {
+              eventname: "Event 1",
+              EventLongName: "Event 1 Long Name",
+              EventShortName: "event1",
+              LocalisedEventLongName: null,
+              countrycode: 0,
+              seriesid: 1,
+              EventLocation: "Location 1",
+            },
+          },
+        ],
+        [
+          "nearby-unallocated",
+          {
+            id: "2",
+            type: "Feature",
+            geometry: {
+              type: "Point",
+              coordinates: [145.0, -37.9] as [number, number],
+            },
+            properties: {
+              eventname: "Nearby Unallocated",
+              EventLongName: "Nearby Unallocated",
+              EventShortName: "nearby-unallocated",
+              LocalisedEventLongName: null,
+              countrycode: 0,
+              seriesid: 1,
+              EventLocation: "Location 2",
+            },
+          },
+        ],
+      ]);
+
+      populateMap(
+        eventTeamsTableData,
+        eventDetails,
+        new Map([["EA1", { name: "EA1", events: ["event1"] }]]),
+        new Map([
+          ["REA1", { name: "REA1", state: "VIC", supportsEAs: ["EA1"] }],
+        ]),
+      );
+
+      const map = getMap()!;
+      map.setView([-37.875, 144.975], 18);
+
+      refreshViewportUnallocatedMarkersForTests({
+        minLongitude: 144.5,
+        maxLongitude: 145.5,
+        minLatitude: -38.5,
+        maxLatitude: -37.5,
+      });
+
+      const unallocatedMarker =
+        getUnallocatedMarkerMap().get("nearby-unallocated");
+
+      expect(unallocatedMarker).toBeDefined();
+      expect(unallocatedMarker!.getRadius()).toBe(8);
+    });
+
+    it("refreshes selection highlight radius on zoomend", () => {
+      populateSingleAllocatedEventMap();
+      const map = getMap()!;
+      const highlightLayer = getHighlightLayer()!;
+
+      setSelectionHighlightRefreshHandler(() => {
+        highlightEventsOnMap(["event1"], getMarkerMap(), highlightLayer);
+      });
+
+      highlightEventsOnMap(["event1"], getMarkerMap(), highlightLayer);
+
+      map.setView([-37.8136, 144.9631], 18);
+      map.fire("zoomend");
+
+      const highlightMarker = highlightLayer.getLayers()[0] as L.CircleMarker;
+      expect(highlightMarker.getRadius()).toBeCloseTo(15, 5);
     });
   });
 });
