@@ -467,37 +467,41 @@ tr.selected:hover {
   margin: 1.5rem 0;
 }
 
-.finish-history-primary-action,
-.finish-history-secondary-action {
-  display: inline-block;
-  padding: 0.5rem 0.9rem;
-  border-radius: 6px;
-  text-decoration: none;
-  font-weight: 600;
-}
-
-.finish-history-primary-action {
-  background-color: var(--parkrun-aubergine);
+.finish-history-page a.script-install-button,
+.finish-history-page a.script-install-button:hover,
+.finish-history-page a.script-install-button:focus-visible,
+.finish-history-page a.script-install-button:active {
   color: var(--parkrun-white);
 }
 
-.finish-history-primary-action:hover,
-.finish-history-primary-action:focus-visible {
-  background-color: #3a1444;
-  outline: none;
-  box-shadow: 0 0 0 3px rgba(76, 26, 87, 0.25);
+.script-install-button {
+  display: inline-block;
+  padding: 0.75em 1.75em;
+  background: var(--parkrun-aubergine);
+  color: var(--parkrun-white);
+  border-radius: 999px;
+  font-weight: 700;
+  text-decoration: none;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  font-size: 0.9rem;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
 }
 
-.finish-history-secondary-action {
-  border: 1px solid var(--parkrun-aubergine);
-  color: var(--parkrun-aubergine);
+.script-install-button:hover {
+  background: #3d2f4f;
+  color: var(--parkrun-white);
 }
 
-.finish-history-secondary-action:hover,
-.finish-history-secondary-action:focus-visible {
-  background-color: #f8f2f9;
-  outline: none;
-  box-shadow: 0 0 0 3px rgba(76, 26, 87, 0.15);
+.script-install-button:focus-visible {
+  color: var(--parkrun-white);
+  outline: 3px solid var(--parkrun-apricot);
+  outline-offset: 2px;
+}
+
+.script-install-button:active {
+  background: #1f1929;
+  color: var(--parkrun-white);
 }
 
 .finish-history-back {

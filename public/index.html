@@ -617,8 +617,9 @@
               The userscript may use Tampermonkey to hand off data between tabs
               on your device. Clipboard import is available if you prefer not to
               use that bridge. Installing or updating the userscript fetches the
-              script from johnsy.com; that request does not include your
-              allocation or finish data.
+              script from GitHub; that request does not include your allocation
+              or finish data. A copy also remains on johnsy.com for older
+              installs.
             </p>
             <p>
               <strong>Export</strong> and <strong>Import</strong> move a single
@@ -643,8 +644,9 @@
                 it.
               </li>
               <li>
-                Click <strong>Install in Tampermonkey</strong> below and confirm
-                installation. Tampermonkey will check for updates automatically.
+                Click <strong>Install Ambassy visit history export</strong>
+                below and confirm in your userscript manager. It will check
+                GitHub for updates automatically.
               </li>
               <li>
                 Set each ambassador's <strong>parkrunner ID</strong> on the
@@ -685,18 +687,9 @@
 
           <div class="finish-history-actions">
             <a
-              id="tampermonkeyInstallLink"
-              class="finish-history-primary-action"
-              target="_blank"
-              rel="noopener noreferrer"
-              >Install in Tampermonkey</a
-            >
-            <a
-              id="userscriptSourceLink"
-              class="finish-history-secondary-action"
-              target="_blank"
-              rel="noopener noreferrer"
-              >View userscript source</a
+              id="userscriptInstallLink"
+              class="script-install-button"
+              >Install Ambassy visit history export</a
             >
             <button type="button" id="importFinishHistoryButton">
               Import visit history from clipboard
