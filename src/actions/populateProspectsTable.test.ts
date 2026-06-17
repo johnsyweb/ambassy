@@ -53,7 +53,7 @@ describe("populateProspectsTable", () => {
             <th>Funding Confirmed</th>
             <th>Geocoding Status</th>
             <th>Coordinates</th>
-            <th>Ambassador Match</th>
+            <th>Event Ambassador assignment</th>
             <th>Actions</th>
           </tr>
         </thead>
@@ -198,5 +198,23 @@ describe("populateProspectsTable", () => {
     const cells = row.querySelectorAll("td");
     expect(cells[4].textContent).toBe("REA1");
     expect(cells[5].textContent).toBe("EA1");
+  });
+
+  it("shows plain-language geocoding and Event Ambassador assignment labels", () => {
+    populateProspectsTable(
+      prospects,
+      eventAmbassadors,
+      regionalAmbassadors,
+      log,
+      eventDetails,
+    );
+
+    const row = document.querySelector(
+      "tr[data-prospect-id='p1']",
+    ) as HTMLTableRowElement;
+    const cells = row.querySelectorAll("td");
+
+    expect(cells[10].textContent).toBe("Location found");
+    expect(cells[12].textContent).toBe("Event Ambassador assigned");
   });
 });

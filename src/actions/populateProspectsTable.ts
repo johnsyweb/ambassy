@@ -23,6 +23,10 @@ import { archiveProspect } from "./archiveProspect";
 import { showLaunchDialog } from "./showLaunchDialog";
 import { EventDetailsMap } from "@models/EventDetailsMap";
 import { calculateDistance } from "@utils/geography";
+import {
+  formatProspectAmbassadorAssignmentStatusLabel,
+  formatProspectGeocodingStatusLabel,
+} from "@utils/prospectStatusLabels";
 import { applyHomeParkrunBonusFromCoordinate } from "@utils/homeParkrunBonus";
 import { ProspectiveEvent } from "@models/ProspectiveEvent";
 import { EventAmbassador } from "@models/EventAmbassador";
@@ -184,7 +188,9 @@ function createProspectRow(
 
   // Geocoding Status
   const geocodingCell = document.createElement("td");
-  geocodingCell.textContent = getStatusText(prospect.geocodingStatus);
+  geocodingCell.textContent = formatProspectGeocodingStatusLabel(
+    prospect.geocodingStatus,
+  );
   geocodingCell.style.textAlign = "center";
   row.appendChild(geocodingCell);
 
@@ -200,9 +206,11 @@ function createProspectRow(
   coordinatesCell.style.fontSize = "0.9em";
   row.appendChild(coordinatesCell);
 
-  // Ambassador Match
+  // Event Ambassador assignment (import pipeline)
   const matchCell = document.createElement("td");
-  matchCell.textContent = getStatusText(prospect.ambassadorMatchStatus);
+  matchCell.textContent = formatProspectAmbassadorAssignmentStatusLabel(
+    prospect.ambassadorMatchStatus,
+  );
   matchCell.style.textAlign = "center";
   row.appendChild(matchCell);
 
@@ -838,23 +846,6 @@ function handleProspectLifecycleChange(
         error instanceof Error ? error.message : "Unknown error"
       }`,
     );
-  }
-}
-
-function getStatusText(status: string): string {
-  switch (status) {
-    case "pending":
-      return "⏳ Pending";
-    case "success":
-    case "matched":
-      return "✅ Success";
-    case "failed":
-    case "unmatched":
-      return "❌ Failed";
-    case "manual":
-      return "📍 Manual";
-    default:
-      return status;
   }
 }
 
