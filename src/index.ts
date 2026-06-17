@@ -123,8 +123,10 @@ import {
   getHighlightLayer,
   getMap,
   setMarkerClickHandler,
+  setSelectionHighlightRefreshHandler,
   populateMap,
 } from "./actions/populateMap";
+import { highlightEventsOnMap } from "@utils/mapNavigation";
 import {
   setRowClickHandler,
   setReallocateButtonHandler,
@@ -1725,6 +1727,23 @@ function initializeTableMapNavigation(): void {
   if (!eventTeamsTableData || !eventDetails) {
     return;
   }
+
+  setSelectionHighlightRefreshHandler(() => {
+    if (selectionState.highlightedEvents.size === 0) {
+      return;
+    }
+
+    const highlightLayer = getHighlightLayer();
+    if (!highlightLayer) {
+      return;
+    }
+
+    highlightEventsOnMap(
+      [...selectionState.highlightedEvents],
+      getMarkerMap(),
+      highlightLayer,
+    );
+  });
 
   setMarkerClickHandler((eventShortName: string) => {
     const markerMap = getMarkerMap();
