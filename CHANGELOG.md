@@ -1,3 +1,31 @@
+# [1.2.0](https://github.com/johnsyweb/ambassy/compare/v1.1.0...v1.2.0) (2026-06-17)
+
+
+### Bug Fixes
+
+* **map:** add outline to prospect diamond markers for visibility ([5749451](https://github.com/johnsyweb/ambassy/commit/5749451e9388aa29823cd66bbf6fdc9ad666259f))
+* **map:** keep viewport when selecting from territory map search ([58f7b55](https://github.com/johnsyweb/ambassy/commit/58f7b559a5b7bf5fd1061366ce6e64387c5b089a))
+
+
+### Features
+
+* **event-teams:** enable reallocate button without row selection ([3a8712d](https://github.com/johnsyweb/ambassy/commit/3a8712d49c4b84fde1b49c7f0150c4be835e0b3f))
+* **map:** add prospect map marker readiness utilities ([5a06973](https://github.com/johnsyweb/ambassy/commit/5a069738e9defe3096ee46ce911b1d654ebda0fa))
+* **map:** add prospective event from place pin ([08c330d](https://github.com/johnsyweb/ambassy/commit/08c330d8ff2d66510d15d121f8462a20dd510a31))
+* **map:** add territory map marker zoom scale utility ([48c2056](https://github.com/johnsyweb/ambassy/commit/48c2056974901fa35da87b29cdd0c5130d33fa4d))
+* **map:** add territory map search for events, prospects, and places ([cf7abc9](https://github.com/johnsyweb/ambassy/commit/cf7abc90ebb36e90f07a7fe70aa74bcc9ed5769a))
+* **map:** add visual prospect map legend with dismiss and restore ([445afab](https://github.com/johnsyweb/ambassy/commit/445afab44d635e4f4f1071a0cda26acd92d3aee0))
+* **map:** allow minimising territory map search panel ([e10a785](https://github.com/johnsyweb/ambassy/commit/e10a7857749cf3a27e8c8a006840c71fc5bf552c))
+* **map:** persist territory map overlay visibility in session ([d766d65](https://github.com/johnsyweb/ambassy/commit/d766d6524a94482490ef03abaca27a05aeb589da))
+* **map:** refresh selection highlights when map zoom changes ([2b797fd](https://github.com/johnsyweb/ambassy/commit/2b797fdfba9f656739fc51a27895ddd5a6f74e00))
+* **map:** render prospect launch readiness on territory map ([3658b0a](https://github.com/johnsyweb/ambassy/commit/3658b0aace827fb7742da81f9886b06ada88b756))
+* **map:** scale territory map markers with zoom ([61471ae](https://github.com/johnsyweb/ambassy/commit/61471ae8ae2bd56ab3265121d7487e1489596aa7))
+* **map:** split territory map into separate marker overlays ([fd80dfb](https://github.com/johnsyweb/ambassy/commit/fd80dfb5bbc2b06b3ee532772782dfd744589ac3))
+* **prospects:** improve Add Prospect address geocoding and feedback ([4ff324f](https://github.com/johnsyweb/ambassy/commit/4ff324f6e204fffacbbd5b4c08084c46ca04de67))
+* **prospects:** toggle launch readiness status from prospects table ([50bdf1f](https://github.com/johnsyweb/ambassy/commit/50bdf1f33289a8553407ccd33b47ea07d92782d0))
+* **prospects:** use plain-language status labels in table ([b15a3e4](https://github.com/johnsyweb/ambassy/commit/b15a3e464e4583ad027ffb20a70ace91cc21f4ed))
+* **ui:** restructure empty-state introduction with CTA above fold ([6969a36](https://github.com/johnsyweb/ambassy/commit/6969a365e4d32335b815da25ab156a12ed954832))
+
 # [1.1.0](https://github.com/johnsyweb/ambassy/compare/v1.0.0...v1.1.0) (2026-06-17)
 
 
