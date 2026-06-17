@@ -78,6 +78,30 @@ describe("showKeyboardShortcutsDialog", () => {
 
     expect(document.activeElement).toBe(closeButton);
   });
+
+  it("is visible when #ambassy is hidden (no-data state)", () => {
+    document.body.innerHTML = `
+      <div id="ambassy" style="display: none">
+        <div id="keyboardShortcutsDialog" role="dialog" aria-labelledby="keyboardShortcutsDialogTitle" aria-modal="true" style="display: none;">
+          <h2 id="keyboardShortcutsDialogTitle">Keyboard Shortcuts</h2>
+          <div id="keyboardShortcutsDialogContent"></div>
+          <button type="button" id="keyboardShortcutsDialogClose">Close</button>
+        </div>
+      </div>
+    `;
+
+    const hiddenAmbassyDialog = document.getElementById(
+      "keyboardShortcutsDialog",
+    )!;
+
+    showKeyboardShortcutsDialog();
+
+    expect(hiddenAmbassyDialog.closest("#ambassy")).toBeNull();
+    expect(hiddenAmbassyDialog.style.display).toBe("block");
+    if (typeof hiddenAmbassyDialog.checkVisibility === "function") {
+      expect(hiddenAmbassyDialog.checkVisibility()).toBe(true);
+    }
+  });
 });
 
 describe("initializeKeyboardShortcuts", () => {

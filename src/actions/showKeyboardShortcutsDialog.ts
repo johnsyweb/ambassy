@@ -21,6 +21,10 @@ export function showKeyboardShortcutsDialog(): void {
     return;
   }
 
+  if (dialog.closest("#ambassy")) {
+    document.body.appendChild(dialog);
+  }
+
   title.textContent = "Keyboard Shortcuts";
   content.innerHTML = "";
 

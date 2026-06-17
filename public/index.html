@@ -751,48 +751,6 @@
           </div>
         </div>
         <div
-          id="keyboardShortcutsDialog"
-          role="dialog"
-          aria-labelledby="keyboardShortcutsDialogTitle"
-          aria-modal="true"
-          style="
-            display: none;
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: white;
-            padding: 2em;
-            border: 2px solid #333;
-            border-radius: 8px;
-            z-index: 1000;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
-            max-width: 600px;
-            width: 90%;
-            max-height: 80vh;
-            overflow-y: auto;
-          "
-        >
-          <h2 id="keyboardShortcutsDialogTitle">Keyboard Shortcuts</h2>
-          <div id="keyboardShortcutsDialogContent"></div>
-          <div
-            style="
-              margin-top: 1em;
-              display: flex;
-              gap: 0.5em;
-              justify-content: flex-end;
-            "
-          >
-            <button
-              type="button"
-              id="keyboardShortcutsDialogClose"
-              style="padding: 0.5em 1em"
-            >
-              Close
-            </button>
-          </div>
-        </div>
-        <div
           id="capacityLimitsDialog"
           role="dialog"
           aria-labelledby="capacityLimitsDialogTitle"
@@ -1174,6 +1132,49 @@
               </tbody>
             </table>
           </div>
+        </div>
+      </div>
+
+      <div
+        id="keyboardShortcutsDialog"
+        role="dialog"
+        aria-labelledby="keyboardShortcutsDialogTitle"
+        aria-modal="true"
+        style="
+          display: none;
+          position: fixed;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+          background: white;
+          padding: 2em;
+          border: 2px solid #333;
+          border-radius: 8px;
+          z-index: 1000;
+          box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+          max-width: 600px;
+          width: 90%;
+          max-height: 80vh;
+          overflow-y: auto;
+        "
+      >
+        <h2 id="keyboardShortcutsDialogTitle">Keyboard Shortcuts</h2>
+        <div id="keyboardShortcutsDialogContent"></div>
+        <div
+          style="
+            margin-top: 1em;
+            display: flex;
+            gap: 0.5em;
+            justify-content: flex-end;
+          "
+        >
+          <button
+            type="button"
+            id="keyboardShortcutsDialogClose"
+            style="padding: 0.5em 1em"
+          >
+            Close
+          </button>
         </div>
       </div>
     </main>
