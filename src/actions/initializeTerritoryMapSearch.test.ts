@@ -5,6 +5,7 @@ import {
   TERRITORY_MAP_SEARCH_INPUT_ID,
 } from "./initializeTerritoryMapSearch";
 import { createSelectionState } from "@models/SelectionState";
+import { setTerritoryMapSearchMinimised } from "@utils/territoryMapSearchMinimised";
 
 describe("initializeTerritoryMapSearch", () => {
   beforeEach(() => {
@@ -44,6 +45,74 @@ describe("initializeTerritoryMapSearch", () => {
       new KeyboardEvent("keydown", { key: "k", ctrlKey: true, bubbles: true }),
     );
 
+    expect(document.activeElement).toBe(input);
+  });
+
+  it("minimises the search panel and shows a restore control", () => {
+    initializeTerritoryMapSearch(() => null, {
+      selectionState: createSelectionState(),
+      getMap: () => null,
+      getMarkerMap: () => new Map(),
+      getHighlightLayer: () => null,
+    });
+
+    const dismiss = document.querySelector(
+      ".territory-map-search-dismiss",
+    ) as HTMLButtonElement;
+    dismiss.click();
+
+    expect(document.querySelector(".territory-map-search-host")).toHaveProperty(
+      "hidden",
+      true,
+    );
+    expect(
+      document.querySelector(".territory-map-search-restore"),
+    ).not.toBeNull();
+  });
+
+  it("restores the search panel from the minimised state", () => {
+    setTerritoryMapSearchMinimised(true);
+    initializeTerritoryMapSearch(() => null, {
+      selectionState: createSelectionState(),
+      getMap: () => null,
+      getMarkerMap: () => new Map(),
+      getHighlightLayer: () => null,
+    });
+
+    const restore = document.querySelector(
+      ".territory-map-search-restore",
+    ) as HTMLButtonElement;
+    restore.click();
+
+    expect(document.querySelector(".territory-map-search-host")).toHaveProperty(
+      "hidden",
+      false,
+    );
+    expect(
+      document.getElementById(TERRITORY_MAP_SEARCH_INPUT_ID),
+    ).not.toBeNull();
+  });
+
+  it("expands and focuses the search input on Ctrl+K when minimised", () => {
+    setTerritoryMapSearchMinimised(true);
+    initializeTerritoryMapSearch(() => null, {
+      selectionState: createSelectionState(),
+      getMap: () => null,
+      getMarkerMap: () => new Map(),
+      getHighlightLayer: () => null,
+    });
+
+    document.dispatchEvent(
+      new KeyboardEvent("keydown", { key: "k", ctrlKey: true, bubbles: true }),
+    );
+
+    const input = document.getElementById(
+      TERRITORY_MAP_SEARCH_INPUT_ID,
+    ) as HTMLInputElement;
+    expect(document.querySelector(".territory-map-search-host")).toHaveProperty(
+      "hidden",
+      false,
+    );
     expect(document.activeElement).toBe(input);
   });
 });

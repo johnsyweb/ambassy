@@ -22,6 +22,11 @@ import {
   clearTemporaryPlacePin,
   setTemporaryPlacePin,
 } from "@utils/temporaryPlacePin";
+import {
+  isTerritoryMapSearchMinimised,
+  setTerritoryMapSearchMinimised,
+  clearTerritoryMapSearchMinimised,
+} from "@utils/territoryMapSearchMinimised";
 import L from "leaflet";
 
 export type TerritoryMapSearchContext = {
@@ -44,6 +49,7 @@ type TerritoryMapSearchNavigation = {
 let searchDebounceTimer: ReturnType<typeof setTimeout> | null = null;
 let placeSearchRequestId = 0;
 let keyboardShortcutAttached = false;
+let keyboardShortcutHandler: ((event: KeyboardEvent) => void) | null = null;
 
 function isTextInputElement(target: EventTarget | null): boolean {
   if (!(target instanceof HTMLElement)) {
@@ -288,7 +294,12 @@ function handleSuggestionSelection(
   input.blur();
 }
 
-function ensureTerritoryMapSearchHost(): HTMLElement | null {
+function ensureTerritoryMapSearchUi(): {
+  host: HTMLElement;
+  restoreHost: HTMLElement;
+  input: HTMLInputElement;
+  listbox: HTMLElement;
+} | null {
   const mapContainer = document.getElementById("mapContainer");
   if (!mapContainer) {
     return null;
@@ -297,12 +308,18 @@ function ensureTerritoryMapSearchHost(): HTMLElement | null {
   let host = mapContainer.querySelector(
     ".territory-map-search-host",
   ) as HTMLElement | null;
+  let restoreHost = mapContainer.querySelector(
+    ".territory-map-search-restore-host",
+  ) as HTMLElement | null;
 
   if (!host) {
     host = document.createElement("div");
     host.className = "territory-map-search-host";
     host.innerHTML = `
-      <label class="territory-map-search-label" for="${TERRITORY_MAP_SEARCH_INPUT_ID}">Find on map</label>
+      <div class="territory-map-search-header">
+        <label class="territory-map-search-label" for="${TERRITORY_MAP_SEARCH_INPUT_ID}">Find on map</label>
+        <button type="button" class="territory-map-search-dismiss" aria-label="Minimise map search">×</button>
+      </div>
       <input
         id="${TERRITORY_MAP_SEARCH_INPUT_ID}"
         class="territory-map-search-input"
@@ -319,16 +336,11 @@ function ensureTerritoryMapSearchHost(): HTMLElement | null {
     mapContainer.appendChild(host);
   }
 
-  return host;
-}
-
-export function initializeTerritoryMapSearch(
-  contextProvider: () => TerritoryMapSearchContext | null,
-  navigation: TerritoryMapSearchNavigation,
-): void {
-  const host = ensureTerritoryMapSearchHost();
-  if (!host) {
-    return;
+  if (!restoreHost) {
+    restoreHost = document.createElement("div");
+    restoreHost.className = "territory-map-search-restore-host";
+    restoreHost.innerHTML = `<button type="button" class="territory-map-search-restore">Find on map</button>`;
+    mapContainer.appendChild(restoreHost);
   }
 
   const input = host.querySelector(
@@ -339,13 +351,72 @@ export function initializeTerritoryMapSearch(
   ) as HTMLElement | null;
 
   if (!input || !listbox) {
+    return null;
+  }
+
+  return { host, restoreHost, input, listbox };
+}
+
+function syncTerritoryMapSearchVisibility(
+  host: HTMLElement,
+  restoreHost: HTMLElement,
+): void {
+  const minimised = isTerritoryMapSearchMinimised();
+  host.hidden = minimised;
+  restoreHost.hidden = !minimised;
+}
+
+function expandTerritoryMapSearchAndFocus(input: HTMLInputElement): void {
+  if (isTerritoryMapSearchMinimised()) {
+    setTerritoryMapSearchMinimised(false);
+    const host = input.closest(".territory-map-search-host") as HTMLElement;
+    const restoreHost = document.querySelector(
+      ".territory-map-search-restore-host",
+    ) as HTMLElement | null;
+    if (restoreHost) {
+      syncTerritoryMapSearchVisibility(host, restoreHost);
+    }
+  }
+
+  input.focus();
+  input.select();
+}
+
+export function initializeTerritoryMapSearch(
+  contextProvider: () => TerritoryMapSearchContext | null,
+  navigation: TerritoryMapSearchNavigation,
+): void {
+  const ui = ensureTerritoryMapSearchUi();
+  if (!ui) {
     return;
   }
+
+  const { host, restoreHost, input, listbox } = ui;
+  syncTerritoryMapSearchVisibility(host, restoreHost);
 
   if (host.dataset.initialized === "true") {
     return;
   }
   host.dataset.initialized = "true";
+
+  const dismissButton = host.querySelector(
+    ".territory-map-search-dismiss",
+  ) as HTMLButtonElement | null;
+  dismissButton?.addEventListener("click", () => {
+    hideSuggestionList(listbox, input);
+    setSearchStatus("");
+    setTerritoryMapSearchMinimised(true);
+    syncTerritoryMapSearchVisibility(host, restoreHost);
+  });
+
+  const restoreButton = restoreHost.querySelector(
+    ".territory-map-search-restore",
+  ) as HTMLButtonElement | null;
+  restoreButton?.addEventListener("click", () => {
+    setTerritoryMapSearchMinimised(false);
+    syncTerritoryMapSearchVisibility(host, restoreHost);
+    input.focus();
+  });
 
   input.addEventListener("input", () => {
     const context = contextProvider();
@@ -396,7 +467,7 @@ export function initializeTerritoryMapSearch(
   });
 
   if (!keyboardShortcutAttached) {
-    document.addEventListener("keydown", (event) => {
+    keyboardShortcutHandler = (event: KeyboardEvent) => {
       if (
         event.key.toLowerCase() !== "k" ||
         !(event.metaKey || event.ctrlKey) ||
@@ -409,10 +480,17 @@ export function initializeTerritoryMapSearch(
         return;
       }
 
+      const searchInput = document.getElementById(
+        TERRITORY_MAP_SEARCH_INPUT_ID,
+      ) as HTMLInputElement | null;
+      if (!searchInput) {
+        return;
+      }
+
       event.preventDefault();
-      input.focus();
-      input.select();
-    });
+      expandTerritoryMapSearchAndFocus(searchInput);
+    };
+    document.addEventListener("keydown", keyboardShortcutHandler);
     keyboardShortcutAttached = true;
   }
 }
@@ -423,6 +501,12 @@ export function resetTerritoryMapSearchForTests(): void {
     searchDebounceTimer = null;
   }
   placeSearchRequestId = 0;
+  if (keyboardShortcutHandler) {
+    document.removeEventListener("keydown", keyboardShortcutHandler);
+    keyboardShortcutHandler = null;
+  }
   keyboardShortcutAttached = false;
+  clearTerritoryMapSearchMinimised();
   document.querySelector(".territory-map-search-host")?.remove();
+  document.querySelector(".territory-map-search-restore-host")?.remove();
 }
