@@ -1,3 +1,5 @@
+import L from "leaflet";
+
 export interface ProspectLaunchReadiness {
   courseFound: boolean;
   landownerPermission: boolean;
@@ -81,3 +83,18 @@ export function syncProspectMapLegend(
 
 export const PROSPECT_MAP_MARKER_SIZE = 20;
 export const PROSPECT_MAP_MARKER_ANCHOR = PROSPECT_MAP_MARKER_SIZE / 2;
+
+export function createProspectMapDivIcon(
+  readiness: ProspectLaunchReadiness,
+  borderColor: string,
+  pixelSize: number = PROSPECT_MAP_MARKER_SIZE,
+): L.DivIcon {
+  const anchor = pixelSize / 2;
+
+  return L.divIcon({
+    className: "prospective-event-marker",
+    html: buildProspectMapMarkerHtml(readiness, borderColor),
+    iconSize: [pixelSize, pixelSize],
+    iconAnchor: [anchor, anchor],
+  });
+}
