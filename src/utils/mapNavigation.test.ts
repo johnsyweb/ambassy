@@ -68,6 +68,13 @@ describe("mapNavigation", () => {
       expect(addLayerSpy).toHaveBeenCalledTimes(1);
     });
 
+    it("should not intercept pointer events on highlight markers", () => {
+      highlightEventsOnMap(["event1"], markerMap, highlightLayer);
+
+      const highlightMarker = highlightLayer.getLayers()[0] as L.CircleMarker;
+      expect(highlightMarker.options.interactive).toBe(false);
+    });
+
     it("should clear previous highlights", () => {
       const clearLayersSpy = jest.spyOn(highlightLayer, "clearLayers");
 

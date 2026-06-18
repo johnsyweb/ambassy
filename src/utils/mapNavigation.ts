@@ -55,6 +55,7 @@ export function highlightEventsOnMap(
         fillColor: "#ff0000",
         fillOpacity: 0.7,
         weight: 3,
+        interactive: false,
       });
       highlightLayer.addLayer(highlightMarker);
     }
