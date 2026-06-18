@@ -689,6 +689,10 @@ tr.selected:hover {
   margin-bottom: 0;
 }
 
+.leaflet-tooltip-pane {
+  z-index: 1101;
+}
+
 .territory-map-search-host {
   /* Leaflet zoom sits top-left (~34px wide + 10px margin); sit search to its right */
   position: absolute;
