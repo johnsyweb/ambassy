@@ -1,3 +1,21 @@
+# [1.4.0](https://github.com/johnsyweb/ambassy/compare/v1.3.0...v1.4.0) (2026-06-18)
+
+
+### Bug Fixes
+
+* **ci:** correct invalid actions/cache v4.2.0 commit pin ([98b504f](https://github.com/johnsyweb/ambassy/commit/98b504fd4921a7532b68ae6c2c6d396cceb66b6a))
+* **ci:** skip puppeteer browser download during dependency install ([5a10208](https://github.com/johnsyweb/ambassy/commit/5a10208bc8414e6f3266a64597b19c3ca37e5c0a))
+* **ci:** skip puppeteer download via committed config file ([a6b4a0b](https://github.com/johnsyweb/ambassy/commit/a6b4a0bb5dc9a0aa578eefcadeeeb7728e9cfd46))
+* **ci:** verify action pins without requiring gh auth ([a04aa91](https://github.com/johnsyweb/ambassy/commit/a04aa91c8ace870bca1864ebe704670754c0592b))
+
+
+### Features
+
+* **ci:** add script to verify GitHub Action commit pins ([6035a1b](https://github.com/johnsyweb/ambassy/commit/6035a1bef1d425fbb2443446f995612a9441b1a0))
+* **tooling:** add lifecycle scripts and mise tasks ([6fff15b](https://github.com/johnsyweb/ambassy/commit/6fff15b1431edaadb35542583e93e3a79d509232))
+* **tooling:** replace husky with hk for git hooks ([1b2ce30](https://github.com/johnsyweb/ambassy/commit/1b2ce308d1941ae740d1425fd8c71e4af1a56cdd))
+* **tooling:** verify action pins on pre-push ([3d2d3f7](https://github.com/johnsyweb/ambassy/commit/3d2d3f735aa6d7aaf8a4124dedbf2b16eca3ad2b))
+
 # [1.3.0](https://github.com/johnsyweb/ambassy/compare/v1.2.1...v1.3.0) (2026-06-18)
 
 
