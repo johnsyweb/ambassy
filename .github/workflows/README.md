@@ -8,17 +8,18 @@ Single workflow for validation, build, and deployment with caching and paralleli
 
 ### Jobs
 
-1. **lint**, **test**, and **audit** run in parallel (aube store cache, Node and aube from `.tool-versions`).
+1. **lint**, **test**, and **audit** run in parallel (each calls `./script/…` after `aube ci`).
 2. **build** runs after all three pass; uploads `dist` artifact (retention 1 day).
-3. **map-dom-budget** smoke test runs after build.
-4. **release** (on qualifying pushes to `main`) runs semantic-release, generates screenshots, and uploads a release build artifact.
+3. **map-dom-budget** smoke test runs after build (`./script/smoke`).
+4. **release** (on qualifying pushes to `main`) runs semantic-release, `./script/screenshots`, and `./script/build`.
 5. **deploy-pages-*** jobs deploy `dist` to GitHub Pages.
 
 ### Tool versions and caching
 
-- **mise** (`jdx/mise-action@v4` with `install: true`) reads `.tool-versions` and installs Node.js and aube, so CI uses the same versions as local dev.
+- **mise** (`jdx/mise-action@v4` with `install: true`) reads `.tool-versions` and `mise.toml`, installing Node.js and aube.
+- **Trust in CI:** the workflow sets `MISE_TRUSTED_CONFIG_PATHS` to the workspace so jobs can run `mise run …` without an interactive prompt. Locally, contributors should run `mise trust` only after reading `mise.toml` and the scripts it references (see README Getting started).
 - **Caching:** `actions/cache@v4` on `~/.local/share/aube/store`, keyed on `aube-lock.yaml`.
-- **Security:** `aube audit --audit-level moderate` fails the workflow on moderate-or-higher CVEs. Installs use `aube ci` with `paranoid: true` from `aube-workspace.yaml`.
+- **Scripts:** CI jobs delegate to normalised scripts under `script/` (see README Getting started).
 
 ### Concurrency
 
@@ -31,17 +32,16 @@ Single workflow for validation, build, and deployment with caching and paralleli
 ## Prerequisites
 
 - [mise](https://mise.jdx.dev/) with `.tool-versions` pinning Node and aube
+- `mise.toml` tasks wrapping `script/` lifecycle scripts
 - `aube-workspace.yaml` with paranoid security settings
 - `puppeteer` in devDependencies
-- `screenshots` script in package.json
 
 ## Local
 
 ```bash
-mise install
-aube install
-aube run lint
-aube test
-aube run build
-aube run screenshots   # optional: update public/screenshot.png and public/ambassy-social-preview.png
+mise run setup
+mise run lint
+mise run test
+mise run build
+mise run cibuild   # lint, test, audit, build, smoke in sequence
 ```

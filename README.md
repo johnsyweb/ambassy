@@ -86,30 +86,74 @@ You can also run release or deploy manually from the GitHub Actions tab (**CI/CD
 
 See [ADR 0008](docs/adr/0008-semantic-release-and-changelog.md) for the full release and deploy flow.
 
-## Local development
+## Getting started
 
-Install [mise](https://mise.jdx.dev/), then from the project root:
+Install [mise](https://mise.jdx.dev/) and clone the repository.
+
+### Tool versions (`.tool-versions`)
+
+Mise installs pinned runtimes from `.tool-versions` (currently Node.js and aube). This file only lists version numbers — no scripts.
 
 ```bash
 mise install
-aube install
 ```
 
-- Run the development server: `aube start`
-- Run tests: `aube test`
-- Lint: `aube run lint`
-- Production build (writes to `dist/`): `aube run build`
-- Audit dependencies (moderate and above): `aube audit --audit-level moderate`
+### Project tasks (`mise.toml`)
+
+`mise.toml` defines [mise tasks](https://mise.jdx.dev/tasks/) that point at executable scripts in `script/` (for example `file = "script/test"` → `./script/test`). It does not set environment variables, hooks, or install commands of its own. **Read `mise.toml` and the `script/` files it references before trusting.**
+
+When you are satisfied they do what you expect:
+
+```bash
+mise trust    # once per machine; records that you accept this project's mise.toml
+```
+
+Mise will prompt or refuse `mise run …` until you trust or ignore the config. See [mise trust](https://mise.jdx.dev/cli/trust.html).
+
+**Without trusting `mise.toml`**, you can still run the same scripts directly after `mise install`:
+
+```bash
+./script/setup
+./script/server
+```
+
+### First run
+
+After `mise install` (and `mise trust` if you use `mise run …`):
+
+```bash
+mise run setup    # first time, or after resetting the project
+mise run update   # after git pull
+mise run server   # webpack dev server with browser open
+```
+
+Tasks follow the [Scripts to Rule Them All](https://github.com/github/scripts-to-rule-them-all) pattern. Each has a script under `script/` and a matching mise task. Equivalent forms: `mise run test` or `./script/test`.
+
+| Task | Command | Purpose |
+|------|---------|---------|
+| setup | `mise run setup` | First-time setup after clone (frozen install) |
+| update | `mise run update` | Refresh tools and dependencies after pull |
+| bootstrap | `mise run bootstrap` | Clean frozen reinstall (`aube ci`) |
+| server | `mise run server` | Development server |
+| lint | `mise run lint` | ESLint |
+| test | `mise run test` | Jest unit tests |
+| build | `mise run build` | Production build to `dist/` |
+| audit | `mise run audit` | Dependency audit (moderate and above) |
+| smoke | `mise run smoke` | Map DOM budget smoke test (needs `dist/`) |
+| cibuild | `mise run cibuild` | All CI checks locally, sequentially |
+| screenshots | `mise run screenshots` | Marketing PNGs (maintainers; needs Chrome) |
+
+Run a single test file: `mise run test -- src/utils/mapMarkerZoomScale.test.ts`
+
+List all tasks: `mise tasks`
 
 The development server enables webpack filesystem caching and uses `eval-cheap-module-source-map` for faster rebuilds. Stack traces map to TypeScript modules; line numbers may be approximate. For line-accurate source maps while debugging, run `aube run start:sourcemaps`.
-
-After `aube run build`, run `aube run smoke:map-dom-budget` to check map overlay and DOM budgets against the bundled sample CSVs (also runs in CI).
 
 Package management uses [aube](https://aube.en.dev/) with paranoid security settings (`aube-workspace.yaml`). See [ADR 0009](docs/adr/0009-aube-paranoid-package-manager.md).
 
 ### Voronoi performance timings (development)
 
-When running `aube start`, a global Voronoi recompute (after allocations or catalogue changes, not on pan/zoom) records a `performance.measure` named `ambassy:voronoi-compute` and logs a `console.debug` line with duration, site count, and visible territory count.
+When running `mise run server`, a global Voronoi recompute (after allocations or catalogue changes, not on pan/zoom) records a `performance.measure` named `ambassy:voronoi-compute` and logs a `console.debug` line with duration, site count, and visible territory count.
 
 To inspect timings in browser devtools:
 
