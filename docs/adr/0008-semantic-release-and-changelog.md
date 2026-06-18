@@ -15,7 +15,7 @@ Domain terms: **App version**, **Changelog** in `CONTEXT.md`.
 3. **First release from full history** — no manual bootstrap; semantic-release derives the initial version from existing conventional commits on `main`.
 4. **Footer version injection** — `public/index.html` holds placeholders (`__APP_VERSION__`, `__CHANGELOG_URL__`); `script/inject-app-version.cjs` reads `package.json` after webpack and writes the deployed `dist/index.html`. Changelog URL is tag-pinned: `…/blob/vX.Y.Z/CHANGELOG.md`.
 5. **Docs-only skip** — skip semantic-release when a push to `main` changes only `docs/`, `specs/`, `CONTEXT.md`, `README.md`, or `.github/`. Still deploy Pages from the CI build artefact (footer version unchanged).
-6. **commitlint** — enforce conventional commits locally (husky) and in CI on pull requests and `main` pushes.
+6. **commitlint** — enforce conventional commits locally ([hk](https://hk.jdx.dev/)) and in CI on pull requests and `main` pushes.
 7. **`script/release`** — `@semantic-release/exec` prepare step updates `package.json` to `${nextRelease.version}` before the git commit.
 
 ## Considered options

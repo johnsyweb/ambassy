@@ -74,7 +74,7 @@ The app is written in TypeScript with unit tests and runs in a modern web browse
 
 ## Releases and versioning
 
-Merges to `main` use [semantic-release](https://semantic-release.gitbook.io/) with [Conventional Commits](https://www.conventionalcommits.org/). Commit messages must follow the convention (`feat:`, `fix:`, `perf:`, etc.); commitlint runs locally (husky) and in CI.
+Merges to `main` use [semantic-release](https://semantic-release.gitbook.io/) with [Conventional Commits](https://www.conventionalcommits.org/). Commit messages must follow the convention (`feat:`, `fix:`, `perf:`, etc.); commitlint runs locally ([hk](https://hk.jdx.dev/)) and in CI.
 
 On each code release, CI generates `CHANGELOG.md`, bumps `package.json`, tags `vX.Y.Z`, publishes a GitHub Release, rebuilds with the new version injected into the footer, and deploys to GitHub Pages. The footer version links to that tag’s changelog. Docs-only changes (`docs/`, `specs/`, `CONTEXT.md`, `README.md`, `.github/`) skip versioning but still redeploy Pages.
 
@@ -92,7 +92,7 @@ Install [mise](https://mise.jdx.dev/) and clone the repository.
 
 ### Tool versions (`.tool-versions`)
 
-Mise installs pinned runtimes from `.tool-versions` (currently Node.js and aube). This file only lists version numbers — no scripts.
+Mise installs pinned runtimes from `.tool-versions` (Node.js, aube, and [hk](https://hk.jdx.dev/)). This file only lists version numbers — no scripts.
 
 ```bash
 mise install
@@ -100,7 +100,7 @@ mise install
 
 ### Project tasks (`mise.toml`)
 
-`mise.toml` defines [mise tasks](https://mise.jdx.dev/tasks/) that point at executable scripts in `script/` (for example `file = "script/test"` → `./script/test`). It does not set environment variables, hooks, or install commands of its own. **Read `mise.toml` and the `script/` files it references before trusting.**
+`mise.toml` defines [mise tasks](https://mise.jdx.dev/tasks/) that point at executable scripts in `script/` (for example `file = "script/test"` → `./script/test`). It also sets `HK_MISE=1` so [hk](https://hk.jdx.dev/) runs hooks with the mise tool environment. **Read `mise.toml`, `hk.pkl`, and the `script/` files they reference before trusting.**
 
 When you are satisfied they do what you expect:
 
@@ -146,6 +146,20 @@ Tasks follow the [Scripts to Rule Them All](https://github.com/github/scripts-to
 Run a single test file: `mise run test -- src/utils/mapMarkerZoomScale.test.ts`
 
 List all tasks: `mise tasks`
+
+### Git hooks (`hk.pkl`)
+
+Git hooks are managed by [hk](https://hk.jdx.dev/). `hk.pkl` defines three hooks that call the same `script/` commands as CI:
+
+| Hook | Step | Command |
+|------|------|---------|
+| pre-commit | test | `./script/test` |
+| pre-push | lint | `./script/lint` |
+| commit-msg | commitlint | `aube exec commitlint --edit` (commit message file) |
+
+`mise run setup` runs `hk install --mise`, which registers hooks in this repository's git config and wraps them with `mise x` so Node and aube are on `PATH`.
+
+Read `hk.pkl` before your first commit. To skip hooks for one command: `HK=0 git commit`. To run a hook manually: `hk run pre-commit`.
 
 The development server enables webpack filesystem caching and uses `eval-cheap-module-source-map` for faster rebuilds. Stack traces map to TypeScript modules; line numbers may be approximate. For line-accurate source maps while debugging, run `aube run start:sourcemaps`.
 
