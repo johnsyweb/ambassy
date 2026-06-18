@@ -33,6 +33,7 @@ concurrency:
 
 env:
   MISE_TRUSTED_CONFIG_PATHS: ${{ github.workspace }}
+  PUPPETEER_SKIP_DOWNLOAD: true
 
 jobs:
   verify-workflows:
@@ -65,7 +66,7 @@ jobs:
             ${{ runner.os }}-aube-
 
       - name: Install dependencies
-        run: aube ci
+        run: ./script/ci-install
 
       - name: Validate pull request commits
         if: github.event_name == 'pull_request'
@@ -94,7 +95,7 @@ jobs:
             ${{ runner.os }}-aube-
 
       - name: Install dependencies
-        run: aube ci
+        run: ./script/ci-install
 
       - name: Lint
         run: ./script/lint
@@ -118,7 +119,7 @@ jobs:
             ${{ runner.os }}-aube-
 
       - name: Install dependencies
-        run: aube ci
+        run: ./script/ci-install
 
       - name: Test
         run: ./script/test
@@ -142,7 +143,7 @@ jobs:
             ${{ runner.os }}-aube-
 
       - name: Install dependencies
-        run: aube ci
+        run: ./script/ci-install
 
       - name: Audit dependencies
         run: ./script/audit
@@ -167,7 +168,7 @@ jobs:
             ${{ runner.os }}-aube-
 
       - name: Install dependencies
-        run: aube ci
+        run: ./script/ci-install
 
       - name: Build
         run: ./script/build
@@ -200,7 +201,7 @@ jobs:
             ${{ runner.os }}-aube-
 
       - name: Install dependencies
-        run: aube ci
+        run: ./script/ci-install
 
       - name: Download build artifact
         uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7
@@ -209,7 +210,7 @@ jobs:
           path: dist
 
       - name: Install Chrome for Puppeteer
-        run: aube exec puppeteer browsers install chrome
+        run: ./script/install-chrome-for-puppeteer
 
       - name: Map DOM budget smoke test
         run: ./script/smoke
@@ -312,7 +313,7 @@ jobs:
             ${{ runner.os }}-aube-
 
       - name: Install dependencies
-        run: aube ci
+        run: ./script/ci-install
 
       - name: Semantic Release
         env:
