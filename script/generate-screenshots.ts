@@ -299,7 +299,7 @@ async function generateScreenshots(): Promise<void> {
 
     // Start the dev server with custom port
     console.log("🚀 Starting dev server...");
-    devServer = spawn("pnpm", ["webpack", "serve", "--port", port.toString()], {
+    devServer = spawn("aube", ["exec", "webpack", "serve", "--port", port.toString()], {
       detached: false,
       stdio: "inherit",
       env: {

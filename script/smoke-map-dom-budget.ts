@@ -280,7 +280,7 @@ async function main(): Promise<void> {
   const distDirectory = path.join(process.cwd(), "dist");
   if (!existsSync(path.join(distDirectory, "index.html"))) {
     fail(
-      "dist/ is missing index.html — run pnpm run build before smoke:map-dom-budget",
+      "dist/ is missing index.html — run aube run build before smoke:map-dom-budget",
     );
   }
 
