@@ -1,0 +1,8 @@
+paranoid: true
+packageManagerStrictVersion: true
+allowBuilds:
+  puppeteer: true
+  unrs-resolver: true
+overrides:
+  js-yaml: ">=4.2.0"
+  uuid: ">=11.1.1"
