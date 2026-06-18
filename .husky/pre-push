@@ -1,1 +1,1 @@
-mise exec -- pnpm run lint
+mise exec -- aube run lint

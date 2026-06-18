@@ -1,1 +1,1 @@
-mise exec -- pnpm test
+mise exec -- aube test
