@@ -9,7 +9,7 @@ Single workflow for validation, build, and deployment with caching and paralleli
 ### Jobs
 
 0. **verify-workflows** checks that every `uses:` reference in `.github/workflows/` is pinned to a 40-character commit SHA that exists on GitHub (`./script/verify-github-action-pins`). This job uses only `actions/checkout` (no cache) so invalid pins fail fast.
-1. **lint**, **test**, and **audit** run in parallel (each calls `./script/…` after `aube ci`).
+1. **lint**, **test**, and **audit** run in parallel (each calls `./script/…` after `./script/ci-install`).
 2. **build** runs after all three pass; uploads `dist` artifact (retention 1 day).
 3. **map-dom-budget** smoke test runs after build (`./script/smoke`).
 4. **release** (on qualifying pushes to `main`) runs semantic-release, `./script/screenshots`, and `./script/build`.
@@ -21,6 +21,7 @@ Single workflow for validation, build, and deployment with caching and paralleli
 - **Trust in CI:** the workflow sets `MISE_TRUSTED_CONFIG_PATHS` to the workspace so jobs can run `mise run …` without an interactive prompt. Locally, contributors should run `mise trust` only after reading `mise.toml` and the scripts it references (see README Getting started).
 - **Caching:** `actions/cache@v4.2.0` (commit-pinned) on `~/.local/share/aube/store`, keyed on `aube-lock.yaml`.
 - **Scripts:** CI jobs delegate to normalised scripts under `script/` (see README Getting started).
+- **Dependencies:** `./script/ci-install` runs `aube ci` with `PUPPETEER_SKIP_DOWNLOAD=true` so Puppeteer's postinstall does not download Chrome during lint, test, audit, or build. Browser jobs call `./script/install-chrome-for-puppeteer` or install system Chrome before screenshots.
 
 ### GitHub Action pinning
 

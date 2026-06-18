@@ -133,7 +133,8 @@ Tasks follow the [Scripts to Rule Them All](https://github.com/github/scripts-to
 |------|---------|---------|
 | setup | `mise run setup` | First-time setup after clone (frozen install) |
 | update | `mise run update` | Refresh tools and dependencies after pull |
-| bootstrap | `mise run bootstrap` | Clean frozen reinstall (`aube ci`) |
+| bootstrap | `mise run bootstrap` | Clean frozen reinstall (`./script/ci-install`) |
+| ci-install | `mise run ci-install` | Frozen install without Puppeteer browser download |
 | server | `mise run server` | Development server |
 | lint | `mise run lint` | ESLint |
 | test | `mise run test` | Jest unit tests |
