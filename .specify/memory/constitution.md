@@ -120,7 +120,7 @@ The application MUST follow the Twelve-Factor App methodology (<https://12factor
 
 **Language**: TypeScript (strict mode enabled)
 
-**Package Manager**: pnpm
+**Package Manager**: aube (paranoid mode; see ADR 0009)
 
 **Testing Framework**: Jest
 
@@ -138,12 +138,12 @@ The application MUST follow the Twelve-Factor App methodology (<https://12factor
 
 Before every commit, developers MUST:
 
-1. Run `pnpm run lint:fix` to format and fix linting issues
-2. Run `pnpm run lint` to verify all linting passes (zero errors, zero warnings)
+1. Run `aube run lint:fix` to format and fix linting issues
+2. Run `aube run lint` to verify all linting passes (zero errors, zero warnings)
 3. Fix ALL linting errors in any files you modified, even if the errors existed before your changes
 4. Remove ALL commented-out code (it is prohibited)
 5. Run `tsc --noEmit` to verify TypeScript type checking passes
-6. Run `pnpm test` to verify all tests pass
+6. Run `aube test` to verify all tests pass
 7. Verify README is updated if changes affect setup or usage
 8. Remove any disused code
 9. Ensure commit message follows Conventional Commits format
@@ -155,7 +155,7 @@ Before every commit, developers MUST:
 Before every push to a remote repository, developers MUST:
 
 1. Verify all quality gates pass (linting with zero errors/warnings, type checking, tests)
-2. Verify the build completes successfully (`pnpm run build` or equivalent)
+2. Verify the build completes successfully (`aube run build` or equivalent)
 3. Ensure no build failures or linting errors exist in the current branch
 4. Confirm all commits in the push follow Conventional Commits format
 5. Verify that CI will pass by running the same checks locally that CI runs
