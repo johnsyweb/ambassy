@@ -31,6 +31,9 @@ concurrency:
   group: pages
   cancel-in-progress: false
 
+env:
+  MISE_TRUSTED_CONFIG_PATHS: ${{ github.workspace }}
+
 jobs:
   commitlint:
     runs-on: ubuntu-latest
@@ -86,7 +89,7 @@ jobs:
         run: aube ci
 
       - name: Lint
-        run: aube run lint
+        run: ./script/lint
 
   test:
     runs-on: ubuntu-latest
@@ -110,7 +113,7 @@ jobs:
         run: aube ci
 
       - name: Test
-        run: aube test
+        run: ./script/test
 
   audit:
     runs-on: ubuntu-latest
@@ -134,7 +137,7 @@ jobs:
         run: aube ci
 
       - name: Audit dependencies
-        run: aube audit --audit-level moderate
+        run: ./script/audit
 
   build:
     needs: [lint, test, audit]
@@ -159,7 +162,7 @@ jobs:
         run: aube ci
 
       - name: Build
-        run: aube run build
+        run: ./script/build
 
       - name: Upload build artifact
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
@@ -201,7 +204,7 @@ jobs:
         run: aube exec puppeteer browsers install chrome
 
       - name: Map DOM budget smoke test
-        run: aube run smoke:map-dom-budget
+        run: ./script/smoke
 
   check-docs-only:
     runs-on: ubuntu-latest
@@ -326,10 +329,10 @@ jobs:
           export PUPPETEER_EXECUTABLE_PATH=/usr/bin/google-chrome
           Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
           sleep 2
-          aube run screenshots
+          ./script/screenshots
 
       - name: Build with screenshots
-        run: aube run build
+        run: ./script/build
 
       - name: Upload release build artifact
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
