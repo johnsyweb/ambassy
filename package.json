@@ -18,8 +18,7 @@
     "sync:userscript-matches": "node script/sync-finish-export-userscript-matches.cjs",
     "rebuild:userscript": "node script/rebuild-finish-export-userscript.cjs",
     "screenshots": "ts-node -r tsconfig-paths/register script/generate-screenshots.ts",
-    "smoke:map-dom-budget": "ts-node -r tsconfig-paths/register script/smoke-map-dom-budget.ts",
-    "prepare": "husky"
+    "smoke:map-dom-budget": "ts-node -r tsconfig-paths/register script/smoke-map-dom-budget.ts"
   },
   "keywords": [
     "parkrun",
@@ -86,7 +85,6 @@
     "gh-pages": "^6.3.0",
     "globals": "^17.6.0",
     "html-webpack-plugin": "^5.6.7",
-    "husky": "^9.1.7",
     "jest": "^30.4.2",
     "jest-environment-jsdom": "^30.4.1",
     "mini-css-extract-plugin": "^2.10.2",

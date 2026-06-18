@@ -1,0 +1,28 @@
+amends "package://github.com/jdx/hk/releases/download/v1.48.0/hk@1.48.0#/Config.pkl"
+
+hooks {
+    ["pre-commit"] {
+        steps {
+            ["test"] {
+                check = "./script/test"
+                exclusive = true
+            }
+        }
+    }
+    ["pre-push"] {
+        steps {
+            ["lint"] {
+                check = "./script/lint"
+                exclusive = true
+            }
+        }
+    }
+    ["commit-msg"] {
+        steps {
+            ["commitlint"] {
+                check = "aube exec commitlint --edit {{commit_msg_file}}"
+                exclusive = true
+            }
+        }
+    }
+}

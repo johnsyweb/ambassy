@@ -4,4 +4,5 @@ set -euo pipefail
 cd "$(dirname "$0")/.."
 
 mise install
+hk install --mise
 aube ci

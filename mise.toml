@@ -1,3 +1,6 @@
+[env]
+HK_MISE = "1"
+
 [tasks.bootstrap]
 description = "Install mise tools and a frozen dependency tree (aube ci)"
 file = "script/bootstrap"
