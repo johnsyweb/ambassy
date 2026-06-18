@@ -45,21 +45,24 @@ jobs:
         with:
           install: true
 
-      - name: Setup pnpm cache
-        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6
+      - name: Cache aube store
+        uses: actions/cache@1bd1e64a74aa4f10adac2b04a4362c8c44c4e0e8 # v4.2.0
         with:
-          cache: pnpm
+          path: ~/.local/share/aube/store
+          key: ${{ runner.os }}-aube-${{ hashFiles('aube-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-aube-
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: aube ci
 
       - name: Validate pull request commits
         if: github.event_name == 'pull_request'
-        run: pnpm exec commitlint --from ${{ github.event.pull_request.base.sha }} --to ${{ github.event.pull_request.head.sha }} --verbose
+        run: aube exec commitlint --from ${{ github.event.pull_request.base.sha }} --to ${{ github.event.pull_request.head.sha }} --verbose
 
       - name: Validate push commit
         if: github.event_name == 'push'
-        run: pnpm exec commitlint --from HEAD~1 --to HEAD --verbose
+        run: aube exec commitlint --from HEAD~1 --to HEAD --verbose
 
   lint:
     runs-on: ubuntu-latest
@@ -71,16 +74,19 @@ jobs:
         with:
           install: true
 
-      - name: Setup pnpm cache
-        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6
+      - name: Cache aube store
+        uses: actions/cache@1bd1e64a74aa4f10adac2b04a4362c8c44c4e0e8 # v4.2.0
         with:
-          cache: pnpm
+          path: ~/.local/share/aube/store
+          key: ${{ runner.os }}-aube-${{ hashFiles('aube-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-aube-
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: aube ci
 
       - name: Lint
-        run: pnpm run lint
+        run: aube run lint
 
   test:
     runs-on: ubuntu-latest
@@ -92,19 +98,21 @@ jobs:
         with:
           install: true
 
-      - name: Setup pnpm cache
-        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6
+      - name: Cache aube store
+        uses: actions/cache@1bd1e64a74aa4f10adac2b04a4362c8c44c4e0e8 # v4.2.0
         with:
-          cache: pnpm
+          path: ~/.local/share/aube/store
+          key: ${{ runner.os }}-aube-${{ hashFiles('aube-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-aube-
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: aube ci
 
       - name: Test
-        run: pnpm test
+        run: aube test
 
-  build:
-    needs: [lint, test]
+  audit:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
@@ -114,16 +122,44 @@ jobs:
         with:
           install: true
 
-      - name: Setup pnpm cache
-        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6
+      - name: Cache aube store
+        uses: actions/cache@1bd1e64a74aa4f10adac2b04a4362c8c44c4e0e8 # v4.2.0
         with:
-          cache: pnpm
+          path: ~/.local/share/aube/store
+          key: ${{ runner.os }}-aube-${{ hashFiles('aube-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-aube-
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: aube ci
+
+      - name: Audit dependencies
+        run: aube audit --audit-level moderate
+
+  build:
+    needs: [lint, test, audit]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
+
+      - name: Setup mise
+        uses: jdx/mise-action@dba19683ed58901619b14f395a24841710cb4925 # v4
+        with:
+          install: true
+
+      - name: Cache aube store
+        uses: actions/cache@1bd1e64a74aa4f10adac2b04a4362c8c44c4e0e8 # v4.2.0
+        with:
+          path: ~/.local/share/aube/store
+          key: ${{ runner.os }}-aube-${{ hashFiles('aube-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-aube-
+
+      - name: Install dependencies
+        run: aube ci
 
       - name: Build
-        run: pnpm run build
+        run: aube run build
 
       - name: Upload build artifact
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
@@ -144,13 +180,16 @@ jobs:
         with:
           install: true
 
-      - name: Setup pnpm cache
-        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6
+      - name: Cache aube store
+        uses: actions/cache@1bd1e64a74aa4f10adac2b04a4362c8c44c4e0e8 # v4.2.0
         with:
-          cache: pnpm
+          path: ~/.local/share/aube/store
+          key: ${{ runner.os }}-aube-${{ hashFiles('aube-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-aube-
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: aube ci
 
       - name: Download build artifact
         uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7
@@ -159,10 +198,10 @@ jobs:
           path: dist
 
       - name: Install Chrome for Puppeteer
-        run: pnpm exec puppeteer browsers install chrome
+        run: aube exec puppeteer browsers install chrome
 
       - name: Map DOM budget smoke test
-        run: pnpm run smoke:map-dom-budget
+        run: aube run smoke:map-dom-budget
 
   check-docs-only:
     runs-on: ubuntu-latest
@@ -253,18 +292,21 @@ jobs:
         with:
           install: true
 
-      - name: Setup pnpm cache
-        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6
+      - name: Cache aube store
+        uses: actions/cache@1bd1e64a74aa4f10adac2b04a4362c8c44c4e0e8 # v4.2.0
         with:
-          cache: pnpm
+          path: ~/.local/share/aube/store
+          key: ${{ runner.os }}-aube-${{ hashFiles('aube-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-aube-
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: aube ci
 
       - name: Semantic Release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: pnpm release
+        run: aube run release
 
       - name: Pull release commit
         run: git fetch origin main && git checkout main && git pull origin main
@@ -284,10 +326,10 @@ jobs:
           export PUPPETEER_EXECUTABLE_PATH=/usr/bin/google-chrome
           Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
           sleep 2
-          pnpm screenshots
+          aube run screenshots
 
       - name: Build with screenshots
-        run: pnpm run build
+        run: aube run build
 
       - name: Upload release build artifact
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
