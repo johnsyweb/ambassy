@@ -127,6 +127,8 @@ import {
   getMarkerMap,
   getHighlightLayer,
   getMap,
+  openEventMarkerTooltip,
+  adjustMapZoom,
   setMarkerClickHandler,
   setSelectionHighlightRefreshHandler,
   populateMap,
@@ -2285,6 +2287,9 @@ document.addEventListener("DOMContentLoaded", async () => {
       showKeyboardShortcutsDialog();
     });
   }
+
+  window.ambassyOpenEventMarkerTooltip = openEventMarkerTooltip;
+  window.ambassyAdjustMapZoom = adjustMapZoom;
 
   ambassy();
 });

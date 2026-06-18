@@ -885,6 +885,25 @@ export function getMap(): L.Map | null {
   return _map;
 }
 
+export function openEventMarkerTooltip(eventShortName: string): boolean {
+  const marker = _markerMap.get(eventShortName);
+  if (!marker) {
+    return false;
+  }
+
+  marker.openTooltip();
+  return true;
+}
+
+export function adjustMapZoom(delta: number): boolean {
+  if (!_map) {
+    return false;
+  }
+
+  _map.setZoom(_map.getZoom() + delta, { animate: true });
+  return true;
+}
+
 export function setMarkerClickHandler(
   handler: (eventShortName: string) => void,
 ): void {

@@ -11,6 +11,7 @@ import {
   getPolygonsLayer,
   getMap,
   getHighlightLayer,
+  openEventMarkerTooltip,
   refreshViewportUnallocatedMarkersForTests,
   setMarkerClickHandler,
   setSelectionHighlightRefreshHandler,
@@ -150,6 +151,68 @@ describe("populateMap", () => {
 
       const eventData = eventTeamsTableData.get("event1");
       expect(eventData?.eventDirectors).toBe("N/A");
+    });
+  });
+
+  describe("openEventMarkerTooltip", () => {
+    it("opens the tooltip for a mapped allocated event", () => {
+      const eventTeamsTableData = new Map([
+        [
+          "event1",
+          {
+            eventShortName: "event1",
+            eventDirectors: "Director1",
+            eventAmbassador: "EA1",
+            regionalAmbassador: "REA1",
+            eventCoordinates: "37.80000° S 144.90000° E",
+            eventSeries: 1,
+            eventCountryCode: 3,
+            eventCountry: "Australia",
+          },
+        ],
+      ]);
+      const eventDetails = new Map([
+        [
+          "event1",
+          {
+            id: "1",
+            type: "Feature",
+            geometry: {
+              type: "Point",
+              coordinates: [144.9631, -37.8136] as [number, number],
+            },
+            properties: {
+              eventname: "Event 1",
+              EventLongName: "Event 1 Long Name",
+              EventShortName: "event1",
+              LocalisedEventLongName: null,
+              countrycode: 0,
+              seriesid: 1,
+              EventLocation: "Location 1",
+            },
+          },
+        ],
+      ]);
+      const eventAmbassadors = new Map([
+        ["EA1", { name: "EA1", events: ["event1"] }],
+      ]);
+      const regionalAmbassadors = new Map([
+        ["REA1", { name: "REA1", state: "VIC", supportsEAs: ["EA1"] }],
+      ]);
+
+      populateMap(
+        eventTeamsTableData,
+        eventDetails,
+        eventAmbassadors,
+        regionalAmbassadors,
+      );
+
+      const marker = getMarkerMap().get("event1")!;
+      const openTooltipSpy = jest.spyOn(marker, "openTooltip");
+
+      expect(openEventMarkerTooltip("event1")).toBe(true);
+      expect(openTooltipSpy).toHaveBeenCalledTimes(1);
+      expect(openEventMarkerTooltip("missing")).toBe(false);
     });
   });
 
