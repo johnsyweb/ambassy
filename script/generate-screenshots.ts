@@ -1,6 +1,6 @@
 #!/usr/bin/env ts-node
 
-/// <reference path="../types/ambassy-window.d.ts" />
+/// <reference path="../src/global.d.ts" />
 
 import puppeteer, { Browser } from "puppeteer";
 import * as fs from "fs";
