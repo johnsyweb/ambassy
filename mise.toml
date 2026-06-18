@@ -1,9 +1,14 @@
 [env]
 HK_MISE = "1"
+PUPPETEER_SKIP_DOWNLOAD = "true"
 
 [tasks.bootstrap]
 description = "Install mise tools and a frozen dependency tree (aube ci)"
 file = "script/bootstrap"
+
+[tasks.ci-install]
+description = "Frozen dependency install for CI (skips Puppeteer browser download)"
+file = "script/ci-install"
 
 [tasks.setup]
 description = "Set up the project after a fresh clone"
@@ -42,7 +47,7 @@ description = "Map DOM budget smoke test (requires dist/)"
 file = "script/smoke"
 
 [tasks.cibuild]
-description = "Run local CI checks sequentially (verify action pins, lint, test, audit, build, smoke)"
+description = "Run local CI checks sequentially (verify action pins, ci-install, lint, test, audit, build, smoke)"
 file = "script/cibuild"
 
 [tasks.verify-action-pins]

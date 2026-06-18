@@ -8,6 +8,7 @@ RUN apt-get update \
 WORKDIR /app
 COPY package.json aube-lock.yaml aube-workspace.yaml ./
 COPY . .
+ENV PUPPETEER_SKIP_DOWNLOAD=true
 RUN aube ci
 RUN aube run build
 

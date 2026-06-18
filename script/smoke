@@ -3,4 +3,5 @@ set -euo pipefail
 
 cd "$(dirname "$0")/.."
 
+"$(dirname "$0")/install-chrome-for-puppeteer"
 aube run smoke:map-dom-budget

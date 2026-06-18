@@ -3,6 +3,5 @@ set -euo pipefail
 
 cd "$(dirname "$0")/.."
 
-mise install
-hk install --mise
-"$(dirname "$0")/ci-install"
+export PUPPETEER_SKIP_DOWNLOAD=true
+aube ci
