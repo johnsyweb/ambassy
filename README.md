@@ -88,19 +88,28 @@ See [ADR 0008](docs/adr/0008-semantic-release-and-changelog.md) for the full rel
 
 ## Local development
 
-- Install dependencies: `pnpm install`
-- Run the development server: `pnpm start`
-- Run tests: `pnpm test`
-- Lint: `pnpm run lint`
-- Production build (writes to `dist/`): `pnpm run build`
+Install [mise](https://mise.jdx.dev/), then from the project root:
 
-The development server enables webpack filesystem caching and uses `eval-cheap-module-source-map` for faster rebuilds. Stack traces map to TypeScript modules; line numbers may be approximate. For line-accurate source maps while debugging, run `pnpm run start:sourcemaps`.
+```bash
+mise install
+aube install
+```
 
-After `pnpm run build`, run `pnpm run smoke:map-dom-budget` to check map overlay and DOM budgets against the bundled sample CSVs (also runs in CI).
+- Run the development server: `aube start`
+- Run tests: `aube test`
+- Lint: `aube run lint`
+- Production build (writes to `dist/`): `aube run build`
+- Audit dependencies (moderate and above): `aube audit --audit-level moderate`
+
+The development server enables webpack filesystem caching and uses `eval-cheap-module-source-map` for faster rebuilds. Stack traces map to TypeScript modules; line numbers may be approximate. For line-accurate source maps while debugging, run `aube run start:sourcemaps`.
+
+After `aube run build`, run `aube run smoke:map-dom-budget` to check map overlay and DOM budgets against the bundled sample CSVs (also runs in CI).
+
+Package management uses [aube](https://aube.en.dev/) with paranoid security settings (`aube-workspace.yaml`). See [ADR 0009](docs/adr/0009-aube-paranoid-package-manager.md).
 
 ### Voronoi performance timings (development)
 
-When running `pnpm start`, a global Voronoi recompute (after allocations or catalogue changes, not on pan/zoom) records a `performance.measure` named `ambassy:voronoi-compute` and logs a `console.debug` line with duration, site count, and visible territory count.
+When running `aube start`, a global Voronoi recompute (after allocations or catalogue changes, not on pan/zoom) records a `performance.measure` named `ambassy:voronoi-compute` and logs a `console.debug` line with duration, site count, and visible territory count.
 
 To inspect timings in browser devtools:
 
