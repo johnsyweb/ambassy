@@ -1,0 +1,43 @@
+[tasks.bootstrap]
+description = "Install mise tools and a frozen dependency tree (aube ci)"
+file = "script/bootstrap"
+
+[tasks.setup]
+description = "Set up the project after a fresh clone"
+file = "script/setup"
+
+[tasks.update]
+description = "Refresh tools and dependencies after git pull"
+file = "script/update"
+
+[tasks.server]
+description = "Start the webpack development server"
+file = "script/server"
+
+[tasks.lint]
+description = "Run ESLint"
+file = "script/lint"
+
+[tasks.test]
+description = "Run unit tests (optional file path forwards to Jest)"
+file = "script/test"
+
+[tasks.build]
+description = "Production build to dist/"
+file = "script/build"
+
+[tasks.audit]
+description = "Audit dependencies (moderate severity and above)"
+file = "script/audit"
+
+[tasks.screenshots]
+description = "Generate marketing screenshot PNGs"
+file = "script/screenshots"
+
+[tasks.smoke]
+description = "Map DOM budget smoke test (requires dist/)"
+file = "script/smoke"
+
+[tasks.cibuild]
+description = "Run local CI checks sequentially (lint, test, audit, build, smoke)"
+file = "script/cibuild"
