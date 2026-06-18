@@ -254,7 +254,7 @@ get_commands_for_language() {
             echo "cargo test && cargo clippy"
             ;;
         *"JavaScript"*|*"TypeScript"*)
-            echo "aube test \\&\\& aube run lint"
+            echo "mise run test \\&\\& mise run lint"
             ;;
         *)
             echo "# Add commands for $lang"
