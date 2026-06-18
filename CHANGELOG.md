@@ -1,3 +1,18 @@
+# [1.3.0](https://github.com/johnsyweb/ambassy/compare/v1.2.1...v1.3.0) (2026-06-18)
+
+
+### Bug Fixes
+
+* **build:** load window type augmentations from src for webpack ([16d5ed9](https://github.com/johnsyweb/ambassy/commit/16d5ed9040ce5d824ee7a40d1bbff0cff2fc229c))
+* **map:** let pointer events pass through selection highlight ring ([e43268c](https://github.com/johnsyweb/ambassy/commit/e43268cc27815ad9d4785fdc1b078aa917a7911c))
+* **map:** show tooltips above territory map search panel ([3fbfa1f](https://github.com/johnsyweb/ambassy/commit/3fbfa1f2c12520f89308dbc04d218157527b0dc1))
+
+
+### Features
+
+* **map:** add helpers for screenshot automation ([0352ee4](https://github.com/johnsyweb/ambassy/commit/0352ee480d3dd092b0ed1f0617b3543c9b095f8c))
+* **screenshots:** drive territory map search scene for marketing images ([16bb45a](https://github.com/johnsyweb/ambassy/commit/16bb45aad696189870812d595f113d29b5f26d06))
+
 ## [1.2.1](https://github.com/johnsyweb/ambassy/compare/v1.2.0...v1.2.1) (2026-06-17)
 
 
