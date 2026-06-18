@@ -21,11 +21,11 @@ Single workflow for validation, build, and deployment with caching and paralleli
 - **Trust in CI:** the workflow sets `MISE_TRUSTED_CONFIG_PATHS` to the workspace so jobs can run `mise run …` without an interactive prompt. Locally, contributors should run `mise trust` only after reading `mise.toml` and the scripts it references (see README Getting started).
 - **Caching:** `actions/cache@v4.2.0` (commit-pinned) on `~/.local/share/aube/store`, keyed on `aube-lock.yaml`.
 - **Scripts:** CI jobs delegate to normalised scripts under `script/` (see README Getting started).
-- **Dependencies:** `./script/ci-install` runs `aube ci` with `PUPPETEER_SKIP_DOWNLOAD=true` so Puppeteer's postinstall does not download Chrome during lint, test, audit, or build. Browser jobs call `./script/install-chrome-for-puppeteer` or install system Chrome before screenshots.
+- **Dependencies:** `./script/ci-install` runs `aube ci` with `PUPPETEER_SKIP_DOWNLOAD=true` and `puppeteer.config.cjs` (`skipDownload: true`) so Puppeteer's postinstall does not download Chrome during lint, test, audit, or build — including inside aube's jailed builds, where environment variables are not always visible to lifecycle scripts. Browser jobs call `./script/install-chrome-for-puppeteer` or install system Chrome before screenshots.
 
 ### GitHub Action pinning
 
-Every workflow `uses:` line must reference a **full 40-character commit SHA**, with the human-readable tag in a trailing comment (for example `actions/checkout@df4cb1c… # v6`). Tag or branch refs (`@v4`, `@main`) are rejected by `./script/verify-github-action-pins`.
+Every workflow `uses:` line must reference a **full 40-character commit SHA**, with the human-readable tag in a trailing comment (for example `actions/checkout@df4cb1c… # v6`). Tag or branch refs (`@v4`, `@main`) are rejected by `./script/verify-github-action-pins`. The verifier uses the public GitHub API (and `GH_TOKEN` when available).
 
 When adding or bumping an action:
 
