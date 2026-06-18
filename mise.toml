@@ -42,7 +42,7 @@ description = "Map DOM budget smoke test (requires dist/)"
 file = "script/smoke"
 
 [tasks.cibuild]
-description = "Run local CI checks sequentially (lint, test, audit, build, smoke)"
+description = "Run local CI checks sequentially (verify action pins, lint, test, audit, build, smoke)"
 file = "script/cibuild"
 
 [tasks.verify-action-pins]
