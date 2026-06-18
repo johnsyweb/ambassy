@@ -1,0 +1,52 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+cd "$(dirname "$0")/.."
+
+workflows_dir=".github/workflows"
+failures=0
+
+commit_exists() {
+  local owner="$1"
+  local repo="$2"
+  local sha="$3"
+
+  if command -v gh >/dev/null 2>&1; then
+    gh api "repos/${owner}/${repo}/commits/${sha}" --jq '.sha' >/dev/null
+    return
+  fi
+
+  curl -sf "https://api.github.com/repos/${owner}/${repo}/commits/${sha}" >/dev/null
+}
+
+while IFS= read -r -d '' file; do
+  while IFS= read -r ref; do
+    [[ -z "$ref" ]] && continue
+
+    owner_repo="${ref%@*}"
+    sha="${ref#*@}"
+    owner="${owner_repo%/*}"
+    repo="${owner_repo#*/}"
+
+    if [[ ! "$sha" =~ ^[0-9a-f]{40}$ ]]; then
+      echo "error: ${owner}/${repo} must be pinned to a 40-character commit SHA (${file})" >&2
+      echo "  found: ${ref}" >&2
+      echo "  resolve: gh api repos/${owner}/${repo}/git/ref/tags/TAG --jq '.object.sha'" >&2
+      failures=$((failures + 1))
+      continue
+    fi
+
+    if ! commit_exists "$owner" "$repo" "$sha"; then
+      echo "error: ${owner}/${repo}@${sha} does not exist on GitHub (${file})" >&2
+      echo "  resolve: gh api repos/${owner}/${repo}/git/ref/tags/TAG --jq '.object.sha'" >&2
+      failures=$((failures + 1))
+    fi
+  done < <(grep -Eho 'uses:[[:space:]]+[^[:space:]#]+' "$file" | sed -E 's/^uses:[[:space:]]+//')
+done < <(find "$workflows_dir" \( -name '*.yml' -o -name '*.yaml' \) -print0)
+
+if [[ "$failures" -gt 0 ]]; then
+  echo "verify-github-action-pins: ${failures} invalid action pin(s)" >&2
+  exit 1
+fi
+
+echo "verify-github-action-pins: all workflow action pins resolve"

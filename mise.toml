@@ -44,3 +44,7 @@ file = "script/smoke"
 [tasks.cibuild]
 description = "Run local CI checks sequentially (lint, test, audit, build, smoke)"
 file = "script/cibuild"
+
+[tasks.verify-action-pins]
+description = "Verify GitHub Actions workflow pins resolve on GitHub"
+file = "script/verify-github-action-pins"
