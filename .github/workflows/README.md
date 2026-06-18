@@ -8,6 +8,7 @@ Single workflow for validation, build, and deployment with caching and paralleli
 
 ### Jobs
 
+0. **verify-workflows** checks that every `uses:` reference in `.github/workflows/` is pinned to a 40-character commit SHA that exists on GitHub (`./script/verify-github-action-pins`). This job uses only `actions/checkout` (no cache) so invalid pins fail fast.
 1. **lint**, **test**, and **audit** run in parallel (each calls `./script/…` after `aube ci`).
 2. **build** runs after all three pass; uploads `dist` artifact (retention 1 day).
 3. **map-dom-budget** smoke test runs after build (`./script/smoke`).
@@ -18,8 +19,27 @@ Single workflow for validation, build, and deployment with caching and paralleli
 
 - **mise** (`jdx/mise-action@v4` with `install: true`) reads `.tool-versions` and `mise.toml`, installing Node.js and aube.
 - **Trust in CI:** the workflow sets `MISE_TRUSTED_CONFIG_PATHS` to the workspace so jobs can run `mise run …` without an interactive prompt. Locally, contributors should run `mise trust` only after reading `mise.toml` and the scripts it references (see README Getting started).
-- **Caching:** `actions/cache@v4` on `~/.local/share/aube/store`, keyed on `aube-lock.yaml`.
+- **Caching:** `actions/cache@v4.2.0` (commit-pinned) on `~/.local/share/aube/store`, keyed on `aube-lock.yaml`.
 - **Scripts:** CI jobs delegate to normalised scripts under `script/` (see README Getting started).
+
+### GitHub Action pinning
+
+Every workflow `uses:` line must reference a **full 40-character commit SHA**, with the human-readable tag in a trailing comment (for example `actions/checkout@df4cb1c… # v6`). Tag or branch refs (`@v4`, `@main`) are rejected by `./script/verify-github-action-pins`.
+
+When adding or bumping an action:
+
+1. Resolve the commit SHA for the tag:
+   ```bash
+   gh api repos/actions/cache/git/ref/tags/v4.2.0 --jq '.object.sha'
+   ```
+   For annotated tags, follow `.object.sha` to the commit if needed:
+   ```bash
+   gh api repos/actions/cache/commits/$(gh api repos/actions/cache/git/ref/tags/v4.2.0 -q .object.sha) --jq .sha
+   ```
+2. Update the workflow with `owner/repo@<sha> # vX.Y.Z`.
+3. Run `mise run verify-action-pins` (also included in `mise run cibuild`).
+
+[Dependabot](https://docs.github.com/en/code-security/dependabot) (`github-actions` ecosystem in `.github/dependabot.yml`) opens weekly PRs to refresh pins; merge those after CI passes.
 
 ### Concurrency
 
@@ -43,5 +63,5 @@ mise run setup
 mise run lint
 mise run test
 mise run build
-mise run cibuild   # lint, test, audit, build, smoke in sequence
+mise run cibuild   # verify action pins, lint, test, audit, build, smoke in sequence
 ```

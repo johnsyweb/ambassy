@@ -141,6 +141,7 @@ Tasks follow the [Scripts to Rule Them All](https://github.com/github/scripts-to
 | audit | `mise run audit` | Dependency audit (moderate and above) |
 | smoke | `mise run smoke` | Map DOM budget smoke test (needs `dist/`) |
 | cibuild | `mise run cibuild` | All CI checks locally, sequentially |
+| verify-action-pins | `mise run verify-action-pins` | Verify workflow action SHAs resolve on GitHub |
 | screenshots | `mise run screenshots` | Marketing PNGs (maintainers; needs Chrome) |
 
 Run a single test file: `mise run test -- src/utils/mapMarkerZoomScale.test.ts`
