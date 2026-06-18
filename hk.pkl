@@ -11,6 +11,9 @@ hooks {
     }
     ["pre-push"] {
         steps {
+            ["verify-action-pins"] {
+                check = "./script/verify-github-action-pins"
+            }
             ["lint"] {
                 check = "./script/lint"
                 exclusive = true

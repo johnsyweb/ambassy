@@ -154,6 +154,7 @@ Git hooks are managed by [hk](https://hk.jdx.dev/). `hk.pkl` defines three hooks
 | Hook | Step | Command |
 |------|------|---------|
 | pre-commit | test | `./script/test` |
+| pre-push | verify-action-pins | `./script/verify-github-action-pins` |
 | pre-push | lint | `./script/lint` |
 | commit-msg | commitlint | `aube exec commitlint --edit` (commit message file) |
 
