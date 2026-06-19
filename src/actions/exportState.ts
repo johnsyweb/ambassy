@@ -10,15 +10,17 @@ import { loadAmbassadorFinishHistories } from "./persistAmbassadorFinishHistory"
 
 const CACHE_KEY = "parkrun events";
 
-function isManuallyResolvedEventDetails(
+function isResolvedIssueCoordinateOverride(
   eventDetails: EventDetails & {
     manualCoordinates?: boolean;
     geocodedAddress?: boolean;
+    resolvedViaCatalogueMatch?: boolean;
   },
 ): boolean {
   return (
     eventDetails.manualCoordinates === true ||
     eventDetails.geocodedAddress === true ||
+    eventDetails.resolvedViaCatalogueMatch === true ||
     eventDetails.id.startsWith("manual-") ||
     eventDetails.id.startsWith("geocoded-")
   );
@@ -65,7 +67,7 @@ export function exportApplicationState(): Blob {
           parsed.eventDetailsMap,
         );
         eventDetailsMap.forEach((eventDetails, key) => {
-          if (isManuallyResolvedEventDetails(eventDetails)) {
+          if (isResolvedIssueCoordinateOverride(eventDetails)) {
             resolvedEventDetails.push([key, eventDetails]);
           }
         });

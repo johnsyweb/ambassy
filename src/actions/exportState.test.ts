@@ -214,6 +214,83 @@ describe("exportState", () => {
       ).toBe(true);
     });
 
+    it("should include catalogue-match resolutions in export", async () => {
+      const mockData = {
+        eventAmbassadors: [
+          ["EA1", { name: "Test EA", events: ["AliasEvent"] }],
+        ],
+        eventTeams: [
+          [
+            "AliasEvent",
+            {
+              eventShortName: "AliasEvent",
+              eventAmbassador: "EA1",
+              eventDirectors: [],
+            },
+          ],
+        ],
+        regionalAmbassadors: [
+          ["REA1", { name: "Test REA", state: "NZ", supportsEAs: ["EA1"] }],
+        ],
+        changesLog: [],
+      };
+
+      const catalogueMatchResolution: EventDetails & {
+        resolvedViaCatalogueMatch?: boolean;
+      } = {
+        id: "greytown-woodside-trail",
+        type: "Feature",
+        geometry: {
+          type: "Point",
+          coordinates: [175.403236, -41.067449],
+        },
+        properties: {
+          eventname: "greytownwoodsidetrail",
+          EventLongName: "Greytown Woodside Trail parkrun",
+          EventShortName: "AliasEvent",
+          LocalisedEventLongName: null,
+          countrycode: 97,
+          seriesid: 1,
+          EventLocation: "Greytown Woodside Trail",
+        },
+        resolvedViaCatalogueMatch: true,
+      };
+
+      const cacheData = JSON.stringify({
+        timestamp: Date.now(),
+        eventDetailsMap: [["AliasEvent", catalogueMatchResolution]],
+      });
+
+      (loadFromStorage as jest.Mock)
+        .mockReturnValueOnce(mockData.eventAmbassadors)
+        .mockReturnValueOnce(mockData.eventTeams)
+        .mockReturnValueOnce(mockData.regionalAmbassadors)
+        .mockReturnValueOnce(mockData.changesLog);
+
+      mockLocalStorage.getItem.mockImplementation((key: string) => {
+        if (key === "parkrun events") {
+          return cacheData;
+        }
+        return null;
+      });
+
+      const blob = exportApplicationState();
+      const jsonString = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result as string);
+        reader.onerror = () => reject(new Error("Failed to read blob"));
+        reader.readAsText(blob);
+      });
+
+      const exportedState = JSON.parse(jsonString);
+
+      expect(exportedState.data.resolvedEventDetails).toHaveLength(1);
+      expect(exportedState.data.resolvedEventDetails[0][0]).toBe("AliasEvent");
+      expect(
+        exportedState.data.resolvedEventDetails[0][1].resolvedViaCatalogueMatch,
+      ).toBe(true);
+    });
+
     it("should not include resolvedEventDetails if none exist", () => {
       const mockData = {
         eventAmbassadors: [["EA1", { name: "Test EA", events: [] }]],

@@ -50,7 +50,7 @@ async function fetchEvents(): Promise<void> {
       eventDetailsMap.set(event.properties.EventShortName, event);
     });
 
-    // Preserve manually resolved events from existing cache
+    // Preserve resolved issue coordinate overrides from existing cache
     const existingCache = localStorage.getItem(EVENTS_CATALOGUE_CACHE_KEY);
     if (existingCache) {
       try {
@@ -59,7 +59,7 @@ async function fetchEvents(): Promise<void> {
           const existingEvents = new Map<string, EventDetails>(
             parsedCache.eventDetailsMap,
           );
-          // Add any manually resolved events that aren't in the fresh API data
+          // Add any resolved issue coordinate overrides that aren't in the fresh API data
           existingEvents.forEach((event, key) => {
             if (!eventDetailsMap.has(key)) {
               eventDetailsMap.set(key, event);
