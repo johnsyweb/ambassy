@@ -1,3 +1,17 @@
+# [1.5.0](https://github.com/johnsyweb/ambassy/compare/v1.4.0...v1.5.0) (2026-06-19)
+
+
+### Bug Fixes
+
+* **deps:** override http-proxy-middleware for GHSA-64mm-vxmg-q3vj ([c6d30e3](https://github.com/johnsyweb/ambassy/commit/c6d30e3117997972c5aaaf107874af5f24248f40))
+* **issues:** include catalogue-match overrides in state export ([dfd4008](https://github.com/johnsyweb/ambassy/commit/dfd4008163e417768ca401699d5acfead38fef76))
+* **issues:** set resolvedViaCatalogueMatch on event search resolution ([7d93879](https://github.com/johnsyweb/ambassy/commit/7d93879e93f29f2dded60e125259ed63737c16bc))
+
+
+### Features
+
+* **geocoding:** replace Nominatim with Photon queue and cache ([efbe8e7](https://github.com/johnsyweb/ambassy/commit/efbe8e770912f49cc0dab232259bb2caee060122))
+
 # [1.4.0](https://github.com/johnsyweb/ambassy/compare/v1.3.0...v1.4.0) (2026-06-18)
 
 
