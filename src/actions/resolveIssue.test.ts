@@ -73,6 +73,16 @@ describe("resolveIssueWithEvent", () => {
     }).toThrow("Event details must have valid coordinates");
   });
 
+  it("should set resolvedViaCatalogueMatch flag", () => {
+    resolveIssueWithEvent(issue, eventDetails, eventDetailsMap, log);
+
+    const addedEvent = eventDetailsMap.get(issue.eventShortName);
+    expect(
+      (addedEvent as EventDetails & { resolvedViaCatalogueMatch?: boolean })
+        .resolvedViaCatalogueMatch,
+    ).toBe(true);
+  });
+
   it("should use issue eventShortName as key even if EventShortName differs", () => {
     const differentEvent: EventDetails = {
       ...eventDetails,

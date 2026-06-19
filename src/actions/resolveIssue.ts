@@ -38,8 +38,9 @@ export function resolveIssueWithEvent(
   }
 
   // Preserve all name variations from the found event, but ensure EventShortName matches the issue key
-  const eventToAdd: EventDetails = {
+  const eventToAdd: EventDetails & { resolvedViaCatalogueMatch?: boolean } = {
     ...eventDetails,
+    resolvedViaCatalogueMatch: true,
     properties: {
       ...eventDetails.properties,
       // Keep the original eventname from the found event (it's the URL-friendly identifier)
