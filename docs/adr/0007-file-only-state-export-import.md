@@ -12,7 +12,7 @@ Domain terms: `CONTEXT.md`.
 
 1. **Export** — one header control immediately downloads `ambassy-state-YYYY-MM-DD.json` (schema `2.0.0`). No dialog. Successful export marks state as saved for the unsaved-changes reminder.
 2. **Import** — header file picker plus drag-and-drop of a `.json` file. Full replace of all persisted data in the export scope, with confirmation when local data exists or there are unsaved changes. No URL query import, clipboard paste, or native share for application state.
-3. **Export scope** — allocations, ambassadors, prospective events, capacity limits, changes log, manually resolved event coordinates, parkrunner IDs, and visit histories. Exclude `events.json` catalogue cache, pending visit import payloads, and session-only UI state (e.g. ambassador name filter).
+3. **Export scope** — allocations, ambassadors, prospective events, capacity limits, changes log, resolved issue coordinate overrides, parkrunner IDs, and visit histories. Exclude `events.json` catalogue cache, pending visit import payloads, and session-only UI state (e.g. ambassador name filter).
 4. **Schema** — new exports use `2.0.0`. Import accepts `2.0.0` and legacy `1.0.0`; missing prospect and visit-history fields in older files default to empty.
 5. **Removal** — delete URL sharing utilities, multi-method share dialog, and related types/tests. Visit-history clipboard import remains a separate flow (see ADR 0005).
 

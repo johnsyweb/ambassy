@@ -173,8 +173,12 @@ How territory map event markers grow when the REA zooms in past region overview,
 _Avoid_: Responsive markers (too vague), pin scaling
 
 **State export**:
-A single JSON file containing all Ambassy data that cannot be recovered from parkrun alone: allocations, ambassadors, prospective events, capacity limits, changes log, manually resolved event coordinates, parkrunner IDs, and visit histories.
+A single JSON file containing all Ambassy data that cannot be recovered from parkrun alone: allocations, ambassadors, prospective events, capacity limits, changes log, resolved issue coordinate overrides, parkrunner IDs, and visit histories.
 _Avoid_: Share, backup, partial export
+
+**Resolved issue coordinate override**:
+An allocation whose event name does not resolve to coordinates in the parkrun catalogue alone, but has been fixed on the Issues tab. Stored under the allocation key in the events catalogue cache and included in state export. Three resolution paths: catalogue match (`resolvedViaCatalogueMatch`), manual pin (`manualCoordinates`), or address geocoding (`geocodedAddress`).
+_Avoid_: Manually resolved coordinates (too narrow — excludes catalogue match)
 
 **State export exclusions**:
 Data deliberately omitted from a state export because it is re-fetchable or ephemeral: the `events.json` catalogue cache, pending visit import payloads, and session-only UI state (e.g. ambassador name filter).
