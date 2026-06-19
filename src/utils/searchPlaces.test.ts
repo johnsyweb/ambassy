@@ -1,8 +1,17 @@
-import { searchPlaces } from "./geocoding";
+import {
+  clearPlaceGeocodingCache,
+  searchPlaces,
+} from "./geocoding";
 
 describe("searchPlaces", () => {
   beforeEach(() => {
+    clearPlaceGeocodingCache();
     global.fetch = jest.fn();
+    jest.useFakeTimers();
+  });
+
+  afterEach(() => {
+    jest.useRealTimers();
   });
 
   it("returns an empty list when the query is shorter than the minimum length", async () => {
@@ -10,19 +19,26 @@ describe("searchPlaces", () => {
     expect(global.fetch).not.toHaveBeenCalled();
   });
 
-  it("returns place suggestions from Nominatim", async () => {
+  it("returns place suggestions from Photon", async () => {
     (global.fetch as jest.Mock).mockResolvedValue({
       ok: true,
-      json: async () => [
-        {
-          lat: "-37.5622",
-          lon: "143.8503",
-          display_name: "Ballarat, Victoria, Australia",
-        },
-      ],
+      json: async () => ({
+        features: [
+          {
+            geometry: { coordinates: [143.8503, -37.5622] },
+            properties: {
+              name: "Ballarat",
+              state: "Victoria",
+              country: "Australia",
+            },
+          },
+        ],
+      }),
     });
 
-    await expect(searchPlaces("Ballarat")).resolves.toEqual([
+    const resultPromise = searchPlaces("Ballarat");
+    jest.runAllTimersAsync();
+    await expect(resultPromise).resolves.toEqual([
       {
         label: "Ballarat, Victoria, Australia",
         latitude: -37.5622,
@@ -31,9 +47,7 @@ describe("searchPlaces", () => {
     ]);
 
     expect(global.fetch).toHaveBeenCalledWith(
-      expect.stringContaining(
-        "q=Ballarat&format=json&limit=5&addressdetails=0",
-      ),
+      expect.stringContaining("photon.komoot.io/api/?q=Ballarat&limit=5"),
     );
   });
 });

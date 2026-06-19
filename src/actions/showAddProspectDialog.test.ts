@@ -13,10 +13,16 @@ import { createProspectFromAddress } from "./createProspectFromAddress";
 import { saveProspectiveEvents } from "./persistProspectiveEvents";
 
 // Mock dependencies
-jest.mock("@utils/geocoding", () => ({
-  geocodeAddress: jest.fn(),
-  searchPlaces: jest.fn(),
-}));
+jest.mock("@utils/geocoding", () => {
+  const actual = jest.requireActual<typeof import("@utils/geocoding")>(
+    "@utils/geocoding",
+  );
+  return {
+    ...actual,
+    geocodeAddress: jest.fn(),
+    searchPlaces: jest.fn(),
+  };
+});
 
 function getAddProspectFormInputs(container: HTMLElement) {
   return {
@@ -103,7 +109,13 @@ describe("showAddProspectDialog", () => {
       lat: -37.8136,
       lng: 144.9631,
     });
-    (searchPlaces as jest.Mock).mockResolvedValue([]);
+    (searchPlaces as jest.Mock).mockResolvedValue([
+      {
+        label: "Melbourne, Victoria, Australia",
+        latitude: -37.8136,
+        longitude: 144.9631,
+      },
+    ]);
     (inferCountryCodeFromCoordinates as jest.Mock).mockResolvedValue("AU");
     (generateProspectAllocationSuggestions as jest.Mock).mockResolvedValue([]);
     (createProspectFromAddress as jest.Mock).mockReturnValue({
@@ -269,8 +281,8 @@ describe("showAddProspectDialog", () => {
       await new Promise((resolve) => setTimeout(resolve, 600));
 
       // Verify geocoding was called
-      expect(geocodeAddress).toHaveBeenCalledWith(
-        "123 Main St, Melbourne VIC 3000",
+      expect(searchPlaces).toHaveBeenCalledWith(
+        "123 Main St, Melbourne VIC 3000, Australia",
       );
 
       const locationStatus = content.querySelector(
@@ -310,7 +322,7 @@ describe("showAddProspectDialog", () => {
     });
 
     it("should handle geocoding errors gracefully", async () => {
-      (geocodeAddress as jest.Mock).mockRejectedValue(
+      (searchPlaces as jest.Mock).mockRejectedValue(
         new Error("Geocoding failed"),
       );
 
@@ -367,7 +379,7 @@ describe("showAddProspectDialog", () => {
 
   describe("User Story 2 - Geocoding failure handling", () => {
     it("should display error message and retry button when geocoding fails", async () => {
-      (geocodeAddress as jest.Mock).mockRejectedValue(
+      (searchPlaces as jest.Mock).mockRejectedValue(
         new Error("Geocoding failed"),
       );
 
@@ -418,7 +430,7 @@ describe("showAddProspectDialog", () => {
     });
 
     it("should allow manual coordinate entry when geocoding fails", async () => {
-      (geocodeAddress as jest.Mock).mockRejectedValue(
+      (searchPlaces as jest.Mock).mockRejectedValue(
         new Error("Geocoding failed"),
       );
       (inferCountryCodeFromCoordinates as jest.Mock).mockResolvedValue("AU");
@@ -493,7 +505,7 @@ describe("showAddProspectDialog", () => {
     });
 
     it("should complete full flow: geocoding failure → manual coordinate entry → prospect creation", async () => {
-      (geocodeAddress as jest.Mock).mockRejectedValue(
+      (searchPlaces as jest.Mock).mockRejectedValue(
         new Error("Geocoding failed"),
       );
       (inferCountryCodeFromCoordinates as jest.Mock).mockResolvedValue("AU");
@@ -776,11 +788,6 @@ describe("showAddProspectDialog", () => {
 
   describe("Place search suggestions", () => {
     it("shows Places when geocoded country mismatches state and hides manual coordinates", async () => {
-      (geocodeAddress as jest.Mock).mockResolvedValue({
-        lat: 39.1128845,
-        lng: -84.5125709,
-      });
-      (inferCountryCodeFromCoordinates as jest.Mock).mockResolvedValue("US");
       (searchPlaces as jest.Mock).mockResolvedValue([
         {
           label:
@@ -789,6 +796,7 @@ describe("showAddProspectDialog", () => {
           longitude: 175.279,
         },
       ]);
+      (inferCountryCodeFromCoordinates as jest.Mock).mockResolvedValue("US");
 
       showAddProspectDialog(
         eventAmbassadors,
@@ -838,13 +846,6 @@ describe("showAddProspectDialog", () => {
     });
 
     it("updates address and shows allocation suggestions when a place is selected", async () => {
-      (geocodeAddress as jest.Mock).mockResolvedValue({
-        lat: 39.1128845,
-        lng: -84.5125709,
-      });
-      (inferCountryCodeFromCoordinates as jest.Mock)
-        .mockResolvedValueOnce("US")
-        .mockResolvedValueOnce("NZ");
       (searchPlaces as jest.Mock).mockResolvedValue([
         {
           label:
@@ -853,6 +854,9 @@ describe("showAddProspectDialog", () => {
           longitude: 175.279,
         },
       ]);
+      (inferCountryCodeFromCoordinates as jest.Mock)
+        .mockResolvedValueOnce("US")
+        .mockResolvedValueOnce("NZ");
       (generateProspectAllocationSuggestions as jest.Mock).mockResolvedValue([
         {
           fromAmbassador: "",
@@ -903,9 +907,6 @@ describe("showAddProspectDialog", () => {
     });
 
     it("shows manual coordinates only when place search returns no results", async () => {
-      (geocodeAddress as jest.Mock).mockRejectedValue(
-        new Error("Geocoding failed"),
-      );
       (searchPlaces as jest.Mock).mockResolvedValue([]);
 
       showAddProspectDialog(
@@ -1009,12 +1010,15 @@ describe("showAddProspectDialog", () => {
     });
 
     it("shows a loading status while the address lookup is in progress", async () => {
-      let resolveGeocode: (value: { lat: number; lng: number }) => void = () =>
-        undefined;
-      (geocodeAddress as jest.Mock).mockImplementation(
+      let resolveSearch: (value: Array<{
+        label: string;
+        latitude: number;
+        longitude: number;
+      }>) => void = () => undefined;
+      (searchPlaces as jest.Mock).mockImplementation(
         () =>
           new Promise((resolve) => {
-            resolveGeocode = resolve;
+            resolveSearch = resolve;
           }),
       );
 
@@ -1041,7 +1045,13 @@ describe("showAddProspectDialog", () => {
       expect(locationStatus.textContent).toContain("Looking up location");
 
       await new Promise((resolve) => setTimeout(resolve, 550));
-      resolveGeocode({ lat: -37.787, lng: 145.123 });
+      resolveSearch([
+        {
+          label: "Ruffey Lake Park, Victoria, Australia",
+          latitude: -37.787,
+          longitude: 145.123,
+        },
+      ]);
       await new Promise((resolve) => setTimeout(resolve, 100));
 
       expect(locationStatus.textContent).toContain("Location found");

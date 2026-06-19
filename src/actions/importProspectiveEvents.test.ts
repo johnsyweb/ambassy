@@ -6,11 +6,11 @@ import {
   saveProspectiveEvents,
   loadProspectiveEvents,
 } from "./persistProspectiveEvents";
-import { geocodeProspectiveEvent } from "@utils/geography";
+import { geocodeProspectiveEvent } from "@utils/geocoding";
 
 // Mock dependencies
 jest.mock("./persistProspectiveEvents");
-jest.mock("@utils/geography");
+jest.mock("@utils/geocoding");
 
 const mockSaveProspectiveEvents = saveProspectiveEvents as jest.MockedFunction<
   typeof saveProspectiveEvents
