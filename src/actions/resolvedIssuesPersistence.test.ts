@@ -1,12 +1,13 @@
 import { exportApplicationState } from "./exportState";
 import { importApplicationState } from "./importState";
-import { resolveIssueWithPin } from "./resolveIssue";
+import { resolveIssueWithPin, resolveIssueWithEvent } from "./resolveIssue";
 import { detectIssues } from "./detectIssues";
 import { EventDetailsMap } from "@models/EventDetailsMap";
 import { EventTeamMap } from "@models/EventTeamMap";
 import { EventAmbassadorMap } from "@models/EventAmbassadorMap";
 import { RegionalAmbassadorMap } from "@models/RegionalAmbassadorMap";
 import { EventIssue } from "@models/EventIssue";
+import { EventDetails } from "@models/EventDetails";
 import { LogEntry } from "@models/LogEntry";
 import { loadFromStorage, saveToStorage } from "@utils/storage";
 
@@ -177,6 +178,135 @@ describe("Resolved Issues Persistence", () => {
     );
 
     // The issue should not appear because eventDetails exist
+    expect(issues).toHaveLength(0);
+  });
+
+  it("should persist catalogue-match resolutions through export and import", async () => {
+    const allocationKey = "Greytown Woodside TrailEvent Ambassador";
+    const eventTeams: EventTeamMap = new Map([
+      [
+        allocationKey,
+        {
+          eventShortName: allocationKey,
+          eventAmbassador: "EA1",
+          eventDirectors: [],
+        },
+      ],
+    ]);
+
+    const eventAmbassadors: EventAmbassadorMap = new Map([
+      ["EA1", { name: "Event Ambassador 1", events: [allocationKey] }],
+    ]);
+
+    const regionalAmbassadors: RegionalAmbassadorMap = new Map([
+      [
+        "REA1",
+        { name: "Regional Ambassador 1", state: "NZ", supportsEAs: ["EA1"] },
+      ],
+    ]);
+
+    const log: LogEntry[] = [];
+    const eventDetailsMap: EventDetailsMap = new Map();
+    const catalogueEvent: EventDetails = {
+      id: "greytown-woodside-trail",
+      type: "Feature",
+      geometry: {
+        type: "Point",
+        coordinates: [175.403236, -41.067449],
+      },
+      properties: {
+        eventname: "greytownwoodsidetrail",
+        EventLongName: "Greytown Woodside Trail parkrun",
+        EventShortName: "Greytown Woodside Trail",
+        LocalisedEventLongName: null,
+        countrycode: 97,
+        seriesid: 1,
+        EventLocation: "Greytown Woodside Trail",
+      },
+    };
+
+    const issue: EventIssue = {
+      eventShortName: allocationKey,
+      eventAmbassador: "EA1",
+      regionalAmbassador: "REA1",
+      issueType: "missing_coordinates",
+      status: "unresolved",
+    };
+
+    resolveIssueWithEvent(issue, catalogueEvent, eventDetailsMap, log);
+
+    saveToStorage("eventAmbassadors", Array.from(eventAmbassadors.entries()));
+    saveToStorage("eventTeams", Array.from(eventTeams.entries()));
+    saveToStorage(
+      "regionalAmbassadors",
+      Array.from(regionalAmbassadors.entries()),
+    );
+    saveToStorage("changesLog", log);
+
+    mockLocalStorage.getItem.mockImplementation((key: string) => {
+      if (key === "parkrun events") {
+        return JSON.stringify({
+          timestamp: Date.now(),
+          eventDetailsMap: Array.from(eventDetailsMap.entries()),
+        });
+      }
+      return null;
+    });
+
+    (loadFromStorage as jest.Mock).mockImplementation((key: string) => {
+      if (key === "eventAmbassadors") {
+        return Array.from(eventAmbassadors.entries());
+      }
+      if (key === "eventTeams") {
+        return Array.from(eventTeams.entries());
+      }
+      if (key === "regionalAmbassadors") {
+        return Array.from(regionalAmbassadors.entries());
+      }
+      if (key === "changesLog") {
+        return log;
+      }
+      return null;
+    });
+
+    const blob = exportApplicationState();
+    const jsonString = await new Promise<string>((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = () => reject(new Error("Failed to read blob"));
+      reader.readAsText(blob);
+    });
+    const exportedState = JSON.parse(jsonString);
+
+    expect(exportedState.data.resolvedEventDetails).toHaveLength(1);
+    expect(exportedState.data.resolvedEventDetails[0][0]).toBe(allocationKey);
+    expect(
+      exportedState.data.resolvedEventDetails[0][1].resolvedViaCatalogueMatch,
+    ).toBe(true);
+
+    jest.clearAllMocks();
+    mockLocalStorage.getItem.mockReturnValue(null);
+    (loadFromStorage as jest.Mock).mockReturnValue(null);
+
+    importApplicationState(exportedState);
+
+    const setItemCalls = (mockLocalStorage.setItem as jest.Mock).mock.calls;
+    const parkrunEventsCall = setItemCalls.find(
+      (call) => call[0] === "parkrun events",
+    );
+    expect(parkrunEventsCall).toBeDefined();
+
+    const cachedData = JSON.parse(parkrunEventsCall[1]);
+    const restoredEventDetailsMap = new Map<string, EventDetails>(
+      cachedData.eventDetailsMap,
+    );
+    const issues = detectIssues(
+      eventTeams,
+      restoredEventDetailsMap,
+      eventAmbassadors,
+      regionalAmbassadors,
+    );
+
     expect(issues).toHaveLength(0);
   });
 
