@@ -8,7 +8,11 @@ import {
   selectProspectFromTerritoryMapSearch,
 } from "@actions/tableMapNavigation";
 import { getAmbassadorNameFilter } from "@utils/ambassadorNameFilter";
-import { searchPlaces } from "@utils/geocoding";
+import {
+  PlaceGeocodingUnavailableError,
+  PLACE_GEOCODING_UNAVAILABLE_SHORT_MESSAGE,
+  searchPlaces,
+} from "@utils/geocoding";
 import {
   buildLocalTerritoryMapSearchSuggestions,
   TERRITORY_MAP_SEARCH_FILTER_HIDDEN_SUFFIX,
@@ -243,9 +247,12 @@ async function refreshTerritoryMapSearchSuggestions(
     if (requestId === placeSearchRequestId) {
       places = placeResults.map(toPlaceSuggestion);
     }
-  } catch {
+  } catch (error) {
     if (requestId === placeSearchRequestId) {
       places = [];
+      if (error instanceof PlaceGeocodingUnavailableError) {
+        setSearchStatus(PLACE_GEOCODING_UNAVAILABLE_SHORT_MESSAGE);
+      }
     }
   }
 

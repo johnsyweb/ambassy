@@ -10,7 +10,7 @@ import { ProspectiveEventList } from "@models/ProspectiveEventList";
 import { CSVParseResult } from "@localtypes/ProspectiveEventTypes";
 import { EventAmbassadorMap } from "@models/EventAmbassadorMap";
 import { RegionalAmbassadorMap } from "@models/RegionalAmbassadorMap";
-import { geocodeProspectiveEvent } from "@utils/geography";
+import { geocodeProspectiveEvent } from "@utils/geocoding";
 import { levenshteinDistance } from "@utils/fuzzyMatch";
 import {
   saveProspectiveEvents,

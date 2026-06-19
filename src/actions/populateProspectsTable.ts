@@ -14,7 +14,7 @@ import {
 import { LogEntry } from "@models/LogEntry";
 import { CapacityStatus } from "@models/CapacityStatus";
 import { ReallocationSuggestion } from "@models/ReallocationSuggestion";
-import { geocodeAddress } from "@utils/geography";
+import { geocodeAddressWithResult } from "@utils/geocoding";
 import { saveProspectiveEvents } from "./persistProspectiveEvents";
 import {
   formatCoordinate,
@@ -746,7 +746,7 @@ function showProspectLocationDialog(
     geocodeButton.textContent = "Geocoding...";
 
     try {
-      const result = await geocodeAddress(address);
+      const result = await geocodeAddressWithResult(address);
       if (result.success && result.coordinates) {
         updateProspectLocation(
           prospect,

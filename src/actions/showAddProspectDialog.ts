@@ -12,6 +12,7 @@ import { ReallocationSuggestion } from "@models/ReallocationSuggestion";
 import {
   geocodeAddress,
   searchPlaces,
+  PlaceGeocodingUnavailableError,
   PlaceSearchResult,
 } from "@utils/geocoding";
 import { createCoordinate } from "@models/Coordinate";
@@ -601,8 +602,12 @@ export function showAddProspectDialog(
     let places: PlaceSearchResult[];
     try {
       places = await searchPlaces(buildPlaceSearchQuery(address, state));
-    } catch {
+    } catch (error) {
       places = [];
+      if (error instanceof PlaceGeocodingUnavailableError) {
+        showManualCoordinateFallback(error.message);
+        return;
+      }
     }
 
     if (places.length > 0) {
@@ -639,24 +644,55 @@ export function showAddProspectDialog(
 
     try {
       currentGeocodeAbort = new AbortController();
-      const { lat, lng } = await geocodeAddress(address);
-      const coordinates = createCoordinate(lat, lng);
-      const inferred = await inferCountryCodeFromCoordinates(coordinates);
-      const expectedCountry = inferExpectedCountryCodeFromStateRegion(state);
 
-      if (
-        expectedCountry &&
-        inferred &&
-        inferred !== "Unknown" &&
-        inferred !== expectedCountry
-      ) {
-        await offerPlaceSearch(address, state);
+      if (/^-?\d+(\.\d+)?\s*,\s*-?\d+(\.\d+)?$/.test(address.trim())) {
+        const { lat, lng } = await geocodeAddress(address);
+        await completeGeocodingWithCoordinates(lat, lng, address);
         return;
       }
 
-      inferredCountry = inferred;
-      await completeGeocodingWithCoordinates(lat, lng, address);
+      const places = await searchPlaces(buildPlaceSearchQuery(address, state));
+
+      if (places.length === 0) {
+        showManualCoordinateFallback(
+          "No matching places found. Try refining the address or enter coordinates manually.",
+        );
+        return;
+      }
+
+      if (places.length === 1) {
+        const place = places[0];
+        const coordinates = createCoordinate(place.latitude, place.longitude);
+        const inferred = await inferCountryCodeFromCoordinates(coordinates);
+        const expectedCountry = inferExpectedCountryCodeFromStateRegion(state);
+
+        if (
+          expectedCountry &&
+          inferred &&
+          inferred !== "Unknown" &&
+          inferred !== expectedCountry
+        ) {
+          clearLocationStatus();
+          showPlacesListbox(places);
+          return;
+        }
+
+        await completeGeocodingWithCoordinates(
+          place.latitude,
+          place.longitude,
+          place.label,
+        );
+        return;
+      }
+
+      clearLocationStatus();
+      showPlacesListbox(places);
     } catch (error) {
+      if (error instanceof PlaceGeocodingUnavailableError) {
+        showManualCoordinateFallback(error.message);
+        return;
+      }
+
       await offerPlaceSearch(
         address,
         state,
