@@ -1,3 +1,12 @@
+# [1.6.0](https://github.com/johnsyweb/ambassy/compare/v1.5.0...v1.6.0) (2026-06-21)
+
+
+### Features
+
+* **issues:** resolve address issues via shared place search ([61cbb2a](https://github.com/johnsyweb/ambassy/commit/61cbb2a4253857f74407d366f3747b4b2aae51b4))
+* **place-location:** add shared Photon search binding module ([423457d](https://github.com/johnsyweb/ambassy/commit/423457d841379ebfd8afadea86b4f12b301115ec))
+* **prospect-location:** reset location with shared place search ([f782572](https://github.com/johnsyweb/ambassy/commit/f782572c4040732aaa3f006d604219209eaa220d))
+
 # [1.5.0](https://github.com/johnsyweb/ambassy/compare/v1.4.0...v1.5.0) (2026-06-19)
 
 
