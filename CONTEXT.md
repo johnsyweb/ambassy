@@ -141,8 +141,16 @@ The map presentation when an ambassador name filter is active. Allocated event m
 _Avoid_: clipped Voronoi
 
 **Place geocoding**:
-Turning a place name or address the REA types into map coordinates by querying Photon (OpenStreetMap data). Used for territory map place search, Add Prospect, issue address resolution, and prospective event import. Only the place query text is sent; allocation CSV data and ambassador names are not included.
+Turning a place name or address the REA types into map coordinates by querying Photon (OpenStreetMap data). Used for territory map place search, Add Prospect, prospect location reset, issue address resolution, and prospective event import. Only the place query text is sent; allocation CSV data and ambassador names are not included.
 _Avoid_: Nominatim (former provider; no longer used from the browser)
+
+**Prospect location reset**:
+Correcting or setting coordinates for an existing prospective event from the Prospects table **Reset Location** action. Uses the same place geocoding flow as Add Prospect (search-first Photon, Places pick list, manual coordinates fallback); may also use browser geolocation. Persists coordinates, state/region, and inferred country immediately on success.
+_Avoid_: Set Location (informal), geocode button (implementation detail)
+
+**Issue address resolution**:
+Fixing missing coordinates for an allocated live event on the Issues tab by entering an address. Uses the shared place geocoding flow (State/Region → Address, search-first Photon, Places pick list); optional parkrun URL for metadata extraction. Place pick sets coordinates and address label; **Resolve** commits with the picked coordinates (no second geocode). Map pin placement remains the separate manual path.
+_Avoid_: Geocode button (retired UX), address dialog (implementation detail)
 
 **Territory map search**:
 A map control for finding and flying to a live event, prospective event, or town or place by name. Searches the full local catalogue and geocodes places via Photon (OpenStreetMap data); navigation only — it does not replace or override the ambassador name filter. Selecting a result pans and zooms the map even when the ambassador filter would hide that marker; matching suggestions and a post-selection status message may note when the target is hidden by the filter. Suggestions are grouped by live events, prospective events, and places. Selecting a live or prospective result syncs the relevant data tab when a row exists. Selecting a place drops a **temporary place pin** on the map, cleared on the next search selection or map click. The pin can be dragged to fine-tune the location before opening the add-prospect dialog. Click the pin (or **Open place actions** in the search status) to add a prospective event at that place via the existing add-prospect flow.
