@@ -412,7 +412,7 @@ describe("showAddProspectDialog", () => {
 
       // Check for retry button
       const retryButton = errorMessage.querySelector(
-        "#retryGeocodingButton",
+        ".place-location-retry-button",
       ) as HTMLButtonElement;
       expect(retryButton).not.toBeNull();
 
@@ -837,7 +837,8 @@ describe("showAddProspectDialog", () => {
       const locationStatus = content.querySelector(
         "#addProspectLocationStatus",
       ) as HTMLElement;
-      expect(locationStatus.style.display).toBe("none");
+      expect(locationStatus.style.display).toBe("block");
+      expect(locationStatus.textContent).toContain("matching place");
 
       const manualCoordinatesContainer = content.querySelector(
         "#manualCoordinates",

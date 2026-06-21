@@ -9,24 +9,14 @@ import { EventAmbassadorMap } from "@models/EventAmbassadorMap";
 import { RegionalAmbassadorMap } from "@models/RegionalAmbassadorMap";
 import { EventDetailsMap } from "@models/EventDetailsMap";
 import { ReallocationSuggestion } from "@models/ReallocationSuggestion";
-import {
-  geocodeAddress,
-  searchPlaces,
-  PlaceGeocodingUnavailableError,
-  PlaceSearchResult,
-} from "@utils/geocoding";
 import { createCoordinate } from "@models/Coordinate";
 import { inferCountryCodeFromCoordinates } from "@models/country";
 import { resolveProspectGeocodingStatus } from "@utils/prospectGeocodingStatus";
 import {
-  buildPlaceSearchQuery,
-  inferExpectedCountryCodeFromStateRegion,
-} from "@utils/prospectPlaceSearch";
-import {
   getAddProspectLocationStatusClassName,
   renderAddProspectLocationStatusMessage,
 } from "@utils/addProspectLocationStatus";
-import { renderAddProspectPlaceListboxHtml } from "@utils/renderAddProspectPlaceListboxHtml";
+import { bindPlaceLocationSearch } from "@utils/placeLocationSearch";
 import { generateProspectAllocationSuggestions } from "./suggestEventAllocation";
 import { createProspectFromAddress } from "./createProspectFromAddress";
 import {
@@ -377,8 +367,6 @@ export function showAddProspectDialog(
   content.appendChild(container);
 
   // State tracking
-  let geocodeTimeout: NodeJS.Timeout | null = null;
-  let currentGeocodeAbort: AbortController | null = null;
   let geocodedCoordinates: { lat: number; lng: number } | null = null;
   let inferredCountry: string | null = null;
   let allocationSuggestions: ReallocationSuggestion[] = [];
@@ -386,49 +374,12 @@ export function showAddProspectDialog(
   let coordinatesEnteredManually = false;
   let coordinatesFromPinDrag = false;
   let initialPlaceAddress = "";
-  let activePlaceSuggestions: PlaceSearchResult[] = [];
 
   const hidePlacesListbox = () => {
     placesContainer.hidden = true;
     placesContainer.innerHTML = "";
-    activePlaceSuggestions = [];
     addressInput.setAttribute("aria-expanded", "false");
     addressField.classList.remove("add-prospect-address-field--places-open");
-  };
-
-  const showPlacesListbox = (places: PlaceSearchResult[]) => {
-    activePlaceSuggestions = places;
-    placesContainer.innerHTML = renderAddProspectPlaceListboxHtml(places);
-    placesContainer.hidden = false;
-    addressInput.setAttribute("aria-expanded", "true");
-    addressField.classList.add("add-prospect-address-field--places-open");
-  };
-
-  placesContainer.addEventListener("click", (event) => {
-    if (!(event.target instanceof Element)) {
-      return;
-    }
-
-    const button = event.target.closest(
-      ".add-prospect-place-option",
-    ) as HTMLButtonElement | null;
-    if (!button) {
-      return;
-    }
-
-    const placeIndex = Number.parseInt(button.dataset.placeIndex ?? "", 10);
-    const place = activePlaceSuggestions[placeIndex];
-    if (place) {
-      void applySelectedPlace(place);
-    }
-  });
-
-  const setLocationStatusLoading = () => {
-    locationStatus.className = getAddProspectLocationStatusClassName("loading");
-    locationStatus.textContent =
-      renderAddProspectLocationStatusMessage("loading");
-    locationStatus.style.display = "block";
-    locationStatus.setAttribute("aria-busy", "true");
   };
 
   const setLocationStatusSuccess = (
@@ -504,7 +455,6 @@ export function showAddProspectDialog(
     locationFromMapNote.style.display = "block";
   }
 
-  // Geocoding function
   const completeGeocodingWithCoordinates = async (
     lat: number,
     lng: number,
@@ -538,249 +488,44 @@ export function showAddProspectDialog(
     displayAllocationSuggestions();
 
     lastGeocodedAddress = address;
-    coordinatesEnteredManually = false;
     coordinatesFromPinDrag = false;
   };
 
-  const applySelectedPlace = async (place: PlaceSearchResult) => {
-    addressInput.value = place.label;
-    setLocationStatusLoading();
-    hidePlacesListbox();
-
-    try {
-      await completeGeocodingWithCoordinates(
-        place.latitude,
-        place.longitude,
-        place.label,
-      );
-    } catch (error) {
-      clearLocationStatus();
-      showManualCoordinateFallback(
-        error instanceof Error ? error.message : "Could not use selected place",
-      );
-    }
-  };
-
-  const showManualCoordinateFallback = (message: string) => {
-    clearLocationStatus();
-    hidePlacesListbox();
-    errorMessage.innerHTML = `
-      ${message}
-      <br>
-      <button type="button" id="retryGeocodingButton" style="margin-top: 0.5em; padding: 0.25em 0.5em; background-color: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer;">
-        Retry Geocoding
-      </button>
-    `;
-    errorMessage.style.display = "block";
-    hidePlacesListbox();
-    manualCoordinatesContainer.style.display = "block";
-
-    const retryButton = errorMessage.querySelector(
-      "#retryGeocodingButton",
-    ) as HTMLButtonElement;
-    if (retryButton) {
-      retryButton.addEventListener("click", () => {
-        errorMessage.style.display = "none";
-        manualCoordinatesContainer.style.display = "none";
-        triggerGeocoding();
-      });
-    }
-  };
-
-  const offerPlaceSearch = async (
-    address: string,
-    state: string,
-    failureMessage?: string,
-  ) => {
-    geocodedCoordinates = null;
-    inferredCountry = null;
-    allocationSuggestions = [];
-    suggestionsContainer.style.display = "none";
-    manualCoordinatesContainer.style.display = "none";
-    hidePlacesListbox();
-
-    let places: PlaceSearchResult[];
-    try {
-      places = await searchPlaces(buildPlaceSearchQuery(address, state));
-    } catch (error) {
-      places = [];
-      if (error instanceof PlaceGeocodingUnavailableError) {
-        showManualCoordinateFallback(error.message);
-        return;
-      }
-    }
-
-    if (places.length > 0) {
-      errorMessage.style.display = "none";
-      clearLocationStatus();
-      showPlacesListbox(places);
-      return;
-    }
-
-    showManualCoordinateFallback(
-      failureMessage ??
-        "No matching places found. Try refining the address or enter coordinates manually.",
-    );
-  };
-
-  const performGeocoding = async (address: string, state: string) => {
-    if (!address.trim() || !state.trim()) {
-      return;
-    }
-
-    // Cancel any pending geocoding
-    if (currentGeocodeAbort) {
-      currentGeocodeAbort.abort();
-    }
-
-    // Show loading
-    setLocationStatusLoading();
-    errorMessage.style.display = "none";
-    suggestionsContainer.style.display = "none";
-    hidePlacesListbox();
-    manualCoordinatesContainer.style.display = "none";
-    addressInput.disabled = true;
-    stateInput.disabled = true;
-
-    try {
-      currentGeocodeAbort = new AbortController();
-
-      if (/^-?\d+(\.\d+)?\s*,\s*-?\d+(\.\d+)?$/.test(address.trim())) {
-        const { lat, lng } = await geocodeAddress(address);
-        await completeGeocodingWithCoordinates(lat, lng, address);
-        return;
-      }
-
-      const places = await searchPlaces(buildPlaceSearchQuery(address, state));
-
-      if (places.length === 0) {
-        showManualCoordinateFallback(
-          "No matching places found. Try refining the address or enter coordinates manually.",
-        );
-        return;
-      }
-
-      if (places.length === 1) {
-        const place = places[0];
-        const coordinates = createCoordinate(place.latitude, place.longitude);
-        const inferred = await inferCountryCodeFromCoordinates(coordinates);
-        const expectedCountry = inferExpectedCountryCodeFromStateRegion(state);
-
-        if (
-          expectedCountry &&
-          inferred &&
-          inferred !== "Unknown" &&
-          inferred !== expectedCountry
-        ) {
-          clearLocationStatus();
-          showPlacesListbox(places);
-          return;
-        }
-
+  const placeSearch = bindPlaceLocationSearch({
+    bindings: {
+      stateInput,
+      addressInput,
+      addressField,
+      placesListbox: placesContainer,
+      locationStatus,
+      errorMessage,
+      manualCoordinatesContainer,
+      coordinatesInput,
+      manualCoordinatesError,
+      useManualCoordinatesButton,
+    },
+    commitMode: "immediate",
+    includeManualCoordinates: true,
+    autoSearchOnBlur: false,
+    onBeforeSearch: () => {
+      suggestionsContainer.style.display = "none";
+    },
+    onResolved: async (resolution) => {
+      coordinatesEnteredManually = resolution.source === "manual";
+      try {
         await completeGeocodingWithCoordinates(
-          place.latitude,
-          place.longitude,
-          place.label,
+          resolution.latitude,
+          resolution.longitude,
+          resolution.addressLabel,
         );
-        return;
+      } catch (error) {
+        clearLocationStatus();
+        errorMessage.textContent =
+          error instanceof Error ? error.message : "Could not use selected place";
+        errorMessage.style.display = "block";
+        manualCoordinatesContainer.style.display = "block";
       }
-
-      clearLocationStatus();
-      showPlacesListbox(places);
-    } catch (error) {
-      if (error instanceof PlaceGeocodingUnavailableError) {
-        showManualCoordinateFallback(error.message);
-        return;
-      }
-
-      await offerPlaceSearch(
-        address,
-        state,
-        error instanceof Error ? error.message : "Geocoding failed",
-      );
-    } finally {
-      addressInput.disabled = false;
-      stateInput.disabled = false;
-      currentGeocodeAbort = null;
-    }
-  };
-
-  // Handle manual coordinate entry
-  const handleManualCoordinates = async () => {
-    const coordinatesStr = coordinatesInput.value.trim();
-    if (!coordinatesStr) {
-      manualCoordinatesError.textContent = "Please enter coordinates";
-      manualCoordinatesError.style.display = "block";
-      return;
-    }
-
-    // Parse coordinates (format: "lat, lng" or "lat,lng")
-    const parts = coordinatesStr.split(",").map((p) => p.trim());
-    if (parts.length !== 2) {
-      manualCoordinatesError.textContent =
-        "Invalid format. Please use: latitude, longitude (e.g., -37.8136, 144.9631)";
-      manualCoordinatesError.style.display = "block";
-      return;
-    }
-
-    const lat = parseFloat(parts[0]);
-    const lng = parseFloat(parts[1]);
-
-    if (isNaN(lat) || isNaN(lng)) {
-      manualCoordinatesError.textContent =
-        "Invalid coordinates. Please enter valid numbers.";
-      manualCoordinatesError.style.display = "block";
-      return;
-    }
-
-    try {
-      const coordinates = createCoordinate(lat, lng);
-      geocodedCoordinates = { lat, lng };
-
-      // Infer country code
-      inferredCountry = await inferCountryCodeFromCoordinates(coordinates);
-      if (!inferredCountry || inferredCountry === "Unknown") {
-        manualCoordinatesError.textContent =
-          "Could not determine country from coordinates. Please verify coordinates are correct or try a different location.";
-        manualCoordinatesError.style.display = "block";
-        return;
-      }
-
-      // Check for duplicate name now that we have country
-      checkDuplicateName();
-
-      // Generate allocation suggestions
-      const prospectName = prospectNameInput.value.trim() || "New Prospect";
-      allocationSuggestions = await generateProspectAllocationSuggestions(
-        prospectName,
-        coordinates,
-        eventAmbassadors,
-        eventDetails,
-        regionalAmbassadors,
-      );
-
-      // Hide manual entry, show suggestions
-      manualCoordinatesContainer.style.display = "none";
-      manualCoordinatesError.style.display = "none";
-      errorMessage.style.display = "none";
-      coordinatesEnteredManually = true;
-      setLocationStatusSuccess(lat, lng, inferredCountry);
-      displayAllocationSuggestions();
-    } catch (error) {
-      manualCoordinatesError.textContent =
-        error instanceof Error ? error.message : "Invalid coordinates";
-      manualCoordinatesError.style.display = "block";
-      geocodedCoordinates = null;
-      inferredCountry = null;
-    }
-  };
-
-  useManualCoordinatesButton.addEventListener("click", handleManualCoordinates);
-  coordinatesInput.addEventListener("keydown", (e) => {
-    if (e.key === "Enter") {
-      e.preventDefault();
-      handleManualCoordinates();
-    }
+    },
   });
 
   // Display allocation suggestions
@@ -1052,15 +797,7 @@ export function showAddProspectDialog(
       return;
     }
 
-    if (geocodeTimeout) {
-      clearTimeout(geocodeTimeout);
-    }
-
-    setLocationStatusLoading();
-
-    geocodeTimeout = setTimeout(() => {
-      performGeocoding(address, state);
-    }, 500);
+    placeSearch.triggerSearch();
   };
 
   // Re-geocode if address changes after successful geocoding
@@ -1081,14 +818,7 @@ export function showAddProspectDialog(
 
   // Cleanup function
   let cleanup = () => {
-    if (geocodeTimeout) {
-      clearTimeout(geocodeTimeout);
-      geocodeTimeout = null;
-    }
-    if (currentGeocodeAbort) {
-      currentGeocodeAbort.abort();
-      currentGeocodeAbort = null;
-    }
+    placeSearch.destroy();
     cancelButton.removeEventListener("click", handleCancel);
     document.removeEventListener("keydown", handleKeyDown);
   };
