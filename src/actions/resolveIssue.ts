@@ -111,6 +111,26 @@ export function resolveIssueWithPin(
   log.push(logEntry);
 }
 
+export async function resolveIssueWithCoordinates(
+  issue: EventIssue,
+  latitude: number,
+  longitude: number,
+  address: string,
+  eventDetailsMap: EventDetailsMap,
+  log: LogEntry[],
+  parkrunUrl?: string,
+): Promise<void> {
+  await persistGeocodedIssueResolution(
+    issue,
+    latitude,
+    longitude,
+    address,
+    eventDetailsMap,
+    log,
+    parkrunUrl,
+  );
+}
+
 export async function resolveIssueWithAddress(
   issue: EventIssue,
   address: string,
@@ -120,80 +140,97 @@ export async function resolveIssueWithAddress(
 ): Promise<void> {
   try {
     const { lat, lng } = await geocodeAddress(address);
-
-    // Extract additional metadata from URL if provided
-    let extractedMetadata: Partial<{
-      eventname: string;
-      EventLongName: string;
-      EventShortName: string;
-      countrycode: number;
-      seriesid: number;
-    }> = {};
-
-    if (parkrunUrl) {
-      try {
-        extractedMetadata = await extractMetadataFromUrl(parkrunUrl);
-      } catch (urlError) {
-        console.warn(
-          `Failed to extract metadata from URL ${parkrunUrl}:`,
-          urlError,
-        );
-        // Continue without URL metadata
-      }
-    }
-
-    const eventDetails: EventDetails & {
-      geocodedAddress?: boolean;
-      sourceAddress?: string;
-      sourceUrl?: string;
-    } = {
-      id: `geocoded-${issue.eventShortName}`,
-      type: "Feature",
-      geometry: {
-        type: "Point",
-        coordinates: [lng, lat], // GeoJSON uses [longitude, latitude]
-      },
-      properties: {
-        eventname:
-          extractedMetadata.eventname ||
-          issue.eventShortName.toLowerCase().replace(/\s+/g, ""),
-        EventLongName: extractedMetadata.EventLongName || issue.eventShortName,
-        EventShortName:
-          extractedMetadata.EventShortName || issue.eventShortName,
-        LocalisedEventLongName: null,
-        countrycode:
-          extractedMetadata.countrycode ||
-          (await getCountryCodeFromCoordinate(createCoordinate(lat, lng))) ||
-          0,
-        seriesid: extractedMetadata.seriesid || 1, // Default to 5km
-        EventLocation: "",
-      },
-      geocodedAddress: true,
-      sourceAddress: address,
-      sourceUrl: parkrunUrl,
-    };
-
-    eventDetailsMap.set(issue.eventShortName, eventDetails);
-    trackStateChange();
-
-    const coord = createCoordinate(lat, lng);
-    const logEntry: LogEntry = {
-      type: "Issue Resolved",
-      event: issue.eventShortName,
-      oldValue: "Missing coordinates",
-      newValue: parkrunUrl
-        ? `Geocoded address: "${address}" (${formatCoordinate(coord)}) with metadata from ${parkrunUrl}`
-        : `Geocoded address: "${address}" (${formatCoordinate(coord)})`,
-      timestamp: Date.now(),
-    };
-
-    log.push(logEntry);
+    await persistGeocodedIssueResolution(
+      issue,
+      lat,
+      lng,
+      address,
+      eventDetailsMap,
+      log,
+      parkrunUrl,
+    );
   } catch (error) {
     throw new Error(
       `Failed to geocode address "${address}": ${error instanceof Error ? error.message : "Unknown error"}`,
       { cause: error },
     );
   }
+}
+
+async function persistGeocodedIssueResolution(
+  issue: EventIssue,
+  lat: number,
+  lng: number,
+  address: string,
+  eventDetailsMap: EventDetailsMap,
+  log: LogEntry[],
+  parkrunUrl?: string,
+): Promise<void> {
+  let extractedMetadata: Partial<{
+    eventname: string;
+    EventLongName: string;
+    EventShortName: string;
+    countrycode: number;
+    seriesid: number;
+  }> = {};
+
+  if (parkrunUrl) {
+    try {
+      extractedMetadata = await extractMetadataFromUrl(parkrunUrl);
+    } catch (urlError) {
+      console.warn(
+        `Failed to extract metadata from URL ${parkrunUrl}:`,
+        urlError,
+      );
+    }
+  }
+
+  const eventDetails: EventDetails & {
+    geocodedAddress?: boolean;
+    sourceAddress?: string;
+    sourceUrl?: string;
+  } = {
+    id: `geocoded-${issue.eventShortName}`,
+    type: "Feature",
+    geometry: {
+      type: "Point",
+      coordinates: [lng, lat],
+    },
+    properties: {
+      eventname:
+        extractedMetadata.eventname ||
+        issue.eventShortName.toLowerCase().replace(/\s+/g, ""),
+      EventLongName: extractedMetadata.EventLongName || issue.eventShortName,
+      EventShortName:
+        extractedMetadata.EventShortName || issue.eventShortName,
+      LocalisedEventLongName: null,
+      countrycode:
+        extractedMetadata.countrycode ||
+        (await getCountryCodeFromCoordinate(createCoordinate(lat, lng))) ||
+        0,
+      seriesid: extractedMetadata.seriesid || 1,
+      EventLocation: "",
+    },
+    geocodedAddress: true,
+    sourceAddress: address,
+    sourceUrl: parkrunUrl,
+  };
+
+  eventDetailsMap.set(issue.eventShortName, eventDetails);
+  trackStateChange();
+
+  const coord = createCoordinate(lat, lng);
+  const logEntry: LogEntry = {
+    type: "Issue Resolved",
+    event: issue.eventShortName,
+    oldValue: "Missing coordinates",
+    newValue: parkrunUrl
+      ? `Geocoded address: "${address}" (${formatCoordinate(coord)}) with metadata from ${parkrunUrl}`
+      : `Geocoded address: "${address}" (${formatCoordinate(coord)})`,
+    timestamp: Date.now(),
+  };
+
+  log.push(logEntry);
 }
 
 /**

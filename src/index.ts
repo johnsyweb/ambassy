@@ -1763,23 +1763,26 @@ function onResolve(issue: EventIssue): void {
 
 async function onEnterAddress(issue: EventIssue): Promise<void> {
   if (!eventDetails) {
-    alert("Event details not loaded. Cannot geocode address.");
     return;
   }
+
+  const eventAmbassadors = getEventAmbassadorsFromSession();
+  const regionalAmbassadors = getRegionalAmbassadorsFromSession();
 
   showAddressDialog(
     issue,
     eventDetails,
+    eventAmbassadors,
+    regionalAmbassadors,
     log,
     () => {
-      // Success callback - refresh UI
       persistEventDetails(eventDetails!);
       persistChangesLog(log);
       refreshIssuesTable();
       refreshUI(eventDetails!, eventTeamsTableData!, log);
     },
     () => {
-      // Cancel callback - do nothing
+      // Cancel — no action
     },
   );
 }
