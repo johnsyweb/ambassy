@@ -39,6 +39,14 @@ const TERRITORY_MAP_SEARCH_DEBOUNCE_MS = 350;
 const MAP_FLY_ANIMATION_MS = 900;
 const SCREENSHOT_ZOOM_OUT_LEVELS = 3;
 
+/** CI-safe Chrome flags — avoid --single-process/--no-zygote (TargetCloseError on Puppeteer 25+). */
+const PUPPETEER_CI_LAUNCH_ARGS = [
+  "--no-sandbox",
+  "--disable-setuid-sandbox",
+  "--disable-dev-shm-usage",
+  "--disable-gpu",
+];
+
 interface ScreenshotConfig {
   name: string;
   url: string;
@@ -247,7 +255,7 @@ async function ensurePuppeteerBrowsers(): Promise<void> {
     const testBrowser = await puppeteer
       .launch({
         headless: true,
-        args: ["--no-sandbox", "--disable-setuid-sandbox"],
+        args: PUPPETEER_CI_LAUNCH_ARGS,
       })
       .catch(() => null);
 
@@ -316,18 +324,13 @@ async function generateScreenshots(): Promise<void> {
     console.log("🌐 Launching browser...");
     browser = await puppeteer.launch({
       headless: isCI ? true : false,
-      args: [
-        "--disable-web-security",
-        "--disable-features=VizDisplayCompositor",
-        "--no-sandbox",
-        "--disable-setuid-sandbox",
-        "--disable-dev-shm-usage",
-        "--disable-accelerated-2d-canvas",
-        "--no-first-run",
-        "--no-zygote",
-        "--single-process",
-        "--disable-gpu",
-      ],
+      args: isCI
+        ? PUPPETEER_CI_LAUNCH_ARGS
+        : [
+            "--disable-web-security",
+            "--no-sandbox",
+            "--disable-setuid-sandbox",
+          ],
       defaultViewport: null,
     });
 
