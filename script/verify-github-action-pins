@@ -36,10 +36,17 @@ while IFS= read -r entry; do
   ref="${entry%%|*}"
   file="${entry#*|}"
 
-  owner_repo="${ref%@*}"
+  owner_repo_path="${ref%@*}"
   sha="${ref#*@}"
-  owner="${owner_repo%/*}"
-  repo="${owner_repo#*/}"
+  # actions: owner/repo@sha — reusable workflows: owner/repo/path/to.yml@sha
+  if [[ ! "$owner_repo_path" =~ ^([^/]+)/([^/]+)(/.*)?$ ]]; then
+    echo "error: could not parse uses: reference (${file})" >&2
+    echo "  found: ${ref}" >&2
+    failures=$((failures + 1))
+    continue
+  fi
+  owner="${BASH_REMATCH[1]}"
+  repo="${BASH_REMATCH[2]}"
 
   if [[ ! "$sha" =~ ^[0-9a-f]{40}$ ]]; then
     echo "error: ${owner}/${repo} must be pinned to a 40-character commit SHA (${file})" >&2

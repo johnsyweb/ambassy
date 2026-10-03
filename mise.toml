@@ -18,6 +18,10 @@ file = "script/setup"
 description = "Refresh tools and dependencies after git pull"
 file = "script/update"
 
+[tasks.update-deps]
+description = "Show outdated packages and bump within package.json ranges (aube update)"
+file = "script/update-deps"
+
 [tasks.server]
 description = "Start the webpack development server"
 file = "script/server"
