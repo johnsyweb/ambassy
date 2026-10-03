@@ -1,3 +1,20 @@
+# [1.7.0](https://github.com/johnsyweb/ambassy/compare/v1.6.0...v1.7.0) (2026-10-03)
+
+
+### Bug Fixes
+
+* **ci:** ignore unfixable advisories in aube audit ([e1dfa73](https://github.com/johnsyweb/ambassy/commit/e1dfa73ec16a244da89b80b8f658a9b48725d72b))
+* **ci:** parse reusable workflow pins in action verifier ([a45ddbc](https://github.com/johnsyweb/ambassy/commit/a45ddbce15ac8edcdb0935faaf03acd6e405958a))
+* **deps:** pin typescript to 6.0.3 and refresh aube-lock ([1573fbd](https://github.com/johnsyweb/ambassy/commit/1573fbd873a6c55a302924e1c07b269ae7d56bb4))
+* **deps:** remove stale typescript 7 resolutions from lockfile ([666dfc0](https://github.com/johnsyweb/ambassy/commit/666dfc0a6fd17e4c6dfa1a04bdff6614d615197b))
+
+
+### Features
+
+* add update-deps task for local within-range bumps ([5c8ad82](https://github.com/johnsyweb/ambassy/commit/5c8ad82c358616298c8cda34db030c5eb42a6e69))
+* **ci:** replace Dependabot with Renovate and aube-lock ([9f3fc77](https://github.com/johnsyweb/ambassy/commit/9f3fc777dfbe13d2d87cd23dac7eadae2cbc13df))
+* **security:** set aube minimumReleaseAge to seven days ([2650479](https://github.com/johnsyweb/ambassy/commit/2650479a388b7900c5ed816fc690aa812b308ce4))
+
 # [1.6.0](https://github.com/johnsyweb/ambassy/compare/v1.5.0...v1.6.0) (2026-06-21)
 
 
