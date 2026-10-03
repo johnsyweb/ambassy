@@ -1,5 +1,7 @@
 paranoid: true
 packageManagerStrictVersion: true
+# 7 days — aligned with Renovate minimumReleaseAge in johnsyweb/renovate-config
+minimumReleaseAge: 10080
 allowBuilds:
   puppeteer: true
   unrs-resolver: true
