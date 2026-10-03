@@ -1,5 +1,5 @@
 FROM node:26-slim AS build-stage
-ARG AUBE_VERSION=1.17.1
+ARG AUBE_VERSION=1.40.0
 RUN apt-get update \
   && apt-get install -y curl ca-certificates \
   && curl -fsSL "https://github.com/jdx/aube/releases/download/v${AUBE_VERSION}/aube-v${AUBE_VERSION}-x86_64-unknown-linux-gnu.tar.gz" \
