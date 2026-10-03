@@ -9,9 +9,9 @@ Ambassy depends on a large npm dependency tree for build, test, release, and scr
 ## Decision
 
 1. **aube as the sole package manager** — native `aube-lock.yaml` (imported from the former pnpm lock); retire `pnpm-lock.yaml`. Atomic cutover across local dev, CI, Husky hooks, Dockerfile, and docs.
-2. **`paranoid: true`** in `aube-workspace.yaml` — jailed builds, strict store integrity, strict dependency-build review, OSV malicious-package checks, and a hard 24-hour minimum release age.
+2. **`paranoid: true`** in `aube-workspace.yaml` — jailed builds, strict store integrity, strict dependency-build review, OSV malicious-package checks, and a minimum release age (see ADR 0011 for the current seven-day value aligned with Renovate).
 3. **Explicit build approval** — dependency lifecycle scripts run only when listed in `allowBuilds` after review (`aube approve-builds` during migration; committed map in `aube-workspace.yaml`).
-4. **Release-age gate escape hatch** — accept the 24-hour gate by default; add packages to `minimumReleaseAgeExclude` in a deliberate PR when an emergency security bump cannot wait.
+4. **Release-age gate escape hatch** — accept the configured gate by default; add packages to `minimumReleaseAgeExclude` in a deliberate PR when an emergency security bump cannot wait.
 5. **CVE audit in CI** — dedicated job running `aube audit --audit-level moderate` (fail on moderate, high, and critical; ignore low).
 6. **Version pinning** — `aube` in `.tool-versions`, `packageManager: "aube@…"` in `package.json`, and `packageManagerStrictVersion: true` so version mismatches fail loudly.
 7. **CI bootstrap via mise** — `jdx/mise-action` installs Node and aube from `.tool-versions`; cache the aube store keyed on `aube-lock.yaml`; frozen installs via `aube ci`.
