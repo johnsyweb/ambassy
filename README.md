@@ -133,6 +133,7 @@ Tasks follow the [Scripts to Rule Them All](https://github.com/github/scripts-to
 |------|---------|---------|
 | setup | `mise run setup` | First-time setup after clone (frozen install) |
 | update | `mise run update` | Refresh tools and dependencies after pull |
+| update-deps | `mise run update-deps` | Show outdated packages; bump within `package.json` ranges |
 | bootstrap | `mise run bootstrap` | Clean frozen reinstall (`./script/ci-install`) |
 | ci-install | `mise run ci-install` | Frozen install without Puppeteer browser download |
 | server | `mise run server` | Development server |
@@ -166,7 +167,7 @@ Read `hk.pkl` before your first commit. To skip hooks for one command: `HK=0 git
 
 The development server enables webpack filesystem caching and uses `eval-cheap-module-source-map` for faster rebuilds. Stack traces map to TypeScript modules; line numbers may be approximate. For line-accurate source maps while debugging, run `aube run start:sourcemaps`.
 
-Package management uses [aube](https://aube.en.dev/) with paranoid security settings (`aube-workspace.yaml`). See [ADR 0009](docs/adr/0009-aube-paranoid-package-manager.md).
+Package management uses [aube](https://aube.en.dev/) with paranoid security settings (`aube-workspace.yaml`). See [ADR 0009](docs/adr/0009-aube-paranoid-package-manager.md). Automated updates use [Renovate](https://docs.renovatebot.com/) via [johnsyweb/renovate-config](https://github.com/johnsyweb/renovate-config); see [ADR 0011](docs/adr/0011-renovate-for-dependency-updates.md). For a local within-range bump: `mise run update-deps`.
 
 ### Voronoi performance timings (development)
 
