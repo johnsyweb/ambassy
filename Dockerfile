@@ -1,4 +1,4 @@
-FROM node:26-slim AS build-stage
+FROM node:26-slim@sha256:ec7758ee051e457b468b32bde57b0879010b325bb9862718e9615225ce4aaae1 AS build-stage
 ARG AUBE_VERSION=1.40.0
 RUN apt-get update \
   && apt-get install -y curl ca-certificates \
