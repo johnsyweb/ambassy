@@ -40,7 +40,7 @@ When adding or bumping an action:
 2. Update the workflow with `owner/repo@<sha> # vX.Y.Z`.
 3. Run `mise run verify-action-pins` (also included in `mise run cibuild`).
 
-[Renovate](https://docs.renovatebot.com/) (via [johnsyweb/renovate-config](https://github.com/johnsyweb/renovate-config)) opens dependency PRs on the shared Friday schedule and automerges when CI is green. The `aube-lock` workflow regenerates `aube-lock.yaml` on `renovate/**` branches. See [ADR 0011](../../docs/adr/0011-renovate-for-dependency-updates.md).
+[Renovate](https://docs.renovatebot.com/) (via [johnsyweb/renovate-config](https://github.com/johnsyweb/renovate-config)) opens dependency PRs on the shared Friday schedule and automerges when checks are green. The `aube-lock` workflow regenerates `aube-lock.yaml` on `renovate/**`, runs `./script/cibuild`, and publishes Check Runs on the final HEAD (no GitHub App). Renovate app membership is declared in [johnsyweb/github-infra](https://github.com/johnsyweb/github-infra). See [ADR 0011](../../docs/adr/0011-renovate-for-dependency-updates.md).
 
 ### Concurrency
 

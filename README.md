@@ -167,7 +167,7 @@ Read `hk.pkl` before your first commit. To skip hooks for one command: `HK=0 git
 
 The development server enables webpack filesystem caching and uses `eval-cheap-module-source-map` for faster rebuilds. Stack traces map to TypeScript modules; line numbers may be approximate. For line-accurate source maps while debugging, run `aube run start:sourcemaps`.
 
-Package management uses [aube](https://aube.en.dev/) with paranoid security settings (`aube-workspace.yaml`). See [ADR 0009](docs/adr/0009-aube-paranoid-package-manager.md). Automated updates use [Renovate](https://docs.renovatebot.com/) via [johnsyweb/renovate-config](https://github.com/johnsyweb/renovate-config); see [ADR 0011](docs/adr/0011-renovate-for-dependency-updates.md). For a local within-range bump: `mise run update-deps`.
+Package management uses [aube](https://aube.en.dev/) with paranoid security settings (`aube-workspace.yaml`). See [ADR 0009](docs/adr/0009-aube-paranoid-package-manager.md). Automated updates use [Renovate](https://docs.renovatebot.com/) via [johnsyweb/renovate-config](https://github.com/johnsyweb/renovate-config); Renovate membership is managed in [johnsyweb/github-infra](https://github.com/johnsyweb/github-infra). See [ADR 0011](docs/adr/0011-renovate-for-dependency-updates.md). For a local within-range bump: `mise run update-deps`.
 
 ### Voronoi performance timings (development)
 
