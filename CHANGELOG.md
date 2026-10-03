@@ -1,3 +1,10 @@
+# [1.8.0](https://github.com/johnsyweb/ambassy/compare/v1.7.1...v1.8.0) (2026-10-03)
+
+
+### Features
+
+* **ci:** use no-App aube-lock verify and Check Runs ([9b7c4b8](https://github.com/johnsyweb/ambassy/commit/9b7c4b8aeb54df5f66d53ceb1afe76cb9f74f9b0))
+
 ## [1.7.1](https://github.com/johnsyweb/ambassy/compare/v1.7.0...v1.7.1) (2026-10-03)
 
 
