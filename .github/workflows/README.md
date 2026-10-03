@@ -40,7 +40,7 @@ When adding or bumping an action:
 2. Update the workflow with `owner/repo@<sha> # vX.Y.Z`.
 3. Run `mise run verify-action-pins` (also included in `mise run cibuild`).
 
-[Dependabot](https://docs.github.com/en/code-security/dependabot) (`github-actions` ecosystem in `.github/dependabot.yml`) opens weekly PRs to refresh pins; merge those after CI passes.
+[Renovate](https://docs.renovatebot.com/) (via [johnsyweb/renovate-config](https://github.com/johnsyweb/renovate-config)) opens dependency PRs on the shared Friday schedule and automerges when CI is green. The `aube-lock` workflow regenerates `aube-lock.yaml` on `renovate/**` branches. See [ADR 0011](../../docs/adr/0011-renovate-for-dependency-updates.md).
 
 ### Concurrency
 

@@ -1,0 +1,19 @@
+name: aube-lock
+
+# Regenerates aube-lock.yaml on Renovate branches. Renovate's npm manager
+# updates package.json but has no aube support, leaving the lockfile stale
+# and breaking frozen installs in CI. See johnsyweb/renovate-config.
+
+on:
+  push:
+    branches: ['renovate/**']
+
+permissions:
+  contents: write
+
+jobs:
+  aube-lock:
+    uses: johnsyweb/renovate-config/.github/workflows/aube-lock.yml@0071401cbf882ae8253f6e58f53826ce8ec80eb6 # main
+    secrets:
+      AUBE_LOCK_APP_ID: ${{ secrets.AUBE_LOCK_APP_ID }}
+      AUBE_LOCK_APP_PRIVATE_KEY: ${{ secrets.AUBE_LOCK_APP_PRIVATE_KEY }}
