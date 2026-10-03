@@ -1,3 +1,10 @@
+## [1.7.1](https://github.com/johnsyweb/ambassy/compare/v1.7.0...v1.7.1) (2026-10-03)
+
+
+### Bug Fixes
+
+* **ci:** drop Puppeteer --single-process for screenshot launches ([88362df](https://github.com/johnsyweb/ambassy/commit/88362dfaca1a0b43aaf259ea5d2ed12cb2444dbc))
+
 # [1.7.0](https://github.com/johnsyweb/ambassy/compare/v1.6.0...v1.7.0) (2026-10-03)
 
 
