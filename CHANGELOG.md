@@ -1,3 +1,10 @@
+## [1.8.1](https://github.com/johnsyweb/ambassy/compare/v1.8.0...v1.8.1) (2026-10-12)
+
+
+### Bug Fixes
+
+* **deps:** override handlebars and shell-quote for audit ([089746a](https://github.com/johnsyweb/ambassy/commit/089746a163e4e9bc270fb7699354268f716f7615))
+
 # [1.8.0](https://github.com/johnsyweb/ambassy/compare/v1.7.1...v1.8.0) (2026-10-03)
 
 
