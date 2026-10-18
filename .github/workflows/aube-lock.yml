@@ -14,7 +14,15 @@ permissions:
 
 jobs:
   aube-lock:
-    uses: johnsyweb/renovate-config/.github/workflows/aube-lock.yml@9ea278f1fec188654ba871a0c12fd6742531d68c
+    uses: johnsyweb/renovate-config/.github/workflows/aube-lock.yml@1873f8eecf2bdef1bb4846c68d4c80a71ea502ca
     with:
       verify_command: ./script/cibuild
       check_name: renovate-verify
+      status_check_names: |
+        verify-workflows
+        commitlint
+        lint
+        test
+        audit
+        build
+        map-dom-budget
